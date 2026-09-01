@@ -20,7 +20,7 @@ import { effectiveFlags, getActivePage, useStore } from '@/state/store';
 import { useAsset } from '@/state/assets';
 import { MapBackground } from './MapBackground';
 import { ObjectNode, flatten } from './ObjectNode';
-import { ShipNode, ShipRanges } from './ShipNode';
+import { ShipLabel, ShipNode, ShipRanges } from './ShipNode';
 import { DEFAULT_EXPORT, setCanvasApi, type ExportOptions } from './canvasBridge';
 import { clamp, dist, simplifyPath, uid, gridRef } from '@/lib/util';
 import { createMarker, createNumber, createPath, createShape, createText } from '@/lib/factory';
@@ -672,9 +672,7 @@ export default function MapCanvas() {
         <ShipWithIcon
           key={o.id}
           obj={o as ShipObject}
-          ship={ship}
           team={(o as ShipObject).teamId ? teamById.get((o as ShipObject).teamId as string) : undefined}
-          flags={effectiveFlags(page, o as ShipObject)}
           theme={theme}
           iconFile={iconAsset?.file}
           iconMime={iconAsset?.mime}
@@ -771,9 +769,26 @@ export default function MapCanvas() {
 
             const objects = page.objects.filter((o) => o.layerId === layer.id);
             if (!objects.length) return null;
+            const labelled = layer.id === LAYER_IDS.ships;
             return (
               <Group key={layer.id} opacity={layer.opacity}>
                 {objects.map(renderObject)}
+                {/* Names come after the markers so they are never overdrawn,
+                    and sit outside the marker nodes so a rotated ship keeps a
+                    tight, upright selection box. */}
+                {labelled &&
+                  shipObjects.filter(isVisible).map((s) => (
+                    <ShipLabel
+                      key={`label:${s.id}`}
+                      obj={s}
+                      ship={s.shipId ? shipById.get(s.shipId) : undefined}
+                      flags={effectiveFlags(page, s)}
+                      inv={inv}
+                      baseSize={iconSize}
+                      hasIcon={!!(s.shipId ? shipById.get(s.shipId)?.iconId : null)}
+                      theme={theme}
+                    />
+                  ))}
               </Group>
             );
           })}
@@ -824,11 +839,14 @@ export default function MapCanvas() {
             rotationSnaps={[0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225, 240, 255, 270, 285, 300, 315, 330, 345]}
             rotationSnapTolerance={4}
             anchorSize={8}
-            anchorStroke="#4ea3ff"
-            anchorFill="#0d1117"
+            anchorStroke={theme.selection}
+            anchorFill={theme.sheet}
             anchorCornerRadius={2}
-            borderStroke="#4ea3ff"
+            borderStroke={theme.selection}
             borderDash={[4, 3]}
+            // Close enough to read as part of the marker rather than a stray dot.
+            rotateAnchorOffset={18}
+            anchorStyleFunc={styleAnchor}
             onTransformEnd={onTransformEnd}
             onDragEnd={onTransformEnd}
           />
@@ -889,11 +907,46 @@ export default function MapCanvas() {
 /* ------------------------------------------------------------------ */
 
 /** Resolves the ship's icon asset before handing it to the Konva node. */
+/**
+ * Konva draws every transformer anchor as a plain rect. The rotate handle is
+ * the one that means something other than "resize", so it is given a round
+ * body and the conventional circular arrow drawn into it.
+ */
+function styleAnchor(anchor: Konva.Rect): void {
+  if (anchor.name().indexOf('rotater') === -1) return;
+  const d = 14;
+  anchor.width(d);
+  anchor.height(d);
+  anchor.offsetX(d / 2);
+  anchor.offsetY(d / 2);
+  anchor.cornerRadius(d / 2);
+  anchor.sceneFunc(function (ctx, shape) {
+    const r = shape.width() / 2;
+    ctx.beginPath();
+    ctx.arc(r, r, r, 0, Math.PI * 2, false);
+    ctx.fillStrokeShape(shape);
+
+    // Three-quarter arc plus a head: the standard "rotate" mark.
+    const ar = r * 0.5;
+    ctx.beginPath();
+    ctx.arc(r, r, ar, Math.PI * 0.6, Math.PI * 2.1, false);
+    ctx.strokeShape(shape);
+
+    const a = Math.PI * 2.1;
+    const tipX = r + Math.cos(a) * ar;
+    const tipY = r + Math.sin(a) * ar;
+    const h = r * 0.42;
+    ctx.beginPath();
+    ctx.moveTo(tipX + Math.cos(a - 2.4) * h, tipY + Math.sin(a - 2.4) * h);
+    ctx.lineTo(tipX, tipY);
+    ctx.lineTo(tipX + Math.cos(a + 0.9) * h, tipY + Math.sin(a + 0.9) * h);
+    ctx.strokeShape(shape);
+  });
+}
+
 function ShipWithIcon(props: {
   obj: ShipObject;
-  ship?: Ship;
   team?: Team;
-  flags: CharacteristicFlags;
   iconFile?: string;
   iconMime?: string;
   inv: number;

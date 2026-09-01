@@ -120,7 +120,23 @@ function PathNode({ obj, inv, selected, theme, ...rest }: NodeCommon & Themed & 
   };
 
   let body: React.ReactNode;
-  if (obj.type === 'arrow' || obj.type === 'ruler') {
+  if (obj.type === 'ruler') {
+    // A ruler is a measurement, not a direction: it gets tick ends (I——I) so
+    // it never reads as an arrow pointing somewhere.
+    const ang = Math.atan2(last.y - first.y, last.x - first.x) + Math.PI / 2;
+    const cap = arrowSize * 0.42;
+    const tick = (p: Vec2) => [
+      p.x - Math.cos(ang) * cap, p.y - Math.sin(ang) * cap,
+      p.x + Math.cos(ang) * cap, p.y + Math.sin(ang) * cap,
+    ];
+    body = (
+      <>
+        <Line points={flatten(pts)} {...shared} />
+        <Line points={tick(first)} {...shared} />
+        <Line points={tick(last)} {...shared} />
+      </>
+    );
+  } else if (obj.type === 'arrow') {
     body = <Arrow points={flatten(pts)} pointerLength={arrowSize} pointerWidth={arrowSize * 0.8} fill={stroke} {...shared} />;
   } else if (obj.type === 'doubleArrow') {
     body = (

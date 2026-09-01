@@ -22,13 +22,9 @@ import {
 } from 'lucide-react';
 import { getActivePage, useStore } from '@/state/store';
 import { Check, ColorInput, Field, InlineEdit, Panel, Slider, Tip } from './common/ui';
-import { CLASS_COLORS } from '@/canvas/shipGlyphs';
-import { LAYER_IDS, SHIP_CLASSES, shipClassCode, type ShipClass, type ID } from '@/types/model';
-import { useAsset } from '@/state/assets';
-import { canvasApi } from '@/canvas/canvasBridge';
+import { LAYER_IDS, type ID } from '@/types/model';
 import { formatRelative } from '@/lib/util';
 import { renderMarkdown } from '@/lib/markdown';
-import { ClassIcon } from './common/ClassIcon';
 
 export function LeftSidebar() {
   const open = useStore((s) => s.leftOpen);
@@ -59,7 +55,6 @@ export function LeftSidebar() {
       <div className="sidebar-resizer" onMouseDown={startResize} />
       <div style={{ overflowY: 'auto', display: 'flex', flexDirection: 'column', minHeight: 0, flex: 1 }}>
         <ProjectPanel />
-        <ShipBrowserPanel />
         <PagesPanel />
         <MapPanel />
         <TeamsPanel />
@@ -256,164 +251,6 @@ function MapPanel() {
 }
 
 /* ------------------------------------------------------------------ */
-
-function ShipBrowserPanel() {
-  const ships = useStore((s) => s.ships);
-  const icons = useStore((s) => s.icons);
-  const project = useStore((s) => s.project);
-  const [query, setQuery] = useState('');
-  const [nation, setNation] = useState('');
-  const [cls, setCls] = useState<'' | ShipClass>('');
-  const [tier, setTier] = useState('');
-  const [team, setTeam] = useState<ID | ''>('');
-  const s = () => useStore.getState();
-
-  const nations = useMemo(() => [...new Set(ships.map((x) => x.nation))].sort(), [ships]);
-  const tiers = useMemo(() => [...new Set(ships.map((x) => x.tier))].sort((a, b) => b - a), [ships]);
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return ships.filter(
-      (ship) =>
-        (!q || ship.name.toLowerCase().includes(q) || ship.nation.toLowerCase().includes(q)) &&
-        (!nation || ship.nation === nation) &&
-        (!cls || ship.class === cls) &&
-        (!tier || String(ship.tier) === tier),
-    );
-  }, [ships, query, nation, cls, tier]);
-
-  const teamId = team || project?.settings.defaultTeamId || project?.teams[0]?.id || null;
-  const iconById = useMemo(() => new Map(icons.map((i) => [i.id, i])), [icons]);
-
-  return (
-    <Panel
-      title="Ships"
-      count={`${filtered.length}/${ships.length}`}
-      storageKey="ships"
-      grow
-      actions={
-        <Tip label="Open ship database — add, edit and assign icons" side="bottom">
-          <button className="icon-btn" onClick={() => s().openModal('shipDb')}>
-            <Database size={13} />
-          </button>
-        </Tip>
-      }
-    >
-      {ships.length === 0 ? (
-        <div className="empty-note">
-          No ships yet.
-          <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 5 }}>
-            <button className="btn sm block" onClick={() => void s().importShipData()}>
-              Import ship data…
-            </button>
-            <button className="btn sm block ghost" onClick={() => void s().loadSampleShips()}>
-              Load sample ship set
-            </button>
-          </div>
-        </div>
-      ) : (
-        <>
-          <div style={{ position: 'relative', marginBottom: 4 }}>
-            <Search size={12} style={{ position: 'absolute', left: 7, top: 6, color: 'var(--fg-faint)' }} />
-            <input
-              type="search"
-              placeholder="Search ships…"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              style={{ paddingLeft: 24 }}
-            />
-          </div>
-
-          <div className="ship-filters">
-            <select value={nation} onChange={(e) => setNation(e.target.value)}>
-              <option value="">Nation</option>
-              {nations.map((n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
-              ))}
-            </select>
-            <select value={cls} onChange={(e) => setCls(e.target.value as ShipClass | '')}>
-              <option value="">Class</option>
-              {SHIP_CLASSES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-            <select value={tier} onChange={(e) => setTier(e.target.value)}>
-              <option value="">Tier</option>
-              {tiers.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {project && project.teams.length > 0 && (
-            <select value={team} onChange={(e) => setTeam(e.target.value)} style={{ marginBottom: 5 }}>
-              <option value="">Place on default team</option>
-              {project.teams.map((t) => (
-                <option key={t.id} value={t.id}>
-                  Place on {t.name}
-                </option>
-              ))}
-            </select>
-          )}
-
-          <div className="ship-list">
-            {filtered.map((ship) => {
-              const iconAsset = ship.iconId ? iconById.get(ship.iconId) : undefined;
-              return (
-                <div
-                  key={ship.id}
-                  className="ship-item"
-                  draggable
-                  title="Drag onto the map, or double-click to place at the centre"
-                  onDragStart={(e) => {
-                    e.dataTransfer.setData('application/x-wows-ship', ship.id);
-                    if (teamId) e.dataTransfer.setData('application/x-wows-team', teamId);
-                    e.dataTransfer.effectAllowed = 'copy';
-                  }}
-                  onDoubleClick={() => {
-                    const api = canvasApi();
-                    if (!api) return;
-                    const centre = api.screenToWorld({
-                      x: (document.querySelector('.canvas-host')?.clientWidth ?? 800) / 2,
-                      y: (document.querySelector('.canvas-host')?.clientHeight ?? 600) / 2,
-                    });
-                    s().placeShip(ship.id, centre, teamId);
-                  }}
-                >
-                  <ShipThumb file={iconAsset?.file} mime={iconAsset?.mime} cls={ship.class} />
-                  <div className="ship-meta">
-                    <div className="ship-name">{ship.name}</div>
-                    <div className="ship-sub">{ship.nation}</div>
-                  </div>
-                  <span className="class-chip" style={{ background: `${CLASS_COLORS[ship.class]}22`, color: CLASS_COLORS[ship.class] }}>
-                    {shipClassCode(ship)}
-                  </span>
-                  <span className="tier-chip">{ship.tier}</span>
-                </div>
-              );
-            })}
-            {!filtered.length && <div className="empty-note">No ships match those filters.</div>}
-          </div>
-        </>
-      )}
-    </Panel>
-  );
-}
-
-function ShipThumb({ file, mime, cls }: { file?: string; mime?: string; cls: ShipClass }) {
-  const img = useAsset('icon', file, mime ?? '');
-  return (
-    <div className="ship-icon">
-      {img ? <img src={img.src} alt="" /> : <ClassIcon cls={cls} size={19} />}
-    </div>
-  );
-}
 
 /* ------------------------------------------------------------------ */
 

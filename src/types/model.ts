@@ -160,10 +160,14 @@ export const DEFAULT_MAP_VIEW: MapViewConfig = {
 /* Ship characteristics that can be drawn on the map                   */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Things a ship can be asked to draw beyond itself.
+ *
+ * The icon and the name are not in here: they are what a ship marker *is*,
+ * always drawn, and so have nothing to toggle. Ranges are decided per ship,
+ * never page-wide.
+ */
 export type CharacteristicKey =
-  | 'icon'
-  | 'name'
-  | 'heading'
   | 'detection'
   | 'radar'
   | 'hydro'
@@ -172,10 +176,7 @@ export type CharacteristicKey =
   | 'torpedo'
   | 'consumables';
 
-export const CHARACTERISTICS: { key: CharacteristicKey; label: string; group: 'label' | 'range' | 'other' }[] = [
-  { key: 'icon', label: 'Ship Icon', group: 'label' },
-  { key: 'name', label: 'Ship Name', group: 'label' },
-  { key: 'heading', label: 'Direction Indicator', group: 'other' },
+export const CHARACTERISTICS: { key: CharacteristicKey; label: string; group: 'range' | 'other' }[] = [
   { key: 'detection', label: 'Detection Range', group: 'range' },
   { key: 'radar', label: 'Radar', group: 'range' },
   { key: 'hydro', label: 'Hydro', group: 'range' },
@@ -185,12 +186,7 @@ export const CHARACTERISTICS: { key: CharacteristicKey; label: string; group: 'l
   { key: 'consumables', label: 'Other Consumables', group: 'other' },
 ];
 
-/**
- * Characteristics that render as a circle / sector on the map.
- *
- * Ranges are decided per ship, never page-wide: there is no page-level toggle
- * for them, so switching one on is always a statement about one ship.
- */
+/** Characteristics that render as a circle / sector on the map. */
 export const RANGE_KEYS: CharacteristicKey[] = [
   'detection',
   'radar',
@@ -200,7 +196,7 @@ export const RANGE_KEYS: CharacteristicKey[] = [
   'torpedo',
 ];
 
-/** Characteristics that a page can set a default for (everything but ranges). */
+/** Characteristics a page can set a default for: everything but the ranges. */
 export const PAGE_CHARACTERISTIC_KEYS: CharacteristicKey[] = CHARACTERISTICS.filter(
   (c) => c.group !== 'range',
 ).map((c) => c.key);
@@ -208,17 +204,10 @@ export const PAGE_CHARACTERISTIC_KEYS: CharacteristicKey[] = CHARACTERISTICS.fil
 export type CharacteristicFlags = Partial<Record<CharacteristicKey, boolean>>;
 
 /**
- * Default page-level state. Nothing but the icon, the name and the heading pip
- * is on, which is the "clean map" requirement: placing a ship must not spray
- * its statistics across the canvas.
- *
- * Range keys are deliberately absent. A page cannot express an opinion about
- * ranges, so storing them here would persist keys that nothing ever reads.
+ * Default page-level state: nothing extra. Placing a ship shows the ship and
+ * its name, and not one thing more until it is asked for.
  */
 export const DEFAULT_CHARACTERISTICS: CharacteristicFlags = {
-  icon: true,
-  name: true,
-  heading: true,
   consumables: false,
 };
 
@@ -450,15 +439,6 @@ export interface Page {
   updatedAt: number;
 }
 
-export interface TacticalPreset {
-  id: ID;
-  name: string;
-  kind: 'shape' | 'path' | 'text';
-  /** Partial object used as a template when the preset is stamped. */
-  data: Record<string, unknown>;
-  createdAt: number;
-}
-
 export interface Project {
   id: ID;
   name: string;
@@ -469,7 +449,6 @@ export interface Project {
   pages: Page[];
   activePageId: ID | null;
   teams: Team[];
-  presets: TacticalPreset[];
   /** Grid snapping and other editor prefs stored with the project. */
   settings: ProjectSettings;
 }

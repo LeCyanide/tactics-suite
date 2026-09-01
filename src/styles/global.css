@@ -1415,60 +1415,33 @@ input[type='range']::-webkit-slider-thumb {
 
 /* Ping palette ----------------------------------------------------- */
 
-/* Grouped tool buttons -------------------------------------------- */
+/* Variant picker for the grouped Shape / Line tools ---------------- */
 
-.tool-variant {
-  position: relative;
-  display: flex;
+.variant-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 2px 0 4px;
 }
-.tool-caret {
-  position: absolute;
-  right: 2px;
-  bottom: 2px;
-  width: 0;
-  height: 0;
-  border-left: 3px solid transparent;
-  border-top: 3px solid currentColor;
-  opacity: 0.75;
-}
-.tool-flyout {
-  position: absolute;
-  right: calc(100% + 6px);
-  top: -2px;
-  min-width: 178px;
-  padding: 3px;
-  background: var(--bg-2);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow);
-  display: none;
-  flex-direction: column;
-  gap: 1px;
-  z-index: 20;
-}
-.tool-variant:hover .tool-flyout {
-  display: flex;
-}
-.tool-flyout-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 5px 8px;
-  border: 0;
+.variant-chip {
+  padding: 6px 8px;
+  border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: transparent;
+  background: var(--bg-2);
   color: var(--fg-dim);
-  font-size: 12px;
-  text-align: left;
+  font-size: 11.5px;
   cursor: default;
 }
-.tool-flyout-item:hover {
+.variant-chip:hover {
   background: var(--bg-3);
   color: var(--fg);
 }
-.tool-flyout-item.active {
-  color: var(--accent);
+.variant-chip.active {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  color: #fff;
 }
+
 
 
 /* Toasts ----------------------------------------------------------- */

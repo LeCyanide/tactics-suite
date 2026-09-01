@@ -92,7 +92,7 @@ project references:
   "format": "wowsplan",
   "formatVersion": 1,
   "exportedAt": 1730000000000,
-  "project": { /* metadata, pages, layers, objects, teams, presets */ },
+  "project": { /* metadata, pages, layers, objects, teams */ },
   "maps":   [ /* map records used by the project */ ],
   "ships":  [ /* ship records referenced by placed ships */ ],
   "icons":  [ /* icon asset records */ ],
@@ -157,22 +157,25 @@ centred beneath the hull, whatever heading the ship is pointing.
 
 ## Ship characteristics are opt-in
 
-Placing a ship shows an icon, a name and a heading pip. Nothing else.
+Placing a ship shows its marker and its name. Nothing else.
 
-Labels (icon, name), the heading indicator and consumables have **page
-defaults** (`Map Display` in the properties panel) and **per-ship overrides**
-(`Display on Map` when a ship is selected). Overridden entries are marked
-`OVR`; clicking the badge clears the override and the ship falls back to the
-page setting.
+Those two are not toggles — they are what a ship marker *is*, so there is
+nothing to switch off. The marker turns with the ship's heading; the name does
+not, staying centred beneath it and horizontal at every angle.
+
+Consumables are the one thing with a **page default** (`Map Display`) and a
+**per-ship override** (`Display on Map` when a ship is selected). Overridden
+entries are marked `OVR`; clicking the badge falls back to the page setting.
 
 Ranges — Detection, Radar, Hydro, Main Battery, Secondary, Torpedo — have no
-page default at all. They are set on one ship at a time, because a range is a
-statement about the ship that projects it.
+page default at all, and so no override badge either. They are set on one ship
+at a time, because a range is a statement about the ship that projects it.
 
 When a range characteristic is switched on, its visualisation is generated
 automatically from the ship database — you never draw those circles by hand —
-and it exists *only* while that toggle is on. Torpedoes render as a directional
-sector rather than a circle when the ship has a torpedo arc.
+and it exists *only* while that toggle is on. Every range is a full circle,
+torpedoes included: the ring answers how far the weapon reaches, not which way
+the ship happens to be pointing.
 
 Range styling (colour, opacity, line width, fill, dash, label) is configured on
 the ship whose range it is, layered over the built-in defaults.
@@ -225,7 +228,6 @@ leaving the ships in place.
 | `Ctrl+Z` / `Ctrl+Y` | Undo / Redo |
 | `Ctrl+C` `Ctrl+V` `Ctrl+D` `Ctrl+A` `Del` | Copy, Paste, Duplicate, Select all, Delete |
 | `Ctrl+N` `Ctrl+O` `Ctrl+S` `Ctrl+E` | New, Open, Save, Export image |
-| `Ctrl+0` | Recentre map |
 | `Ctrl+B` `Ctrl+J` `Ctrl+K` | Left sidebar, Properties, Notes |
 | `Ctrl+Tab` | Next page |
 | `F1` | Shortcut reference |
