@@ -1,5 +1,5 @@
 import { useMemo, useRef } from 'react';
-import { ChevronRight, Palette, Radar as RadarIcon, Route as RouteIcon, Save, Trash2, Zap } from 'lucide-react';
+import { ChevronRight, Palette, Radar as RadarIcon, Save, Trash2 } from 'lucide-react';
 import {
   CHARACTERISTICS,
   DEFAULT_CHARACTERISTICS,
@@ -9,17 +9,14 @@ import {
   type CharacteristicKey,
   type MarkerObject,
   type PathObject,
-  type PingObject,
   type ShapeObject,
   type ShipObject,
   type TacticalObject,
   type TextObject,
-  type ZoneObject,
 } from '@/types/model';
 import { effectiveFlags, getActivePage, shipRangeKm, useStore } from '@/state/store';
 import { Check, ColorInput, Field, NumInput, Panel, SectionLabel, Slider, Tip } from './common/ui';
-import { PING_ICONS, ZONE_PRESETS } from '@/data/pings';
-import { formatKm, gridRef } from '@/lib/util';
+import { gridRef } from '@/lib/util';
 
 export function RightSidebar() {
   const open = useStore((s) => s.rightOpen);
@@ -73,7 +70,6 @@ function NoSelectionPanels() {
   return (
     <>
       <MapDisplayPanel />
-      {(tool === 'ping' || tool === 'zone') && <ToolPresetPanel />}
       <ToolDefaultsPanel />
       <PresetsPanel />
     </>
@@ -104,17 +100,6 @@ function MapDisplayPanel() {
         />
       ))}
 
-      <SectionLabel>Ranges</SectionLabel>
-      {CHARACTERISTICS.filter((c) => c.group === 'range').map((c) => {
-        const on = page.display[c.key] ?? false;
-        return (
-          <div key={c.key}>
-            <Check label={c.label} checked={on} onChange={(v) => s().setPageDisplay(c.key, v)} />
-            {on && <RangeStyleEditor rangeKey={c.key} />}
-          </div>
-        );
-      })}
-
       <SectionLabel>Other</SectionLabel>
       {CHARACTERISTICS.filter((c) => c.group === 'other').map((c) => (
         <Check
@@ -124,105 +109,58 @@ function MapDisplayPanel() {
           onChange={(v) => s().setPageDisplay(c.key, v)}
         />
       ))}
+
+      <div className="faint" style={{ fontSize: 11, marginTop: 8, lineHeight: 1.45 }}>
+        Ranges are set per ship. Select a ship to switch its detection, radar,
+        hydro, gun or torpedo circles on.
+      </div>
     </Panel>
   );
 }
 
-function RangeStyleEditor({ rangeKey }: { rangeKey: CharacteristicKey }) {
-  const page = useStore(getActivePage);
+/**
+ * Style controls for one range circle of one ship.
+ *
+ * There is no page-level equivalent any more: a range belongs to the ship that
+ * projects it, so its colour and weight are stored as an override on that
+ * ship's object, layered over the built-in default.
+ */
+function ShipRangeStyleEditor({ obj, rangeKey }: { obj: ShipObject; rangeKey: CharacteristicKey }) {
   const s = () => useStore.getState();
-  if (!page) return null;
-  const style = page.rangeStyles[rangeKey] ?? DEFAULT_RANGE_STYLES[rangeKey];
-  if (!style) return null;
+  const style = { ...DEFAULT_RANGE_STYLES[rangeKey], ...(obj.rangeStyles?.[rangeKey] ?? {}) };
+  if (!DEFAULT_RANGE_STYLES[rangeKey]) return null;
+
+  const patch = (p: Partial<typeof style>) =>
+    s().updateObject(obj.id, {
+      rangeStyles: { ...(obj.rangeStyles ?? {}), [rangeKey]: { ...style, ...p } },
+    } as Partial<TacticalObject>);
 
   return (
     <div style={{ margin: '2px 0 6px 20px', paddingLeft: 8, borderLeft: '1px solid var(--line)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '2px 0' }}>
-        <ColorInput value={style.color} onChange={(v) => s().setRangeStyle(rangeKey, { color: v })} />
-        <NumInput value={style.lineWidth} min={0.5} max={8} step={0.5} onChange={(v) => s().setRangeStyle(rangeKey, { lineWidth: v })} width={54} />
+        <ColorInput value={style.color} onChange={(v) => patch({ color: v })} />
+        <NumInput value={style.lineWidth} min={0.5} max={8} step={0.5} onChange={(v) => patch({ lineWidth: v })} width={54} />
         <Tip label="Dashed" side="bottom">
-          <button
-            className={`icon-btn${style.dashed ? ' active' : ''}`}
-            onClick={() => s().setRangeStyle(rangeKey, { dashed: !style.dashed })}
-          >
+          <button className={`icon-btn${style.dashed ? ' active' : ''}`} onClick={() => patch({ dashed: !style.dashed })}>
             ⋯
           </button>
         </Tip>
         <Tip label="Fill" side="bottom">
-          <button
-            className={`icon-btn${style.fill ? ' active' : ''}`}
-            onClick={() => s().setRangeStyle(rangeKey, { fill: !style.fill })}
-          >
+          <button className={`icon-btn${style.fill ? ' active' : ''}`} onClick={() => patch({ fill: !style.fill })}>
             <Palette size={12} />
           </button>
         </Tip>
       </div>
       <Field label="Opacity">
-        <Slider value={style.opacity} onChange={(v) => s().setRangeStyle(rangeKey, { opacity: v })} />
+        <Slider value={style.opacity} onChange={(v) => patch({ opacity: v })} />
       </Field>
       {style.fill && (
         <Field label="Fill">
-          <Slider value={style.fillOpacity} max={0.6} onChange={(v) => s().setRangeStyle(rangeKey, { fillOpacity: v })} />
+          <Slider value={style.fillOpacity} max={0.6} onChange={(v) => patch({ fillOpacity: v })} />
         </Field>
       )}
-      <Check label="Show label" checked={style.showLabel} onChange={(v) => s().setRangeStyle(rangeKey, { showLabel: v })} />
+      <Check label="Show label" checked={style.showLabel} onChange={(v) => patch({ showLabel: v })} />
     </div>
-  );
-}
-
-function ToolPresetPanel() {
-  const tool = useStore((s) => s.tool);
-  const pings = useStore((s) => s.pings);
-  const options = useStore((s) => s.toolOptions);
-  const s = () => useStore.getState();
-
-  if (tool === 'ping') {
-    return (
-      <Panel title="Ping Preset" storageKey="pingPreset" actions={
-        <Tip label="Edit presets" side="bottom">
-          <button className="icon-btn" onClick={() => s().openModal('pingEditor')}>
-            <Zap size={13} />
-          </button>
-        </Tip>
-      }>
-        <div className="ping-grid">
-          {pings.map((p) => (
-            <button
-              key={p.id}
-              className={`ping-chip${options.pingPresetId === p.id ? ' active' : ''}`}
-              onClick={() => s().patchToolOptions({ pingPresetId: p.id })}
-            >
-              <GlyphIcon path={PING_ICONS[p.icon]} color={p.color} size={13} />
-              <span>{p.label}</span>
-            </button>
-          ))}
-        </div>
-        <Field label="Size">
-          <Slider value={options.pingSize} min={16} max={64} step={1} onChange={(v) => s().patchToolOptions({ pingSize: v })} format={(v) => `${Math.round(v)}px`} />
-        </Field>
-      </Panel>
-    );
-  }
-
-  return (
-    <Panel title="Zone Preset" storageKey="zonePreset">
-      <div className="ping-grid">
-        {ZONE_PRESETS.map((z) => (
-          <button
-            key={z.id}
-            className={`ping-chip${options.zonePresetId === z.id ? ' active' : ''}`}
-            onClick={() => s().patchToolOptions({ zonePresetId: z.id })}
-          >
-            <span className="swatch" style={{ background: z.color }} />
-            <span>{z.label}</span>
-          </button>
-        ))}
-      </div>
-      <div className="faint" style={{ fontSize: 11, marginTop: 6, lineHeight: 1.5 }}>
-        Circle and cone zones are drawn by dragging outwards from the centre. Polygon zones are drawn by clicking each
-        corner, then double-clicking to close.
-      </div>
-    </Panel>
   );
 }
 
@@ -327,22 +265,20 @@ function SingleObjectPanels({ obj }: { obj: TacticalObject }) {
   return (
     <>
       <CommonObjectPanel obj={obj} />
-      {['freehand', 'line', 'arrow', 'doubleArrow', 'curvedArrow', 'polygon', 'ruler', 'bearing', 'area'].includes(obj.type) && (
+      {['freehand', 'line', 'arrow', 'doubleArrow', 'curvedArrow', 'polygon', 'ruler', 'area'].includes(obj.type) && (
         <PathPropertiesPanel obj={obj as PathObject} />
       )}
-      {['rect', 'roundRect', 'circle', 'ellipse', 'arc'].includes(obj.type) && <ShapePropertiesPanel obj={obj as ShapeObject} />}
+      {['rect', 'roundRect', 'circle'].includes(obj.type) && <ShapePropertiesPanel obj={obj as ShapeObject} />}
       {(obj.type === 'text' || obj.type === 'number') && <TextPropertiesPanel obj={obj as TextObject} />}
       {obj.type === 'marker' && <MarkerPropertiesPanel obj={obj as MarkerObject} />}
-      {obj.type === 'ping' && <PingPropertiesPanel obj={obj as PingObject} />}
-      {obj.type === 'zone' && <ZonePropertiesPanel obj={obj as ZoneObject} />}
     </>
   );
 }
 
 const TYPE_LABEL: Record<string, string> = {
   freehand: 'Freehand', line: 'Line', arrow: 'Arrow', doubleArrow: 'Double Arrow', curvedArrow: 'Curved Arrow',
-  polygon: 'Polygon', ruler: 'Ruler', bearing: 'Bearing', area: 'Area', rect: 'Rectangle', roundRect: 'Rounded Rectangle',
-  circle: 'Circle', ellipse: 'Ellipse', arc: 'Arc', text: 'Text', number: 'Number', marker: 'Marker', ping: 'Ping', zone: 'Zone',
+  polygon: 'Polygon', ruler: 'Ruler', area: 'Area', rect: 'Rectangle', roundRect: 'Rounded Rectangle',
+  circle: 'Circle', text: 'Text', number: 'Number', marker: 'Marker',
 };
 
 function CommonObjectPanel({ obj }: { obj: TacticalObject }) {
@@ -385,7 +321,7 @@ function CommonObjectPanel({ obj }: { obj: TacticalObject }) {
             onClick={() =>
               s().savePreset({
                 name: `${TYPE_LABEL[obj.type] ?? obj.type} preset`,
-                kind: obj.type === 'zone' ? 'zone' : obj.type === 'ping' ? 'ping' : 'shape',
+                kind: 'shape',
                 data: { ...obj },
               })
             }
@@ -441,7 +377,7 @@ function StrokeEditor({ obj }: { obj: PathObject | ShapeObject }) {
 function PathPropertiesPanel({ obj }: { obj: PathObject }) {
   const s = () => useStore.getState();
   const update = (patch: Partial<PathObject>) => s().updateObject(obj.id, patch as Partial<TacticalObject>);
-  const isArrow = ['arrow', 'doubleArrow', 'curvedArrow', 'ruler', 'bearing'].includes(obj.type);
+  const isArrow = ['arrow', 'doubleArrow', 'curvedArrow', 'ruler'].includes(obj.type);
 
   return (
     <Panel title="Style" storageKey="pathStyle">
@@ -456,7 +392,7 @@ function PathPropertiesPanel({ obj }: { obj: PathObject }) {
           <Slider value={obj.curvature ?? 0.25} min={-0.8} max={0.8} step={0.02} onChange={(v) => update({ curvature: v })} format={(v) => v.toFixed(2)} />
         </Field>
       )}
-      {['ruler', 'bearing', 'area'].includes(obj.type) && (
+      {['ruler', 'area'].includes(obj.type) && (
         <Check label="Show measurement" checked={obj.showMeasurement !== false} onChange={(v) => update({ showMeasurement: v })} />
       )}
       {['polygon', 'area', 'freehand'].includes(obj.type) && (
@@ -476,10 +412,10 @@ function ShapePropertiesPanel({ obj }: { obj: ShapeObject }) {
   return (
     <Panel title="Style" storageKey="shapeStyle">
       <StrokeEditor obj={obj} />
-      <Field label={obj.type === 'circle' || obj.type === 'arc' ? 'Radius' : 'Width'}>
+      <Field label={obj.type === 'circle' ? 'Radius' : 'Width'}>
         <NumInput value={obj.rx / 1000} step={0.1} min={0.01} onChange={(v) => update({ rx: v * 1000 })} suffix="km" />
       </Field>
-      {obj.type !== 'circle' && obj.type !== 'arc' && (
+      {obj.type !== 'circle' && (
         <Field label="Height">
           <NumInput value={obj.ry / 1000} step={0.1} min={0.01} onChange={(v) => update({ ry: v * 1000 })} suffix="km" />
         </Field>
@@ -488,16 +424,6 @@ function ShapePropertiesPanel({ obj }: { obj: ShapeObject }) {
         <Field label="Corner">
           <NumInput value={(obj.cornerRadius ?? 0) / 1000} step={0.05} min={0} onChange={(v) => update({ cornerRadius: v * 1000 })} suffix="km" />
         </Field>
-      )}
-      {obj.type === 'arc' && (
-        <>
-          <Field label="Start">
-            <NumInput value={obj.startAngle ?? -60} step={5} onChange={(v) => update({ startAngle: v })} suffix="°" />
-          </Field>
-          <Field label="Sweep">
-            <NumInput value={obj.sweepAngle ?? 120} step={5} min={1} max={360} onChange={(v) => update({ sweepAngle: v })} suffix="°" />
-          </Field>
-        </>
       )}
     </Panel>
   );
@@ -569,100 +495,6 @@ function MarkerPropertiesPanel({ obj }: { obj: MarkerObject }) {
     </Panel>
   );
 }
-
-function PingPropertiesPanel({ obj }: { obj: PingObject }) {
-  const pings = useStore((s) => s.pings);
-  const s = () => useStore.getState();
-  const update = (patch: Partial<PingObject>) => s().updateObject(obj.id, patch as Partial<TacticalObject>);
-
-  return (
-    <Panel title="Ping" storageKey="pingStyle">
-      <Field label="Preset">
-        <select
-          value={obj.presetId}
-          onChange={(e) => {
-            const preset = pings.find((p) => p.id === e.target.value);
-            if (preset) update({ presetId: preset.id, icon: preset.icon, label: preset.label, color: preset.color, directional: preset.directional });
-          }}
-        >
-          {pings.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.label}
-            </option>
-          ))}
-        </select>
-      </Field>
-      <Field label="Label">
-        <input type="text" value={obj.label} onChange={(e) => update({ label: e.target.value })} />
-      </Field>
-      <Field label="Colour">
-        <ColorInput value={obj.color} onChange={(v) => update({ color: v })} />
-      </Field>
-      <Field label="Size">
-        <NumInput value={obj.size} min={14} max={80} onChange={(v) => update({ size: v })} suffix="px" />
-      </Field>
-      <Check label="Show label" checked={obj.showLabel} onChange={(v) => update({ showLabel: v })} />
-      <Check label="Directional" checked={obj.directional} onChange={(v) => update({ directional: v })} />
-    </Panel>
-  );
-}
-
-function ZonePropertiesPanel({ obj }: { obj: ZoneObject }) {
-  const s = () => useStore.getState();
-  const update = (patch: Partial<ZoneObject>) => s().updateObject(obj.id, patch as Partial<TacticalObject>);
-
-  return (
-    <Panel title="Tactical Zone" storageKey="zoneStyle">
-      <Field label="Label">
-        <input type="text" value={obj.label} onChange={(e) => update({ label: e.target.value })} />
-      </Field>
-      <Field label="Colour">
-        <ColorInput value={obj.color} onChange={(v) => update({ color: v })} />
-      </Field>
-      {(obj.zoneShape === 'circle' || obj.zoneShape === 'cone') && (
-        <Field label="Radius">
-          <NumInput
-            value={(obj.radius ?? 0) / 1000}
-            step={0.1}
-            min={0.1}
-            onChange={(v) => update({ radius: v * 1000, valueKm: v })}
-            suffix="km"
-          />
-        </Field>
-      )}
-      {obj.zoneShape === 'cone' && (
-        <Field label="Half-angle">
-          <NumInput value={obj.coneAngle ?? 35} min={5} max={180} step={5} onChange={(v) => update({ coneAngle: v })} suffix="°" />
-        </Field>
-      )}
-      {obj.zoneShape === 'rect' && (
-        <>
-          <Field label="Width">
-            <NumInput value={(obj.rx ?? 0) / 1000} step={0.1} onChange={(v) => update({ rx: v * 1000 })} suffix="km" />
-          </Field>
-          <Field label="Height">
-            <NumInput value={(obj.ry ?? 0) / 1000} step={0.1} onChange={(v) => update({ ry: v * 1000 })} suffix="km" />
-          </Field>
-        </>
-      )}
-      <Field label="Line width">
-        <NumInput value={obj.lineWidth} min={0.5} max={10} step={0.5} onChange={(v) => update({ lineWidth: v })} suffix="px" />
-      </Field>
-      <Check label="Fill" checked={obj.fill} onChange={(v) => update({ fill: v })} />
-      {obj.fill && (
-        <Field label="Fill opacity">
-          <Slider value={obj.fillOpacity} max={0.7} onChange={(v) => update({ fillOpacity: v })} />
-        </Field>
-      )}
-      <Check label="Dashed" checked={obj.dashed} onChange={(v) => update({ dashed: v })} />
-      <Check label="Show label" checked={obj.showLabel} onChange={(v) => update({ showLabel: v })} />
-    </Panel>
-  );
-}
-
-/* ================================================================== */
-/* Ship properties                                                     */
-/* ================================================================== */
 
 function ShipPropertiesPanels({ obj }: { obj: ShipObject }) {
   const project = useStore((s) => s.project);
@@ -763,8 +595,9 @@ function ShipPropertiesPanels({ obj }: { obj: ShipObject }) {
         }
       >
         <div className="faint" style={{ fontSize: 11, marginBottom: 4, lineHeight: 1.45 }}>
-          Ticks follow the page defaults until you change one here. An <span className="badge-override">OVR</span> badge
-          marks a per-ship override; click it to fall back to the page setting.
+          Labels follow the page defaults until you change one here; an{' '}
+          <span className="badge-override">OVR</span> badge marks a per-ship override, and clicking it falls back to the
+          page setting. Ranges have no page default — they belong to this ship alone.
         </div>
 
         <SectionLabel>Labels</SectionLabel>
@@ -775,22 +608,25 @@ function ShipPropertiesPanels({ obj }: { obj: ShipObject }) {
         <SectionLabel>Ranges</SectionLabel>
         {CHARACTERISTICS.filter((c) => c.group === 'range').map((c) => {
           const km = shipRangeKm(ship, c.key);
+          const on = flags[c.key] ?? false;
           return (
-            <ShipFlagCheck
-              key={c.key}
-              obj={obj}
-              flagKey={c.key}
-              label={
-                <span style={{ display: 'flex', gap: 6, alignItems: 'baseline' }}>
-                  {c.label}
-                  <span className="mono faint" style={{ fontSize: 10 }}>
-                    {km ? `${km.toFixed(1)} km` : 'n/a'}
+            <div key={c.key}>
+              <ShipFlagCheck
+                obj={obj}
+                flagKey={c.key}
+                label={
+                  <span style={{ display: 'flex', gap: 6, alignItems: 'baseline' }}>
+                    {c.label}
+                    <span className="mono faint" style={{ fontSize: 10 }}>
+                      {km ? `${km.toFixed(1)} km` : 'n/a'}
+                    </span>
                   </span>
-                </span>
-              }
-              value={flags[c.key] ?? false}
-              disabledReason={km ? undefined : 'This ship has no value for that characteristic'}
-            />
+                }
+                value={on}
+                disabledReason={km ? undefined : 'This ship has no value for that characteristic'}
+              />
+              {on && !!km && <ShipRangeStyleEditor obj={obj} rangeKey={c.key} />}
+            </div>
           );
         })}
 
@@ -809,59 +645,6 @@ function ShipPropertiesPanels({ obj }: { obj: ShipObject }) {
         )}
       </Panel>
 
-      {/* Route ------------------------------------------------------- */}
-      <Panel
-        title="Planned Route"
-        count={obj.route.length}
-        storageKey="shipRoute"
-        actions={
-          <Tip label="Add waypoints with the Route tool" side="bottom">
-            <button className={`icon-btn${useStore.getState().tool === 'route' ? ' active' : ''}`} onClick={() => s().setTool('route')}>
-              <RouteIcon size={13} />
-            </button>
-          </Tip>
-        }
-      >
-        <Check label="Show route" checked={obj.routeVisible} onChange={(v) => update({ routeVisible: v })} />
-        <Check label="Route follows ship" checked={obj.routeFollows} onChange={(v) => update({ routeFollows: v })} />
-        {obj.route.length === 0 ? (
-          <div className="empty-note">
-            Pick the Route tool and click on the map to lay down waypoints for this ship.
-          </div>
-        ) : (
-          <>
-            <div style={{ margin: '4px 0' }}>
-              {obj.route.map((wp, i) => (
-                <div key={wp.id} className="row">
-                  <span className="idx">{i + 1}</span>
-                  <span className="row-label mono" style={{ fontSize: 11 }}>
-                    {(wp.x / 1000).toFixed(1)}, {(wp.y / 1000).toFixed(1)}
-                  </span>
-                  <input
-                    type="number"
-                    value={wp.speed_kn ?? ''}
-                    placeholder="kn"
-                    style={{ width: 48, height: 20 }}
-                    onChange={(e) =>
-                      s().updateWaypoint(obj.id, wp.id, { speed_kn: e.target.value ? parseFloat(e.target.value) : undefined })
-                    }
-                  />
-                  <button className="icon-btn danger" onClick={() => s().removeWaypoint(obj.id, wp.id)}>
-                    <Trash2 size={11} />
-                  </button>
-                </div>
-              ))}
-            </div>
-            <div className="faint mono" style={{ fontSize: 10.5 }}>
-              Total {formatKm(routeLength(obj))}
-              {ship?.speed_kn ? ` · ~${estimateMinutes(obj, ship.speed_kn).toFixed(1)} min at ${ship.speed_kn} kn` : ''}
-            </div>
-            <button className="btn sm block" style={{ marginTop: 5 }} onClick={() => s().clearRoute(obj.id)}>
-              Clear route
-            </button>
-          </>
-        )}
-      </Panel>
     </>
   );
 }
@@ -924,31 +707,12 @@ function ConsumableList({ shipId }: { shipId: string }) {
         </div>
       ))}
       <div className="faint" style={{ fontSize: 10.5, marginTop: 6, lineHeight: 1.45 }}>
-        Radar, Hydro and Smoke draw as range circles when their toggle above is on. Everything else can be listed on the
-        map with <em>Other Consumables</em>.
+        Radar and Hydro draw as range circles when their toggle above is on. Everything else, smoke included, can be
+        listed on the map with <em>Other Consumables</em>.
       </div>
     </div>
   );
 }
-
-function routeLength(obj: ShipObject): number {
-  let total = 0;
-  let prev = { x: obj.x, y: obj.y };
-  for (const wp of obj.route) {
-    total += Math.hypot(wp.x - prev.x, wp.y - prev.y);
-    prev = wp;
-  }
-  return total;
-}
-
-function estimateMinutes(obj: ShipObject, knots: number): number {
-  const metresPerMinute = knots * 1852 / 60;
-  return metresPerMinute > 0 ? routeLength(obj) / metresPerMinute : 0;
-}
-
-/* ================================================================== */
-/* Multiple selection                                                  */
-/* ================================================================== */
 
 function MultiSelectionPanel({ objects }: { objects: TacticalObject[] }) {
   const page = useStore(getActivePage);

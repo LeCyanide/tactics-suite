@@ -33,6 +33,7 @@ const FIELD_ALIASES: Record<string, string[]> = {
   name: ['name', 'ship', 'shipname', 'title'],
   nation: ['nation', 'country', 'flag', 'faction'],
   class: ['class', 'type', 'shiptype', 'shipclass', 'hull'],
+  cruiserType: ['cruisertype', 'cruisersubclass', 'subclass'],
   tier: ['tier', 'level', 'lvl'],
   hp: ['hp', 'health', 'hitpoints', 'survivability'],
   speed_kn: ['speed', 'maxspeed', 'speedkn', 'knots'],
@@ -104,6 +105,19 @@ function toClass(value: unknown): ShipClass {
   return 'CA';
 }
 
+/** Source values that name a light cruiser specifically. */
+const CL_ALIASES = ['cl', 'lightcruiser'];
+
+/**
+ * Light cruisers import as CA — same class in every mechanical sense — but the
+ * distinction is kept so the database can label them CL.
+ */
+function toCruiserType(value: unknown): 'CA' | 'CL' | undefined {
+  const key = norm(String(value ?? ''));
+  if (!key) return undefined;
+  return CL_ALIASES.some((a) => key === a || key.includes(a)) ? 'CL' : 'CA';
+}
+
 /**
  * Metres sneak into range columns often enough to be worth handling: anything
  * above 100 in a "km" field is treated as metres.
@@ -170,6 +184,7 @@ export function normalizeShip(raw: Raw, existing?: Ship): Ship {
     name,
     nation: String(pick(raw, 'nation') ?? existing?.nation ?? 'Unknown'),
     class: pick(raw, 'class') !== undefined ? toClass(pick(raw, 'class')) : (existing?.class ?? 'CA'),
+    cruiserType: undefined, // resolved below, once the class is known
     tier: pick(raw, 'tier') !== undefined ? toTier(pick(raw, 'tier')) : (existing?.tier ?? 10),
     hp: num(pick(raw, 'hp')) ?? existing?.hp,
     speed_kn: num(pick(raw, 'speed_kn')) ?? existing?.speed_kn,
@@ -199,6 +214,14 @@ export function normalizeShip(raw: Raw, existing?: Ship): Ship {
     iconId: (pick(raw, 'iconId') as string) ?? existing?.iconId ?? null,
     notes: notes ?? existing?.notes,
   };
+
+  // The CA/CL split only means anything for cruisers. An explicit column wins;
+  // otherwise a source that said "CL" in the class column still carries over.
+  if (ship.class === 'CA') {
+    const explicit = toCruiserType(pick(raw, 'cruiserType'));
+    const fromClass = pick(raw, 'class') !== undefined ? toCruiserType(pick(raw, 'class')) : undefined;
+    ship.cruiserType = explicit ?? fromClass ?? existing?.cruiserType;
+  }
 
   // Drop undefined keys so exported files stay tidy.
   for (const key of Object.keys(ship) as (keyof Ship)[]) {
@@ -265,7 +288,7 @@ function coerceRows(data: unknown): Raw[] {
 /* ------------------------------------------------------------------ */
 
 const CSV_COLUMNS: (keyof Ship)[] = [
-  'id', 'name', 'nation', 'class', 'tier', 'hp', 'speed_kn', 'rudderShift_s', 'turningCircle_m',
+  'id', 'name', 'nation', 'class', 'cruiserType', 'tier', 'hp', 'speed_kn', 'rudderShift_s', 'turningCircle_m',
   'concealment_km', 'concealmentAir_km', 'mainBatteryRange_km', 'mainBattery', 'secondaryRange_km',
   'torpedoRange_km', 'torpedoSpeed_kn', 'torpedoArc_deg', 'torpedoes', 'aaRange_km', 'aa',
   'radar_km', 'radarDuration_s', 'hydro_km', 'hydroDuration_s', 'smokeDuration_s', 'smokeRadius_km',

@@ -1,12 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Copy, Eye, Grid3x3, HardDrive, Plus, Save, X } from 'lucide-react';
 import { getActivePage, useStore } from '@/state/store';
 import { canvasApi } from '@/canvas/canvasBridge';
-import { useAsset } from '@/state/assets';
 import { InlineEdit, Tip } from './common/ui';
 import { renderMarkdown } from '@/lib/markdown';
 import { formatRelative } from '@/lib/util';
-import type { ShipObject } from '@/types/model';
 
 /* ------------------------------------------------------------------ */
 /* Page tabs                                                           */
@@ -15,14 +13,46 @@ import type { ShipObject } from '@/types/model';
 export function PageTabs() {
   const project = useStore((s) => s.project);
   const s = () => useStore.getState();
+  // Index the drag is currently hovering, so the gap shows where it will land.
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [overIndex, setOverIndex] = useState<number | null>(null);
+
   if (!project) return null;
 
+  const endDrag = () => {
+    setDragId(null);
+    setOverIndex(null);
+  };
+
   return (
-    <div className="page-tabs">
+    <div className="page-tabs" onDragLeave={() => setOverIndex(null)}>
       {project.pages.map((page, i) => (
         <div
           key={page.id}
-          className={`page-tab${page.id === project.activePageId ? ' active' : ''}`}
+          className={
+            `page-tab${page.id === project.activePageId ? ' active' : ''}` +
+            `${dragId === page.id ? ' dragging' : ''}` +
+            `${overIndex === i && dragId && dragId !== page.id ? ' drop-target' : ''}`
+          }
+          draggable
+          onDragStart={(e) => {
+            setDragId(page.id);
+            e.dataTransfer.effectAllowed = 'move';
+            // Firefox refuses to start a drag without payload.
+            e.dataTransfer.setData('text/plain', page.id);
+          }}
+          onDragEnd={endDrag}
+          onDragOver={(e) => {
+            if (!dragId) return;
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            setOverIndex(i);
+          }}
+          onDrop={(e) => {
+            e.preventDefault();
+            if (dragId && dragId !== page.id) s().movePageTo(dragId, i);
+            endDrag();
+          }}
           onMouseDown={(e) => e.button === 0 && s().setActivePage(page.id)}
           onAuxClick={(e) => {
             if (e.button === 1 && project.pages.length > 1) s().deletePage(page.id);
@@ -68,10 +98,10 @@ export function PageTabs() {
 /* ------------------------------------------------------------------ */
 
 const TOOL_NAMES: Record<string, string> = {
-  select: 'Select', marquee: 'Multi-select', pan: 'Pan', freehand: 'Freehand', line: 'Line', arrow: 'Arrow',
+  select: 'Select', marquee: 'Multi-select', freehand: 'Freehand', line: 'Line', arrow: 'Arrow',
   doubleArrow: 'Double arrow', curvedArrow: 'Curved arrow', rect: 'Rectangle', roundRect: 'Rounded rectangle',
-  circle: 'Circle', ellipse: 'Ellipse', polygon: 'Polygon', arc: 'Arc', text: 'Text', number: 'Number',
-  marker: 'Marker', ruler: 'Ruler', bearing: 'Bearing', area: 'Area', ping: 'Ping', zone: 'Zone', route: 'Route',
+  circle: 'Circle', polygon: 'Polygon', text: 'Text', number: 'Number',
+  marker: 'Marker', ruler: 'Ruler', area: 'Area',
 };
 
 export function StatusBar() {
@@ -79,13 +109,9 @@ export function StatusBar() {
   const page = useStore(getActivePage);
   const project = useStore((s) => s.project);
   const selection = useStore((s) => s.selection);
-  const camera = useStore((s) => s.camera);
   const dirty = useStore((s) => s.dirty);
   const lastSavedAt = useStore((s) => s.lastSavedAt);
   const s = () => useStore.getState();
-
-  const fitScale = canvasApi()?.fitScale() ?? 1;
-  const zoomPct = Math.round((camera.scale / (fitScale || 1)) * 100);
 
   return (
     <div className="statusbar">
@@ -99,8 +125,8 @@ export function StatusBar() {
         </>
       )}
       <span className="sep" />
-      <button onClick={() => canvasApi()?.fit()} title="Fit map to screen (Ctrl+0)">
-        <span className="mono">{Number.isFinite(zoomPct) ? zoomPct : 100}%</span>
+      <button onClick={() => canvasApi()?.fit()} title="Recentre map (Ctrl+0)">
+        <span className="mono">Recentre</span>
       </button>
 
       <span className="spacer" />
@@ -133,8 +159,9 @@ export function StatusBar() {
         <span className={`status-dot${dirty ? ' dirty' : ''}`} />
         {dirty ? 'Unsaved changes' : `Saved ${formatRelative(lastSavedAt)}`}
       </span>
-      <button onClick={() => void s().saveProject()} disabled={!project} title="Save (Ctrl+S)">
-        <Save size={12} />
+      <button className="save-btn" onClick={() => void s().saveProject()} disabled={!project} title="Save (Ctrl+S)">
+        <Save size={14} />
+        Save
       </button>
     </div>
   );
@@ -195,86 +222,6 @@ export function NotesPanel() {
         />
         {preview && <div className="notes-preview">{renderMarkdown(page.notes)}</div>}
       </div>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* Minimap                                                             */
-/* ------------------------------------------------------------------ */
-
-export function Minimap() {
-  const project = useStore((s) => s.project);
-  const page = useStore(getActivePage);
-  const maps = useStore((s) => s.maps);
-  const camera = useStore((s) => s.camera);
-  const [host, setHost] = useState({ width: 0, height: 0 });
-
-  const map = maps.find((m) => m.id === page?.mapId) ?? null;
-  const image = useAsset('map', map?.file, map?.mime ?? '');
-
-  useEffect(() => {
-    const el = document.querySelector('.canvas-host') as HTMLElement | null;
-    if (!el) return;
-    const ro = new ResizeObserver(() => setHost({ width: el.clientWidth, height: el.clientHeight }));
-    ro.observe(el);
-    setHost({ width: el.clientWidth, height: el.clientHeight });
-    return () => ro.disconnect();
-  }, [page?.id]);
-
-  const worldW = map?.widthMeters ?? 30000;
-  const worldH = map?.heightMeters ?? 30000;
-
-  const ships = useMemo(
-    () => (page?.objects.filter((o) => o.type === 'ship') ?? []) as ShipObject[],
-    [page?.objects],
-  );
-  const teamColor = useMemo(() => new Map((project?.teams ?? []).map((t) => [t.id, t.color])), [project?.teams]);
-
-  if (!project?.settings.showMinimap || !page) return null;
-
-  const mmW = 168;
-  const mmH = Math.round((mmW * worldH) / worldW);
-
-  // Visible world rectangle, expressed in minimap pixels.
-  const view = {
-    x: (-camera.x / camera.scale / worldW) * mmW,
-    y: (-camera.y / camera.scale / worldH) * mmH,
-    w: (host.width / camera.scale / worldW) * mmW,
-    h: (host.height / camera.scale / worldH) * mmH,
-  };
-
-  const jump = (e: React.MouseEvent<SVGSVGElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const wx = ((e.clientX - rect.left) / rect.width) * worldW;
-    const wy = ((e.clientY - rect.top) / rect.height) * worldH;
-    canvasApi()?.centerOn({ x: wx, y: wy });
-  };
-
-  return (
-    <div className="minimap" style={{ width: mmW }}>
-      <svg viewBox={`0 0 ${mmW} ${mmH}`} height={mmH} onMouseDown={jump}>
-        <rect x={0} y={0} width={mmW} height={mmH} fill="#0e1620" />
-        {image && <image href={image.src} x={0} y={0} width={mmW} height={mmH} opacity={0.65} />}
-        {ships.map((s) => (
-          <circle
-            key={s.id}
-            cx={(s.x / worldW) * mmW}
-            cy={(s.y / worldH) * mmH}
-            r={2}
-            fill={(s.teamId && teamColor.get(s.teamId)) || '#8b98a5'}
-          />
-        ))}
-        <rect
-          x={view.x}
-          y={view.y}
-          width={view.w}
-          height={view.h}
-          fill="rgba(78,163,255,0.10)"
-          stroke="#4ea3ff"
-          strokeWidth={1}
-        />
-      </svg>
     </div>
   );
 }

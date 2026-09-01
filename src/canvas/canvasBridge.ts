@@ -4,12 +4,8 @@ export interface ExportOptions {
   background: boolean;
   grid: boolean;
   ships: boolean;
-  routes: boolean;
   ranges: boolean;
-  zones: boolean;
-  pings: boolean;
-  shapes: boolean;
-  text: boolean;
+  annotations: boolean;
   layerNames: boolean;
   /** Target width of the exported image in pixels. */
   width: number;
@@ -21,12 +17,8 @@ export const DEFAULT_EXPORT: ExportOptions = {
   background: true,
   grid: true,
   ships: true,
-  routes: true,
   ranges: true,
-  zones: true,
-  pings: true,
-  shapes: true,
-  text: true,
+  annotations: true,
   layerNames: false,
   width: 2560,
   format: 'png',
@@ -34,12 +26,10 @@ export const DEFAULT_EXPORT: ExportOptions = {
 };
 
 export interface CanvasApi {
+  /** Re-centres and re-fits the map. The camera has no other state. */
   fit(): void;
-  zoomBy(factor: number): void;
-  zoomTo(scale: number): void;
   screenToWorld(p: Vec2): Vec2;
   worldToScreen(p: Vec2): Vec2;
-  centerOn(p: Vec2): void;
   exportImage(opts: ExportOptions): Promise<string | null>;
   /** Camera scale at which the whole map exactly fills the viewport. */
   fitScale(): number;

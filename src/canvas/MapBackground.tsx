@@ -2,6 +2,7 @@ import { memo, useMemo } from 'react';
 import { Group, Image as KonvaImage, Line, Rect, Text } from 'react-konva';
 import type { GameMap, MapViewConfig } from '@/types/model';
 import { columnLabel } from '@/lib/util';
+import type { CanvasTheme } from '@/state/theme';
 
 interface Props {
   map: GameMap | null;
@@ -10,6 +11,11 @@ interface Props {
   /** World extent used when no map is assigned yet. */
   fallbackWidth: number;
   fallbackHeight: number;
+  /**
+   * Canvas palette. Passed in rather than read from a module global so that
+   * switching theme invalidates this component's memo and repaints the map.
+   */
+  theme: CanvasTheme;
 }
 
 /**
@@ -19,7 +25,14 @@ interface Props {
  * reach the tactical objects above it, and it lives on its own Konva layer
  * because it only changes when the map or its grid settings change.
  */
-export const MapBackground = memo(function MapBackground({ map, view, image, fallbackWidth, fallbackHeight }: Props) {
+export const MapBackground = memo(function MapBackground({
+  map,
+  view,
+  image,
+  fallbackWidth,
+  fallbackHeight,
+  theme,
+}: Props) {
   const w = map?.widthMeters ?? fallbackWidth;
   const h = map?.heightMeters ?? fallbackHeight;
   const cols = view.gridCols ?? map?.gridCols ?? 10;
@@ -47,17 +60,17 @@ export const MapBackground = memo(function MapBackground({ map, view, image, fal
   return (
     <Group listening={false}>
       {/* Sea backdrop so an unassigned map still looks intentional */}
-      <Rect x={0} y={0} width={w} height={h} fill="#0e1620" />
+      <Rect x={0} y={0} width={w} height={h} fill={theme.sheet} />
 
       {image && <KonvaImage image={image} x={0} y={0} width={w} height={h} opacity={view.mapOpacity} />}
 
       {grid && (
         <Group opacity={view.gridOpacity}>
           {grid.vertical.map((pts, i) => (
-            <Line key={`v${i}`} points={pts} stroke="#9fb4c8" strokeWidth={w * 0.0004} />
+            <Line key={`v${i}`} points={pts} stroke={theme.grid} strokeWidth={w * 0.0004} />
           ))}
           {grid.horizontal.map((pts, i) => (
-            <Line key={`h${i}`} points={pts} stroke="#9fb4c8" strokeWidth={w * 0.0004} />
+            <Line key={`h${i}`} points={pts} stroke={theme.grid} strokeWidth={w * 0.0004} />
           ))}
         </Group>
       )}
@@ -74,7 +87,7 @@ export const MapBackground = memo(function MapBackground({ map, view, image, fal
               align="center"
               fontSize={labelSize}
               fontFamily="JetBrains Mono, Consolas, monospace"
-              fill="#c8d6e5"
+              fill={theme.gridLabel}
             />
           ))}
           {Array.from({ length: rows }, (_, r) => (
@@ -85,14 +98,14 @@ export const MapBackground = memo(function MapBackground({ map, view, image, fal
               y={cellH * r + cellH / 2 - labelSize * 0.6}
               fontSize={labelSize}
               fontFamily="JetBrains Mono, Consolas, monospace"
-              fill="#c8d6e5"
+              fill={theme.gridLabel}
             />
           ))}
         </Group>
       )}
 
       {view.showBorder && (
-        <Rect x={0} y={0} width={w} height={h} stroke="#4b6076" strokeWidth={w * 0.0009} />
+        <Rect x={0} y={0} width={w} height={h} stroke={theme.border} strokeWidth={w * 0.0009} />
       )}
     </Group>
   );

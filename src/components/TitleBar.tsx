@@ -82,18 +82,8 @@ export function TitleBar() {
       },
       { label: 'Deselect', shortcut: 'Esc', action: () => s().clearSelection(), enabled: selection.length > 0 },
     ],
-    Page: [
-      { label: 'New Page', action: () => s().addPage(), enabled: hasProject },
-      { label: 'Duplicate Page', action: () => page && s().duplicatePage(page.id), enabled: !!page },
-      { label: 'Delete Page', action: () => page && s().deletePage(page.id), enabled: !!page && (project?.pages.length ?? 0) > 1 },
-      { separator: true },
-      { label: 'Move Page Left', action: () => page && s().reorderPage(page.id, -1), enabled: !!page },
-      { label: 'Move Page Right', action: () => page && s().reorderPage(page.id, 1), enabled: !!page },
-    ],
     View: [
-      { label: 'Fit Map to Screen', shortcut: 'Ctrl+0', action: () => canvasApi()?.fit() },
-      { label: 'Zoom In', shortcut: 'Ctrl++', action: () => canvasApi()?.zoomBy(1.2) },
-      { label: 'Zoom Out', shortcut: 'Ctrl+-', action: () => canvasApi()?.zoomBy(1 / 1.2) },
+      { label: 'Recentre Map', shortcut: 'Ctrl+0', action: () => canvasApi()?.fit() },
       { separator: true },
       { label: 'Left Sidebar', checked: leftOpen, shortcut: 'Ctrl+B', action: () => s().toggleLeft() },
       { label: 'Right Sidebar', checked: rightOpen, shortcut: 'Ctrl+J', action: () => s().toggleRight() },
@@ -111,26 +101,20 @@ export function TitleBar() {
         action: () => page && s().patchMapView({ showCoordinates: !page.mapView.showCoordinates }),
         enabled: !!page,
       },
-      {
-        label: 'Minimap',
-        checked: project?.settings.showMinimap ?? true,
-        action: () =>
-          project &&
-          useStore.setState({
-            project: { ...project, settings: { ...project.settings, showMinimap: !project.settings.showMinimap } },
-            dirty: true,
-          }),
-        enabled: hasProject,
-      },
     ],
-    Library: [
+    // Library and Help both collapsed into here: one place for everything that
+    // is not about the document currently open.
+    Settings: [
+      { label: 'Preferences…', action: () => s().openModal('settings') },
+      {
+        label: 'Light Theme',
+        checked: settings.theme === 'light',
+        action: () => s().patchSettings({ theme: settings.theme === 'light' ? 'dark' : 'light' }),
+      },
+      { separator: true },
       { label: 'Map Manager…', action: () => s().openModal('maps') },
       { label: 'Ship Database…', action: () => s().openModal('shipDb') },
-      { label: 'Ping Presets…', action: () => s().openModal('pingEditor') },
       { separator: true },
-      { label: 'Settings…', action: () => s().openModal('settings') },
-    ],
-    Help: [
       { label: 'Keyboard Shortcuts', shortcut: 'F1', action: () => s().openModal('shortcuts') },
       { label: 'Storage & About', action: () => s().openModal('settings') },
     ],

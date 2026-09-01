@@ -1,25 +1,18 @@
 import { memo } from 'react';
-import { Arc, Arrow, Circle, Ellipse, Group, Label, Line, Path, Rect, Tag, Text } from 'react-konva';
+import { Arrow, Circle, Group, Label, Line, Path, Rect, Tag, Text } from 'react-konva';
 import type {
   MarkerObject,
   PathObject,
-  PingObject,
   ShapeObject,
   TacticalObject,
   TextObject,
   Vec2,
-  ZoneObject,
 } from '@/types/model';
-import { PING_ICONS } from '@/data/pings';
-import { bearing, dashArray, formatArea, formatBearing, formatKm, pathLength, polygonArea, withAlpha } from '@/lib/util';
+import { MARKER_ICONS } from '@/data/markerIcons';
+import type { CanvasTheme } from '@/state/theme';
+import { dashArray, formatArea, formatKm, pathLength, polygonArea, withAlpha } from '@/lib/util';
 
-const MARKER_PATHS: Record<MarkerObject['shape'], string> = {
-  pin: PING_ICONS.pin,
-  cross: PING_ICONS.cross,
-  diamond: PING_ICONS.diamond,
-  star: PING_ICONS.star,
-  flag: PING_ICONS.flag,
-};
+const MARKER_PATHS: Record<MarkerObject['shape'], string> = MARKER_ICONS;
 
 /** See ShipNode: drag is delegated to the Layer; this satisfies react-konva. */
 const bubbleDrag = () => {};
@@ -54,9 +47,11 @@ interface Props {
   inv: number;
   selected: boolean;
   draggable: boolean;
+  /** Canvas palette; a prop so a theme switch invalidates the memo. */
+  theme: CanvasTheme;
 }
 
-export const ObjectNode = memo(function ObjectNode({ obj, inv, selected, draggable }: Props) {
+export const ObjectNode = memo(function ObjectNode({ obj, inv, selected, draggable, theme }: Props) {
   const common = {
     id: obj.id,
     name: 'object',
@@ -78,24 +73,17 @@ export const ObjectNode = memo(function ObjectNode({ obj, inv, selected, draggab
     case 'curvedArrow':
     case 'polygon':
     case 'ruler':
-    case 'bearing':
     case 'area':
-      return <PathNode {...common} obj={obj as PathObject} inv={inv} selected={selected} />;
+      return <PathNode {...common} obj={obj as PathObject} inv={inv} selected={selected} theme={theme} />;
     case 'rect':
     case 'roundRect':
     case 'circle':
-    case 'ellipse':
-    case 'arc':
-      return <ShapeNode {...common} obj={obj as ShapeObject} inv={inv} selected={selected} />;
+      return <ShapeNode {...common} obj={obj as ShapeObject} inv={inv} selected={selected} theme={theme} />;
     case 'text':
     case 'number':
-      return <TextNode {...common} obj={obj as TextObject} inv={inv} selected={selected} />;
+      return <TextNode {...common} obj={obj as TextObject} inv={inv} selected={selected} theme={theme} />;
     case 'marker':
-      return <MarkerNode {...common} obj={obj as MarkerObject} inv={inv} selected={selected} />;
-    case 'ping':
-      return <PingNode {...common} obj={obj as PingObject} inv={inv} selected={selected} />;
-    case 'zone':
-      return <ZoneNode {...common} obj={obj as ZoneObject} inv={inv} selected={selected} />;
+      return <MarkerNode {...common} obj={obj as MarkerObject} inv={inv} selected={selected} theme={theme} />;
     default:
       return null;
   }
@@ -105,11 +93,13 @@ export const ObjectNode = memo(function ObjectNode({ obj, inv, selected, draggab
 
 type NodeCommon = Record<string, unknown>;
 
-function PathNode({ obj, inv, selected, ...rest }: NodeCommon & { obj: PathObject; inv: number; selected: boolean }) {
+type Themed = { theme: CanvasTheme };
+
+function PathNode({ obj, inv, selected, theme, ...rest }: NodeCommon & Themed & { obj: PathObject; inv: number; selected: boolean }) {
   const s = obj.stroke;
   const width = s.width * inv;
   const dash = dashArray(s.dash, width);
-  const stroke = selected ? '#8ecbff' : s.color;
+  const stroke = selected ? theme.selection : s.color;
   const fill = s.fill ? withAlpha(s.fill, s.fillOpacity) : undefined;
   const pts = obj.points;
   if (pts.length < 2) return null;
@@ -125,7 +115,7 @@ function PathNode({ obj, inv, selected, ...rest }: NodeCommon & { obj: PathObjec
     lineCap: 'round' as const,
     lineJoin: 'round' as const,
     hitStrokeWidth: Math.max(width * 3, 12 * inv),
-    shadowColor: selected ? '#4ea3ff' : undefined,
+    shadowColor: selected ? theme.selection : undefined,
     shadowBlur: selected ? 8 * inv : 0,
   };
 
@@ -153,8 +143,6 @@ function PathNode({ obj, inv, selected, ...rest }: NodeCommon & { obj: PathObjec
         {...shared}
       />
     );
-  } else if (obj.type === 'bearing') {
-    body = <Arrow points={flatten(pts)} pointerLength={arrowSize * 0.8} pointerWidth={arrowSize * 0.6} fill={stroke} {...shared} />;
   } else {
     body = (
       <Line
@@ -172,22 +160,15 @@ function PathNode({ obj, inv, selected, ...rest }: NodeCommon & { obj: PathObjec
   if (obj.showMeasurement) {
     if (obj.type === 'ruler') {
       const mid = { x: (first.x + last.x) / 2, y: (first.y + last.y) / 2 };
-      measurement = <MeasureLabel x={mid.x} y={mid.y} inv={inv} color={s.color} text={formatKm(pathLength(pts))} />;
-    } else if (obj.type === 'bearing') {
-      const mid = { x: (first.x + last.x) / 2, y: (first.y + last.y) / 2 };
       measurement = (
-        <MeasureLabel
-          x={mid.x}
-          y={mid.y}
-          inv={inv}
-          color={s.color}
-          text={`${formatBearing(bearing(first, last))}   ${formatKm(pathLength(pts))}`}
-        />
+        <MeasureLabel x={mid.x} y={mid.y} inv={inv} color={s.color} theme={theme} text={formatKm(pathLength(pts))} />
       );
     } else if (obj.type === 'area') {
       const cx = pts.reduce((a, p) => a + p.x, 0) / pts.length;
       const cy = pts.reduce((a, p) => a + p.y, 0) / pts.length;
-      measurement = <MeasureLabel x={cx} y={cy} inv={inv} color={s.color} text={formatArea(polygonArea(pts))} />;
+      measurement = (
+        <MeasureLabel x={cx} y={cy} inv={inv} color={s.color} theme={theme} text={formatArea(polygonArea(pts))} />
+      );
     }
   }
 
@@ -199,22 +180,24 @@ function PathNode({ obj, inv, selected, ...rest }: NodeCommon & { obj: PathObjec
   );
 }
 
-function MeasureLabel({ x, y, inv, color, text }: { x: number; y: number; inv: number; color: string; text: string }) {
+function MeasureLabel({
+  x, y, inv, color, text, theme,
+}: { x: number; y: number; inv: number; color: string; text: string; theme: CanvasTheme }) {
   return (
     <Group x={x} y={y} scaleX={inv} scaleY={inv} listening={false}>
       <Label y={-11} x={0}>
-        <Tag fill="rgba(9,13,18,0.85)" cornerRadius={2.5} stroke={color} strokeWidth={0.7} />
-        <Text text={text} fontSize={11} fontFamily="JetBrains Mono, Consolas, monospace" fill="#e8eef5" padding={4} />
+        <Tag fill={theme.plate} cornerRadius={2.5} stroke={color} strokeWidth={0.7} />
+        <Text text={text} fontSize={11} fontFamily="JetBrains Mono, Consolas, monospace" fill={theme.plateText} padding={4} />
       </Label>
     </Group>
   );
 }
 
-function ShapeNode({ obj, inv, selected, ...rest }: NodeCommon & { obj: ShapeObject; inv: number; selected: boolean }) {
+function ShapeNode({ obj, inv, selected, theme, ...rest }: NodeCommon & Themed & { obj: ShapeObject; inv: number; selected: boolean }) {
   const s = obj.stroke;
   const width = s.width * inv;
   const dash = dashArray(s.dash, width);
-  const stroke = selected ? '#8ecbff' : s.color;
+  const stroke = selected ? theme.selection : s.color;
   const fill = s.fill ? withAlpha(s.fill, s.fillOpacity) : undefined;
   const shared = { stroke, strokeWidth: width, dash, fill, hitStrokeWidth: Math.max(width * 3, 12 * inv) };
 
@@ -232,22 +215,11 @@ function ShapeNode({ obj, inv, selected, ...rest }: NodeCommon & { obj: ShapeObj
         />
       )}
       {obj.type === 'circle' && <Circle radius={obj.rx} {...shared} />}
-      {obj.type === 'ellipse' && <Ellipse radiusX={obj.rx} radiusY={obj.ry} {...shared} />}
-      {obj.type === 'arc' && (
-        <Arc
-          innerRadius={obj.rx * 0.99}
-          outerRadius={obj.rx}
-          angle={obj.sweepAngle ?? 120}
-          rotation={obj.startAngle ?? -60}
-          {...shared}
-          fill={undefined}
-        />
-      )}
     </Group>
   );
 }
 
-function TextNode({ obj, inv, selected, ...rest }: NodeCommon & { obj: TextObject; inv: number; selected: boolean }) {
+function TextNode({ obj, inv, selected, theme, ...rest }: NodeCommon & Themed & { obj: TextObject; inv: number; selected: boolean }) {
   const style = `${obj.bold ? 'bold ' : ''}${obj.italic ? 'italic' : ''}`.trim() || 'normal';
 
   if (obj.type === 'number') {
@@ -302,7 +274,7 @@ function TextNode({ obj, inv, selected, ...rest }: NodeCommon & { obj: TextObjec
   );
 }
 
-function MarkerNode({ obj, inv, selected, ...rest }: NodeCommon & { obj: MarkerObject; inv: number; selected: boolean }) {
+function MarkerNode({ obj, inv, selected, theme, ...rest }: NodeCommon & Themed & { obj: MarkerObject; inv: number; selected: boolean }) {
   const size = obj.size;
   return (
     <Group {...rest}>
@@ -324,94 +296,6 @@ function MarkerNode({ obj, inv, selected, ...rest }: NodeCommon & { obj: MarkerO
           </Label>
         )}
       </Group>
-    </Group>
-  );
-}
-
-function PingNode({ obj, inv, selected, ...rest }: NodeCommon & { obj: PingObject; inv: number; selected: boolean }) {
-  const size = obj.size;
-  const r = size * 0.62;
-  return (
-    <Group {...rest} rotation={0}>
-      <Group scaleX={inv} scaleY={inv}>
-        <Circle radius={r} fill="rgba(10,14,20,0.82)" stroke={obj.color} strokeWidth={selected ? 2.4 : 1.8} />
-        {selected && <Circle radius={r + 4} stroke="#4ea3ff" strokeWidth={1} dash={[4, 3]} />}
-
-        {obj.directional && (
-          <Group rotation={(rest.rotation as number) ?? 0}>
-            <Line points={[0, -r - 3, -5, -r - 11, 5, -r - 11]} closed fill={obj.color} />
-          </Group>
-        )}
-
-        <Group scaleX={size / 34} scaleY={size / 34} offsetX={12} offsetY={12}>
-          <Path data={PING_ICONS[obj.icon] ?? PING_ICONS.pin} stroke={obj.color} strokeWidth={2} lineJoin="round" lineCap="round" />
-        </Group>
-
-        <Circle radius={r} fill="transparent" />
-
-        {obj.showLabel && obj.label && (
-          <Label y={r + 3}>
-            <Tag fill="rgba(9,13,18,0.85)" cornerRadius={2} stroke={obj.color} strokeWidth={0.7} />
-            <Text
-              text={obj.label}
-              fontSize={10}
-              fontStyle="600"
-              fontFamily="Inter, Segoe UI, sans-serif"
-              fill="#e8eef5"
-              padding={3}
-            />
-          </Label>
-        )}
-      </Group>
-    </Group>
-  );
-}
-
-function ZoneNode({ obj, inv, selected, ...rest }: NodeCommon & { obj: ZoneObject; inv: number; selected: boolean }) {
-  const stroke = selected ? '#8ecbff' : obj.color;
-  const strokeWidth = obj.lineWidth * inv;
-  const fill = obj.fill ? withAlpha(obj.color, obj.fillOpacity) : undefined;
-  const dash = obj.dashed ? [strokeWidth * 4, strokeWidth * 3] : undefined;
-  const shared = { stroke, strokeWidth, fill, dash, hitStrokeWidth: Math.max(strokeWidth * 3, 12 * inv) };
-
-  const labelOffsetY =
-    obj.zoneShape === 'circle' ? -(obj.radius ?? 0) : obj.zoneShape === 'rect' ? -(obj.ry ?? 0) : 0;
-
-  return (
-    <Group {...rest}>
-      {obj.zoneShape === 'circle' && <Circle radius={obj.radius ?? 1000} {...shared} />}
-      {obj.zoneShape === 'rect' && (
-        <Rect x={-(obj.rx ?? 0)} y={-(obj.ry ?? 0)} width={(obj.rx ?? 0) * 2} height={(obj.ry ?? 0) * 2} {...shared} />
-      )}
-      {obj.zoneShape === 'cone' && (
-        <Arc
-          innerRadius={0}
-          outerRadius={obj.radius ?? 1000}
-          angle={(obj.coneAngle ?? 35) * 2}
-          rotation={-90 - (obj.coneAngle ?? 35)}
-          {...shared}
-        />
-      )}
-      {obj.zoneShape === 'polygon' && (obj.points?.length ?? 0) >= 2 && (
-        <Line points={flatten(obj.points ?? [])} closed {...shared} lineJoin="round" />
-      )}
-
-      {obj.showLabel && (
-        <Group y={labelOffsetY} scaleX={inv} scaleY={inv} rotation={-((rest.rotation as number) ?? 0)} listening={false}>
-          <Label y={-14}>
-            <Tag fill="rgba(9,13,18,0.85)" cornerRadius={2.5} stroke={obj.color} strokeWidth={0.7} />
-            <Text
-              text={obj.valueKm ? `${obj.label}\n${obj.valueKm.toFixed(1)} km` : obj.label}
-              fontSize={10.5}
-              fontStyle="600"
-              align="center"
-              fontFamily="Inter, Segoe UI, sans-serif"
-              fill="#e8eef5"
-              padding={3.5}
-            />
-          </Label>
-        </Group>
-      )}
     </Group>
   );
 }

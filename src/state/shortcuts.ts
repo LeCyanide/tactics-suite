@@ -4,7 +4,6 @@ import { canvasApi } from '@/canvas/canvasBridge';
 
 const TOOL_KEYS: Record<string, ToolId> = {
   v: 'select',
-  h: 'pan',
   f: 'freehand',
   l: 'line',
   a: 'arrow',
@@ -12,10 +11,7 @@ const TOOL_KEYS: Record<string, ToolId> = {
   c: 'circle',
   t: 'text',
   m: 'ruler',
-  p: 'ping',
-  z: 'zone',
   n: 'number',
-  b: 'bearing',
   g: 'polygon',
 };
 
@@ -30,8 +26,6 @@ export const SHORTCUT_REFERENCE: { group: string; rows: ShortcutRow[] }[] = [
     rows: [
       { keys: 'V', action: 'Select' },
       { keys: 'Shift + V', action: 'Multi-select (marquee)' },
-      { keys: 'H', action: 'Pan' },
-      { keys: 'Space (hold)', action: 'Temporary pan' },
       { keys: 'F', action: 'Freehand' },
       { keys: 'L', action: 'Line' },
       { keys: 'A', action: 'Arrow' },
@@ -41,9 +35,6 @@ export const SHORTCUT_REFERENCE: { group: string; rows: ShortcutRow[] }[] = [
       { keys: 'T', action: 'Text' },
       { keys: 'N', action: 'Number badge' },
       { keys: 'M', action: 'Ruler / measure' },
-      { keys: 'B', action: 'Bearing' },
-      { keys: 'P', action: 'Ping' },
-      { keys: 'Z', action: 'Tactical zone' },
     ],
   },
   {
@@ -74,10 +65,7 @@ export const SHORTCUT_REFERENCE: { group: string; rows: ShortcutRow[] }[] = [
   {
     group: 'View',
     rows: [
-      { keys: 'Ctrl + 0', action: 'Fit map to screen' },
-      { keys: 'Ctrl + +  /  Ctrl + -', action: 'Zoom in / out' },
-      { keys: 'Mouse wheel', action: 'Zoom at cursor' },
-      { keys: 'Middle drag', action: 'Pan' },
+      { keys: 'Ctrl + 0', action: 'Recentre map' },
       { keys: 'Ctrl + B', action: 'Toggle left sidebar' },
       { keys: 'Ctrl + J', action: 'Toggle properties' },
       { keys: 'Ctrl + K', action: 'Toggle notes' },
@@ -102,13 +90,6 @@ export function useShortcuts(): void {
     const onKeyDown = (e: KeyboardEvent) => {
       const typing = isTypingTarget(e.target);
       const ctrl = e.ctrlKey || e.metaKey;
-
-      // Space is a modal pan while held, but only outside text fields.
-      if (e.code === 'Space' && !typing && !e.repeat) {
-        s().setSpacePan(true);
-        e.preventDefault();
-        return;
-      }
 
       if (ctrl) {
         const key = e.key.toLowerCase();
@@ -157,15 +138,6 @@ export function useShortcuts(): void {
           case '0':
             handled();
             canvasApi()?.fit();
-            return;
-          case '=':
-          case '+':
-            handled();
-            canvasApi()?.zoomBy(1.2);
-            return;
-          case '-':
-            handled();
-            canvasApi()?.zoomBy(1 / 1.2);
             return;
           default:
             break;
@@ -249,19 +221,9 @@ export function useShortcuts(): void {
       if (tool && !e.shiftKey && !e.altKey) s().setTool(tool);
     };
 
-    const onKeyUp = (e: KeyboardEvent) => {
-      if (e.code === 'Space') useStore.getState().setSpacePan(false);
-    };
-
-    const onBlur = () => useStore.getState().setSpacePan(false);
-
     window.addEventListener('keydown', onKeyDown);
-    window.addEventListener('keyup', onKeyUp);
-    window.addEventListener('blur', onBlur);
     return () => {
       window.removeEventListener('keydown', onKeyDown);
-      window.removeEventListener('keyup', onKeyUp);
-      window.removeEventListener('blur', onBlur);
     };
   }, []);
 }

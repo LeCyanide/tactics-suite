@@ -6,6 +6,15 @@ editor in the shape of lightweight CAD software, not a website.
 No account, no login, no server, no community features, no telemetry. The
 application never makes a network request; everything it needs is on disk.
 
+The map is **fixed**: it is always centred and always shown whole, with a small
+margin at the edges. There is no pan and no zoom, so a page always looks the
+same to whoever opens it, and the camera has no state to get lost in.
+
+Dark and light themes are both supported; switch under `Settings ▸ Preferences`
+(or `Settings ▸ Light Theme`). The canvas follows the theme too — its colours
+live in `src/state/theme.ts`, because Konva paints to a bitmap and cannot read
+CSS custom properties.
+
 ---
 
 ## Running it
@@ -48,7 +57,7 @@ Everything is stored locally under the OS application-data directory:
 
 ```
 %APPDATA%\WoWS Tactical Planner\data\
-  settings.json               application settings + ping presets
+  settings.json               application settings
   projects/<id>.json          one document per project
   maps/maps.json              map database index
   maps/assets/<id>.png        imported map images
@@ -139,32 +148,34 @@ Nothing ever replaces an assigned icon with a generic symbol. Team colour is
 applied as a ring and label border around the icon, never painted onto the
 artwork.
 
-Icons are drawn at a constant on-screen size (scaled by 1/zoom), so they stay
-recognisable however far in or out you are zoomed, while ranges stay in world
-units.
+Icons are drawn at a constant on-screen size (scaled by 1/zoom) while ranges
+stay in world units. A ship's marker is painted in its team's colour — that is
+the only thing that colours it — and its name is always drawn horizontally and
+centred beneath the hull, whatever heading the ship is pointing.
 
 ---
 
 ## Ship characteristics are opt-in
 
-Placing a ship shows an icon, a name and a heading pip. Nothing else. Every
-characteristic — Detection, Radar, Hydro, Smoke, Main Battery, Secondary,
-Torpedo, AA, HP, Class, Tier, Consumables — is independently toggleable, at two
-levels:
+Placing a ship shows an icon, a name and a heading pip. Nothing else.
 
-- **Page defaults** (`Map Display` in the properties panel) decide what every
-  ship on the page shows.
-- **Per-ship overrides** (`Display on Map` when a ship is selected) win over the
-  page default. Overridden entries are marked `OVR`; clicking the badge clears
-  the override and the ship falls back to the page setting.
+Labels (icon, name), the heading indicator and consumables have **page
+defaults** (`Map Display` in the properties panel) and **per-ship overrides**
+(`Display on Map` when a ship is selected). Overridden entries are marked
+`OVR`; clicking the badge clears the override and the ship falls back to the
+page setting.
+
+Ranges — Detection, Radar, Hydro, Main Battery, Secondary, Torpedo — have no
+page default at all. They are set on one ship at a time, because a range is a
+statement about the ship that projects it.
 
 When a range characteristic is switched on, its visualisation is generated
 automatically from the ship database — you never draw those circles by hand —
 and it exists *only* while that toggle is on. Torpedoes render as a directional
 sector rather than a circle when the ship has a torpedo arc.
 
-Range styling (colour, opacity, line width, fill, dash, label) is configurable
-per characteristic, with per-ship overrides.
+Range styling (colour, opacity, line width, fill, dash, label) is configured on
+the ship whose range it is, layered over the built-in defaults.
 
 Hidden characteristics are not rendered, and therefore cannot appear in an
 exported image.
@@ -192,14 +203,15 @@ place and keep their icon assignment. Export back out as JSON, CSV or YAML.
 
 ## Layers
 
-Each page carries its own layer stack: Grid, Tactical Zones, Ship Ranges,
-Routes, Shapes, Ships, Text, Pings, plus any custom layers you add. Every layer
-has visibility, lock, opacity, rename, reorder and delete; objects can be moved
-between layers.
+Each page carries four layers: **Grid**, **Ship Ranges**, **Annotations** and
+**Ships**, plus any custom layers you add. Shapes, arrows, text and markers all
+share Annotations, because they are drawn the same way and are almost always
+shown or hidden together. Every layer has visibility, lock, opacity, rename,
+reorder and delete; objects can be moved between layers.
 
-Ship ranges and routes render on their own dedicated layers even though they
-belong to ship objects, which is what lets you hide every radar circle on the
-page with one click while leaving the ships in place.
+Ship ranges render on their own layer even though they belong to ship objects,
+which is what lets you hide every radar circle on the page with one click while
+leaving the ships in place.
 
 ---
 
@@ -207,14 +219,13 @@ page with one click while leaving the ships in place.
 
 | | |
 |---|---|
-| `V` / `Shift+V` / `H` | Select / Multi-select / Pan |
-| `Space` (hold) | Temporary pan |
+| `V` / `Shift+V` | Select / Multi-select |
 | `F` `L` `A` `R` `C` `G` | Freehand, Line, Arrow, Rectangle, Circle, Polygon |
-| `T` `N` `M` `B` `P` `Z` | Text, Number, Ruler, Bearing, Ping, Zone |
+| `T` `N` `M` | Text, Number, Ruler |
 | `Ctrl+Z` / `Ctrl+Y` | Undo / Redo |
 | `Ctrl+C` `Ctrl+V` `Ctrl+D` `Ctrl+A` `Del` | Copy, Paste, Duplicate, Select all, Delete |
 | `Ctrl+N` `Ctrl+O` `Ctrl+S` `Ctrl+E` | New, Open, Save, Export image |
-| `Ctrl+0` `Ctrl++` `Ctrl+-` | Fit, Zoom in, Zoom out |
+| `Ctrl+0` | Recentre map |
 | `Ctrl+B` `Ctrl+J` `Ctrl+K` | Left sidebar, Properties, Notes |
 | `Ctrl+Tab` | Next page |
 | `F1` | Shortcut reference |
@@ -235,8 +246,8 @@ src/
   state/shortcuts.ts       global keyboard map
   state/assets.ts          decoded-image cache for maps and icons
   canvas/MapCanvas.tsx     stage, camera, tools, selection, transforms, export
-  canvas/ShipNode.tsx      ship icon, labels, ranges, routes
-  canvas/ObjectNode.tsx    shapes, paths, text, markers, pings, zones
+  canvas/ShipNode.tsx      ship icon, labels, ranges
+  canvas/ObjectNode.tsx    shapes, paths, text, markers
   canvas/MapBackground.tsx map image, grid, coordinates
   components/              title bar, sidebars, tool rail, modals
   lib/shipImport.ts        JSON/CSV/YAML ship parsing and export
