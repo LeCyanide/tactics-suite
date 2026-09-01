@@ -1,0 +1,285 @@
+/**
+ * Ship database import/export.
+ *
+ * The user supplies the data, and real-world exports are messy, so the parser
+ * is deliberately forgiving: it accepts JSON, CSV and YAML, matches column
+ * names case- and separator-insensitively across a table of aliases, strips
+ * unit suffixes ("10.0 km", "97,200 HP") and understands Roman-numeral tiers.
+ * Anything it cannot map is preserved under the ship's notes so nothing the
+ * user imported is silently thrown away.
+ */
+
+import Papa from 'papaparse';
+import { dump as yamlDump, load as yamlLoad } from 'js-yaml';
+import type { Consumable, Ship, ShipClass } from '@/types/model';
+import { uid } from './util';
+
+type Raw = Record<string, unknown>;
+
+const CLASS_ALIASES: Record<string, ShipClass> = {
+  dd: 'DD', destroyer: 'DD', destroyers: 'DD',
+  ca: 'CA', cl: 'CA', cruiser: 'CA', cruisers: 'CA', heavycruiser: 'CA', lightcruiser: 'CA',
+  bb: 'BB', battleship: 'BB', battleships: 'BB', battlecruiser: 'BB',
+  cv: 'CV', carrier: 'CV', aircraftcarrier: 'CV', carriers: 'CV',
+  ss: 'SS', submarine: 'SS', sub: 'SS', submarines: 'SS',
+};
+
+const ROMAN: Record<string, number> = {
+  i: 1, ii: 2, iii: 3, iv: 4, v: 5, vi: 6, vii: 7, viii: 8, ix: 9, x: 10, xi: 11, xii: 12,
+};
+
+/** field -> accepted source keys (normalised: lowercase, alphanumeric only) */
+const FIELD_ALIASES: Record<string, string[]> = {
+  name: ['name', 'ship', 'shipname', 'title'],
+  nation: ['nation', 'country', 'flag', 'faction'],
+  class: ['class', 'type', 'shiptype', 'shipclass', 'hull'],
+  tier: ['tier', 'level', 'lvl'],
+  hp: ['hp', 'health', 'hitpoints', 'survivability'],
+  speed_kn: ['speed', 'maxspeed', 'speedkn', 'knots'],
+  rudderShift_s: ['ruddershift', 'rudder', 'ruddershifttime'],
+  turningCircle_m: ['turningcircle', 'turningradius', 'turncircle'],
+  concealment_km: ['concealment', 'detectability', 'detection', 'detectionrange', 'seadetection', 'concealmentsea', 'detectabilitybysea'],
+  concealmentAir_km: ['concealmentair', 'airdetection', 'detectabilitybyair', 'airdetectability'],
+  mainBatteryRange_km: ['mainbatteryrange', 'range', 'artilleryrange', 'gunrange', 'firingrange', 'mainrange'],
+  mainBattery: ['mainbattery', 'guns', 'artillery', 'mainguns'],
+  secondaryRange_km: ['secondaryrange', 'secondarybatteryrange', 'atbarange'],
+  secondaryBattery: ['secondary', 'secondarybattery', 'atba'],
+  torpedoRange_km: ['torpedorange', 'torprange', 'torpedoesrange'],
+  torpedoSpeed_kn: ['torpedospeed', 'torpspeed'],
+  torpedoArc_deg: ['torpedoarc', 'torpedoangle', 'torparc'],
+  torpedoes: ['torpedoes', 'torps', 'torpedotubes'],
+  aaRange_km: ['aarange', 'antiairrange', 'aadistance'],
+  aa: ['aa', 'antiair', 'aadps', 'aadefense'],
+  radar_km: ['radar', 'radarrange', 'surveillanceradar', 'radarkm'],
+  radarDuration_s: ['radarduration', 'radartime'],
+  hydro_km: ['hydro', 'hydrorange', 'hydroacoustic', 'hydroacousticsearch', 'sonar'],
+  hydroDuration_s: ['hydroduration', 'hydrotime'],
+  smokeDuration_s: ['smokeduration', 'smoketime'],
+  smokeRadius_km: ['smokeradius', 'smokerange', 'smoke'],
+  fighter: ['fighter', 'catapultfighter'],
+  spottingAircraft: ['spottingaircraft', 'spotter', 'spotteraircraft', 'spottingplane'],
+  notes: ['notes', 'comment', 'comments', 'description'],
+  iconId: ['iconid', 'icon'],
+};
+
+function norm(key: string): string {
+  return key.toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+/** Pulls "12.4" out of "12.4 km", "12,4km", "97 200 HP" or a plain number. */
+function num(value: unknown): number | undefined {
+  if (value === null || value === undefined || value === '') return undefined;
+  if (typeof value === 'number') return Number.isFinite(value) ? value : undefined;
+  const text = String(value).trim();
+  if (!text || /^(n\/?a|none|-|—)$/i.test(text)) return undefined;
+  const cleaned = text.replace(/\s|'/g, '').replace(/,(?=\d{3}\b)/g, '');
+  const match = cleaned.replace(',', '.').match(/-?\d+(\.\d+)?/);
+  if (!match) return undefined;
+  const n = parseFloat(match[0]);
+  return Number.isFinite(n) ? n : undefined;
+}
+
+function bool(value: unknown): boolean | undefined {
+  if (value === null || value === undefined || value === '') return undefined;
+  if (typeof value === 'boolean') return value;
+  const t = String(value).trim().toLowerCase();
+  if (['true', 'yes', 'y', '1', 'x'].includes(t)) return true;
+  if (['false', 'no', 'n', '0', '', '-', 'n/a'].includes(t)) return false;
+  return undefined;
+}
+
+function toTier(value: unknown): number {
+  const direct = num(value);
+  if (direct !== undefined && direct >= 1 && direct <= 12) return Math.round(direct);
+  const t = String(value ?? '').trim().toLowerCase().replace(/[^ivx]/g, '');
+  return ROMAN[t] ?? 10;
+}
+
+function toClass(value: unknown): ShipClass {
+  const key = norm(String(value ?? ''));
+  if (CLASS_ALIASES[key]) return CLASS_ALIASES[key];
+  for (const [alias, cls] of Object.entries(CLASS_ALIASES)) {
+    if (key.includes(alias)) return cls;
+  }
+  return 'CA';
+}
+
+/**
+ * Metres sneak into range columns often enough to be worth handling: anything
+ * above 100 in a "km" field is treated as metres.
+ */
+function toKm(value: unknown): number | undefined {
+  const n = num(value);
+  if (n === undefined) return undefined;
+  if (n > 100) return n / 1000;
+  return n;
+}
+
+function pick(raw: Raw, field: string): unknown {
+  const aliases = FIELD_ALIASES[field] ?? [field.toLowerCase()];
+  for (const key of Object.keys(raw)) {
+    if (aliases.includes(norm(key))) {
+      const v = raw[key];
+      if (v !== '' && v !== null && v !== undefined) return v;
+    }
+  }
+  return undefined;
+}
+
+function parseConsumables(raw: Raw): Consumable[] | undefined {
+  const direct = raw['consumables'] ?? raw['Consumables'] ?? raw['otherConsumables'] ?? raw['Other Consumables'];
+  if (Array.isArray(direct)) {
+    return direct.map((c) =>
+      typeof c === 'string'
+        ? { name: c }
+        : {
+            name: String((c as Raw)?.name ?? 'Consumable'),
+            range_km: toKm((c as Raw)?.range_km ?? (c as Raw)?.range),
+            duration_s: num((c as Raw)?.duration_s ?? (c as Raw)?.duration),
+            charges: num((c as Raw)?.charges),
+            cooldown_s: num((c as Raw)?.cooldown_s ?? (c as Raw)?.cooldown),
+            notes: (c as Raw)?.notes ? String((c as Raw).notes) : undefined,
+          },
+    );
+  }
+  if (typeof direct === 'string' && direct.trim()) {
+    return direct
+      .split(/[;|]/)
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .map((s) => ({ name: s }));
+  }
+  return undefined;
+}
+
+const KNOWN_KEYS = new Set(Object.values(FIELD_ALIASES).flat().concat(['consumables', 'otherconsumables', 'id']));
+
+export function normalizeShip(raw: Raw, existing?: Ship): Ship {
+  const name = String(pick(raw, 'name') ?? existing?.name ?? 'Unnamed Ship').trim();
+
+  // Anything we did not recognise is folded into the notes rather than lost.
+  const leftovers = Object.entries(raw)
+    .filter(([k, v]) => !KNOWN_KEYS.has(norm(k)) && v !== '' && v !== null && v !== undefined)
+    .map(([k, v]) => `${k}: ${typeof v === 'object' ? JSON.stringify(v) : String(v)}`);
+
+  const notesFromField = pick(raw, 'notes');
+  const notes = [notesFromField ? String(notesFromField) : '', ...leftovers].filter(Boolean).join('\n') || undefined;
+
+  const ship: Ship = {
+    id: (raw.id ? String(raw.id) : undefined) ?? existing?.id ?? uid('ship-'),
+    name,
+    nation: String(pick(raw, 'nation') ?? existing?.nation ?? 'Unknown'),
+    class: pick(raw, 'class') !== undefined ? toClass(pick(raw, 'class')) : (existing?.class ?? 'CA'),
+    tier: pick(raw, 'tier') !== undefined ? toTier(pick(raw, 'tier')) : (existing?.tier ?? 10),
+    hp: num(pick(raw, 'hp')) ?? existing?.hp,
+    speed_kn: num(pick(raw, 'speed_kn')) ?? existing?.speed_kn,
+    rudderShift_s: num(pick(raw, 'rudderShift_s')) ?? existing?.rudderShift_s,
+    turningCircle_m: num(pick(raw, 'turningCircle_m')) ?? existing?.turningCircle_m,
+    concealment_km: toKm(pick(raw, 'concealment_km')) ?? existing?.concealment_km,
+    concealmentAir_km: toKm(pick(raw, 'concealmentAir_km')) ?? existing?.concealmentAir_km,
+    mainBatteryRange_km: toKm(pick(raw, 'mainBatteryRange_km')) ?? existing?.mainBatteryRange_km,
+    mainBattery: (pick(raw, 'mainBattery') as string) ?? existing?.mainBattery,
+    secondaryRange_km: toKm(pick(raw, 'secondaryRange_km')) ?? existing?.secondaryRange_km,
+    secondaryBattery: (pick(raw, 'secondaryBattery') as string) ?? existing?.secondaryBattery,
+    torpedoRange_km: toKm(pick(raw, 'torpedoRange_km')) ?? existing?.torpedoRange_km,
+    torpedoSpeed_kn: num(pick(raw, 'torpedoSpeed_kn')) ?? existing?.torpedoSpeed_kn,
+    torpedoArc_deg: num(pick(raw, 'torpedoArc_deg')) ?? existing?.torpedoArc_deg,
+    torpedoes: (pick(raw, 'torpedoes') as string) ?? existing?.torpedoes,
+    aaRange_km: toKm(pick(raw, 'aaRange_km')) ?? existing?.aaRange_km,
+    aa: (pick(raw, 'aa') as string) ?? existing?.aa,
+    radar_km: toKm(pick(raw, 'radar_km')) ?? existing?.radar_km,
+    radarDuration_s: num(pick(raw, 'radarDuration_s')) ?? existing?.radarDuration_s,
+    hydro_km: toKm(pick(raw, 'hydro_km')) ?? existing?.hydro_km,
+    hydroDuration_s: num(pick(raw, 'hydroDuration_s')) ?? existing?.hydroDuration_s,
+    smokeDuration_s: num(pick(raw, 'smokeDuration_s')) ?? existing?.smokeDuration_s,
+    smokeRadius_km: toKm(pick(raw, 'smokeRadius_km')) ?? existing?.smokeRadius_km,
+    fighter: bool(pick(raw, 'fighter')) ?? existing?.fighter,
+    spottingAircraft: bool(pick(raw, 'spottingAircraft')) ?? existing?.spottingAircraft,
+    consumables: parseConsumables(raw) ?? existing?.consumables,
+    iconId: (pick(raw, 'iconId') as string) ?? existing?.iconId ?? null,
+    notes: notes ?? existing?.notes,
+  };
+
+  // Drop undefined keys so exported files stay tidy.
+  for (const key of Object.keys(ship) as (keyof Ship)[]) {
+    if (ship[key] === undefined) delete ship[key];
+  }
+  return ship;
+}
+
+export interface ParseResult {
+  ships: Ship[];
+  format: 'json' | 'csv' | 'yaml';
+  warnings: string[];
+}
+
+export function parseShipData(text: string, ext: string): ParseResult {
+  const warnings: string[] = [];
+  const e = ext.toLowerCase().replace('.', '');
+  let rows: Raw[] = [];
+  let format: ParseResult['format'] = 'json';
+
+  if (e === 'csv' || e === 'tsv') {
+    format = 'csv';
+    const parsed = Papa.parse<Raw>(text, { header: true, skipEmptyLines: true, dynamicTyping: false });
+    if (parsed.errors?.length) {
+      warnings.push(...parsed.errors.slice(0, 5).map((err) => `Row ${err.row ?? '?'}: ${err.message}`));
+    }
+    rows = parsed.data ?? [];
+  } else if (e === 'yaml' || e === 'yml') {
+    format = 'yaml';
+    rows = coerceRows(yamlLoad(text));
+  } else {
+    format = 'json';
+    rows = coerceRows(JSON.parse(text));
+  }
+
+  const ships = rows
+    .filter((r) => r && typeof r === 'object')
+    .map((r) => normalizeShip(r))
+    .filter((s) => s.name && s.name !== 'Unnamed Ship');
+
+  if (!ships.length) warnings.push('No ship rows were recognised in this file.');
+  return { ships, format, warnings };
+}
+
+/** Accepts an array, a {ships:[...]} wrapper, or a name-keyed object. */
+function coerceRows(data: unknown): Raw[] {
+  if (Array.isArray(data)) return data as Raw[];
+  if (data && typeof data === 'object') {
+    const obj = data as Raw;
+    for (const key of ['ships', 'data', 'items', 'vehicles']) {
+      if (Array.isArray(obj[key])) return obj[key] as Raw[];
+    }
+    // { "Des Moines": {...}, "Yamato": {...} }
+    const values = Object.entries(obj);
+    if (values.every(([, v]) => v && typeof v === 'object' && !Array.isArray(v))) {
+      return values.map(([k, v]) => ({ name: k, ...(v as Raw) }));
+    }
+  }
+  return [];
+}
+
+/* ------------------------------------------------------------------ */
+/* Export                                                              */
+/* ------------------------------------------------------------------ */
+
+const CSV_COLUMNS: (keyof Ship)[] = [
+  'id', 'name', 'nation', 'class', 'tier', 'hp', 'speed_kn', 'rudderShift_s', 'turningCircle_m',
+  'concealment_km', 'concealmentAir_km', 'mainBatteryRange_km', 'mainBattery', 'secondaryRange_km',
+  'torpedoRange_km', 'torpedoSpeed_kn', 'torpedoArc_deg', 'torpedoes', 'aaRange_km', 'aa',
+  'radar_km', 'radarDuration_s', 'hydro_km', 'hydroDuration_s', 'smokeDuration_s', 'smokeRadius_km',
+  'fighter', 'spottingAircraft', 'notes',
+];
+
+export function serializeShips(ships: Ship[], format: 'json' | 'csv' | 'yaml'): string {
+  if (format === 'json') return JSON.stringify(ships, null, 2);
+  if (format === 'yaml') return yamlDump(ships);
+  const rows = ships.map((s) => {
+    const row: Record<string, unknown> = {};
+    for (const col of CSV_COLUMNS) row[col] = s[col] ?? '';
+    row.consumables = (s.consumables ?? []).map((c) => c.name).join(' | ');
+    return row;
+  });
+  return Papa.unparse(rows, { columns: [...CSV_COLUMNS.map(String), 'consumables'] });
+}
