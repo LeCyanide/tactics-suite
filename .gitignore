@@ -1,0 +1,11 @@
+node_modules/
+dist/
+dist-electron/
+release/
+
+# graphify keeps its output here; the graph is rebuildable from source
+graphify-out/
+
+*.log
+.DS_Store
+Thumbs.db
