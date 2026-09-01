@@ -2,9 +2,15 @@ import { create } from 'zustand';
 import {
   DEFAULT_APP_SETTINGS,
   DEFAULT_CHARACTERISTICS,
-  DEFAULT_RANGE_STYLES,
+  DEFAULT_PROJECT_SETTINGS,
+  DEFAULT_RANGE_FLAGS,
+  SCHEMA_VERSION,
   DEFAULT_STROKE,
   LAYER_IDS,
+  LEGACY_LAYER_REMAP,
+  PAGE_CHARACTERISTIC_KEYS,
+  REMOVED_OBJECT_TYPES,
+  createDefaultLayers,
   type AppSettings,
   type CharacteristicFlags,
   type CharacteristicKey,
@@ -15,7 +21,6 @@ import {
   type Page,
   type Project,
   type ProjectSummary,
-  type RangeStyle,
   type Ship,
   type ShipIconAsset,
   type ShipObject,
@@ -24,17 +29,14 @@ import {
   type TacticalPreset,
   type Team,
   type Vec2,
-  type Waypoint,
 } from '@/types/model';
 import { clamp, clone, debounce, uid } from '@/lib/util';
+import { applyTheme } from './theme';
 import {
-  CLAN_WAR_TEMPLATE_PAGES,
   createPage,
   createProject,
   createShipObject,
-  createWaypoint,
 } from '@/lib/factory';
-import { BUILT_IN_PINGS, type PingPreset } from '@/data/pings';
 import { parseShipData, serializeShips } from '@/lib/shipImport';
 import { SAMPLE_SHIPS } from '@/data/sampleShips';
 
@@ -43,7 +45,6 @@ const HISTORY_LIMIT = 100;
 export type ToolId =
   | 'select'
   | 'marquee'
-  | 'pan'
   | 'freehand'
   | 'line'
   | 'arrow'
@@ -52,18 +53,20 @@ export type ToolId =
   | 'rect'
   | 'roundRect'
   | 'circle'
-  | 'ellipse'
   | 'polygon'
-  | 'arc'
   | 'text'
   | 'number'
   | 'marker'
   | 'ruler'
-  | 'bearing'
-  | 'area'
-  | 'ping'
-  | 'zone'
-  | 'route';
+  | 'area';
+
+/** The shape variants offered behind the single "Shape" rail button. */
+export const SHAPE_TOOLS = ['rect', 'roundRect', 'circle', 'polygon'] as const;
+/** The line/arrow variants offered behind the single "Arrow" rail button. */
+export const ARROW_TOOLS = ['line', 'arrow', 'doubleArrow', 'curvedArrow'] as const;
+
+export type ShapeTool = (typeof SHAPE_TOOLS)[number];
+export type ArrowTool = (typeof ARROW_TOOLS)[number];
 
 export interface Camera {
   /** Stage translation in screen pixels. */
@@ -77,9 +80,9 @@ export interface ToolOptions {
   stroke: StrokeStyle;
   fontSize: number;
   arrowSize: number;
-  pingPresetId: string;
-  pingSize: number;
-  zonePresetId: string;
+  /** Which variant the grouped Shape / Arrow rail buttons currently draw. */
+  shapeVariant: ShapeTool;
+  arrowVariant: ArrowTool;
   markerColor: string;
   numberCounter: number;
 }
@@ -94,8 +97,7 @@ export type ModalId =
   | 'export'
   | 'settings'
   | 'shortcuts'
-  | 'backups'
-  | 'pingEditor';
+  | 'backups';
 
 export interface Toast {
   id: string;
@@ -109,7 +111,6 @@ interface State {
   icons: ShipIconAsset[];
   maps: GameMap[];
   settings: AppSettings;
-  pings: PingPreset[];
 
   /* projects */
   projectList: ProjectSummary[];
@@ -138,7 +139,6 @@ interface State {
   toasts: Toast[];
   /** Increment to ask the canvas to re-fit the map. */
   fitRequest: number;
-  spacePan: boolean;
 }
 
 interface Actions {
@@ -151,7 +151,7 @@ interface Actions {
 
   /* projects */
   refreshProjects(): Promise<void>;
-  newProject(name: string, useTemplate: boolean): Promise<void>;
+  newProject(name: string): Promise<void>;
   openProject(id: ID): Promise<void>;
   saveProject(opts?: { backup?: boolean; silent?: boolean }): Promise<void>;
   saveProjectAs(name: string): Promise<void>;
@@ -169,11 +169,12 @@ interface Actions {
   renamePage(id: ID, name: string): void;
   deletePage(id: ID): void;
   reorderPage(id: ID, delta: number): void;
+  /** Absolute reorder, used by drag and drop on the board tabs. */
+  movePageTo(id: ID, index: number): void;
   setPageMap(mapId: ID | null): void;
   patchMapView(patch: Partial<MapViewConfig>): void;
   setNotes(text: string): void;
   setPageDisplay(key: CharacteristicKey, value: boolean): void;
-  setRangeStyle(key: string, patch: Partial<RangeStyle>): void;
 
   /* objects */
   addObjects(objects: TacticalObject[], opts?: { select?: boolean; history?: boolean }): void;
@@ -192,10 +193,6 @@ interface Actions {
   /* ships on map */
   placeShip(shipId: ID, at: Vec2, teamId?: ID | null): void;
   setShipDisplay(objectId: ID, key: CharacteristicKey, value: boolean | undefined): void;
-  addWaypoint(objectId: ID, at: Vec2): void;
-  updateWaypoint(objectId: ID, wpId: ID, patch: Partial<Waypoint>, opts?: { history?: boolean }): void;
-  removeWaypoint(objectId: ID, wpId: ID): void;
-  clearRoute(objectId: ID): void;
 
   /* layers */
   addLayer(name?: string): void;
@@ -235,10 +232,6 @@ interface Actions {
   deleteIcon(id: ID): Promise<void>;
   assignIcon(shipId: ID, iconId: ID | null): Promise<void>;
 
-  /* pings */
-  savePingPreset(preset: PingPreset): void;
-  removePingPreset(id: string): void;
-  resetPingPresets(): void;
 
   /* ui */
   setTool(tool: ToolId): void;
@@ -254,7 +247,6 @@ interface Actions {
   toggleLeft(): void;
   toggleRight(): void;
   toggleNotes(): void;
-  setSpacePan(on: boolean): void;
 }
 
 export type Store = State & Actions;
@@ -263,9 +255,8 @@ const initialToolOptions: ToolOptions = {
   stroke: clone(DEFAULT_STROKE),
   fontSize: 340,
   arrowSize: 14,
-  pingPresetId: 'attack',
-  pingSize: 30,
-  zonePresetId: 'radar',
+  shapeVariant: 'rect',
+  arrowVariant: 'arrow',
   markerColor: '#f4c95d',
   numberCounter: 1,
 };
@@ -301,9 +292,9 @@ export const useStore = create<Store>((set, get) => {
   }, DEFAULT_APP_SETTINGS.autosaveIntervalMs);
 
   const persistSettings = debounce(() => {
-    const { settings, pings } = get();
+    const { settings } = get();
     void window.api.settings
-      .save({ ...settings, pings } as unknown as Record<string, unknown>)
+      .save({ ...settings } as unknown as Record<string, unknown>)
       .catch(() => undefined);
   }, 400);
 
@@ -348,7 +339,6 @@ export const useStore = create<Store>((set, get) => {
     icons: [],
     maps: [],
     settings: clone(DEFAULT_APP_SETTINGS),
-    pings: clone(BUILT_IN_PINGS),
     projectList: [],
     project: null,
     dirty: false,
@@ -359,7 +349,7 @@ export const useStore = create<Store>((set, get) => {
     tool: 'select',
     toolOptions: clone(initialToolOptions),
     selection: [],
-    activeLayerId: LAYER_IDS.shapes,
+    activeLayerId: LAYER_IDS.annotations,
     camera: { x: 0, y: 0, scale: 0.02 },
     clipboard: [],
     modal: null,
@@ -370,7 +360,6 @@ export const useStore = create<Store>((set, get) => {
     notesOpen: false,
     toasts: [],
     fitRequest: 0,
-    spacePan: false,
 
     /* ------------------------------ boot ------------------------------- */
 
@@ -383,13 +372,14 @@ export const useStore = create<Store>((set, get) => {
         window.api.projects.list().catch(() => []),
       ]);
 
-      const stored = rawSettings as Partial<AppSettings> & { pings?: PingPreset[] };
+      const stored = rawSettings as Partial<AppSettings>;
       const settings: AppSettings = { ...clone(DEFAULT_APP_SETTINGS), ...stored };
+      // Ping presets were dropped in schema 2; discard any that were persisted.
       delete (settings as unknown as Record<string, unknown>).pings;
+      applyTheme(settings.theme);
 
       set({
         settings,
-        pings: stored.pings?.length ? stored.pings : clone(BUILT_IN_PINGS),
         ships: ships as Ship[],
         icons: icons as ShipIconAsset[],
         maps: maps as GameMap[],
@@ -415,6 +405,7 @@ export const useStore = create<Store>((set, get) => {
     },
 
     patchSettings(patch) {
+      if (patch.theme) applyTheme(patch.theme);
       set((s) => ({ settings: { ...s.settings, ...patch } }));
       persistSettings();
     },
@@ -425,8 +416,8 @@ export const useStore = create<Store>((set, get) => {
       set({ projectList: (await window.api.projects.list()) as ProjectSummary[] });
     },
 
-    async newProject(name, useTemplate) {
-      const project = createProject(name || 'Untitled Project', useTemplate ? CLAN_WAR_TEMPLATE_PAGES : undefined);
+    async newProject(name) {
+      const project = createProject(name || 'Untitled Project');
       await window.api.projects.save(project);
       set({
         project,
@@ -436,7 +427,7 @@ export const useStore = create<Store>((set, get) => {
         dirty: false,
         lastSavedAt: Date.now(),
         modal: null,
-        activeLayerId: LAYER_IDS.shapes,
+        activeLayerId: LAYER_IDS.annotations,
       });
       get().patchSettings({ lastProjectId: project.id });
       get().requestFit();
@@ -455,18 +446,35 @@ export const useStore = create<Store>((set, get) => {
         const page = {
           ...createPage(p.name ?? 'Page'),
           ...p,
-          display: { ...clone(DEFAULT_CHARACTERISTICS), ...(p.display ?? {}) },
-          rangeStyles: { ...clone(DEFAULT_RANGE_STYLES), ...(p.rangeStyles ?? {}) },
+          // Ranges left page level in schema 2; only the non-range flags survive.
+          display: { ...clone(DEFAULT_CHARACTERISTICS), ...pickPageFlags(p.display) },
+          layers: createDefaultLayers(),
         };
+        delete (page as unknown as Record<string, unknown>).rangeStyles;
+
+        // Drop the object types schema 2 no longer knows how to draw, rather
+        // than keeping orphans that nothing can select or render.
+        const removed = new Set<string>(REMOVED_OBJECT_TYPES);
+        page.objects = (page.objects ?? []).filter((o) => !removed.has(o.type));
+
         // Objects must not live on the Grid pseudo-layer, or on a layer that
-        // no longer exists; either way they would be uneditable. Move them to
-        // the shapes layer rather than losing them.
+        // no longer exists; either way they would be uneditable. Retired
+        // layers map onto Annotations rather than losing their contents.
         const known = new Set(page.layers.map((l) => l.id));
-        page.objects = page.objects.map((o) =>
-          o.layerId === LAYER_IDS.grid || !known.has(o.layerId)
-            ? ({ ...o, layerId: LAYER_IDS.shapes } as typeof o)
-            : o,
-        );
+        page.objects = page.objects.map((o) => {
+          const remapped = LEGACY_LAYER_REMAP[o.layerId] ?? o.layerId;
+          const layerId =
+            remapped === LAYER_IDS.grid || !known.has(remapped) ? LAYER_IDS.annotations : remapped;
+          if (o.type === 'ship') {
+            // Routes are gone; strip their leftovers so they cannot be saved back.
+            const ship = { ...o, layerId } as unknown as Record<string, unknown>;
+            delete ship.route;
+            delete ship.routeVisible;
+            delete ship.routeFollows;
+            return ship as unknown as typeof o;
+          }
+          return { ...o, layerId } as typeof o;
+        });
         return page;
       });
       if (!doc.pages.length) doc.pages = [createPage('01 - Opening')];
@@ -475,6 +483,14 @@ export const useStore = create<Store>((set, get) => {
       }
       doc.teams = doc.teams ?? [];
       doc.presets = doc.presets ?? [];
+      // Rebuilding settings from the known keys drops retired ones (showMinimap)
+      // rather than carrying them along in every future save.
+      doc.settings = { ...clone(DEFAULT_PROJECT_SETTINGS), ...(doc.settings ?? {}) };
+      for (const key of Object.keys(doc.settings) as (keyof typeof doc.settings)[]) {
+        if (!(key in DEFAULT_PROJECT_SETTINGS)) delete doc.settings[key];
+      }
+      // The document now has schema 2 shape, so record that it does.
+      doc.schemaVersion = SCHEMA_VERSION;
 
       set({
         project: doc,
@@ -484,7 +500,7 @@ export const useStore = create<Store>((set, get) => {
         dirty: false,
         lastSavedAt: Date.now(),
         modal: null,
-        activeLayerId: LAYER_IDS.shapes,
+        activeLayerId: LAYER_IDS.annotations,
       });
       get().patchSettings({
         lastProjectId: id,
@@ -625,11 +641,7 @@ export const useStore = create<Store>((set, get) => {
         copy.name = `${src.name} (copy)`;
         copy.createdAt = Date.now();
         // Fresh ids so the two pages never share object identity.
-        copy.objects = copy.objects.map((o) => ({
-          ...o,
-          id: uid('obj-'),
-          ...(o.type === 'ship' ? { route: (o as ShipObject).route.map((w) => ({ ...w, id: uid('wp-') })) } : {}),
-        })) as TacticalObject[];
+        copy.objects = copy.objects.map((o) => ({ ...o, id: uid('obj-') })) as TacticalObject[];
         const at = draft.pages.findIndex((p) => p.id === id);
         draft.pages.splice(at + 1, 0, copy);
         draft.activePageId = copy.id;
@@ -670,6 +682,17 @@ export const useStore = create<Store>((set, get) => {
       });
     },
 
+    movePageTo(id, index) {
+      commit((draft) => {
+        const at = draft.pages.findIndex((p) => p.id === id);
+        if (at < 0) return;
+        const to = clamp(index, 0, draft.pages.length - 1);
+        if (at === to) return;
+        const [page] = draft.pages.splice(at, 1);
+        draft.pages.splice(to, 0, page);
+      });
+    },
+
     setPageMap(mapId) {
       commitPage((page) => {
         page.mapId = mapId;
@@ -692,15 +715,6 @@ export const useStore = create<Store>((set, get) => {
     setPageDisplay(key, value) {
       commitPage((page) => {
         page.display = { ...page.display, [key]: value };
-      });
-    },
-
-    setRangeStyle(key, patch) {
-      commitPage((page) => {
-        page.rangeStyles = {
-          ...page.rangeStyles,
-          [key]: { ...(page.rangeStyles[key] ?? DEFAULT_RANGE_STYLES[key]), ...patch },
-        };
       });
     },
 
@@ -757,14 +771,6 @@ export const useStore = create<Store>((set, get) => {
           copy.id = uid('obj-');
           copy.x += 800;
           copy.y += 800;
-          if (copy.type === 'ship') {
-            (copy as ShipObject).route = (copy as ShipObject).route.map((w) => ({
-              ...w,
-              id: uid('wp-'),
-              x: w.x + 800,
-              y: w.y + 800,
-            }));
-          }
           return copy;
         });
       get().addObjects(copies);
@@ -792,14 +798,6 @@ export const useStore = create<Store>((set, get) => {
         copy.id = uid('obj-');
         copy.x += dx;
         copy.y += dy;
-        if (copy.type === 'ship') {
-          (copy as ShipObject).route = (copy as ShipObject).route.map((w) => ({
-            ...w,
-            id: uid('wp-'),
-            x: w.x + dx,
-            y: w.y + dy,
-          }));
-        }
         return copy;
       });
       get().addObjects(copies);
@@ -814,11 +812,7 @@ export const useStore = create<Store>((set, get) => {
       commitPage((p) => {
         p.objects = p.objects.map((o) => {
           if (!idSet.has(o.id) || o.locked) return o;
-          const moved = { ...o, x: o.x + dx, y: o.y + dy } as TacticalObject;
-          if (moved.type === 'ship' && (moved as ShipObject).routeFollows) {
-            (moved as ShipObject).route = (moved as ShipObject).route.map((w) => ({ ...w, x: w.x + dx, y: w.y + dy }));
-          }
-          return moved;
+          return { ...o, x: o.x + dx, y: o.y + dy } as TacticalObject;
         });
       });
     },
@@ -834,16 +828,7 @@ export const useStore = create<Store>((set, get) => {
         page.objects = page.objects.map((o) => {
           const patch = byId.get(o.id);
           if (!patch) return o;
-          const dx = patch.x - o.x;
-          const dy = patch.y - o.y;
           const moved = { ...o, x: patch.x, y: patch.y } as TacticalObject;
-          if (moved.type === 'ship' && (moved as ShipObject).routeFollows) {
-            (moved as ShipObject).route = (moved as ShipObject).route.map((w) => ({
-              ...w,
-              x: w.x + dx,
-              y: w.y + dy,
-            }));
-          }
           return moved;
         });
       }, { history: false });
@@ -890,47 +875,6 @@ export const useStore = create<Store>((set, get) => {
       });
     },
 
-    addWaypoint(objectId, at) {
-      commitPage((page) => {
-        page.objects = page.objects.map((o) =>
-          o.id === objectId && o.type === 'ship'
-            ? ({ ...o, route: [...(o as ShipObject).route, createWaypoint(at.x, at.y)] } as TacticalObject)
-            : o,
-        );
-      });
-    },
-
-    updateWaypoint(objectId, wpId, patch, opts = {}) {
-      commitPage((page) => {
-        page.objects = page.objects.map((o) =>
-          o.id === objectId && o.type === 'ship'
-            ? ({
-                ...o,
-                route: (o as ShipObject).route.map((w) => (w.id === wpId ? { ...w, ...patch } : w)),
-              } as TacticalObject)
-            : o,
-        );
-      }, { history: opts.history !== false });
-    },
-
-    removeWaypoint(objectId, wpId) {
-      commitPage((page) => {
-        page.objects = page.objects.map((o) =>
-          o.id === objectId && o.type === 'ship'
-            ? ({ ...o, route: (o as ShipObject).route.filter((w) => w.id !== wpId) } as TacticalObject)
-            : o,
-        );
-      });
-    },
-
-    clearRoute(objectId) {
-      commitPage((page) => {
-        page.objects = page.objects.map((o) =>
-          o.id === objectId && o.type === 'ship' ? ({ ...o, route: [] } as TacticalObject) : o,
-        );
-      });
-    },
-
     /* ------------------------------ layers ----------------------------- */
 
     addLayer(name) {
@@ -953,9 +897,9 @@ export const useStore = create<Store>((set, get) => {
         if (!layer || layer.system) return;
         page.layers = page.layers.filter((l) => l.id !== id);
         // Orphaned objects fall back to the shapes layer rather than vanishing.
-        page.objects = page.objects.map((o) => (o.layerId === id ? { ...o, layerId: LAYER_IDS.shapes } : o));
+        page.objects = page.objects.map((o) => (o.layerId === id ? { ...o, layerId: LAYER_IDS.annotations } : o));
       });
-      if (get().activeLayerId === id) set({ activeLayerId: LAYER_IDS.shapes });
+      if (get().activeLayerId === id) set({ activeLayerId: LAYER_IDS.annotations });
     },
 
     reorderLayer(id, delta) {
@@ -1273,29 +1217,6 @@ export const useStore = create<Store>((set, get) => {
       set({ ships });
     },
 
-    /* ------------------------------ pings ------------------------------ */
-
-    savePingPreset(preset) {
-      set((s) => {
-        const at = s.pings.findIndex((p) => p.id === preset.id);
-        const pings = s.pings.slice();
-        if (at >= 0) pings[at] = preset;
-        else pings.push(preset);
-        return { pings };
-      });
-      persistSettings();
-    },
-
-    removePingPreset(id) {
-      set((s) => ({ pings: s.pings.filter((p) => p.id !== id) }));
-      persistSettings();
-    },
-
-    resetPingPresets() {
-      set({ pings: clone(BUILT_IN_PINGS) });
-      persistSettings();
-    },
-
     /* -------------------------------- ui ------------------------------- */
 
     setTool(tool) {
@@ -1350,9 +1271,6 @@ export const useStore = create<Store>((set, get) => {
     toggleNotes() {
       set((s) => ({ notesOpen: !s.notesOpen }));
     },
-    setSpacePan(on) {
-      set({ spacePan: on });
-    },
   };
 });
 
@@ -1378,8 +1296,27 @@ function normalizeName(name: string): string {
 /* ------------------------------------------------------------------ */
 
 /** Page defaults with the ship's own overrides applied on top. */
+/**
+ * Keeps only the characteristics a page is allowed to set a default for.
+ * Range keys are filtered out, because ranges are a per-ship decision.
+ */
+export function pickPageFlags(flags: CharacteristicFlags | undefined): CharacteristicFlags {
+  const out: CharacteristicFlags = {};
+  for (const key of PAGE_CHARACTERISTIC_KEYS) {
+    if (flags && flags[key] !== undefined) out[key] = flags[key];
+  }
+  return out;
+}
+
 export function effectiveFlags(page: Page, ship: ShipObject): Required<CharacteristicFlags> {
-  return { ...DEFAULT_CHARACTERISTICS, ...page.display, ...ship.display } as Required<CharacteristicFlags>;
+  // Page defaults never carry range keys, so a ship's ranges come only from
+  // its own overrides.
+  return {
+    ...DEFAULT_RANGE_FLAGS,
+    ...DEFAULT_CHARACTERISTICS,
+    ...pickPageFlags(page.display),
+    ...ship.display,
+  } as Required<CharacteristicFlags>;
 }
 
 export function shipRangeKm(ship: Ship | undefined, key: CharacteristicKey): number | undefined {
@@ -1391,16 +1328,12 @@ export function shipRangeKm(ship: Ship | undefined, key: CharacteristicKey): num
       return ship.radar_km;
     case 'hydro':
       return ship.hydro_km;
-    case 'smoke':
-      return ship.smokeRadius_km;
     case 'mainBattery':
       return ship.mainBatteryRange_km;
     case 'secondary':
       return ship.secondaryRange_km;
     case 'torpedo':
       return ship.torpedoRange_km;
-    case 'aa':
-      return ship.aaRange_km;
     default:
       return undefined;
   }

@@ -16,7 +16,7 @@
 
 export type ID = string;
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 /* ------------------------------------------------------------------ */
 /* Ships                                                               */
@@ -34,6 +34,14 @@ export const SHIP_CLASS_LABEL: Record<ShipClass, string> = {
   SS: 'Submarine',
 };
 
+/**
+ * The code shown for a ship's class. Light cruisers read "CL" but are a CA in
+ * every other respect — same marker, same colour, same handling.
+ */
+export function shipClassCode(ship: { class: ShipClass; cruiserType?: 'CA' | 'CL' }): string {
+  return ship.class === 'CA' ? (ship.cruiserType ?? 'CA') : ship.class;
+}
+
 /** A consumable that is not one of the first-class ones (radar/hydro/smoke/...). */
 export interface Consumable {
   name: string;
@@ -50,6 +58,11 @@ export interface Ship {
   name: string;
   nation: string;
   class: ShipClass;
+  /**
+   * Cruisers may be flagged as light cruisers. This is a naming distinction
+   * only: a CL uses the CA marker and is treated identically everywhere else.
+   */
+  cruiserType?: 'CA' | 'CL';
   tier: number;
 
   hp?: number;
@@ -150,77 +163,69 @@ export const DEFAULT_MAP_VIEW: MapViewConfig = {
 export type CharacteristicKey =
   | 'icon'
   | 'name'
-  | 'class'
-  | 'tier'
-  | 'hp'
   | 'heading'
   | 'detection'
   | 'radar'
   | 'hydro'
-  | 'smoke'
   | 'mainBattery'
   | 'secondary'
   | 'torpedo'
-  | 'aa'
-  | 'consumables'
-  | 'route';
+  | 'consumables';
 
 export const CHARACTERISTICS: { key: CharacteristicKey; label: string; group: 'label' | 'range' | 'other' }[] = [
   { key: 'icon', label: 'Ship Icon', group: 'label' },
   { key: 'name', label: 'Ship Name', group: 'label' },
-  { key: 'class', label: 'Class', group: 'label' },
-  { key: 'tier', label: 'Tier', group: 'label' },
-  { key: 'hp', label: 'HP', group: 'label' },
   { key: 'heading', label: 'Direction Indicator', group: 'other' },
   { key: 'detection', label: 'Detection Range', group: 'range' },
   { key: 'radar', label: 'Radar', group: 'range' },
   { key: 'hydro', label: 'Hydro', group: 'range' },
-  { key: 'smoke', label: 'Smoke', group: 'range' },
   { key: 'mainBattery', label: 'Main Battery Range', group: 'range' },
   { key: 'secondary', label: 'Secondary Battery Range', group: 'range' },
   { key: 'torpedo', label: 'Torpedo Range', group: 'range' },
-  { key: 'aa', label: 'AA Range', group: 'range' },
   { key: 'consumables', label: 'Other Consumables', group: 'other' },
-  { key: 'route', label: 'Planned Route', group: 'other' },
 ];
 
-/** Characteristics that render as a circle / sector on the map. */
+/**
+ * Characteristics that render as a circle / sector on the map.
+ *
+ * Ranges are decided per ship, never page-wide: there is no page-level toggle
+ * for them, so switching one on is always a statement about one ship.
+ */
 export const RANGE_KEYS: CharacteristicKey[] = [
   'detection',
   'radar',
   'hydro',
-  'smoke',
   'mainBattery',
   'secondary',
   'torpedo',
-  'aa',
 ];
+
+/** Characteristics that a page can set a default for (everything but ranges). */
+export const PAGE_CHARACTERISTIC_KEYS: CharacteristicKey[] = CHARACTERISTICS.filter(
+  (c) => c.group !== 'range',
+).map((c) => c.key);
 
 export type CharacteristicFlags = Partial<Record<CharacteristicKey, boolean>>;
 
 /**
- * Default page-level state. Nothing but the icon and the name is on, which is
- * the "clean map" requirement: placing a ship must not spray its statistics
- * across the canvas.
+ * Default page-level state. Nothing but the icon, the name and the heading pip
+ * is on, which is the "clean map" requirement: placing a ship must not spray
+ * its statistics across the canvas.
+ *
+ * Range keys are deliberately absent. A page cannot express an opinion about
+ * ranges, so storing them here would persist keys that nothing ever reads.
  */
 export const DEFAULT_CHARACTERISTICS: CharacteristicFlags = {
   icon: true,
   name: true,
-  class: false,
-  tier: false,
-  hp: false,
   heading: true,
-  detection: false,
-  radar: false,
-  hydro: false,
-  smoke: false,
-  mainBattery: false,
-  secondary: false,
-  torpedo: false,
-  aa: false,
   consumables: false,
-  route: true,
 };
+
+/** Every range off. The starting point for a ship's own range flags. */
+export const DEFAULT_RANGE_FLAGS: CharacteristicFlags = Object.fromEntries(
+  RANGE_KEYS.map((k) => [k, false]),
+) as CharacteristicFlags;
 
 /** How one range characteristic is painted. */
 export interface RangeStyle {
@@ -239,11 +244,9 @@ export const DEFAULT_RANGE_STYLES: RangeStyleMap = {
   detection: { color: '#f4c95d', opacity: 0.9, lineWidth: 1.5, fill: false, fillOpacity: 0.08, dashed: true, showLabel: true },
   radar: { color: '#5ad2f4', opacity: 0.9, lineWidth: 1.5, fill: true, fillOpacity: 0.07, dashed: false, showLabel: true },
   hydro: { color: '#7ee787', opacity: 0.9, lineWidth: 1.5, fill: true, fillOpacity: 0.06, dashed: false, showLabel: true },
-  smoke: { color: '#b9c2cc', opacity: 0.85, lineWidth: 1.5, fill: true, fillOpacity: 0.1, dashed: false, showLabel: true },
   mainBattery: { color: '#ff8f5e', opacity: 0.85, lineWidth: 1.5, fill: false, fillOpacity: 0.05, dashed: false, showLabel: true },
   secondary: { color: '#ffb38a', opacity: 0.8, lineWidth: 1.2, fill: false, fillOpacity: 0.05, dashed: true, showLabel: true },
   torpedo: { color: '#8f7bff', opacity: 0.9, lineWidth: 1.5, fill: true, fillOpacity: 0.1, dashed: false, showLabel: true },
-  aa: { color: '#ff6b8a', opacity: 0.85, lineWidth: 1.5, fill: false, fillOpacity: 0.06, dashed: true, showLabel: true },
 };
 
 /* ------------------------------------------------------------------ */
@@ -275,28 +278,35 @@ export interface Layer {
 /** Well-known layer ids, so new objects land somewhere sensible. */
 export const LAYER_IDS = {
   grid: 'layer-grid',
-  zones: 'layer-zones',
   ranges: 'layer-ranges',
-  routes: 'layer-routes',
+  annotations: 'layer-annotations',
   ships: 'layer-ships',
-  shapes: 'layer-shapes',
-  text: 'layer-text',
-  pings: 'layer-pings',
 } as const;
 
+/**
+ * Four layers, and no more. Shapes, arrows, text and markers all live on
+ * "Annotations" — they are drawn the same way and are almost always shown or
+ * hidden together — while ranges keep their own layer so every circle on the
+ * page can be switched off in one click.
+ */
 export function createDefaultLayers(): Layer[] {
   // Rendered back-to-front in array order.
   return [
     { id: LAYER_IDS.grid, name: 'Grid', visible: true, locked: true, opacity: 1, system: true },
-    { id: LAYER_IDS.zones, name: 'Tactical Zones', visible: true, locked: false, opacity: 1, system: true },
     { id: LAYER_IDS.ranges, name: 'Ship Ranges', visible: true, locked: false, opacity: 1, system: true },
-    { id: LAYER_IDS.routes, name: 'Routes', visible: true, locked: false, opacity: 1, system: true },
-    { id: LAYER_IDS.shapes, name: 'Shapes', visible: true, locked: false, opacity: 1, system: true },
+    { id: LAYER_IDS.annotations, name: 'Annotations', visible: true, locked: false, opacity: 1, system: true },
     { id: LAYER_IDS.ships, name: 'Ships', visible: true, locked: false, opacity: 1, system: true },
-    { id: LAYER_IDS.text, name: 'Text', visible: true, locked: false, opacity: 1, system: true },
-    { id: LAYER_IDS.pings, name: 'Pings', visible: true, locked: false, opacity: 1, system: true },
   ];
 }
+
+/** Layer ids removed in schema 2, mapped onto their replacement. */
+export const LEGACY_LAYER_REMAP: Record<string, string> = {
+  'layer-zones': LAYER_IDS.annotations,
+  'layer-routes': LAYER_IDS.annotations,
+  'layer-shapes': LAYER_IDS.annotations,
+  'layer-text': LAYER_IDS.annotations,
+  'layer-pings': LAYER_IDS.annotations,
+};
 
 /* ------------------------------------------------------------------ */
 /* Tactical objects                                                    */
@@ -312,17 +322,15 @@ export type ObjectType =
   | 'rect'
   | 'roundRect'
   | 'circle'
-  | 'ellipse'
   | 'polygon'
-  | 'arc'
   | 'text'
   | 'number'
   | 'marker'
   | 'ruler'
-  | 'bearing'
-  | 'area'
-  | 'ping'
-  | 'zone';
+  | 'area';
+
+/** Object types dropped in schema 2; they are stripped when a project loads. */
+export const REMOVED_OBJECT_TYPES = ['ping', 'zone', 'ellipse', 'arc', 'bearing'] as const;
 
 export interface Vec2 {
   x: number;
@@ -361,7 +369,7 @@ export const DEFAULT_STROKE: StrokeStyle = {
 
 /** Freehand, line, arrow, double arrow, curved arrow, polygon, ruler, area. */
 export interface PathObject extends BaseObject {
-  type: 'freehand' | 'line' | 'arrow' | 'doubleArrow' | 'curvedArrow' | 'polygon' | 'ruler' | 'bearing' | 'area';
+  type: 'freehand' | 'line' | 'arrow' | 'doubleArrow' | 'curvedArrow' | 'polygon' | 'ruler' | 'area';
   /** Points relative to (x, y), in metres. */
   points: Vec2[];
   stroke: StrokeStyle;
@@ -373,14 +381,11 @@ export interface PathObject extends BaseObject {
 }
 
 export interface ShapeObject extends BaseObject {
-  type: 'rect' | 'roundRect' | 'circle' | 'ellipse' | 'arc';
+  type: 'rect' | 'roundRect' | 'circle';
   /** Half-extents in metres (circle uses rx). */
   rx: number;
   ry: number;
   cornerRadius?: number;
-  /** Arc sweep, degrees. */
-  startAngle?: number;
-  sweepAngle?: number;
   stroke: StrokeStyle;
 }
 
@@ -406,52 +411,6 @@ export interface MarkerObject extends BaseObject {
   shape: 'pin' | 'cross' | 'diamond' | 'star' | 'flag';
 }
 
-export interface PingObject extends BaseObject {
-  type: 'ping';
-  presetId: string;
-  icon: string;
-  label: string;
-  color: string;
-  size: number;
-  showLabel: boolean;
-  /** Ping presets that point somewhere (attack, push, retreat) use rotation. */
-  directional: boolean;
-}
-
-export type ZoneShape = 'circle' | 'rect' | 'polygon' | 'cone';
-
-export interface ZoneObject extends BaseObject {
-  type: 'zone';
-  zoneShape: ZoneShape;
-  label: string;
-  color: string;
-  /** Circle / cone radius in metres. */
-  radius?: number;
-  /** Cone half-angle in degrees. */
-  coneAngle?: number;
-  /** Rect half-extents. */
-  rx?: number;
-  ry?: number;
-  /** Polygon vertices relative to (x, y). */
-  points?: Vec2[];
-  lineWidth: number;
-  fill: boolean;
-  fillOpacity: number;
-  dashed: boolean;
-  showLabel: boolean;
-  /** Optional km value displayed under the label. */
-  valueKm?: number;
-}
-
-export interface Waypoint {
-  id: ID;
-  x: number;
-  y: number;
-  /** Planned speed in knots at this leg. */
-  speed_kn?: number;
-  label?: string;
-}
-
 export interface ShipObject extends BaseObject {
   type: 'ship';
   shipId: ID | null;
@@ -462,25 +421,13 @@ export interface ShipObject extends BaseObject {
   teamId: ID | null;
   /** Per-ship overrides layered on top of the page defaults. */
   display: CharacteristicFlags;
-  /** Per-ship range style overrides. */
+  /** Per-ship range style overrides, layered on DEFAULT_RANGE_STYLES. */
   rangeStyles?: Partial<RangeStyleMap>;
-  route: Waypoint[];
-  routeVisible: boolean;
-  /** Route follows the ship when the ship is dragged. */
-  routeFollows: boolean;
   iconScale: number;
-  hpOverride?: number;
   label?: string;
 }
 
-export type TacticalObject =
-  | ShipObject
-  | PathObject
-  | ShapeObject
-  | TextObject
-  | MarkerObject
-  | PingObject
-  | ZoneObject;
+export type TacticalObject = ShipObject | PathObject | ShapeObject | TextObject | MarkerObject;
 
 /* ------------------------------------------------------------------ */
 /* Pages & projects                                                    */
@@ -493,9 +440,11 @@ export interface Page {
   mapView: MapViewConfig;
   layers: Layer[];
   objects: TacticalObject[];
-  /** Page-level defaults for ship characteristics. */
+  /**
+   * Page-level defaults for ship characteristics. Ranges are deliberately not
+   * part of this: they are decided per ship.
+   */
   display: CharacteristicFlags;
-  rangeStyles: RangeStyleMap;
   notes: string;
   createdAt: number;
   updatedAt: number;
@@ -504,7 +453,7 @@ export interface Page {
 export interface TacticalPreset {
   id: ID;
   name: string;
-  kind: 'zone' | 'ping' | 'shape' | 'path' | 'text';
+  kind: 'shape' | 'path' | 'text';
   /** Partial object used as a template when the preset is stamped. */
   data: Record<string, unknown>;
   createdAt: number;
@@ -530,7 +479,6 @@ export interface ProjectSettings {
   /** Snap step in metres. */
   snapStep: number;
   shipIconSize: number;
-  showMinimap: boolean;
   defaultTeamId: ID | null;
 }
 
@@ -538,7 +486,6 @@ export const DEFAULT_PROJECT_SETTINGS: ProjectSettings = {
   snapToGrid: false,
   snapStep: 500,
   shipIconSize: 30,
-  showMinimap: true,
   defaultTeamId: null,
 };
 
@@ -550,13 +497,18 @@ export interface ProjectSummary {
   createdAt: number;
   updatedAt: number;
   pageCount: number;
+  /** Size of the project file on disk, in bytes. */
+  sizeBytes: number;
 }
 
 /* ------------------------------------------------------------------ */
 /* Application settings                                                */
 /* ------------------------------------------------------------------ */
 
+export type ThemeName = 'dark' | 'light';
+
 export interface AppSettings {
+  theme: ThemeName;
   lastProjectId: ID | null;
   recentProjectIds: ID[];
   accentColor: string;
@@ -570,6 +522,7 @@ export interface AppSettings {
 }
 
 export const DEFAULT_APP_SETTINGS: AppSettings = {
+  theme: 'dark',
   lastProjectId: null,
   recentProjectIds: [],
   accentColor: '#4ea3ff',

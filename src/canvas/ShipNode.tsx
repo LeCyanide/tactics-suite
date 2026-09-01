@@ -1,9 +1,10 @@
 import { memo } from 'react';
-import { Arc, Circle, Group, Image as KonvaImage, Label, Line, Path, Rect, Tag, Text } from 'react-konva';
-import type { CharacteristicFlags, Page, RangeStyle, Ship, ShipObject, Team } from '@/types/model';
-import { RANGE_KEYS, SHIP_CLASS_LABEL, DEFAULT_RANGE_STYLES } from '@/types/model';
-import { CLASS_COLORS, CLASS_GLYPHS, GLYPH_CONTRAST, GLYPH_CONTRAST_WIDTH } from './shipGlyphs';
+import { Arc, Circle, Group, Image as KonvaImage, Line, Path, Rect, Text } from 'react-konva';
+import type { CharacteristicFlags, RangeStyle, Ship, ShipObject, Team } from '@/types/model';
+import { RANGE_KEYS, DEFAULT_RANGE_STYLES } from '@/types/model';
+import { CLASS_GLYPHS, GLYPH_CONTRAST_WIDTH } from './shipGlyphs';
 import { shipRangeKm } from '@/state/store';
+import type { CanvasTheme } from '@/state/theme';
 import { withAlpha } from '@/lib/util';
 
 /**
@@ -18,12 +19,16 @@ const RANGE_LABEL: Record<string, string> = {
   detection: 'Detection',
   radar: 'Radar',
   hydro: 'Hydro',
-  smoke: 'Smoke',
   mainBattery: 'Main Battery',
   secondary: 'Secondary',
   torpedo: 'Torpedo',
-  aa: 'AA',
 };
+
+/** Width of the name plate, in screen px, used to centre it under the hull. */
+const NAME_FONT = 10.5;
+
+/** Fixed plate width keeps a multi-line name centred without measuring text. */
+const NAME_PLATE_W = 160;
 
 interface ShipNodeProps {
   obj: ShipObject;
@@ -36,6 +41,8 @@ interface ShipNodeProps {
   baseSize: number;
   selected: boolean;
   draggable: boolean;
+  /** Canvas palette; a prop so a theme switch invalidates the memo. */
+  theme: CanvasTheme;
 }
 
 /**
@@ -55,22 +62,17 @@ export const ShipNode = memo(function ShipNode({
   baseSize,
   selected,
   draggable,
+  theme,
 }: ShipNodeProps) {
   const glyph = CLASS_GLYPHS[obj.shipClass] ?? CLASS_GLYPHS.CA;
   const size = baseSize * obj.iconScale * (icon ? 1 : glyph.scale);
   const half = size / 2;
-  const teamColor = team?.color ?? '#8b98a5';
+  // Team membership is the only thing that colours a ship. A ship with no
+  // team falls back to neutral grey rather than to a class colour.
+  const teamColor = team?.color ?? theme.neutral;
 
   const lines: string[] = [];
   if (flags.name) lines.push(obj.label || obj.shipName);
-  const sub: string[] = [];
-  if (flags.class) sub.push(SHIP_CLASS_LABEL[obj.shipClass] ?? obj.shipClass);
-  if (flags.tier) sub.push(`T${obj.tier}`);
-  if (sub.length) lines.push(sub.join('  ·  '));
-  if (flags.hp) {
-    const hp = obj.hpOverride ?? ship?.hp;
-    if (hp) lines.push(`${Math.round(hp).toLocaleString()} HP`);
-  }
   if (flags.consumables && ship) {
     // Consumables as text, so they are available without forcing a ring onto
     // the map. The ranged ones still have their own independent toggles.
@@ -80,6 +82,7 @@ export const ShipNode = memo(function ShipNode({
     if (ship.fighter) lines.push('Fighter');
     if (ship.spottingAircraft) lines.push('Spotting Aircraft');
   }
+  const text = lines.join('\n');
 
   return (
     <Group
@@ -94,24 +97,9 @@ export const ShipNode = memo(function ShipNode({
       listening={!obj.locked}
     >
       <Group scaleX={inv} scaleY={inv}>
-        {/* Selection halo */}
-        {selected && (
-          <Circle radius={half + 7} stroke="#4ea3ff" strokeWidth={1.5} dash={[4, 3]} listening={false} />
-        )}
-
-        {/* Team ring — colours the ship without touching the icon artwork */}
-        {team && (
-          <Circle
-            radius={half + 2.5}
-            stroke={teamColor}
-            strokeWidth={2}
-            opacity={0.95}
-            listening={false}
-            shadowColor="#000"
-            shadowBlur={4}
-            shadowOpacity={0.5}
-          />
-        )}
+        {/* Selection is a corner bracket, not a ring: nothing circular is
+            allowed to surround a ship marker. */}
+        {selected && <SelectionBrackets half={half + 4} color={theme.selection} />}
 
         {/* Rotating part: hull icon and heading pointer */}
         <Group rotation={obj.rotation}>
@@ -131,8 +119,8 @@ export const ShipNode = memo(function ShipNode({
               <Group scaleX={size / 24} scaleY={size / 24} offsetX={12} offsetY={12} listening={false}>
                 <Path
                   data={glyph.solid}
-                  fill={withAlpha(CLASS_COLORS[obj.shipClass] ?? '#8b98a5', 0.94)}
-                  stroke={GLYPH_CONTRAST}
+                  fill={withAlpha(teamColor, 0.94)}
+                  stroke={theme.contrast}
                   strokeWidth={GLYPH_CONTRAST_WIDTH}
                   lineJoin="round"
                 />
@@ -143,27 +131,51 @@ export const ShipNode = memo(function ShipNode({
         {/* Hit area — generous enough to grab comfortably at any zoom */}
         <Rect x={-half - 3} y={-half - 3} width={size + 6} height={size + 6} fill="transparent" />
 
-        {/* Labels stay upright regardless of heading */}
-        {lines.length > 0 && (
-          <Label y={half + 4} x={0}>
-            <Tag fill="rgba(9,13,18,0.78)" cornerRadius={2.5} stroke={selected ? '#4ea3ff' : teamColor} strokeWidth={selected ? 1 : 0.6} />
-            <Text
-              text={lines.join('\n')}
-              fontSize={10.5}
-              lineHeight={1.25}
-              fontFamily="Inter, Segoe UI, sans-serif"
-              fontStyle="600"
-              fill="#e8eef5"
-              padding={3.5}
-              align="center"
-              offsetX={0}
-            />
-          </Label>
+        {/* The name sits outside the rotating group, so it stays horizontal
+            whatever the ship's heading, and is centred on the hull by giving
+            the Text its own width and centring within it. */}
+        {text && (
+          <Text
+            text={text}
+            x={-NAME_PLATE_W / 2}
+            y={half + 5}
+            width={NAME_PLATE_W}
+            align="center"
+            fontSize={NAME_FONT}
+            lineHeight={1.25}
+            fontFamily="Inter, Segoe UI, sans-serif"
+            fontStyle="600"
+            fill={theme.plateText}
+            stroke={theme.contrast}
+            strokeWidth={2.6}
+            fillAfterStrokeEnabled
+            listening={false}
+          />
         )}
       </Group>
     </Group>
   );
 });
+
+/**
+ * Four corner ticks around the marker. Circles are reserved for range rings,
+ * so selection has to read as something else entirely.
+ */
+function SelectionBrackets({ half, color }: { half: number; color: string }) {
+  const arm = Math.max(4, half * 0.45);
+  const corner = (sx: number, sy: number) => [
+    sx * half, sy * half - sy * arm,
+    sx * half, sy * half,
+    sx * half - sx * arm, sy * half,
+  ];
+  return (
+    <Group listening={false}>
+      {([[-1, -1], [1, -1], [-1, 1], [1, 1]] as const).map(([sx, sy]) => (
+        <Line key={`${sx}:${sy}`} points={corner(sx, sy)} stroke={color} strokeWidth={1.5} lineCap="round" />
+      ))}
+    </Group>
+  );
+}
 
 /* ------------------------------------------------------------------ */
 /* Range visualisations                                                */
@@ -172,9 +184,9 @@ export const ShipNode = memo(function ShipNode({
 interface ShipRangesProps {
   obj: ShipObject;
   ship?: Ship;
-  page: Page;
   flags: CharacteristicFlags;
   inv: number;
+  theme: CanvasTheme;
 }
 
 /**
@@ -183,14 +195,15 @@ interface ShipRangesProps {
  * page default or a per-ship override being true, which is also why hidden
  * characteristics cannot leak into an exported image.
  */
-export const ShipRanges = memo(function ShipRanges({ obj, ship, page, flags, inv }: ShipRangesProps) {
+export const ShipRanges = memo(function ShipRanges({ obj, ship, flags, inv, theme }: ShipRangesProps) {
   if (!obj.visible) return null;
 
   const rings = RANGE_KEYS.filter((key) => flags[key]).map((key) => {
     const km = shipRangeKm(ship, key);
     if (!km || km <= 0) return null;
+    // Ranges are per ship: the only inheritance is from the built-in defaults.
     const style: RangeStyle = {
-      ...(page.rangeStyles[key] ?? DEFAULT_RANGE_STYLES[key]),
+      ...DEFAULT_RANGE_STYLES[key],
       ...(obj.rangeStyles?.[key] ?? {}),
     };
     return { key, km, radius: km * 1000, style };
@@ -227,16 +240,19 @@ export const ShipRanges = memo(function ShipRanges({ obj, ship, page, flags, inv
             )}
             {style.showLabel && (
               <Group x={0} y={-radius} scaleX={inv} scaleY={inv}>
-                <Label y={-13}>
-                  <Tag fill="rgba(9,13,18,0.8)" cornerRadius={2} />
-                  <Text
-                    text={`${RANGE_LABEL[key] ?? key} ${km.toFixed(1)} km`}
-                    fontSize={10}
-                    fontFamily="JetBrains Mono, Consolas, monospace"
-                    fill={style.color}
-                    padding={3}
-                  />
-                </Label>
+                <Text
+                  text={`${RANGE_LABEL[key] ?? key} ${km.toFixed(1)} km`}
+                  x={-70}
+                  y={-15}
+                  width={140}
+                  align="center"
+                  fontSize={10}
+                  fontFamily="JetBrains Mono, Consolas, monospace"
+                  fill={style.color}
+                  stroke={theme.contrast}
+                  strokeWidth={2.4}
+                  fillAfterStrokeEnabled
+                />
               </Group>
             )}
           </Group>
@@ -245,91 +261,3 @@ export const ShipRanges = memo(function ShipRanges({ obj, ship, page, flags, inv
     </Group>
   );
 });
-
-/* ------------------------------------------------------------------ */
-/* Planned route                                                       */
-/* ------------------------------------------------------------------ */
-
-interface ShipRouteProps {
-  obj: ShipObject;
-  team?: Team;
-  inv: number;
-  editable: boolean;
-  showSpeeds: boolean;
-}
-
-export const ShipRoute = memo(function ShipRoute({ obj, team, inv, editable, showSpeeds }: ShipRouteProps) {
-  if (!obj.route.length || !obj.routeVisible || !obj.visible) return null;
-  const color = team?.color ?? '#8b98a5';
-  const pts: number[] = [obj.x, obj.y];
-  for (const wp of obj.route) pts.push(wp.x, wp.y);
-
-  const last = obj.route[obj.route.length - 1];
-  const prev = obj.route.length > 1 ? obj.route[obj.route.length - 2] : { x: obj.x, y: obj.y };
-  const angle = Math.atan2(last.y - prev.y, last.x - prev.x);
-  const head = 11 * inv;
-
-  return (
-    <Group listening={false} opacity={obj.opacity}>
-      <Line points={pts} stroke={color} strokeWidth={2 * inv} dash={[10 * inv, 7 * inv]} opacity={0.9} lineJoin="round" />
-      {/* Arrowhead on the final leg */}
-      <Line
-        points={[
-          last.x - Math.cos(angle - 0.42) * head * 1.8,
-          last.y - Math.sin(angle - 0.42) * head * 1.8,
-          last.x,
-          last.y,
-          last.x - Math.cos(angle + 0.42) * head * 1.8,
-          last.y - Math.sin(angle + 0.42) * head * 1.8,
-        ]}
-        stroke={color}
-        strokeWidth={2 * inv}
-        lineJoin="round"
-      />
-      {obj.route.map((wp, i) => (
-        <Group key={wp.id} x={wp.x} y={wp.y}>
-          <Circle radius={4 * inv} fill="#0d1117" stroke={color} strokeWidth={1.6 * inv} />
-          {showSpeeds && wp.speed_kn ? (
-            <Group scaleX={inv} scaleY={inv}>
-              <Label x={7} y={-8}>
-                <Tag fill="rgba(9,13,18,0.8)" cornerRadius={2} />
-                <Text text={`${wp.speed_kn} kn`} fontSize={9.5} fontFamily="JetBrains Mono, monospace" fill={color} padding={2.5} />
-              </Label>
-            </Group>
-          ) : null}
-          {i === obj.route.length - 1 && wp.label ? (
-            <Group scaleX={inv} scaleY={inv}>
-              <Label x={7} y={4}>
-                <Tag fill="rgba(9,13,18,0.8)" cornerRadius={2} />
-                <Text text={wp.label} fontSize={9.5} fill="#c9d4e0" padding={2.5} />
-              </Label>
-            </Group>
-          ) : null}
-        </Group>
-      ))}
-    </Group>
-  );
-});
-
-/** Draggable waypoint handles, drawn in the overlay for the selected ship. */
-export function RouteHandles({ obj, inv }: { obj: ShipObject; inv: number }) {
-  return (
-    <Group>
-      {obj.route.map((wp) => (
-        <Circle
-          key={wp.id}
-          id={`wp:${obj.id}:${wp.id}`}
-          name="waypoint"
-          x={wp.x}
-          y={wp.y}
-          radius={6 * inv}
-          fill="#4ea3ff"
-          stroke="#0d1117"
-          strokeWidth={1.5 * inv}
-          draggable
-          onDragMove={bubbleDrag}
-        />
-      ))}
-    </Group>
-  );
-}

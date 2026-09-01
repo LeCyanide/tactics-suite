@@ -167,15 +167,27 @@ interface AnyProject {
 }
 
 export async function listProjects(): Promise<
-  { id: string; name: string; description?: string; createdAt: number; updatedAt: number; pageCount: number }[]
+  {
+    id: string;
+    name: string;
+    description?: string;
+    createdAt: number;
+    updatedAt: number;
+    pageCount: number;
+    sizeBytes: number;
+  }[]
 > {
   ensureDirs();
   const files = await fsp.readdir(P.projectsDir()).catch(() => [] as string[]);
   const out = [];
   for (const f of files) {
     if (!f.endsWith('.json')) continue;
-    const doc = await readJson<AnyProject | null>(path.join(P.projectsDir(), f), null);
+    const full = path.join(P.projectsDir(), f);
+    const doc = await readJson<AnyProject | null>(full, null);
     if (!doc || !doc.id) continue;
+    // Size of the document on disk, so the browser can show what a project
+    // actually costs without loading every one of them.
+    const sizeBytes = await fsp.stat(full).then((st) => st.size).catch(() => 0);
     out.push({
       id: doc.id,
       name: doc.name ?? 'Untitled',
@@ -183,6 +195,7 @@ export async function listProjects(): Promise<
       createdAt: doc.createdAt ?? 0,
       updatedAt: doc.updatedAt ?? 0,
       pageCount: Array.isArray(doc.pages) ? doc.pages.length : 0,
+      sizeBytes,
     });
   }
   out.sort((a, b) => b.updatedAt - a.updatedAt);

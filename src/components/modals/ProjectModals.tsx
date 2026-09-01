@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Copy, FileDown, FileUp, FolderOpen, RefreshCw, Trash2 } from 'lucide-react';
 import { useStore } from '@/state/store';
 import { Modal } from '../common/ui';
-import { CLAN_WAR_TEMPLATE_PAGES } from '@/lib/factory';
 import { formatBytes, formatDate, formatRelative } from '@/lib/util';
 
 export function ProjectsModal() {
@@ -55,7 +54,8 @@ export function ProjectsModal() {
             <div key={p.id} className={`card${current?.id === p.id ? ' selected' : ''}`}>
               <div className="card-title">{p.name}</div>
               <div className="card-sub">
-                {p.pageCount} page{p.pageCount === 1 ? '' : 's'} · {formatRelative(p.updatedAt)}
+                {p.pageCount} page{p.pageCount === 1 ? '' : 's'} · {formatBytes(p.sizeBytes)} ·{' '}
+                {formatRelative(p.updatedAt)}
               </div>
               <div className="card-sub faint" style={{ fontSize: 10 }}>
                 created {formatDate(p.createdAt)}
@@ -85,13 +85,12 @@ export function NewProjectModal() {
   const s = () => useStore.getState();
   const saveAs = !!arg?.saveAs;
 
-  const [name, setName] = useState(saveAs ? `${current?.name ?? 'Project'} (copy)` : 'Clan War Strategy');
-  const [template, setTemplate] = useState(true);
+  const [name, setName] = useState(saveAs ? `${current?.name ?? 'Project'} (copy)` : 'tactics-planner');
 
   const submit = async () => {
     const trimmed = name.trim() || 'Untitled Project';
     if (saveAs) await s().saveProjectAs(trimmed);
-    else await s().newProject(trimmed, template);
+    else await s().newProject(trimmed);
     s().closeModal();
   };
 
@@ -124,18 +123,6 @@ export function NewProjectModal() {
         }}
       />
 
-      {!saveAs && (
-        <>
-          <label className="section-label">Pages</label>
-          <label className="check">
-            <input type="checkbox" checked={template} onChange={(e) => setTemplate(e.target.checked)} />
-            <span>Start with the standard clan-war page set</span>
-          </label>
-          <div className="faint mono" style={{ fontSize: 10.5, marginTop: 6, lineHeight: 1.7, paddingLeft: 22 }}>
-            {template ? CLAN_WAR_TEMPLATE_PAGES.join('\n') : '01 - Opening'}
-          </div>
-        </>
-      )}
     </Modal>
   );
 }

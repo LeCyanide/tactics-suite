@@ -3,10 +3,8 @@ import { Copy, Database, FileDown, FileUp, Image as ImageIcon, Plus, RefreshCw, 
 import { getActivePage, useStore } from '@/state/store';
 import { Check, ColorInput, Field, InlineEdit, Modal, NumInput, SectionLabel, Tip } from '../common/ui';
 import { useAsset } from '@/state/assets';
-import { SHIP_CLASSES, type GameMap, type Ship, type ShipClass } from '@/types/model';
+import { SHIP_CLASSES, shipClassCode, type GameMap, type Ship, type ShipClass } from '@/types/model';
 import { CLASS_COLORS } from '@/canvas/shipGlyphs';
-import { PING_ICONS, type PingPreset } from '@/data/pings';
-import { GlyphIcon } from '../RightSidebar';
 import { ClassIcon } from '../common/ClassIcon';
 import { uid } from '@/lib/util';
 
@@ -258,7 +256,7 @@ export function ShipDatabaseModal() {
                       <td>{ship.nation}</td>
                       <td>
                         <span className="class-chip" style={{ background: `${CLASS_COLORS[ship.class]}22`, color: CLASS_COLORS[ship.class] }}>
-                          {ship.class}
+                          {shipClassCode(ship)}
                         </span>
                       </td>
                       <td className="num">{ship.tier}</td>
@@ -325,6 +323,17 @@ function ShipEditor({ ship, onDeleted }: { ship: Ship; onDeleted: () => void }) 
           ))}
         </select>
       </Field>
+      {ship.class === 'CA' && (
+        <Field label="Cruiser type">
+          <select
+            value={ship.cruiserType ?? 'CA'}
+            onChange={(e) => set({ cruiserType: e.target.value as 'CA' | 'CL' })}
+          >
+            <option value="CA">CA — Heavy Cruiser</option>
+            <option value="CL">CL — Light Cruiser</option>
+          </select>
+        </Field>
+      )}
       <Field label="Tier">
         <NumInput value={ship.tier} min={1} max={12} step={1} onChange={(v) => set({ tier: Math.round(v) })} />
       </Field>
@@ -396,101 +405,5 @@ function ShipEditor({ ship, onDeleted }: { ship: Ship; onDeleted: () => void }) 
         <Trash2 size={12} /> Delete ship
       </button>
     </div>
-  );
-}
-
-/* ================================================================== */
-/* Ping preset editor                                                  */
-/* ================================================================== */
-
-export function PingEditorModal() {
-  const pings = useStore((s) => s.pings);
-  const s = () => useStore.getState();
-  const [selectedId, setSelectedId] = useState<string | null>(pings[0]?.id ?? null);
-  const selected = pings.find((p) => p.id === selectedId) ?? null;
-
-  const set = (patch: Partial<PingPreset>) => selected && s().savePingPreset({ ...selected, ...patch });
-
-  return (
-    <Modal
-      title="Ping Presets"
-      subtitle="Stored with your application settings"
-      onClose={() => s().closeModal()}
-      footer={
-        <>
-          <button
-            className="btn"
-            onClick={() => {
-              const preset: PingPreset = {
-                id: uid('ping-'),
-                label: 'New Ping',
-                color: '#4ea3ff',
-                icon: 'pin',
-                directional: false,
-              };
-              s().savePingPreset(preset);
-              setSelectedId(preset.id);
-            }}
-          >
-            <Plus size={13} /> Add preset
-          </button>
-          <button className="btn ghost" onClick={() => s().resetPingPresets()}>
-            Reset to defaults
-          </button>
-          <span className="spacer" />
-          <button className="btn ghost" onClick={() => s().closeModal()}>
-            Close
-          </button>
-        </>
-      }
-    >
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 240px', gap: 12 }}>
-        <div className="ping-grid" style={{ alignContent: 'start' }}>
-          {pings.map((p) => (
-            <button
-              key={p.id}
-              className={`ping-chip${p.id === selectedId ? ' active' : ''}`}
-              onClick={() => setSelectedId(p.id)}
-            >
-              <GlyphIcon path={PING_ICONS[p.icon] ?? PING_ICONS.pin} color={p.color} size={14} />
-              <span>{p.label}</span>
-            </button>
-          ))}
-        </div>
-
-        {selected && (
-          <div style={{ borderLeft: '1px solid var(--line)', paddingLeft: 12 }}>
-            <Field label="Label">
-              <input type="text" value={selected.label} onChange={(e) => set({ label: e.target.value })} />
-            </Field>
-            <Field label="Colour">
-              <ColorInput value={selected.color} onChange={(v) => set({ color: v })} />
-            </Field>
-            <Field label="Icon">
-              <select value={selected.icon} onChange={(e) => set({ icon: e.target.value })}>
-                {Object.keys(PING_ICONS).map((k) => (
-                  <option key={k} value={k}>
-                    {k}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Check label="Directional" checked={selected.directional} onChange={(v) => set({ directional: v })} />
-            <div style={{ display: 'grid', placeItems: 'center', padding: '16px 0' }}>
-              <GlyphIcon path={PING_ICONS[selected.icon] ?? PING_ICONS.pin} color={selected.color} size={38} />
-            </div>
-            <button
-              className="btn sm danger block"
-              onClick={() => {
-                s().removePingPreset(selected.id);
-                setSelectedId(null);
-              }}
-            >
-              <Trash2 size={12} /> Delete preset
-            </button>
-          </div>
-        )}
-      </div>
-    </Modal>
   );
 }

@@ -23,7 +23,7 @@ import {
 import { getActivePage, useStore } from '@/state/store';
 import { Check, ColorInput, Field, InlineEdit, Panel, Slider, Tip } from './common/ui';
 import { CLASS_COLORS } from '@/canvas/shipGlyphs';
-import { LAYER_IDS, SHIP_CLASSES, type ShipClass, type ID } from '@/types/model';
+import { LAYER_IDS, SHIP_CLASSES, shipClassCode, type ShipClass, type ID } from '@/types/model';
 import { useAsset } from '@/state/assets';
 import { canvasApi } from '@/canvas/canvasBridge';
 import { formatRelative } from '@/lib/util';
@@ -59,9 +59,9 @@ export function LeftSidebar() {
       <div className="sidebar-resizer" onMouseDown={startResize} />
       <div style={{ overflowY: 'auto', display: 'flex', flexDirection: 'column', minHeight: 0, flex: 1 }}>
         <ProjectPanel />
+        <ShipBrowserPanel />
         <PagesPanel />
         <MapPanel />
-        <ShipBrowserPanel />
         <TeamsPanel />
         <LayersPanel />
         <NotesPreviewPanel />
@@ -287,12 +287,12 @@ function ShipBrowserPanel() {
 
   return (
     <Panel
-      title="Ship Database"
+      title="Ships"
       count={`${filtered.length}/${ships.length}`}
       storageKey="ships"
       grow
       actions={
-        <Tip label="Open ship database" side="bottom">
+        <Tip label="Open ship database — add, edit and assign icons" side="bottom">
           <button className="icon-btn" onClick={() => s().openModal('shipDb')}>
             <Database size={13} />
           </button>
@@ -362,7 +362,7 @@ function ShipBrowserPanel() {
             </select>
           )}
 
-          <div style={{ maxHeight: 340, overflowY: 'auto' }}>
+          <div className="ship-list">
             {filtered.map((ship) => {
               const iconAsset = ship.iconId ? iconById.get(ship.iconId) : undefined;
               return (
@@ -392,7 +392,7 @@ function ShipBrowserPanel() {
                     <div className="ship-sub">{ship.nation}</div>
                   </div>
                   <span className="class-chip" style={{ background: `${CLASS_COLORS[ship.class]}22`, color: CLASS_COLORS[ship.class] }}>
-                    {ship.class}
+                    {shipClassCode(ship)}
                   </span>
                   <span className="tier-chip">{ship.tier}</span>
                 </div>

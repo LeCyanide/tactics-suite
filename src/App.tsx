@@ -3,12 +3,12 @@ import { TitleBar } from './components/TitleBar';
 import { LeftRailToggle, LeftSidebar } from './components/LeftSidebar';
 import { RightRailToggle, RightSidebar } from './components/RightSidebar';
 import { ToolRail } from './components/ToolRail';
-import { Minimap, NotesPanel, PageTabs, StatusBar } from './components/Workspace';
+import { NotesPanel, PageTabs, StatusBar } from './components/Workspace';
 import MapCanvas from './canvas/MapCanvas';
 import { useStore } from './state/store';
 import { useShortcuts } from './state/shortcuts';
 import { BackupsModal, NewProjectModal, ProjectsModal } from './components/modals/ProjectModals';
-import { MapManagerModal, PingEditorModal, ShipDatabaseModal } from './components/modals/LibraryModals';
+import { MapManagerModal, ShipDatabaseModal } from './components/modals/LibraryModals';
 import { ExportModal, SettingsModal, ShortcutsModal } from './components/modals/SystemModals';
 import { preloadIcons } from './state/assets';
 
@@ -54,7 +54,6 @@ export default function App() {
               <div className="canvas-wrap">
                 <LeftRailToggle />
                 <MapCanvas />
-                <Minimap />
                 <RightRailToggle />
                 <ToolRail />
               </div>
@@ -74,7 +73,6 @@ export default function App() {
       {modal === 'newProject' && <NewProjectModal />}
       {modal === 'maps' && <MapManagerModal />}
       {modal === 'shipDb' && <ShipDatabaseModal />}
-      {modal === 'pingEditor' && <PingEditorModal />}
       {modal === 'export' && <ExportModal />}
       {modal === 'settings' && <SettingsModal />}
       {modal === 'shortcuts' && <ShortcutsModal />}
@@ -99,12 +97,13 @@ function WelcomeScreen({ booted }: { booted: boolean }) {
         flex: 1,
         display: 'grid',
         placeItems: 'center',
-        background: 'radial-gradient(circle at 50% 40%, #101822 0%, #070b10 70%)',
+        background:
+          'radial-gradient(circle at 50% 40%, var(--canvas-void-hi) 0%, var(--canvas-void) 70%)',
       }}
     >
       <div style={{ textAlign: 'center', maxWidth: 460 }}>
         <div style={{ fontSize: 17, fontWeight: 650, letterSpacing: '0.02em', marginBottom: 6 }}>
-          WoWS Tactical Planner
+          Tactics Planner
         </div>
         <div className="faint" style={{ fontSize: 12.5, lineHeight: 1.7, marginBottom: 18 }}>
           {booted

@@ -5,6 +5,7 @@ import { Check, Field, Modal, NumInput, SectionLabel, Slider } from '../common/u
 import { canvasApi, DEFAULT_EXPORT, type ExportOptions } from '@/canvas/canvasBridge';
 import { SHORTCUT_REFERENCE } from '@/state/shortcuts';
 import { formatBytes } from '@/lib/util';
+import type { ThemeName } from '@/types/model';
 
 /* ================================================================== */
 /* Image export                                                        */
@@ -75,12 +76,8 @@ export function ExportModal() {
           {cat('background', 'Background Map')}
           {cat('grid', 'Grid & Coordinates')}
           {cat('ships', 'Ships')}
-          {cat('routes', 'Routes')}
           {cat('ranges', 'Ship Ranges')}
-          {cat('zones', 'Tactical Zones')}
-          {cat('pings', 'Pings')}
-          {cat('shapes', 'Shapes & Drawings')}
-          {cat('text', 'Text & Numbers')}
+          {cat('annotations', 'Annotations')}
           <div className="faint" style={{ fontSize: 11, marginTop: 8, lineHeight: 1.5 }}>
             Hidden layers, hidden teams and switched-off ship characteristics are never drawn — if Radar is off on the
             map, it is absent from the file too.
@@ -143,6 +140,17 @@ export function SettingsModal() {
         </button>
       </>
     }>
+      <SectionLabel>Appearance</SectionLabel>
+      <Field label="Theme">
+        <select
+          value={settings.theme}
+          onChange={(e) => s().patchSettings({ theme: e.target.value as ThemeName })}
+        >
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
+        </select>
+      </Field>
+
       <SectionLabel>Editor</SectionLabel>
       {project && (
         <>
@@ -182,13 +190,6 @@ export function SettingsModal() {
               }
             />
           </Field>
-          <Check
-            label="Show minimap"
-            checked={project.settings.showMinimap}
-            onChange={(v) =>
-              useStore.setState({ project: { ...project, settings: { ...project.settings, showMinimap: v } }, dirty: true })
-            }
-          />
         </>
       )}
 

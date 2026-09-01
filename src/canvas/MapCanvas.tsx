@@ -15,30 +15,27 @@ import {
   type TacticalObject,
   type TextObject,
   type Vec2,
-  type ZoneObject,
 } from '@/types/model';
 import { effectiveFlags, getActivePage, useStore } from '@/state/store';
 import { useAsset } from '@/state/assets';
 import { MapBackground } from './MapBackground';
 import { ObjectNode, flatten } from './ObjectNode';
-import { RouteHandles, ShipNode, ShipRanges, ShipRoute } from './ShipNode';
+import { ShipNode, ShipRanges } from './ShipNode';
 import { DEFAULT_EXPORT, setCanvasApi, type ExportOptions } from './canvasBridge';
 import { clamp, dist, simplifyPath, uid, gridRef } from '@/lib/util';
-import {
-  createMarker,
-  createNumber,
-  createPath,
-  createPing,
-  createShape,
-  createText,
-  createZone,
-} from '@/lib/factory';
-import { ZONE_PRESETS } from '@/data/pings';
+import { createMarker, createNumber, createPath, createShape, createText } from '@/lib/factory';
+import { canvasThemeFor, type CanvasTheme } from '@/state/theme';
 
-const MIN_SCALE = 0.0015;
-const MAX_SCALE = 0.6;
 const FALLBACK_W = 30000;
 const FALLBACK_H = 30000;
+
+/**
+ * Fraction of the viewport the map sheet occupies. The map is fixed: it is
+ * always centred and always shown whole, with this margin left as a small
+ * border on the sides. There is no pan and no zoom, so this is the only
+ * camera state the canvas ever has.
+ */
+const FIT_MARGIN = 0.94;
 
 type DraftState =
   | { kind: 'shape'; obj: TacticalObject; start: Vec2 }
@@ -69,8 +66,9 @@ export default function MapCanvas() {
   const selection = useStore((s) => s.selection);
   const activeLayerId = useStore((s) => s.activeLayerId);
   const fitRequest = useStore((s) => s.fitRequest);
-  const spacePan = useStore((s) => s.spacePan);
-  const pings = useStore((s) => s.pings);
+  // Subscribing here is what makes a theme switch repaint the map: the palette
+  // then flows down as a prop and invalidates every memoised Konva node.
+  const themeName = useStore((s) => s.settings.theme);
 
   const [size, setSize] = useState({ width: 800, height: 600 });
   const [draft, setDraft] = useState<DraftState>(null);
@@ -80,7 +78,6 @@ export default function MapCanvas() {
   const [menu, setMenu] = useState<ContextMenuState | null>(null);
   const [exportOpts, setExportOpts] = useState<ExportOptions | null>(null);
 
-  const panRef = useRef<{ active: boolean; last: Vec2 } | null>(null);
   const dragRef = useRef<{ last: Vec2; ids: ID[] } | null>(null);
   const fitScaleRef = useRef(0.02);
 
@@ -97,6 +94,7 @@ export default function MapCanvas() {
   const iconById = useMemo(() => new Map(icons.map((i) => [i.id, i])), [icons]);
   const teamById = useMemo(() => new Map((project?.teams ?? []).map((t) => [t.id, t])), [project?.teams]);
 
+  const theme = canvasThemeFor(themeName);
   const inv = 1 / camera.scale;
   const snapStep = project?.settings.snapStep ?? 500;
   const snapOn = !!project?.settings.snapToGrid;
@@ -118,7 +116,7 @@ export default function MapCanvas() {
   }, []);
 
   const fit = useCallback(() => {
-    const scale = Math.min(size.width / worldW, size.height / worldH) * 0.94;
+    const scale = Math.min(size.width / worldW, size.height / worldH) * FIT_MARGIN;
     fitScaleRef.current = Math.min(size.width / worldW, size.height / worldH);
     useStore.getState().setCamera({
       scale,
@@ -165,33 +163,8 @@ export default function MapCanvas() {
   useEffect(() => {
     setCanvasApi({
       fit,
-      zoomBy: (factor) => {
-        const { camera: cam } = useStore.getState();
-        const center = { x: size.width / 2, y: size.height / 2 };
-        const world = { x: (center.x - cam.x) / cam.scale, y: (center.y - cam.y) / cam.scale };
-        const scale = clamp(cam.scale * factor, MIN_SCALE, MAX_SCALE);
-        useStore.getState().setCamera({
-          scale,
-          x: center.x - world.x * scale,
-          y: center.y - world.y * scale,
-        });
-      },
-      zoomTo: (relative) => {
-        const scale = clamp(fitScaleRef.current * relative, MIN_SCALE, MAX_SCALE);
-        const { camera: cam } = useStore.getState();
-        const center = { x: size.width / 2, y: size.height / 2 };
-        const world = { x: (center.x - cam.x) / cam.scale, y: (center.y - cam.y) / cam.scale };
-        useStore.getState().setCamera({ scale, x: center.x - world.x * scale, y: center.y - world.y * scale });
-      },
       screenToWorld: toWorld,
       worldToScreen: toScreen,
-      centerOn: (p) => {
-        const { camera: cam } = useStore.getState();
-        useStore.getState().setCamera({
-          x: size.width / 2 - p.x * cam.scale,
-          y: size.height / 2 - p.y * cam.scale,
-        });
-      },
       exportImage: async (opts) => doExport(opts),
       fitScale: () => fitScaleRef.current,
       viewport: () => ({ width: size.width, height: size.height }),
@@ -253,33 +226,9 @@ export default function MapCanvas() {
   /* Wheel zoom                                                          */
   /* ------------------------------------------------------------------ */
 
-  const onWheel = (e: KonvaEventObject<WheelEvent>) => {
-    e.evt.preventDefault();
-    const stage = stageRef.current;
-    const pointer = stage?.getPointerPosition();
-    if (!pointer) return;
-
-    // Ctrl+wheel and plain wheel both zoom; shift+wheel pans horizontally.
-    if (e.evt.shiftKey) {
-      useStore.getState().setCamera({ x: camera.x - e.evt.deltaY, y: camera.y });
-      return;
-    }
-    const factor = e.evt.deltaY > 0 ? 1 / 1.12 : 1.12;
-    const world = toWorld(pointer);
-    const scale = clamp(camera.scale * factor, MIN_SCALE, MAX_SCALE);
-    useStore.getState().setCamera({
-      scale,
-      x: pointer.x - world.x * scale,
-      y: pointer.y - world.y * scale,
-    });
-  };
-
   /* ------------------------------------------------------------------ */
   /* Tool interactions                                                   */
   /* ------------------------------------------------------------------ */
-
-  const activeZonePreset = ZONE_PRESETS.find((z) => z.id === toolOptions.zonePresetId) ?? ZONE_PRESETS[0];
-  const activePing = pings.find((p) => p.id === toolOptions.pingPresetId) ?? pings[0];
 
   /**
    * Resolves the layer a newly drawn object belongs on.
@@ -288,22 +237,15 @@ export default function MapCanvas() {
    * grid and coordinates; a locked layer cannot be edited afterwards. Neither
    * is ever a legal target, so both fall through to a real drawing layer.
    */
-  const layerFor = (kind: 'shape' | 'text' | 'ping' | 'zone'): ID => {
+  const layerFor = (): ID => {
     const layers = page?.layers ?? [];
     const usable = (id: string) => layers.some((l) => l.id === id && !l.locked && l.id !== LAYER_IDS.grid);
 
-    if (kind === 'ping' && usable(LAYER_IDS.pings)) return LAYER_IDS.pings;
-    if (kind === 'zone' && usable(LAYER_IDS.zones)) return LAYER_IDS.zones;
-    if (kind === 'text' && usable(LAYER_IDS.text)) return LAYER_IDS.text;
-
-    // Otherwise the planner's selected layer, if it can actually hold objects.
+    // The planner's selected layer, if it can actually hold objects; every
+    // drawn object now lands on Annotations unless a custom layer is active.
     if (usable(activeLayerId)) return activeLayerId;
-    if (usable(LAYER_IDS.shapes)) return LAYER_IDS.shapes;
-    return layers.find((l) => !l.locked && l.id !== LAYER_IDS.grid)?.id ?? LAYER_IDS.shapes;
-  };
-
-  const startPan = (pos: Vec2) => {
-    panRef.current = { active: true, last: pos };
+    if (usable(LAYER_IDS.annotations)) return LAYER_IDS.annotations;
+    return layers.find((l) => !l.locked && l.id !== LAYER_IDS.grid)?.id ?? LAYER_IDS.annotations;
   };
 
   const onMouseDown = (e: KonvaEventObject<MouseEvent>) => {
@@ -313,14 +255,8 @@ export default function MapCanvas() {
     const pos = stage.getPointerPosition();
     if (!pos) return;
     const world = snap(toWorld(pos));
-    const middle = e.evt.button === 1;
     const onEmpty = e.target === stage || e.target.name() === 'backdrop';
 
-    if (middle || tool === 'pan' || spacePan) {
-      e.evt.preventDefault();
-      startPan(pos);
-      return;
-    }
     if (e.evt.button !== 0) return;
 
     if (tool === 'select' || tool === 'marquee') {
@@ -332,46 +268,29 @@ export default function MapCanvas() {
     }
 
     // Single-click placements
-    if (tool === 'ping' && activePing) {
-      const obj = createPing(activePing, layerFor('ping'), world, toolOptions.pingSize);
-      useStore.getState().addObjects([obj]);
-      return;
-    }
     if (tool === 'marker') {
-      useStore.getState().addObjects([createMarker(layerFor('shape'), world, toolOptions.markerColor)]);
+      useStore.getState().addObjects([createMarker(layerFor(), world, toolOptions.markerColor)]);
       return;
     }
     if (tool === 'number') {
       const n = toolOptions.numberCounter;
-      useStore.getState().addObjects([createNumber(layerFor('text'), world, n)]);
+      useStore.getState().addObjects([createNumber(layerFor(), world, n)]);
       useStore.getState().patchToolOptions({ numberCounter: n + 1 });
       return;
     }
     if (tool === 'text') {
-      const obj = createText(layerFor('text'), world, '', toolOptions.fontSize);
+      const obj = createText(layerFor(), world, '', toolOptions.fontSize);
       useStore.getState().addObjects([obj]);
       setEditingText({ id: obj.id, value: '' });
       return;
     }
-    if (tool === 'route') {
-      const shipId = selection.find((id) => page.objects.find((o) => o.id === id && o.type === 'ship'));
-      if (shipId) useStore.getState().addWaypoint(shipId, world);
-      else useStore.getState().toast('Select a ship first, then click to add waypoints', 'error');
-      return;
-    }
-
     // Multi-click polygons
-    const wantsPolygon =
-      tool === 'polygon' || tool === 'area' || (tool === 'zone' && activeZonePreset.shape === 'polygon');
-    if (wantsPolygon) {
+    if (tool === 'polygon' || tool === 'area') {
       setDraft((prev) => {
         if (prev?.kind === 'poly') {
           return { ...prev, points: [...prev.points, world], cursor: world };
         }
-        const obj =
-          tool === 'zone'
-            ? createZone(activeZonePreset, layerFor('zone'), world)
-            : createPath(tool as PathObject['type'], layerFor('shape'), world, [], toolOptions.stroke);
+        const obj = createPath(tool as PathObject['type'], layerFor(), world, [], toolOptions.stroke);
         return { kind: 'poly', obj, points: [world], cursor: world };
       });
       return;
@@ -380,17 +299,14 @@ export default function MapCanvas() {
     // Drag-defined objects
     const dragTools: Record<string, true> = {
       freehand: true, line: true, arrow: true, doubleArrow: true, curvedArrow: true,
-      rect: true, roundRect: true, circle: true, ellipse: true, arc: true,
-      ruler: true, bearing: true, zone: true,
+      rect: true, roundRect: true, circle: true, ruler: true,
     };
     if (dragTools[tool]) {
       let obj: TacticalObject;
-      if (tool === 'zone') {
-        obj = createZone(activeZonePreset, layerFor('zone'), world, 0);
-      } else if (['rect', 'roundRect', 'circle', 'ellipse', 'arc'].includes(tool)) {
-        obj = createShape(tool as ShapeObject['type'], layerFor('shape'), world, 0, 0, toolOptions.stroke);
+      if (['rect', 'roundRect', 'circle'].includes(tool)) {
+        obj = createShape(tool as ShapeObject['type'], layerFor(), world, 0, 0, toolOptions.stroke);
       } else {
-        obj = createPath(tool as PathObject['type'], layerFor('shape'), world, [
+        obj = createPath(tool as PathObject['type'], layerFor(), world, [
           { x: 0, y: 0 },
           { x: 0, y: 0 },
         ], toolOptions.stroke);
@@ -408,13 +324,6 @@ export default function MapCanvas() {
     setCursorWorld(raw);
     const world = snap(raw);
 
-    if (panRef.current?.active) {
-      const last = panRef.current.last;
-      useStore.getState().setCamera({ x: camera.x + (pos.x - last.x), y: camera.y + (pos.y - last.y) });
-      panRef.current.last = pos;
-      return;
-    }
-
     if (marquee) {
       setMarquee({ x: marquee.x, y: marquee.y, w: pos.x - marquee.x, h: pos.y - marquee.y });
       return;
@@ -430,22 +339,9 @@ export default function MapCanvas() {
         const next = [...p.points, { x: world.x - obj.x, y: world.y - obj.y }];
         return { ...prev, obj: { ...p, points: next } as TacticalObject };
       }
-      if (obj.type === 'zone') {
-        const z = obj as ZoneObject;
-        if (z.zoneShape === 'rect') {
-          const cx = (start.x + world.x) / 2;
-          const cy = (start.y + world.y) / 2;
-          return {
-            ...prev,
-            obj: { ...z, x: cx, y: cy, rx: Math.abs(world.x - start.x) / 2, ry: Math.abs(world.y - start.y) / 2 } as TacticalObject,
-          };
-        }
-        const r = dist(start, world);
-        return { ...prev, obj: { ...z, radius: r, valueKm: r / 1000 } as TacticalObject };
-      }
-      if (['rect', 'roundRect', 'ellipse', 'circle', 'arc'].includes(obj.type)) {
+      if (['rect', 'roundRect', 'circle'].includes(obj.type)) {
         const s = obj as ShapeObject;
-        if (obj.type === 'circle' || obj.type === 'arc') {
+        if (obj.type === 'circle') {
           const r = dist(start, world);
           return { ...prev, obj: { ...s, x: start.x, y: start.y, rx: r, ry: r } as TacticalObject };
         }
@@ -504,10 +400,7 @@ export default function MapCanvas() {
     if (current.kind === 'shape') {
       const obj = current.obj;
       // Reject accidental click-sized objects.
-      if (obj.type === 'zone') {
-        const z = obj as ZoneObject;
-        if (z.zoneShape === 'rect' ? (z.rx ?? 0) < 50 : (z.radius ?? 0) < 100) return;
-      } else if ('rx' in obj && (obj as ShapeObject).rx < 50) {
+      if ('rx' in obj && (obj as ShapeObject).rx < 50) {
         return;
       } else if ('points' in obj) {
         const p = obj as PathObject;
@@ -528,19 +421,13 @@ export default function MapCanvas() {
     setDraft(null);
     if (!current || current.kind !== 'poly' || current.points.length < 3) return;
     const origin = current.points[0];
-    const rel = current.points.map((p) => ({ x: p.x - origin.x, y: p.y - origin.y }));
-    if (current.obj.type === 'zone') {
-      useStore.getState().addObjects([{ ...(current.obj as ZoneObject), x: origin.x, y: origin.y, points: rel } as TacticalObject]);
-    } else {
-      useStore.getState().addObjects([{ ...(current.obj as PathObject), x: origin.x, y: origin.y, points: rel } as TacticalObject]);
-    }
+    const rel = current.points.map((p: Vec2) => ({ x: p.x - origin.x, y: p.y - origin.y }));
+    useStore
+      .getState()
+      .addObjects([{ ...(current.obj as PathObject), x: origin.x, y: origin.y, points: rel } as TacticalObject]);
   };
 
   const onMouseUp = () => {
-    if (panRef.current?.active) {
-      panRef.current = null;
-      return;
-    }
     if (marquee) {
       finishMarquee();
       return;
@@ -565,7 +452,7 @@ export default function MapCanvas() {
   /* ------------------------------------------------------------------ */
 
   const onNodeClick = (e: KonvaEventObject<MouseEvent>) => {
-    if (tool !== 'select' && tool !== 'marquee' && tool !== 'route') return;
+    if (tool !== 'select' && tool !== 'marquee') return;
     const node = e.target.findAncestor('.object', true) ?? e.target;
     const id = node.id();
     if (!id) return;
@@ -576,10 +463,6 @@ export default function MapCanvas() {
 
   const onDragStart = (e: KonvaEventObject<DragEvent>) => {
     const node = e.target;
-    if (node.name() === 'waypoint') {
-      useStore.getState().pushHistory();
-      return;
-    }
     const id = node.id();
     if (!id) return;
     if (!selection.includes(id)) useStore.getState().select([id]);
@@ -592,12 +475,12 @@ export default function MapCanvas() {
 
   const onDragMove = (e: KonvaEventObject<DragEvent>) => {
     const node = e.target;
-    if (snapOn && node.name() !== 'waypoint') {
+    if (snapOn) {
       node.x(Math.round(node.x() / snapStep) * snapStep);
       node.y(Math.round(node.y() / snapStep) * snapStep);
     }
     const state = dragRef.current;
-    if (!state || node.name() === 'waypoint') return;
+    if (!state) return;
     // Move the rest of the selection by the same delta, imperatively, so a
     // multi-object drag stays smooth without a store write per frame.
     const dx = node.x() - state.last.x;
@@ -616,14 +499,6 @@ export default function MapCanvas() {
   const onDragEnd = (e: KonvaEventObject<DragEvent>) => {
     const node = e.target;
     const store = useStore.getState();
-
-    if (node.name() === 'waypoint') {
-      const [, objectId, wpId] = node.id().split(':');
-      store.updateWaypoint(objectId, wpId, { x: node.x(), y: node.y() }, { history: false });
-      dragRef.current = null;
-      return;
-    }
-
     const id = node.id();
     const state = dragRef.current;
     dragRef.current = null;
@@ -648,7 +523,7 @@ export default function MapCanvas() {
   /* Transformer                                                         */
   /* ------------------------------------------------------------------ */
 
-  const resizableTypes = new Set(['rect', 'roundRect', 'circle', 'ellipse', 'arc', 'zone', 'text']);
+  const resizableTypes = new Set(['rect', 'roundRect', 'circle', 'text']);
 
   useEffect(() => {
     const tr = trRef.current;
@@ -691,23 +566,12 @@ export default function MapCanvas() {
 
       if (sx !== 1 || sy !== 1) {
         const avg = (Math.abs(sx) + Math.abs(sy)) / 2;
-        if (obj.type === 'circle' || obj.type === 'arc') {
+        if (obj.type === 'circle') {
           patch.rx = (obj as ShapeObject).rx * avg;
           patch.ry = patch.rx;
-        } else if (obj.type === 'rect' || obj.type === 'roundRect' || obj.type === 'ellipse') {
+        } else if (obj.type === 'rect' || obj.type === 'roundRect') {
           patch.rx = (obj as ShapeObject).rx * Math.abs(sx);
           patch.ry = (obj as ShapeObject).ry * Math.abs(sy);
-        } else if (obj.type === 'zone') {
-          const z = obj as ZoneObject;
-          if (z.zoneShape === 'rect') {
-            patch.rx = (z.rx ?? 0) * Math.abs(sx);
-            patch.ry = (z.ry ?? 0) * Math.abs(sy);
-          } else if (z.zoneShape === 'polygon') {
-            patch.points = (z.points ?? []).map((p) => ({ x: p.x * sx, y: p.y * sy }));
-          } else {
-            patch.radius = (z.radius ?? 0) * avg;
-            patch.valueKm = ((z.radius ?? 0) * avg) / 1000;
-          }
         } else if (obj.type === 'text' || obj.type === 'number') {
           patch.fontSize = Math.max(20, (obj as TextObject).fontSize * avg);
         }
@@ -764,25 +628,16 @@ export default function MapCanvas() {
     background: ex ? ex.background : true,
     grid: ex ? ex.grid : true,
     ships: ex ? ex.ships : true,
-    routes: ex ? ex.routes : true,
     ranges: ex ? ex.ranges : true,
-    zones: ex ? ex.zones : true,
-    pings: ex ? ex.pings : true,
-    shapes: ex ? ex.shapes : true,
-    text: ex ? ex.text : true,
+    annotations: ex ? ex.annotations : true,
   };
 
   const gridLayer = page.layers.find((l) => l.id === LAYER_IDS.grid);
   const shipObjects = page.objects.filter((o): o is ShipObject => o.type === 'ship');
   const layerById = new Map(page.layers.map((l) => [l.id, l]));
 
-  const categoryOf = (o: TacticalObject): keyof typeof show => {
-    if (o.type === 'ship') return 'ships';
-    if (o.type === 'zone') return 'zones';
-    if (o.type === 'ping') return 'pings';
-    if (o.type === 'text' || o.type === 'number') return 'text';
-    return 'shapes';
-  };
+  const categoryOf = (o: TacticalObject): keyof typeof show =>
+    o.type === 'ship' ? 'ships' : 'annotations';
 
   const isVisible = (o: TacticalObject): boolean => {
     const layer = layerById.get(o.layerId);
@@ -797,7 +652,7 @@ export default function MapCanvas() {
   };
 
   const isDraggable = (o: TacticalObject): boolean => {
-    if (tool !== 'select' && tool !== 'route') return false;
+    if (tool !== 'select') return false;
     if (o.locked || exportOpts) return false;
     const layer = layerById.get(o.layerId);
     if (layer?.locked) return false;
@@ -820,6 +675,7 @@ export default function MapCanvas() {
           ship={ship}
           team={(o as ShipObject).teamId ? teamById.get((o as ShipObject).teamId as string) : undefined}
           flags={effectiveFlags(page, o as ShipObject)}
+          theme={theme}
           iconFile={iconAsset?.file}
           iconMime={iconAsset?.mime}
           inv={inv}
@@ -829,11 +685,19 @@ export default function MapCanvas() {
         />
       );
     }
-    return <ObjectNode key={o.id} obj={o} inv={inv} selected={selection.includes(o.id)} draggable={isDraggable(o)} />;
+    return (
+      <ObjectNode
+        key={o.id}
+        obj={o}
+        inv={inv}
+        selected={selection.includes(o.id)}
+        draggable={isDraggable(o)}
+        theme={theme}
+      />
+    );
   };
 
-  const cursorClass =
-    tool === 'pan' || spacePan ? 'grab' : tool === 'select' || tool === 'marquee' ? 'default' : 'cross';
+  const cursorClass = tool === 'select' || tool === 'marquee' ? 'default' : 'cross';
 
   return (
     <div
@@ -850,7 +714,6 @@ export default function MapCanvas() {
         y={camera.y}
         scaleX={camera.scale}
         scaleY={camera.scale}
-        onWheel={onWheel}
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}
@@ -871,6 +734,7 @@ export default function MapCanvas() {
             image={mapImage}
             fallbackWidth={FALLBACK_W}
             fallbackHeight={FALLBACK_H}
+            theme={theme}
           />
         </Layer>
 
@@ -896,31 +760,11 @@ export default function MapCanvas() {
                       key={s.id}
                       obj={s}
                       ship={s.shipId ? shipById.get(s.shipId) : undefined}
-                      page={page}
                       flags={effectiveFlags(page, s)}
                       inv={inv}
+                      theme={theme}
                     />
                   ))}
-                </Group>
-              );
-            }
-
-            if (layer.id === LAYER_IDS.routes) {
-              if (!show.routes) return null;
-              return (
-                <Group key={layer.id} opacity={layer.opacity} listening={false}>
-                  {shipObjects
-                    .filter((s) => isVisible(s) && effectiveFlags(page, s).route !== false)
-                    .map((s) => (
-                      <ShipRoute
-                        key={s.id}
-                        obj={s}
-                        team={s.teamId ? teamById.get(s.teamId) : undefined}
-                        inv={inv}
-                        editable={selection.includes(s.id)}
-                        showSpeeds
-                      />
-                    ))}
                 </Group>
               );
             }
@@ -938,7 +782,7 @@ export default function MapCanvas() {
         {/* Overlay: drafts, marquee, handles — never part of an export */}
         <Layer visible={!exportOpts}>
           {draft?.kind === 'shape' && (
-            <ObjectNode obj={draft.obj} inv={inv} selected draggable={false} />
+            <ObjectNode obj={draft.obj} inv={inv} selected draggable={false} theme={theme} />
           )}
           {draft?.kind === 'poly' && (
             <Group listening={false}>
@@ -971,11 +815,6 @@ export default function MapCanvas() {
               </Group>
             </Group>
           )}
-
-          {selection.length === 1 &&
-            shipObjects
-              .filter((s) => s.id === selection[0] && tool === 'route')
-              .map((s) => <RouteHandles key={s.id} obj={s} inv={inv} />)}
 
           <Transformer
             ref={trRef}
@@ -1061,6 +900,7 @@ function ShipWithIcon(props: {
   baseSize: number;
   selected: boolean;
   draggable: boolean;
+  theme: CanvasTheme;
 }) {
   const { iconFile, iconMime, ...rest } = props;
   const icon = useAsset('icon', iconFile, iconMime ?? '');
