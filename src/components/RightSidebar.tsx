@@ -1,7 +1,10 @@
-import { useMemo, useRef } from 'react';
-import { ChevronRight, Palette, Radar as RadarIcon, Save, Trash2 } from 'lucide-react';
+import { useMemo, useRef, useState } from 'react';
+import { ChevronRight, Database, Palette, Radar as RadarIcon, Save, Search, Trash2 } from 'lucide-react';
 import {
   CHARACTERISTICS,
+  PAGE_CHARACTERISTIC_KEYS,
+  SHIP_CLASSES,
+  shipClassCode,
   DEFAULT_CHARACTERISTICS,
   DEFAULT_RANGE_STYLES,
   RANGE_KEYS,
@@ -10,12 +13,30 @@ import {
   type MarkerObject,
   type PathObject,
   type ShapeObject,
+  type ID,
+  type ShipClass,
   type ShipObject,
   type TacticalObject,
   type TextObject,
 } from '@/types/model';
-import { effectiveFlags, getActivePage, shipRangeKm, useStore } from '@/state/store';
+import {
+  ARROW_TOOLS,
+  ARROW_TOOL_LABELS,
+  SHAPE_TOOLS,
+  SHAPE_TOOL_LABELS,
+  effectiveFlags,
+  getActivePage,
+  shipRangeKm,
+  useStore,
+  type ArrowTool,
+  type ShapeTool,
+  type ToolId,
+} from '@/state/store';
 import { Check, ColorInput, Field, NumInput, Panel, SectionLabel, Slider, Tip } from './common/ui';
+import { CLASS_COLORS } from '@/canvas/shipGlyphs';
+import { useAsset } from '@/state/assets';
+import { canvasApi } from '@/canvas/canvasBridge';
+import { ClassIcon } from './common/ClassIcon';
 import { gridRef } from '@/lib/util';
 
 export function RightSidebar() {
@@ -53,6 +74,8 @@ export function RightSidebar() {
         {selected.length === 0 && <NoSelectionPanels />}
         {selected.length === 1 && <SingleObjectPanels obj={selected[0]} />}
         {selected.length > 1 && <MultiSelectionPanel objects={selected} />}
+        <ToolVariantPanel />
+        <ShipBrowserPanel />
       </div>
     </div>
   );
@@ -64,14 +87,12 @@ export function RightSidebar() {
 
 function NoSelectionPanels() {
   const page = useStore(getActivePage);
-  const tool = useStore((s) => s.tool);
   if (!page) return null;
 
   return (
     <>
       <MapDisplayPanel />
       <ToolDefaultsPanel />
-      <PresetsPanel />
     </>
   );
 }
@@ -90,17 +111,6 @@ function MapDisplayPanel() {
 
   return (
     <Panel title="Map Display" storageKey="mapDisplay">
-      <SectionLabel>Labels</SectionLabel>
-      {CHARACTERISTICS.filter((c) => c.group === 'label').map((c) => (
-        <Check
-          key={c.key}
-          label={c.label}
-          checked={page.display[c.key] ?? DEFAULT_CHARACTERISTICS[c.key] ?? false}
-          onChange={(v) => s().setPageDisplay(c.key, v)}
-        />
-      ))}
-
-      <SectionLabel>Other</SectionLabel>
       {CHARACTERISTICS.filter((c) => c.group === 'other').map((c) => (
         <Check
           key={c.key}
@@ -111,8 +121,9 @@ function MapDisplayPanel() {
       ))}
 
       <div className="faint" style={{ fontSize: 11, marginTop: 8, lineHeight: 1.45 }}>
-        Ranges are set per ship. Select a ship to switch its detection, radar,
-        hydro, gun or torpedo circles on.
+        Every ship always shows its marker and its name. Ranges are set per
+        ship — select one to switch its detection, radar, hydro, gun or torpedo
+        circles on.
       </div>
     </Panel>
   );
@@ -210,55 +221,44 @@ function ToolDefaultsPanel() {
   );
 }
 
-function PresetsPanel() {
-  const project = useStore((s) => s.project);
-  const s = () => useStore.getState();
-  if (!project) return null;
+/**
+ * Which shape or arrow the grouped rail button draws.
+ *
+ * The rail carries one button per family; the choice of variant lives here,
+ * where there is room to show every option with its name.
+ */
+function ToolVariantPanel() {
+  const tool = useStore((s) => s.tool);
+  const setTool = useStore((s) => s.setTool);
+  const patch = useStore((s) => s.patchToolOptions);
+
+  const isShape = (SHAPE_TOOLS as readonly string[]).includes(tool);
+  const isArrow = (ARROW_TOOLS as readonly string[]).includes(tool);
+  if (!isShape && !isArrow) return null;
+
+  const variants: readonly string[] = isShape ? SHAPE_TOOLS : ARROW_TOOLS;
+  const labels = isShape ? SHAPE_TOOL_LABELS : ARROW_TOOL_LABELS;
 
   return (
-    <Panel title="Tactical Presets" count={project.presets.length} storageKey="presets">
-      {project.presets.length === 0 ? (
-        <div className="empty-note">
-          Select an object and use <em>Save as preset</em> in its properties to keep a reusable copy here.
-        </div>
-      ) : (
-        project.presets.map((preset) => (
-          <div key={preset.id} className="row">
-            <span className="row-label">{preset.name}</span>
-            <span className="count mono">{preset.kind}</span>
-            <div className="row-actions">
-              <Tip label="Stamp at map centre" side="bottom">
-                <button
-                  className="icon-btn"
-                  onClick={() => {
-                    const page = getActivePage(useStore.getState());
-                    if (!page) return;
-                    const data = { ...(preset.data as Record<string, unknown>) };
-                    s().addObjects([
-                      {
-                        ...(data as unknown as TacticalObject),
-                        id: `obj-${Math.random().toString(36).slice(2)}`,
-                      } as TacticalObject,
-                    ]);
-                  }}
-                >
-                  <ChevronRight size={12} />
-                </button>
-              </Tip>
-              <button className="icon-btn danger" onClick={() => s().removePreset(preset.id)}>
-                <Trash2 size={11} />
-              </button>
-            </div>
-          </div>
-        ))
-      )}
+    <Panel title={isShape ? 'Shape' : 'Line & Arrow'} storageKey="toolVariant">
+      <div className="variant-grid">
+        {variants.map((v) => (
+          <button
+            key={v}
+            className={`variant-chip${tool === v ? ' active' : ''}`}
+            onClick={() => {
+              if (isShape) patch({ shapeVariant: v as ShapeTool });
+              else patch({ arrowVariant: v as ArrowTool });
+              setTool(v as ToolId);
+            }}
+          >
+            {labels[v as keyof typeof labels]}
+          </button>
+        ))}
+      </div>
     </Panel>
   );
 }
-
-/* ================================================================== */
-/* Single object                                                       */
-/* ================================================================== */
 
 function SingleObjectPanels({ obj }: { obj: TacticalObject }) {
   if (obj.type === 'ship') return <ShipPropertiesPanels obj={obj as ShipObject} />;
@@ -315,20 +315,6 @@ function CommonObjectPanel({ obj }: { obj: TacticalObject }) {
         <button className="btn sm" style={{ flex: 1 }} onClick={() => s().duplicateSelection()}>
           Duplicate
         </button>
-        <Tip label="Save as preset" side="bottom">
-          <button
-            className="btn sm"
-            onClick={() =>
-              s().savePreset({
-                name: `${TYPE_LABEL[obj.type] ?? obj.type} preset`,
-                kind: 'shape',
-                data: { ...obj },
-              })
-            }
-          >
-            <Save size={12} />
-          </button>
-        </Tip>
         <button className="btn sm danger" onClick={() => s().deleteSelection()}>
           <Trash2 size={12} />
         </button>
@@ -595,15 +581,10 @@ function ShipPropertiesPanels({ obj }: { obj: ShipObject }) {
         }
       >
         <div className="faint" style={{ fontSize: 11, marginBottom: 4, lineHeight: 1.45 }}>
-          Labels follow the page defaults until you change one here; an{' '}
-          <span className="badge-override">OVR</span> badge marks a per-ship override, and clicking it falls back to the
-          page setting. Ranges have no page default — they belong to this ship alone.
+          Ranges belong to this ship alone — switch on what this ship should
+          show. Anything that follows a page default carries an{' '}
+          <span className="badge-override">OVR</span> badge once you change it; click the badge to fall back.
         </div>
-
-        <SectionLabel>Labels</SectionLabel>
-        {CHARACTERISTICS.filter((c) => c.group === 'label').map((c) => (
-          <ShipFlagCheck key={c.key} obj={obj} flagKey={c.key} label={c.label} value={flags[c.key] ?? false} />
-        ))}
 
         <SectionLabel>Ranges</SectionLabel>
         {CHARACTERISTICS.filter((c) => c.group === 'range').map((c) => {
@@ -663,7 +644,10 @@ function ShipFlagCheck({
   disabledReason?: string;
 }) {
   const s = () => useStore.getState();
-  const overridden = Object.prototype.hasOwnProperty.call(obj.display, flagKey);
+  // Only page-level characteristics can be "overridden": a range has no page
+  // default to differ from, so the badge would be permanent noise on it.
+  const canOverride = PAGE_CHARACTERISTIC_KEYS.includes(flagKey);
+  const overridden = canOverride && Object.prototype.hasOwnProperty.call(obj.display, flagKey);
   return (
     <Check
       label={label}
@@ -671,7 +655,7 @@ function ShipFlagCheck({
       title={disabledReason}
       onChange={(v) => s().setShipDisplay(obj.id, flagKey, v)}
       overridden={overridden}
-      onClearOverride={() => s().setShipDisplay(obj.id, flagKey, undefined)}
+      onClearOverride={canOverride ? () => s().setShipDisplay(obj.id, flagKey, undefined) : undefined}
     />
   );
 }
@@ -760,6 +744,168 @@ function MultiSelectionPanel({ objects }: { objects: TacticalObject[] }) {
 }
 
 /* ------------------------------------------------------------------ */
+
+/* ================================================================== */
+/* Ship selector                                                       */
+/* ================================================================== */
+
+function ShipBrowserPanel() {
+  const ships = useStore((s) => s.ships);
+  const icons = useStore((s) => s.icons);
+  const project = useStore((s) => s.project);
+  const [query, setQuery] = useState('');
+  const [nation, setNation] = useState('');
+  const [cls, setCls] = useState<'' | ShipClass>('');
+  const [tier, setTier] = useState('');
+  const [team, setTeam] = useState<ID | ''>('');
+  const s = () => useStore.getState();
+
+  const nations = useMemo(() => [...new Set(ships.map((x) => x.nation))].sort(), [ships]);
+  const tiers = useMemo(() => [...new Set(ships.map((x) => x.tier))].sort((a, b) => b - a), [ships]);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return ships.filter(
+      (ship) =>
+        (!q || ship.name.toLowerCase().includes(q) || ship.nation.toLowerCase().includes(q)) &&
+        (!nation || ship.nation === nation) &&
+        (!cls || ship.class === cls) &&
+        (!tier || String(ship.tier) === tier),
+    );
+  }, [ships, query, nation, cls, tier]);
+
+  const teamId = team || project?.settings.defaultTeamId || project?.teams[0]?.id || null;
+  const iconById = useMemo(() => new Map(icons.map((i) => [i.id, i])), [icons]);
+
+  return (
+    <Panel
+      title="Ships"
+      count={`${filtered.length}/${ships.length}`}
+      storageKey="ships"
+      grow
+      actions={
+        <Tip label="Open ship database — add, edit and assign icons" side="bottom">
+          <button className="icon-btn" onClick={() => s().openModal('shipDb')}>
+            <Database size={13} />
+          </button>
+        </Tip>
+      }
+    >
+      {ships.length === 0 ? (
+        <div className="empty-note">
+          No ships yet.
+          <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 5 }}>
+            <button className="btn sm block" onClick={() => void s().importShipData()}>
+              Import ship data…
+            </button>
+            <button className="btn sm block ghost" onClick={() => void s().loadSampleShips()}>
+              Load sample ship set
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div style={{ position: 'relative', marginBottom: 4 }}>
+            <Search size={12} style={{ position: 'absolute', left: 7, top: 6, color: 'var(--fg-faint)' }} />
+            <input
+              type="search"
+              placeholder="Search ships…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              style={{ paddingLeft: 24 }}
+            />
+          </div>
+
+          <div className="ship-filters">
+            <select value={nation} onChange={(e) => setNation(e.target.value)}>
+              <option value="">Nation</option>
+              {nations.map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+            <select value={cls} onChange={(e) => setCls(e.target.value as ShipClass | '')}>
+              <option value="">Class</option>
+              {SHIP_CLASSES.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+            <select value={tier} onChange={(e) => setTier(e.target.value)}>
+              <option value="">Tier</option>
+              {tiers.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {project && project.teams.length > 0 && (
+            <select value={team} onChange={(e) => setTeam(e.target.value)} style={{ marginBottom: 5 }}>
+              <option value="">Place on default team</option>
+              {project.teams.map((t) => (
+                <option key={t.id} value={t.id}>
+                  Place on {t.name}
+                </option>
+              ))}
+            </select>
+          )}
+
+          <div className="ship-list">
+            {filtered.map((ship) => {
+              const iconAsset = ship.iconId ? iconById.get(ship.iconId) : undefined;
+              return (
+                <div
+                  key={ship.id}
+                  className="ship-item"
+                  draggable
+                  title="Drag onto the map, or double-click to place at the centre"
+                  onDragStart={(e) => {
+                    e.dataTransfer.setData('application/x-wows-ship', ship.id);
+                    if (teamId) e.dataTransfer.setData('application/x-wows-team', teamId);
+                    e.dataTransfer.effectAllowed = 'copy';
+                  }}
+                  onDoubleClick={() => {
+                    const api = canvasApi();
+                    if (!api) return;
+                    const centre = api.screenToWorld({
+                      x: (document.querySelector('.canvas-host')?.clientWidth ?? 800) / 2,
+                      y: (document.querySelector('.canvas-host')?.clientHeight ?? 600) / 2,
+                    });
+                    s().placeShip(ship.id, centre, teamId);
+                  }}
+                >
+                  <ShipThumb file={iconAsset?.file} mime={iconAsset?.mime} cls={ship.class} />
+                  <div className="ship-meta">
+                    <div className="ship-name">{ship.name}</div>
+                    <div className="ship-sub">{ship.nation}</div>
+                  </div>
+                  <span className="class-chip" style={{ background: `${CLASS_COLORS[ship.class]}22`, color: CLASS_COLORS[ship.class] }}>
+                    {shipClassCode(ship)}
+                  </span>
+                  <span className="tier-chip">{ship.tier}</span>
+                </div>
+              );
+            })}
+            {!filtered.length && <div className="empty-note">No ships match those filters.</div>}
+          </div>
+        </>
+      )}
+    </Panel>
+  );
+}
+
+function ShipThumb({ file, mime, cls }: { file?: string; mime?: string; cls: ShipClass }) {
+  const img = useAsset('icon', file, mime ?? '');
+  return (
+    <div className="ship-icon">
+      {img ? <img src={img.src} alt="" /> : <ClassIcon cls={cls} size={19} />}
+    </div>
+  );
+}
 
 export function GlyphIcon({ path, color, size = 14 }: { path: string; color: string; size?: number }) {
   return (

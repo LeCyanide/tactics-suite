@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Copy, Eye, Grid3x3, HardDrive, Plus, Save, X } from 'lucide-react';
 import { getActivePage, useStore } from '@/state/store';
-import { canvasApi } from '@/canvas/canvasBridge';
 import { InlineEdit, Tip } from './common/ui';
 import { renderMarkdown } from '@/lib/markdown';
 import { formatRelative } from '@/lib/util';
@@ -124,10 +123,7 @@ export function StatusBar() {
           <span style={{ color: 'var(--accent)' }}>{selection.length} selected</span>
         </>
       )}
-      <span className="sep" />
-      <button onClick={() => canvasApi()?.fit()} title="Recentre map (Ctrl+0)">
-        <span className="mono">Recentre</span>
-      </button>
+
 
       <span className="spacer" />
 

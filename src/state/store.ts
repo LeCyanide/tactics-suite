@@ -26,7 +26,6 @@ import {
   type ShipObject,
   type StrokeStyle,
   type TacticalObject,
-  type TacticalPreset,
   type Team,
   type Vec2,
 } from '@/types/model';
@@ -61,12 +60,26 @@ export type ToolId =
   | 'area';
 
 /** The shape variants offered behind the single "Shape" rail button. */
-export const SHAPE_TOOLS = ['rect', 'roundRect', 'circle', 'polygon'] as const;
+export const SHAPE_TOOLS = ['circle', 'rect', 'roundRect', 'polygon'] as const;
 /** The line/arrow variants offered behind the single "Arrow" rail button. */
 export const ARROW_TOOLS = ['line', 'arrow', 'doubleArrow', 'curvedArrow'] as const;
 
 export type ShapeTool = (typeof SHAPE_TOOLS)[number];
 export type ArrowTool = (typeof ARROW_TOOLS)[number];
+
+export const SHAPE_TOOL_LABELS: Record<ShapeTool, string> = {
+  circle: 'Circle',
+  rect: 'Rectangle',
+  roundRect: 'Rounded',
+  polygon: 'Polygon',
+};
+
+export const ARROW_TOOL_LABELS: Record<ArrowTool, string> = {
+  arrow: 'Arrow',
+  line: 'Line',
+  doubleArrow: 'Double',
+  curvedArrow: 'Curved',
+};
 
 export interface Camera {
   /** Stage translation in screen pixels. */
@@ -206,10 +219,6 @@ interface Actions {
   updateTeam(id: ID, patch: Partial<Team>): void;
   removeTeam(id: ID): void;
 
-  /* presets */
-  savePreset(preset: Omit<TacticalPreset, 'id' | 'createdAt'>): void;
-  removePreset(id: ID): void;
-
   /* history */
   pushHistory(): void;
   undo(): void;
@@ -255,7 +264,7 @@ const initialToolOptions: ToolOptions = {
   stroke: clone(DEFAULT_STROKE),
   fontSize: 340,
   arrowSize: 14,
-  shapeVariant: 'rect',
+  shapeVariant: 'circle',
   arrowVariant: 'arrow',
   markerColor: '#f4c95d',
   numberCounter: 1,
@@ -482,7 +491,6 @@ export const useStore = create<Store>((set, get) => {
         doc.activePageId = doc.pages[0].id;
       }
       doc.teams = doc.teams ?? [];
-      doc.presets = doc.presets ?? [];
       // Rebuilding settings from the known keys drops retired ones (showMinimap)
       // rather than carrying them along in every future save.
       doc.settings = { ...clone(DEFAULT_PROJECT_SETTINGS), ...(doc.settings ?? {}) };
@@ -950,21 +958,6 @@ export const useStore = create<Store>((set, get) => {
             o.type === 'ship' && (o as ShipObject).teamId === id ? ({ ...o, teamId: null } as TacticalObject) : o,
           );
         }
-      });
-    },
-
-    /* ----------------------------- presets ----------------------------- */
-
-    savePreset(preset) {
-      commit((draft) => {
-        draft.presets.push({ ...preset, id: uid('preset-'), createdAt: Date.now() });
-      });
-      get().toast(`Preset "${preset.name}" saved`, 'success');
-    },
-
-    removePreset(id) {
-      commit((draft) => {
-        draft.presets = draft.presets.filter((p) => p.id !== id);
       });
     },
 

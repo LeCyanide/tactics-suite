@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { getActivePage, useStore, type ToolId } from '@/state/store';
-import { canvasApi } from '@/canvas/canvasBridge';
 
 const TOOL_KEYS: Record<string, ToolId> = {
   v: 'select',
@@ -65,7 +64,6 @@ export const SHORTCUT_REFERENCE: { group: string; rows: ShortcutRow[] }[] = [
   {
     group: 'View',
     rows: [
-      { keys: 'Ctrl + 0', action: 'Recentre map' },
       { keys: 'Ctrl + B', action: 'Toggle left sidebar' },
       { keys: 'Ctrl + J', action: 'Toggle properties' },
       { keys: 'Ctrl + K', action: 'Toggle notes' },
@@ -134,10 +132,6 @@ export function useShortcuts(): void {
           case 'k':
             handled();
             s().toggleNotes();
-            return;
-          case '0':
-            handled();
-            canvasApi()?.fit();
             return;
           default:
             break;

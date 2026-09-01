@@ -20,6 +20,7 @@ import {
   type ID,
 } from '@/types/model';
 import { clone, uid } from './util';
+import { canvasTheme } from '@/state/theme';
 
 /**
  * Every project starts with the two clan-war sides. The colours are the whole
@@ -63,7 +64,6 @@ export function createProject(name = 'Untitled Project', pageNames?: string[]): 
     pages,
     activePageId: pages[0]?.id ?? null,
     teams,
-    presets: [],
     settings: { ...clone(DEFAULT_PROJECT_SETTINGS), defaultTeamId: teams[0].id },
   };
 }
@@ -132,7 +132,8 @@ export function createText(layerId: ID, origin: Vec2, text = 'Text', fontSize = 
     fontFamily: 'Inter',
     bold: false,
     italic: false,
-    color: '#e6edf3',
+    // Follows the theme, or text placed in light mode is white on white.
+    color: canvasTheme().plateText,
     background: null,
     align: 'left',
   } as TextObject;

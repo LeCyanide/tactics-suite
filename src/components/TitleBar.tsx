@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Crosshair, Minus, Square, X, Copy as CopyIcon } from 'lucide-react';
 import { getActivePage, useStore } from '@/state/store';
-import { canvasApi } from '@/canvas/canvasBridge';
 
 interface MenuEntry {
   label?: string;
@@ -83,8 +82,6 @@ export function TitleBar() {
       { label: 'Deselect', shortcut: 'Esc', action: () => s().clearSelection(), enabled: selection.length > 0 },
     ],
     View: [
-      { label: 'Recentre Map', shortcut: 'Ctrl+0', action: () => canvasApi()?.fit() },
-      { separator: true },
       { label: 'Left Sidebar', checked: leftOpen, shortcut: 'Ctrl+B', action: () => s().toggleLeft() },
       { label: 'Right Sidebar', checked: rightOpen, shortcut: 'Ctrl+J', action: () => s().toggleRight() },
       { label: 'Notes Panel', checked: notesOpen, shortcut: 'Ctrl+K', action: () => s().toggleNotes() },
@@ -106,11 +103,6 @@ export function TitleBar() {
     // is not about the document currently open.
     Settings: [
       { label: 'Preferences…', action: () => s().openModal('settings') },
-      {
-        label: 'Light Theme',
-        checked: settings.theme === 'light',
-        action: () => s().patchSettings({ theme: settings.theme === 'light' ? 'dark' : 'light' }),
-      },
       { separator: true },
       { label: 'Map Manager…', action: () => s().openModal('maps') },
       { label: 'Ship Database…', action: () => s().openModal('shipDb') },

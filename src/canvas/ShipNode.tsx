@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Arc, Circle, Group, Image as KonvaImage, Line, Path, Rect, Text } from 'react-konva';
+import { Circle, Group, Image as KonvaImage, Line, Path, Rect, Text } from 'react-konva';
 import type { CharacteristicFlags, RangeStyle, Ship, ShipObject, Team } from '@/types/model';
 import { RANGE_KEYS, DEFAULT_RANGE_STYLES } from '@/types/model';
 import { CLASS_GLYPHS, GLYPH_CONTRAST_WIDTH } from './shipGlyphs';
@@ -32,9 +32,7 @@ const NAME_PLATE_W = 160;
 
 interface ShipNodeProps {
   obj: ShipObject;
-  ship?: Ship;
   team?: Team;
-  flags: CharacteristicFlags;
   icon: HTMLImageElement | null;
   /** 1 / camera.scale — converts screen pixels into world metres. */
   inv: number;
@@ -54,9 +52,7 @@ interface ShipNodeProps {
  */
 export const ShipNode = memo(function ShipNode({
   obj,
-  ship,
   team,
-  flags,
   icon,
   inv,
   baseSize,
@@ -71,25 +67,16 @@ export const ShipNode = memo(function ShipNode({
   // team falls back to neutral grey rather than to a class colour.
   const teamColor = team?.color ?? theme.neutral;
 
-  const lines: string[] = [];
-  if (flags.name) lines.push(obj.label || obj.shipName);
-  if (flags.consumables && ship) {
-    // Consumables as text, so they are available without forcing a ring onto
-    // the map. The ranged ones still have their own independent toggles.
-    for (const c of ship.consumables ?? []) {
-      lines.push(c.range_km ? `${c.name} ${c.range_km.toFixed(1)} km` : c.name);
-    }
-    if (ship.fighter) lines.push('Fighter');
-    if (ship.spottingAircraft) lines.push('Spotting Aircraft');
-  }
-  const text = lines.join('\n');
-
   return (
     <Group
       id={obj.id}
       name="object ship"
       x={obj.x}
       y={obj.y}
+      // Rotation lives on the outer node so the transformer's rotate handle
+      // drives it directly. Anything that must stay upright cancels it again
+      // with an equal counter-rotation about this same origin.
+      rotation={obj.rotation}
       opacity={obj.opacity}
       visible={obj.visible}
       draggable={draggable}
@@ -98,60 +85,95 @@ export const ShipNode = memo(function ShipNode({
     >
       <Group scaleX={inv} scaleY={inv}>
         {/* Selection is a corner bracket, not a ring: nothing circular is
-            allowed to surround a ship marker. */}
-        {selected && <SelectionBrackets half={half + 4} color={theme.selection} />}
+            allowed to surround a ship marker. Counter-rotated so it reads as
+            a frame rather than tilting with the hull. */}
+        {selected && (
+          <Group rotation={-obj.rotation}>
+            <SelectionBrackets half={half + 4} color={theme.selection} />
+          </Group>
+        )}
 
-        {/* Rotating part: hull icon and heading pointer */}
-        <Group rotation={obj.rotation}>
-          {flags.heading && (
-            <Line
-              points={[0, -half - 4, -4, -half + 3, 0, -half + 1, 4, -half + 3]}
-              closed
-              fill={teamColor}
-              listening={false}
+        {/* The hull itself is the only thing that turns with the heading. */}
+        {icon ? (
+          <KonvaImage image={icon} width={size} height={size} offsetX={half} offsetY={half} listening={false} />
+        ) : (
+          <Group scaleX={size / 24} scaleY={size / 24} offsetX={12} offsetY={12} listening={false}>
+            <Path
+              data={glyph.solid}
+              fill={withAlpha(teamColor, 0.94)}
+              stroke={theme.contrast}
+              strokeWidth={GLYPH_CONTRAST_WIDTH}
+              lineJoin="round"
             />
-          )}
-
-          {flags.icon !== false &&
-            (icon ? (
-              <KonvaImage image={icon} width={size} height={size} offsetX={half} offsetY={half} listening={false} />
-            ) : (
-              <Group scaleX={size / 24} scaleY={size / 24} offsetX={12} offsetY={12} listening={false}>
-                <Path
-                  data={glyph.solid}
-                  fill={withAlpha(teamColor, 0.94)}
-                  stroke={theme.contrast}
-                  strokeWidth={GLYPH_CONTRAST_WIDTH}
-                  lineJoin="round"
-                />
-              </Group>
-            ))}
-        </Group>
+          </Group>
+        )}
 
         {/* Hit area — generous enough to grab comfortably at any zoom */}
         <Rect x={-half - 3} y={-half - 3} width={size + 6} height={size + 6} fill="transparent" />
 
-        {/* The name sits outside the rotating group, so it stays horizontal
-            whatever the ship's heading, and is centred on the hull by giving
-            the Text its own width and centring within it. */}
-        {text && (
-          <Text
-            text={text}
-            x={-NAME_PLATE_W / 2}
-            y={half + 5}
-            width={NAME_PLATE_W}
-            align="center"
-            fontSize={NAME_FONT}
-            lineHeight={1.25}
-            fontFamily="Inter, Segoe UI, sans-serif"
-            fontStyle="600"
-            fill={theme.plateText}
-            stroke={theme.contrast}
-            strokeWidth={2.6}
-            fillAfterStrokeEnabled
-            listening={false}
-          />
-        )}
+      </Group>
+    </Group>
+  );
+});
+
+/**
+ * The ship's name (and, when asked for, its consumables).
+ *
+ * Drawn as a sibling of the marker rather than a child, for two reasons: it
+ * must never turn with the hull, and it must not swell the transformer's
+ * bounding box — a 160px-wide plate inside a rotated node produces a large
+ * tilted diamond around a small ship.
+ */
+export const ShipLabel = memo(function ShipLabel({
+  obj,
+  ship,
+  flags,
+  inv,
+  baseSize,
+  hasIcon,
+  theme,
+}: {
+  obj: ShipObject;
+  ship?: Ship;
+  flags: CharacteristicFlags;
+  inv: number;
+  baseSize: number;
+  /** Imported icons are drawn at full size; procedural glyphs are scaled. */
+  hasIcon: boolean;
+  theme: CanvasTheme;
+}) {
+  if (!obj.visible) return null;
+
+  const glyph = CLASS_GLYPHS[obj.shipClass] ?? CLASS_GLYPHS.CA;
+  const half = (baseSize * obj.iconScale * (hasIcon ? 1 : glyph.scale)) / 2;
+
+  const lines: string[] = [obj.label || obj.shipName];
+  if (flags.consumables && ship) {
+    for (const c of ship.consumables ?? []) {
+      lines.push(c.range_km ? `${c.name} ${c.range_km.toFixed(1)} km` : c.name);
+    }
+    if (ship.fighter) lines.push('Fighter');
+    if (ship.spottingAircraft) lines.push('Spotting Aircraft');
+  }
+
+  return (
+    <Group x={obj.x} y={obj.y} opacity={obj.opacity} listening={false}>
+      <Group scaleX={inv} scaleY={inv}>
+        <Text
+          text={lines.join('\n')}
+          x={-NAME_PLATE_W / 2}
+          y={half + 5}
+          width={NAME_PLATE_W}
+          align="center"
+          fontSize={NAME_FONT}
+          lineHeight={1.25}
+          fontFamily="Inter, Segoe UI, sans-serif"
+          fontStyle="600"
+          fill={theme.plateText}
+          stroke={theme.contrast}
+          strokeWidth={2.6}
+          fillAfterStrokeEnabled
+        />
       </Group>
     </Group>
   );
@@ -219,25 +241,11 @@ export const ShipRanges = memo(function ShipRanges({ obj, ship, flags, inv, them
         const fill = style.fill ? withAlpha(style.color, style.fillOpacity) : undefined;
         const strokeWidth = style.lineWidth * inv;
 
-        // Torpedoes are a launch sector, not a bubble.
-        const isCone = key === 'torpedo' && (ship?.torpedoArc_deg ?? 0) > 0;
-
         return (
           <Group key={key}>
-            {isCone ? (
-              <Arc
-                innerRadius={0}
-                outerRadius={radius}
-                angle={(ship?.torpedoArc_deg ?? 45) * 2}
-                rotation={obj.rotation - 90 - (ship?.torpedoArc_deg ?? 45)}
-                stroke={stroke}
-                strokeWidth={strokeWidth}
-                fill={fill}
-                dash={dash}
-              />
-            ) : (
-              <Circle radius={radius} stroke={stroke} strokeWidth={strokeWidth} fill={fill} dash={dash} />
-            )}
+            {/* Every range is a full circle, torpedoes included: the ring says
+                how far the weapon reaches, not which way the ship is facing. */}
+            <Circle radius={radius} stroke={stroke} strokeWidth={strokeWidth} fill={fill} dash={dash} />
             {style.showLabel && (
               <Group x={0} y={-radius} scaleX={inv} scaleY={inv}>
                 <Text
