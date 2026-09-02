@@ -54,6 +54,9 @@ const api = {
     remove: (id: string) => call<any[]>('map:delete', id),
     dataUrl: (file: string, mime: string) => call<string | null>('map:dataUrl', file, mime),
   },
+  capLayouts: {
+    list: () => call<any[]>('capLayout:list'),
+  },
   ships: {
     list: () => call<any[]>('ship:list'),
     saveAll: (ships: unknown[]) => call<void>('ship:saveAll', ships),

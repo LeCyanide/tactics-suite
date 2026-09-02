@@ -2,10 +2,8 @@ import { useMemo, useRef, useState } from 'react';
 import { ChevronRight, Database, Palette, Radar as RadarIcon, Save, Search, Trash2 } from 'lucide-react';
 import {
   CHARACTERISTICS,
-  PAGE_CHARACTERISTIC_KEYS,
   SHIP_CLASSES,
   shipClassCode,
-  DEFAULT_CHARACTERISTICS,
   DEFAULT_RANGE_STYLES,
   RANGE_KEYS,
   SHIP_CLASS_LABEL,
@@ -32,7 +30,7 @@ import {
   type ShapeTool,
   type ToolId,
 } from '@/state/store';
-import { Check, ColorInput, Field, NumInput, Panel, SectionLabel, Slider, Tip } from './common/ui';
+import { Check, ColorInput, Field, NumInput, Panel, Slider, Tip } from './common/ui';
 import { CLASS_COLORS } from '@/canvas/shipGlyphs';
 import { useAsset } from '@/state/assets';
 import { canvasApi } from '@/canvas/canvasBridge';
@@ -82,51 +80,14 @@ export function RightSidebar() {
 }
 
 /* ================================================================== */
-/* Nothing selected — page-level display defaults & tool settings      */
+/* Nothing selected — tool settings                                    */
 /* ================================================================== */
 
 function NoSelectionPanels() {
   const page = useStore(getActivePage);
   if (!page) return null;
 
-  return (
-    <>
-      <MapDisplayPanel />
-      <ToolDefaultsPanel />
-    </>
-  );
-}
-
-/**
- * Page-level characteristic defaults.
- *
- * These are the "global" toggles: they decide what every ship on the page
- * shows unless that ship overrides it. Everything is off by default, which is
- * what keeps a freshly-populated map clean.
- */
-function MapDisplayPanel() {
-  const page = useStore(getActivePage);
-  const s = () => useStore.getState();
-  if (!page) return null;
-
-  return (
-    <Panel title="Map Display" storageKey="mapDisplay">
-      {CHARACTERISTICS.filter((c) => c.group === 'other').map((c) => (
-        <Check
-          key={c.key}
-          label={c.label}
-          checked={page.display[c.key] ?? DEFAULT_CHARACTERISTICS[c.key] ?? false}
-          onChange={(v) => s().setPageDisplay(c.key, v)}
-        />
-      ))}
-
-      <div className="faint" style={{ fontSize: 11, marginTop: 8, lineHeight: 1.45 }}>
-        Every ship always shows its marker and its name. Ranges are set per
-        ship — select one to switch its detection, radar, hydro, gun or torpedo
-        circles on.
-      </div>
-    </Panel>
-  );
+  return <ToolDefaultsPanel />;
 }
 
 /**
@@ -482,6 +443,9 @@ function MarkerPropertiesPanel({ obj }: { obj: MarkerObject }) {
   );
 }
 
+/** Marker colour for a ship with no custom colour and no team. */
+const NEUTRAL_ICON_COLOR = '#8b98a5';
+
 function ShipPropertiesPanels({ obj }: { obj: ShipObject }) {
   const project = useStore((s) => s.project);
   const page = useStore(getActivePage);
@@ -493,6 +457,7 @@ function ShipPropertiesPanels({ obj }: { obj: ShipObject }) {
   if (!page || !project) return null;
 
   const map = maps.find((m) => m.id === page.mapId);
+  const team = project.teams.find((t) => t.id === obj.teamId);
   const flags = effectiveFlags(page, obj);
   const update = (patch: Partial<ShipObject>) => s().updateObject(obj.id, patch as Partial<TacticalObject>);
 
@@ -543,14 +508,18 @@ function ShipPropertiesPanels({ obj }: { obj: ShipObject }) {
         <Field label="Icon size">
           <Slider value={obj.iconScale} min={0.5} max={2.5} step={0.05} onChange={(v) => update({ iconScale: v })} format={(v) => `${v.toFixed(2)}x`} />
         </Field>
-        <Field label="Layer">
-          <select value={obj.layerId} onChange={(e) => update({ layerId: e.target.value })}>
-            {page.layers.map((l) => (
-              <option key={l.id} value={l.id}>
-                {l.name}
-              </option>
-            ))}
-          </select>
+        <Field label="Icon colour">
+          <ColorInput
+            value={obj.iconColor ?? team?.color ?? NEUTRAL_ICON_COLOR}
+            onChange={(v) => update({ iconColor: v })}
+          />
+          {obj.iconColor && (
+            <Tip label="Follow the team colour again" side="bottom">
+              <button className="btn sm" onClick={() => update({ iconColor: undefined })}>
+                Team
+              </button>
+            </Tip>
+          )}
         </Field>
 
         <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
@@ -566,13 +535,13 @@ function ShipPropertiesPanels({ obj }: { obj: ShipObject }) {
         </div>
       </Panel>
 
-      {/* Per-ship display overrides ---------------------------------- */}
+      {/* Range rings, per ship --------------------------------------- */}
       <Panel
-        title="Display on Map"
-        storageKey="shipDisplay"
+        title="Ranges"
+        storageKey="shipRanges"
         actions={
           Object.keys(obj.display).length > 0 ? (
-            <Tip label="Clear all overrides — follow page defaults" side="bottom">
+            <Tip label="Switch every range off" side="bottom">
               <button className="icon-btn" onClick={() => update({ display: {} })}>
                 <RadarIcon size={12} />
               </button>
@@ -580,13 +549,6 @@ function ShipPropertiesPanels({ obj }: { obj: ShipObject }) {
           ) : undefined
         }
       >
-        <div className="faint" style={{ fontSize: 11, marginBottom: 4, lineHeight: 1.45 }}>
-          Ranges belong to this ship alone — switch on what this ship should
-          show. Anything that follows a page default carries an{' '}
-          <span className="badge-override">OVR</span> badge once you change it; click the badge to fall back.
-        </div>
-
-        <SectionLabel>Ranges</SectionLabel>
         {CHARACTERISTICS.filter((c) => c.group === 'range').map((c) => {
           const km = shipRangeKm(ship, c.key);
           const on = flags[c.key] ?? false;
@@ -610,22 +572,7 @@ function ShipPropertiesPanels({ obj }: { obj: ShipObject }) {
             </div>
           );
         })}
-
-        <SectionLabel>Other</SectionLabel>
-        {CHARACTERISTICS.filter((c) => c.group === 'other').map((c) => (
-          <ShipFlagCheck key={c.key} obj={obj} flagKey={c.key} label={c.label} value={flags[c.key] ?? false} />
-        ))}
       </Panel>
-
-      {/* Consumables ------------------------------------------------- */}
-      <Panel title="Consumables" storageKey="shipConsumables">
-        {ship ? (
-          <ConsumableList shipId={ship.id} />
-        ) : (
-          <div className="empty-note">This ship is no longer in the database.</div>
-        )}
-      </Panel>
-
     </>
   );
 }
@@ -644,57 +591,15 @@ function ShipFlagCheck({
   disabledReason?: string;
 }) {
   const s = () => useStore.getState();
-  // Only page-level characteristics can be "overridden": a range has no page
-  // default to differ from, so the badge would be permanent noise on it.
-  const canOverride = PAGE_CHARACTERISTIC_KEYS.includes(flagKey);
-  const overridden = canOverride && Object.prototype.hasOwnProperty.call(obj.display, flagKey);
+  // Ranges are set per ship and have no page default to differ from, so there
+  // is nothing an override badge could mean here.
   return (
     <Check
       label={label}
       checked={value}
       title={disabledReason}
       onChange={(v) => s().setShipDisplay(obj.id, flagKey, v)}
-      overridden={overridden}
-      onClearOverride={canOverride ? () => s().setShipDisplay(obj.id, flagKey, undefined) : undefined}
     />
-  );
-}
-
-function ConsumableList({ shipId }: { shipId: string }) {
-  const ship = useStore((s) => s.ships.find((x) => x.id === shipId));
-  if (!ship) return null;
-
-  const rows: { name: string; value: string }[] = [];
-  if (ship.radar_km) rows.push({ name: 'Radar', value: `${ship.radar_km.toFixed(1)} km${ship.radarDuration_s ? ` · ${ship.radarDuration_s}s` : ''}` });
-  if (ship.hydro_km) rows.push({ name: 'Hydro', value: `${ship.hydro_km.toFixed(1)} km${ship.hydroDuration_s ? ` · ${ship.hydroDuration_s}s` : ''}` });
-  if (ship.smokeDuration_s || ship.smokeRadius_km)
-    rows.push({
-      name: 'Smoke',
-      value: `${ship.smokeRadius_km ? `${ship.smokeRadius_km.toFixed(2)} km` : ''}${ship.smokeDuration_s ? ` · ${ship.smokeDuration_s}s` : ''}`.trim(),
-    });
-  if (ship.fighter) rows.push({ name: 'Fighter', value: 'yes' });
-  if (ship.spottingAircraft) rows.push({ name: 'Spotting Aircraft', value: 'yes' });
-  for (const c of ship.consumables ?? []) {
-    rows.push({ name: c.name, value: c.range_km ? `${c.range_km.toFixed(1)} km` : c.duration_s ? `${c.duration_s}s` : '—' });
-  }
-
-  if (!rows.length) return <div className="empty-note">No consumables recorded for this ship.</div>;
-
-  return (
-    <div>
-      {rows.map((r, i) => (
-        <div key={i} className="field" style={{ padding: '1px 0' }}>
-          <label style={{ width: 'auto', flex: 1 }}>{r.name}</label>
-          <span className="mono dim" style={{ fontSize: 11 }}>
-            {r.value || '—'}
-          </span>
-        </div>
-      ))}
-      <div className="faint" style={{ fontSize: 10.5, marginTop: 6, lineHeight: 1.45 }}>
-        Radar and Hydro draw as range circles when their toggle above is on. Everything else, smoke included, can be
-        listed on the map with <em>Other Consumables</em>.
-      </div>
-    </div>
   );
 }
 

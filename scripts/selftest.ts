@@ -11,6 +11,7 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 
 import { parseShipData, serializeShips } from '../src/lib/shipImport';
+import { shipRangeKm } from '../src/state/store';
 import * as db from '../electron/storage/db';
 
 let failures = 0;
@@ -49,6 +50,34 @@ async function testShipImport(): Promise<void> {
   check('csv: "Destroyer" -> DD', shima.class === 'DD', shima.class);
   check('csv: 20000 m -> 20 km', shima.torpedoRange_km === 20, shima.torpedoRange_km);
   check('csv: "-" radar dropped', shima.radar_km === undefined, shima.radar_km);
+
+  // The in-game export shape: every unit in the header, and 0 standing in for
+  // "this ship has none".
+  const wows = [
+    'Ship,Class,Tier,Nation,Detection by Sea (km),Detection by Air (km),Main Battery Range (km),Torpedo Range (km),Airstrike Min Range (km),Airstrike Max Range (km),Radar Range (km),Hydro Range (km)',
+    'Petropavlovsk,Cruiser,10,U.S.S.R.,11.90,7.75,19.70,0,0,0,12.00,5.00',
+    'Gouden Leeuw,Cruiser,10,Netherlands,11.34,7.61,17.90,0,1.50,13.00,0,0',
+  ].join('\n');
+
+  const fromWows = parseShipData(wows, '.csv');
+  const petro = fromWows.ships.find((s) => s.name === 'Petropavlovsk')!;
+  check('wows: "(km)" header suffix ignored', petro.concealment_km === 11.9, petro.concealment_km);
+  check('wows: air detection mapped', petro.concealmentAir_km === 7.75, petro.concealmentAir_km);
+  check('wows: main battery range mapped', petro.mainBatteryRange_km === 19.7, petro.mainBatteryRange_km);
+  check('wows: radar range mapped', petro.radar_km === 12, petro.radar_km);
+  check('wows: hydro range mapped', petro.hydro_km === 5, petro.hydro_km);
+  check('wows: 0 torpedo range -> absent', petro.torpedoRange_km === undefined, petro.torpedoRange_km);
+  check('wows: "U.S.S.R." -> USSR', petro.nation === 'USSR', petro.nation);
+  check('wows: 0 airstrike -> absent', petro.airstrikeMaxRange_km === undefined, petro.airstrikeMaxRange_km);
+  check('wows: nothing left over to note', petro.notes === undefined, petro.notes);
+  const leeuw = fromWows.ships.find((s) => s.name === 'Gouden Leeuw')!;
+  check('wows: airstrike min mapped', leeuw.airstrikeMinRange_km === 1.5, leeuw.airstrikeMinRange_km);
+  check('wows: airstrike max mapped', leeuw.airstrikeMaxRange_km === 13, leeuw.airstrikeMaxRange_km);
+  check('wows: 0 radar -> absent', leeuw.radar_km === undefined, leeuw.radar_km);
+
+  // The ring is drawn from the maximum alone; the minimum is data only.
+  check('range: airstrike ring uses the maximum', shipRangeKm(leeuw, 'airstrike') === 13, shipRangeKm(leeuw, 'airstrike'));
+  check('range: no airstrike -> no ring', shipRangeKm(petro, 'airstrike') === undefined, shipRangeKm(petro, 'airstrike'));
 
   // JSON with a wrapper object and nested consumables.
   const json = JSON.stringify({

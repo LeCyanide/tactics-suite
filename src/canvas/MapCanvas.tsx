@@ -19,6 +19,7 @@ import {
 import { effectiveFlags, getActivePage, useStore } from '@/state/store';
 import { useAsset } from '@/state/assets';
 import { MapBackground } from './MapBackground';
+import { CapZones } from './CapZones';
 import { ObjectNode, flatten } from './ObjectNode';
 import { ShipLabel, ShipNode, ShipRanges } from './ShipNode';
 import { DEFAULT_EXPORT, setCanvasApi, type ExportOptions } from './canvasBridge';
@@ -58,6 +59,7 @@ export default function MapCanvas() {
   const project = useStore((s) => s.project);
   const page = useStore(getActivePage);
   const maps = useStore((s) => s.maps);
+  const capLayouts = useStore((s) => s.capLayouts);
   const ships = useStore((s) => s.ships);
   const icons = useStore((s) => s.icons);
   const camera = useStore((s) => s.camera);
@@ -627,12 +629,16 @@ export default function MapCanvas() {
   const show = {
     background: ex ? ex.background : true,
     grid: ex ? ex.grid : true,
+    caps: ex ? ex.caps : true,
     ships: ex ? ex.ships : true,
     ranges: ex ? ex.ranges : true,
     annotations: ex ? ex.annotations : true,
   };
 
   const gridLayer = page.layers.find((l) => l.id === LAYER_IDS.grid);
+  const capsLayer = page.layers.find((l) => l.id === LAYER_IDS.caps);
+  const capsVisible = show.caps && (capsLayer?.visible ?? true);
+  const capLayout = capsVisible ? (capLayouts.find((c) => c.id === page.capLayoutId) ?? null) : null;
   const shipObjects = page.objects.filter((o): o is ShipObject => o.type === 'ship');
   const layerById = new Map(page.layers.map((l) => [l.id, l]));
 
@@ -720,7 +726,7 @@ export default function MapCanvas() {
         onContextMenu={onContextMenu}
       >
         {/* Background: map image, grid, coordinates */}
-        <Layer listening={false} visible={show.background || show.grid}>
+        <Layer listening={false} visible={show.background || show.grid || capsVisible}>
           <MapBackground
             map={map}
             view={{
@@ -734,6 +740,8 @@ export default function MapCanvas() {
             fallbackHeight={FALLBACK_H}
             theme={theme}
           />
+          {/* Above the grid, below every tactical object. */}
+          <CapZones layout={capLayout} map={map} opacity={capsLayer?.opacity ?? 1} />
         </Layer>
 
         {/* Content: one Konva group per tactical layer, back to front */}
@@ -781,8 +789,6 @@ export default function MapCanvas() {
                     <ShipLabel
                       key={`label:${s.id}`}
                       obj={s}
-                      ship={s.shipId ? shipById.get(s.shipId) : undefined}
-                      flags={effectiveFlags(page, s)}
                       inv={inv}
                       baseSize={iconSize}
                       hasIcon={!!(s.shipId ? shipById.get(s.shipId)?.iconId : null)}

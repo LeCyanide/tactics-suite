@@ -10,6 +10,7 @@
  *     ships/icons.json              icon asset index
  *     ships/icons/<id>.<ext>        imported ship icons
  *     maps/maps.json                map database index
+ *     maps/cap-layouts.json         capture point layout library
  *     maps/assets/<id>.<ext>        imported map images
  *     projects/<id>.json            one document per project
  *     backups/<id>/<ts>.wowsplan    rolling backups
@@ -66,6 +67,7 @@ const P = {
   iconsDir: () => path.join(storageRoot(), 'ships', 'icons'),
   mapsDir: () => path.join(storageRoot(), 'maps'),
   mapsFile: () => path.join(storageRoot(), 'maps', 'maps.json'),
+  capLayoutsFile: () => path.join(storageRoot(), 'maps', 'cap-layouts.json'),
   mapAssetsDir: () => path.join(storageRoot(), 'maps', 'assets'),
   projectsDir: () => path.join(storageRoot(), 'projects'),
   projectFile: (id: string) => path.join(storageRoot(), 'projects', `${safeId(id)}.json`),
@@ -262,6 +264,19 @@ interface AnyMap {
 
 export async function listMaps(): Promise<AnyMap[]> {
   return readJson<AnyMap[]>(P.mapsFile(), []);
+}
+
+/**
+ * The capture point layout library.
+ *
+ * Read-only and shared by every project: these describe how the game itself
+ * lays a map out, so nothing in the editor writes them back. A missing or
+ * unreadable file simply means no layouts are on offer.
+ */
+export async function listCapLayouts(): Promise<unknown[]> {
+  const doc = await readJson<{ layouts?: unknown[] } | unknown[] | null>(P.capLayoutsFile(), null);
+  if (Array.isArray(doc)) return doc;
+  return doc?.layouts ?? [];
 }
 
 async function writeMaps(maps: AnyMap[]): Promise<void> {
