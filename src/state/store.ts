@@ -308,15 +308,11 @@ export const useStore = create<Store>((set, get) => {
   }, 400);
 
   /**
-   * Applies a mutation to a cloned project. History is pushed by default; live
-   * gestures (dragging, resizing) pass history:false and call pushHistory()
-   * once at the start of the gesture instead.
+   * Publishes a new project version: stamps the timestamps, pushes the previous
+   * version onto the undo stack unless the caller opted out, and schedules the
+   * autosave. The two commit helpers differ only in how much they copy.
    */
-  const commit = (fn: (draft: Project) => void, opts: { history?: boolean } = {}) => {
-    const current = get().project;
-    if (!current) return;
-    const next = clone(current);
-    fn(next);
+  const publish = (next: Project, current: Project, opts: { history?: boolean }) => {
     next.updatedAt = Date.now();
     const page = activePageOf(next);
     if (page) page.updatedAt = next.updatedAt;
@@ -334,12 +330,45 @@ export const useStore = create<Store>((set, get) => {
     autosave();
   };
 
-  /** Mutates the active page. */
-  const commitPage = (fn: (page: Page, draft: Project) => void, opts: { history?: boolean } = {}) => {
-    commit((draft) => {
-      const page = activePageOf(draft);
-      if (page) fn(page, draft);
-    }, opts);
+  /**
+   * Applies a mutation to a deep copy of the whole project. History is pushed
+   * by default; live gestures (dragging, resizing) pass history:false and call
+   * pushHistory() once at the start of the gesture instead.
+   *
+   * Reach for this only when the mutation leaves the active page — renaming or
+   * reordering pages, teams, project-level fields. Anything confined to one
+   * page belongs in commitPage, which copies far less.
+   */
+  const commit = (fn: (draft: Project) => void, opts: { history?: boolean } = {}) => {
+    const current = get().project;
+    if (!current) return;
+    const next = clone(current);
+    fn(next);
+    publish(next, current, opts);
+  };
+
+  /**
+   * Mutates the active page, copying only that page.
+   *
+   * The project and its pages array are copied shallowly and the active page is
+   * deep-cloned; every other page is shared with the previous version. That is
+   * what keeps dragging cheap on a large project — moveObjectsTo runs once per
+   * pointer move — and stops the hundred-entry undo stack from holding a
+   * hundred copies of pages that never changed.
+   *
+   * The callback gets the page and nothing else, deliberately: the sharing
+   * above is sound precisely because nothing here can reach another page. A
+   * mutation that needs the project must use commit instead.
+   */
+  const commitPage = (fn: (page: Page) => void, opts: { history?: boolean } = {}) => {
+    const current = get().project;
+    if (!current) return;
+    const target = activePageOf(current);
+    if (!target) return;
+    const draft = clone(target);
+    const next: Project = { ...current, pages: current.pages.map((p) => (p === target ? draft : p)) };
+    fn(draft);
+    publish(next, current, opts);
   };
 
   return {
