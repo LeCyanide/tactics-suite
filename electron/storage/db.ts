@@ -18,6 +18,8 @@
  * Writes are atomic: content goes to a sibling `.tmp` file which is then
  * renamed over the target, so a crash mid-write can never leave a truncated
  * project behind.
+ * A crash between the two steps leaves the temp file behind instead;
+ * `sweepTempFiles` clears those orphans out on startup.
  *
  * The rest of the application only talks to this module through the IPC
  * surface in `electron/ipc.ts`, so the backing implementation can be replaced
@@ -140,6 +142,88 @@ function queued<T>(key: string, task: () => Promise<T>): Promise<T> {
     next.catch(() => undefined),
   );
   return next;
+}
+
+/* ------------------------------------------------------------------ */
+/* Orphaned temp-file sweep                                            */
+/* ------------------------------------------------------------------ */
+
+/** The `<name>.<pid>.tmp` files written by the two helpers above. */
+const TMP_PATTERN = /\.(\d+)\.tmp$/;
+
+/**
+ * How old a temp file whose pid still resolves to a running process must be
+ * before we assume the number was recycled rather than that a write is in
+ * flight. Any real write completes in milliseconds, so an hour is generous.
+ */
+const TMP_MAX_AGE_MS = 60 * 60 * 1000;
+
+function pidIsRunning(pid: number): boolean {
+  if (!Number.isInteger(pid) || pid <= 0) return false;
+  try {
+    // Signal 0 performs the permission/existence check without signalling.
+    process.kill(pid, 0);
+    return true;
+  } catch (err: any) {
+    // EPERM means the process exists but belongs to someone else.
+    return err?.code === 'EPERM';
+  }
+}
+
+/** Every directory a `.tmp` file can be written into, backups included. */
+async function tmpDirs(): Promise<string[]> {
+  const backupsRoot = path.join(storageRoot(), 'backups');
+  const dirs = [
+    storageRoot(),
+    P.shipsDir(),
+    P.iconsDir(),
+    P.mapsDir(),
+    P.mapAssetsDir(),
+    P.projectsDir(),
+    backupsRoot,
+  ];
+  // Backups sit one level deeper, one directory per project.
+  const entries = await fsp.readdir(backupsRoot, { withFileTypes: true }).catch(() => []);
+  for (const e of entries) if (e.isDirectory()) dirs.push(path.join(backupsRoot, e.name));
+  return dirs;
+}
+
+/**
+ * Deletes temp files left behind by a process that died between writing one
+ * and renaming it over its target. Nothing else ever removes them, so without
+ * this they accumulate in `projects/`, `maps/` and `ships/` forever.
+ *
+ * A file is only removed once it is certain nobody is still writing it: its
+ * pid is gone, or the file is old enough that a live pid must be a recycled
+ * number rather than a second instance mid-write.
+ *
+ * Best-effort throughout — anything that cannot be inspected or deleted is
+ * left where it is, exactly as an unreadable document is only moved aside.
+ * Startup must never fail because of housekeeping.
+ */
+export async function sweepTempFiles(maxAgeMs = TMP_MAX_AGE_MS): Promise<string[]> {
+  const removed: string[] = [];
+  const now = Date.now();
+  for (const dir of await tmpDirs()) {
+    const entries = await fsp.readdir(dir, { withFileTypes: true }).catch(() => []);
+    for (const entry of entries) {
+      if (!entry.isFile()) continue;
+      const match = TMP_PATTERN.exec(entry.name);
+      if (!match) continue;
+      const full = path.join(dir, entry.name);
+      try {
+        if (pidIsRunning(Number(match[1]))) {
+          const st = await fsp.stat(full);
+          if (now - st.mtimeMs < maxAgeMs) continue;
+        }
+        await fsp.rm(full, { force: true });
+        removed.push(full);
+      } catch {
+        /* ignore */
+      }
+    }
+  }
+  return removed;
 }
 
 /* ------------------------------------------------------------------ */
