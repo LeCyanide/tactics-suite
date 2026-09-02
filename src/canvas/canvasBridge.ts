@@ -3,6 +3,7 @@ import type { Vec2 } from '@/types/model';
 export interface ExportOptions {
   background: boolean;
   grid: boolean;
+  caps: boolean;
   ships: boolean;
   ranges: boolean;
   annotations: boolean;
@@ -16,6 +17,7 @@ export interface ExportOptions {
 export const DEFAULT_EXPORT: ExportOptions = {
   background: true,
   grid: true,
+  caps: true,
   ships: true,
   ranges: true,
   annotations: true,

@@ -75,6 +75,7 @@ export function ExportModal() {
           <SectionLabel>Include</SectionLabel>
           {cat('background', 'Background Map')}
           {cat('grid', 'Grid & Coordinates')}
+          {cat('caps', 'Capture Zones')}
           {cat('ships', 'Ships')}
           {cat('ranges', 'Ship Ranges')}
           {cat('annotations', 'Annotations')}

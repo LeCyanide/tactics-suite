@@ -140,6 +140,7 @@ export function registerIpc(getWindow: GetWindow): void {
   /* ---------------- maps ---------------- */
 
   handle('map:list', () => db.listMaps());
+  handle('capLayout:list', () => db.listCapLayouts());
 
   handle('map:pickImages', async () => {
     const w = getWindow();

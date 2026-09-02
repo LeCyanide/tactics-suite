@@ -190,10 +190,14 @@ function PagesPanel() {
 function MapPanel() {
   const page = useStore(getActivePage);
   const maps = useStore((s) => s.maps);
+  const capLayouts = useStore((s) => s.capLayouts);
   const s = () => useStore.getState();
   if (!page) return null;
 
   const map = maps.find((m) => m.id === page.mapId) ?? null;
+  // A map offers whichever layouts were recorded for it; most have two or
+  // three, and a few have none.
+  const layouts = capLayouts.filter((c) => c.mapId === page.mapId);
 
   return (
     <Panel
@@ -216,17 +220,53 @@ function MapPanel() {
     >
       <select value={page.mapId ?? ''} onChange={(e) => s().setPageMap(e.target.value || null)}>
         <option value="">— No map —</option>
-        {maps.map((m) => (
-          <option key={m.id} value={m.id}>
-            {m.name}
-          </option>
-        ))}
+        {maps
+          .filter((m) => !m.archived)
+          .map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.name}
+            </option>
+          ))}
+        {/* Stand-ins are grouped rather than mixed in, so the real maps stay
+            the obvious choice and the temporary set is easy to spot. */}
+        {maps.some((m) => m.archived) && (
+          <optgroup label="Archived — layout baked into image">
+            {maps
+              .filter((m) => m.archived)
+              .map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.name}
+                </option>
+              ))}
+          </optgroup>
+        )}
       </select>
 
       {map && (
         <div className="faint mono" style={{ fontSize: 10.5, margin: '5px 2px' }}>
           {(map.widthMeters / 1000).toFixed(0)} × {(map.heightMeters / 1000).toFixed(0)} km · grid{' '}
           {page.mapView.gridCols ?? map.gridCols} × {page.mapView.gridRows ?? map.gridRows}
+        </div>
+      )}
+
+      {map && layouts.length > 0 && (
+        <Field label="Cap layout">
+          <select
+            value={page.capLayoutId ?? ''}
+            onChange={(e) => s().setPageCapLayout(e.target.value || null)}
+          >
+            <option value="">— None —</option>
+            {layouts.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </Field>
+      )}
+      {map && layouts.length === 0 && (
+        <div className="faint" style={{ fontSize: 10.5, margin: '5px 2px' }}>
+          No cap layouts recorded for this map.
         </div>
       )}
 

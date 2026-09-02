@@ -24,6 +24,23 @@ const CLASS_ALIASES: Record<string, ShipClass> = {
   ss: 'SS', submarine: 'SS', sub: 'SS', submarines: 'SS',
 };
 
+/**
+ * Nation names differ between every source that publishes them ("U.S.A.",
+ * "United States", "USA"). They are folded to one spelling so the database
+ * does not end up with the same navy under three labels in the filters.
+ * Anything unrecognised is kept exactly as written.
+ */
+const NATION_ALIASES: Record<string, string> = {
+  usa: 'USA', us: 'USA', america: 'USA', unitedstates: 'USA', unitedstatesofamerica: 'USA',
+  uk: 'UK', britain: 'UK', greatbritain: 'UK', unitedkingdom: 'UK', royalnavy: 'UK',
+  ussr: 'USSR', soviet: 'USSR', sovietunion: 'USSR', russia: 'USSR',
+  japan: 'Japan', germany: 'Germany', france: 'France', italy: 'Italy', spain: 'Spain',
+  netherlands: 'Netherlands', holland: 'Netherlands', dutch: 'Netherlands',
+  panasia: 'Pan-Asia', panamerica: 'Pan-America', panamerican: 'Pan-America',
+  europe: 'Europe', paneurope: 'Europe', european: 'Europe',
+  commonwealth: 'Commonwealth', panafrica: 'Pan-Africa',
+};
+
 const ROMAN: Record<string, number> = {
   i: 1, ii: 2, iii: 3, iv: 4, v: 5, vi: 6, vii: 7, viii: 8, ix: 9, x: 10, xi: 11, xii: 12,
 };
@@ -39,8 +56,8 @@ const FIELD_ALIASES: Record<string, string[]> = {
   speed_kn: ['speed', 'maxspeed', 'speedkn', 'knots'],
   rudderShift_s: ['ruddershift', 'rudder', 'ruddershifttime'],
   turningCircle_m: ['turningcircle', 'turningradius', 'turncircle'],
-  concealment_km: ['concealment', 'detectability', 'detection', 'detectionrange', 'seadetection', 'concealmentsea', 'detectabilitybysea'],
-  concealmentAir_km: ['concealmentair', 'airdetection', 'detectabilitybyair', 'airdetectability'],
+  concealment_km: ['concealment', 'detectability', 'detection', 'detectionrange', 'seadetection', 'concealmentsea', 'detectabilitybysea', 'detectionbysea', 'detectionsea', 'surfacedetection'],
+  concealmentAir_km: ['concealmentair', 'airdetection', 'detectabilitybyair', 'airdetectability', 'detectionbyair', 'detectionair'],
   mainBatteryRange_km: ['mainbatteryrange', 'range', 'artilleryrange', 'gunrange', 'firingrange', 'mainrange'],
   mainBattery: ['mainbattery', 'guns', 'artillery', 'mainguns'],
   secondaryRange_km: ['secondaryrange', 'secondarybatteryrange', 'atbarange'],
@@ -49,6 +66,8 @@ const FIELD_ALIASES: Record<string, string[]> = {
   torpedoSpeed_kn: ['torpedospeed', 'torpspeed'],
   torpedoArc_deg: ['torpedoarc', 'torpedoangle', 'torparc'],
   torpedoes: ['torpedoes', 'torps', 'torpedotubes'],
+  airstrikeMinRange_km: ['airstrikeminrange', 'airstrikemin', 'minairstrikerange', 'airstrikerangemin'],
+  airstrikeMaxRange_km: ['airstrikemaxrange', 'airstrikemax', 'maxairstrikerange', 'airstrikerangemax', 'airstrikerange', 'airstrike'],
   aaRange_km: ['aarange', 'antiairrange', 'aadistance'],
   aa: ['aa', 'antiair', 'aadps', 'aadefense'],
   radar_km: ['radar', 'radarrange', 'surveillanceradar', 'radarkm'],
@@ -67,6 +86,30 @@ function norm(key: string): string {
   return key.toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
+/** Unit words that trail a column name rather than belong to it. */
+const UNIT_WORDS = new Set([
+  'km', 'm', 'nm', 'kn', 'kt', 'kts', 'knot', 'knots', 's', 'sec', 'secs', 'second', 'seconds',
+  'deg', 'degree', 'degrees', 'mm', 'hp', 'pct', 'percent', '%',
+]);
+
+/**
+ * Column names carry their units — "Detection by Sea (km)", "Speed, kn" — and
+ * the unit is never part of what the column means. A parenthesised group and a
+ * trailing unit word are dropped so those headers land on the same key as the
+ * bare ones. The unit only goes if something is left to match on, so a column
+ * headed just "km" or "HP" still keeps its name.
+ */
+function normHeader(key: string): string {
+  const stripped = key
+    .replace(/\([^)]*\)/g, ' ')
+    .replace(/\[[^\]]*\]/g, ' ')
+    .trim()
+    .replace(/[\s,;:_/-]+(?:in\s+)?([a-z%]+)\.?$/i, (all, unit) =>
+      UNIT_WORDS.has(String(unit).toLowerCase()) ? '' : all,
+    );
+  return norm(stripped) || norm(key);
+}
+
 /** Pulls "12.4" out of "12.4 km", "12,4km", "97 200 HP" or a plain number. */
 function num(value: unknown): number | undefined {
   if (value === null || value === undefined || value === '') return undefined;
@@ -78,6 +121,21 @@ function num(value: unknown): number | undefined {
   if (!match) return undefined;
   const n = parseFloat(match[0]);
   return Number.isFinite(n) ? n : undefined;
+}
+
+/**
+ * A stat column reading 0 means the ship has none of it: exports write 0 where
+ * a blank cell was meant, and a ship with "radar 0" has no radar. Treating it
+ * as absent keeps zero-radius rings and "0.0 km" labels out of the planner.
+ */
+function pos(value: unknown): number | undefined {
+  const n = num(value);
+  return n !== undefined && n > 0 ? n : undefined;
+}
+
+/** Whether a cell is a written-out zero, for columns we do not recognise. */
+function isZero(value: unknown): boolean {
+  return /^0+([.,]0+)?$/.test(String(value).trim());
 }
 
 function bool(value: unknown): boolean | undefined {
@@ -105,6 +163,12 @@ function toClass(value: unknown): ShipClass {
   return 'CA';
 }
 
+function toNation(value: unknown): string | undefined {
+  const text = String(value ?? '').trim();
+  if (!text) return undefined;
+  return NATION_ALIASES[norm(text)] ?? text;
+}
+
 /** Source values that name a light cruiser specifically. */
 const CL_ALIASES = ['cl', 'lightcruiser'];
 
@@ -123,7 +187,7 @@ function toCruiserType(value: unknown): 'CA' | 'CL' | undefined {
  * above 100 in a "km" field is treated as metres.
  */
 function toKm(value: unknown): number | undefined {
-  const n = num(value);
+  const n = pos(value);
   if (n === undefined) return undefined;
   if (n > 100) return n / 1000;
   return n;
@@ -131,10 +195,14 @@ function toKm(value: unknown): number | undefined {
 
 function pick(raw: Raw, field: string): unknown {
   const aliases = FIELD_ALIASES[field] ?? [field.toLowerCase()];
-  for (const key of Object.keys(raw)) {
-    if (aliases.includes(norm(key))) {
-      const v = raw[key];
-      if (v !== '' && v !== null && v !== undefined) return v;
+  // Exact header names win; only then is the unit-stripped form considered, so
+  // a file carrying both "Radar" and "Radar Range (km)" keeps the plain one.
+  for (const shape of [norm, normHeader]) {
+    for (const key of Object.keys(raw)) {
+      if (aliases.includes(shape(key))) {
+        const v = raw[key];
+        if (v !== '' && v !== null && v !== undefined) return v;
+      }
     }
   }
   return undefined;
@@ -168,12 +236,17 @@ function parseConsumables(raw: Raw): Consumable[] | undefined {
 
 const KNOWN_KEYS = new Set(Object.values(FIELD_ALIASES).flat().concat(['consumables', 'otherconsumables', 'id']));
 
+/** Whether a column was consumed by a field, under either header shape. */
+function isKnownKey(key: string): boolean {
+  return KNOWN_KEYS.has(norm(key)) || KNOWN_KEYS.has(normHeader(key));
+}
+
 export function normalizeShip(raw: Raw, existing?: Ship): Ship {
   const name = String(pick(raw, 'name') ?? existing?.name ?? 'Unnamed Ship').trim();
 
   // Anything we did not recognise is folded into the notes rather than lost.
   const leftovers = Object.entries(raw)
-    .filter(([k, v]) => !KNOWN_KEYS.has(norm(k)) && v !== '' && v !== null && v !== undefined)
+    .filter(([k, v]) => !isKnownKey(k) && v !== '' && v !== null && v !== undefined && !isZero(v))
     .map(([k, v]) => `${k}: ${typeof v === 'object' ? JSON.stringify(v) : String(v)}`);
 
   const notesFromField = pick(raw, 'notes');
@@ -182,14 +255,14 @@ export function normalizeShip(raw: Raw, existing?: Ship): Ship {
   const ship: Ship = {
     id: (raw.id ? String(raw.id) : undefined) ?? existing?.id ?? uid('ship-'),
     name,
-    nation: String(pick(raw, 'nation') ?? existing?.nation ?? 'Unknown'),
+    nation: toNation(pick(raw, 'nation')) ?? existing?.nation ?? 'Unknown',
     class: pick(raw, 'class') !== undefined ? toClass(pick(raw, 'class')) : (existing?.class ?? 'CA'),
     cruiserType: undefined, // resolved below, once the class is known
     tier: pick(raw, 'tier') !== undefined ? toTier(pick(raw, 'tier')) : (existing?.tier ?? 10),
-    hp: num(pick(raw, 'hp')) ?? existing?.hp,
-    speed_kn: num(pick(raw, 'speed_kn')) ?? existing?.speed_kn,
-    rudderShift_s: num(pick(raw, 'rudderShift_s')) ?? existing?.rudderShift_s,
-    turningCircle_m: num(pick(raw, 'turningCircle_m')) ?? existing?.turningCircle_m,
+    hp: pos(pick(raw, 'hp')) ?? existing?.hp,
+    speed_kn: pos(pick(raw, 'speed_kn')) ?? existing?.speed_kn,
+    rudderShift_s: pos(pick(raw, 'rudderShift_s')) ?? existing?.rudderShift_s,
+    turningCircle_m: pos(pick(raw, 'turningCircle_m')) ?? existing?.turningCircle_m,
     concealment_km: toKm(pick(raw, 'concealment_km')) ?? existing?.concealment_km,
     concealmentAir_km: toKm(pick(raw, 'concealmentAir_km')) ?? existing?.concealmentAir_km,
     mainBatteryRange_km: toKm(pick(raw, 'mainBatteryRange_km')) ?? existing?.mainBatteryRange_km,
@@ -197,16 +270,18 @@ export function normalizeShip(raw: Raw, existing?: Ship): Ship {
     secondaryRange_km: toKm(pick(raw, 'secondaryRange_km')) ?? existing?.secondaryRange_km,
     secondaryBattery: (pick(raw, 'secondaryBattery') as string) ?? existing?.secondaryBattery,
     torpedoRange_km: toKm(pick(raw, 'torpedoRange_km')) ?? existing?.torpedoRange_km,
-    torpedoSpeed_kn: num(pick(raw, 'torpedoSpeed_kn')) ?? existing?.torpedoSpeed_kn,
-    torpedoArc_deg: num(pick(raw, 'torpedoArc_deg')) ?? existing?.torpedoArc_deg,
+    torpedoSpeed_kn: pos(pick(raw, 'torpedoSpeed_kn')) ?? existing?.torpedoSpeed_kn,
+    torpedoArc_deg: pos(pick(raw, 'torpedoArc_deg')) ?? existing?.torpedoArc_deg,
     torpedoes: (pick(raw, 'torpedoes') as string) ?? existing?.torpedoes,
+    airstrikeMinRange_km: toKm(pick(raw, 'airstrikeMinRange_km')) ?? existing?.airstrikeMinRange_km,
+    airstrikeMaxRange_km: toKm(pick(raw, 'airstrikeMaxRange_km')) ?? existing?.airstrikeMaxRange_km,
     aaRange_km: toKm(pick(raw, 'aaRange_km')) ?? existing?.aaRange_km,
     aa: (pick(raw, 'aa') as string) ?? existing?.aa,
     radar_km: toKm(pick(raw, 'radar_km')) ?? existing?.radar_km,
-    radarDuration_s: num(pick(raw, 'radarDuration_s')) ?? existing?.radarDuration_s,
+    radarDuration_s: pos(pick(raw, 'radarDuration_s')) ?? existing?.radarDuration_s,
     hydro_km: toKm(pick(raw, 'hydro_km')) ?? existing?.hydro_km,
-    hydroDuration_s: num(pick(raw, 'hydroDuration_s')) ?? existing?.hydroDuration_s,
-    smokeDuration_s: num(pick(raw, 'smokeDuration_s')) ?? existing?.smokeDuration_s,
+    hydroDuration_s: pos(pick(raw, 'hydroDuration_s')) ?? existing?.hydroDuration_s,
+    smokeDuration_s: pos(pick(raw, 'smokeDuration_s')) ?? existing?.smokeDuration_s,
     smokeRadius_km: toKm(pick(raw, 'smokeRadius_km')) ?? existing?.smokeRadius_km,
     fighter: bool(pick(raw, 'fighter')) ?? existing?.fighter,
     spottingAircraft: bool(pick(raw, 'spottingAircraft')) ?? existing?.spottingAircraft,
@@ -290,7 +365,8 @@ function coerceRows(data: unknown): Raw[] {
 const CSV_COLUMNS: (keyof Ship)[] = [
   'id', 'name', 'nation', 'class', 'cruiserType', 'tier', 'hp', 'speed_kn', 'rudderShift_s', 'turningCircle_m',
   'concealment_km', 'concealmentAir_km', 'mainBatteryRange_km', 'mainBattery', 'secondaryRange_km',
-  'torpedoRange_km', 'torpedoSpeed_kn', 'torpedoArc_deg', 'torpedoes', 'aaRange_km', 'aa',
+  'torpedoRange_km', 'torpedoSpeed_kn', 'torpedoArc_deg', 'torpedoes',
+  'airstrikeMinRange_km', 'airstrikeMaxRange_km', 'aaRange_km', 'aa',
   'radar_km', 'radarDuration_s', 'hydro_km', 'hydroDuration_s', 'smokeDuration_s', 'smokeRadius_km',
   'fighter', 'spottingAircraft', 'notes',
 ];

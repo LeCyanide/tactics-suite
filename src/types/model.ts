@@ -85,6 +85,15 @@ export interface Ship {
   torpedoArc_deg?: number;
   torpedoes?: string;
 
+  /**
+   * The airstrike ring is drawn from the maximum alone, as a full circle like
+   * every other range. The minimum is kept because the source data carries it
+   * and it survives an export round-trip, but nothing draws it: a hole in the
+   * ring buys less clarity than it costs.
+   */
+  airstrikeMinRange_km?: number;
+  airstrikeMaxRange_km?: number;
+
   aaRange_km?: number;
   aa?: string;
 
@@ -132,6 +141,19 @@ export interface GameMap {
   /** Grid divisions across / down. */
   gridCols: number;
   gridRows: number;
+  /** Game space this map came from, e.g. "spaces/46_Estuary". */
+  spaceName?: string;
+  /** Map extent in BigWorld units, as the game declares it (1 unit = 30 m). */
+  spaceSize?: number;
+  /**
+   * A stand-in kept only until real data replaces it — a pre-rendered image
+   * with a cap layout drawn into the artwork, covering a mode the layout
+   * library has nothing for. Flagged rather than hidden so the whole set can
+   * be found and dropped in one pass; see scripts/remove-archived-maps.mjs.
+   */
+  archived?: boolean;
+  /** The live map this one stands in for. */
+  archiveOf?: ID;
   addedAt: number;
   updatedAt: number;
 }
@@ -157,6 +179,82 @@ export const DEFAULT_MAP_VIEW: MapViewConfig = {
 };
 
 /* ------------------------------------------------------------------ */
+/* Capture point layouts                                               */
+/* ------------------------------------------------------------------ */
+
+/**
+ * One capture zone, as the game lays it out at the start of a match.
+ *
+ * Stored as fractions of the map extent rather than metres. A layout is then
+ * independent of both the game's own units and whatever metre size a map
+ * declares, so correcting a map's extent later can never leave its caps
+ * pointing at the wrong water. Multiply by the map extent to get world metres.
+ */
+export interface CapPoint {
+  /** 0 = A, 1 = B, 2 = C, … */
+  index: number;
+  label: string;
+  /** Centre, as a fraction of map width and height. */
+  nx: number;
+  ny: number;
+  /** Radius, as a fraction of map width. */
+  nr: number;
+  /** -1 = neutral, 0 = alpha, 1 = bravo. */
+  teamId: number;
+  /** Arms race caps start switched off and are enabled during the match. */
+  initiallyEnabled: boolean;
+  /** ControlPointType index; 0 = Control, 4 = BaseWithPoints. */
+  cpType: number;
+}
+
+/**
+ * A full cap layout for one map and mode. A map has several, and they are
+ * chosen per page — nothing about a map ties it to one layout.
+ */
+export interface CapLayout {
+  id: ID;
+  mapId: ID;
+  /** Game space it was read from, e.g. "spaces/46_Estuary". */
+  spaceName: string;
+  /** Human label, e.g. "Domination · 3 caps". */
+  name: string;
+  scenario: string;
+  gameMode: number;
+  points: CapPoint[];
+}
+
+/**
+ * Cap zone colours, taken from the game's own palette: alpha green, bravo red,
+ * and white where neither side starts in possession. These are deliberately
+ * not the project's team colours — a layout is a fact about the match, not
+ * something the planner authors, so it reads the same in every project.
+ */
+export const CAP_COLORS = {
+  neutral: '#FFFFFF',
+  alpha: '#4CE8AA',
+  bravo: '#FE4D2A',
+} as const;
+
+/**
+ * Fill alpha for a cap zone. Low enough that the islands inside a zone stay
+ * readable, which is usually the whole point of talking about a cap.
+ */
+export const CAP_FILL_OPACITY = 0.15;
+
+/**
+ * ControlPointType index for a scoring base — the two-base Standard battle
+ * layout. These are drawn with the game's base flag rather than a letter.
+ */
+export const CP_TYPE_BASE_WITH_POINTS = 4;
+
+/** The colour a cap is drawn in, from the team that starts owning it. */
+export function capColor(teamId: number): string {
+  if (teamId === 0) return CAP_COLORS.alpha;
+  if (teamId === 1) return CAP_COLORS.bravo;
+  return CAP_COLORS.neutral;
+}
+
+/* ------------------------------------------------------------------ */
 /* Ship characteristics that can be drawn on the map                   */
 /* ------------------------------------------------------------------ */
 
@@ -174,7 +272,7 @@ export type CharacteristicKey =
   | 'mainBattery'
   | 'secondary'
   | 'torpedo'
-  | 'consumables';
+  | 'airstrike';
 
 export const CHARACTERISTICS: { key: CharacteristicKey; label: string; group: 'range' | 'other' }[] = [
   { key: 'detection', label: 'Detection Range', group: 'range' },
@@ -183,7 +281,7 @@ export const CHARACTERISTICS: { key: CharacteristicKey; label: string; group: 'r
   { key: 'mainBattery', label: 'Main Battery Range', group: 'range' },
   { key: 'secondary', label: 'Secondary Battery Range', group: 'range' },
   { key: 'torpedo', label: 'Torpedo Range', group: 'range' },
-  { key: 'consumables', label: 'Other Consumables', group: 'other' },
+  { key: 'airstrike', label: 'Airstrike', group: 'range' },
 ];
 
 /** Characteristics that render as a circle / sector on the map. */
@@ -194,6 +292,7 @@ export const RANGE_KEYS: CharacteristicKey[] = [
   'mainBattery',
   'secondary',
   'torpedo',
+  'airstrike',
 ];
 
 /** Characteristics a page can set a default for: everything but the ranges. */
@@ -204,12 +303,10 @@ export const PAGE_CHARACTERISTIC_KEYS: CharacteristicKey[] = CHARACTERISTICS.fil
 export type CharacteristicFlags = Partial<Record<CharacteristicKey, boolean>>;
 
 /**
- * Default page-level state: nothing extra. Placing a ship shows the ship and
- * its name, and not one thing more until it is asked for.
+ * Default page-level state. Every characteristic is a range now, and ranges
+ * are decided per ship, so there is nothing left for a page to default.
  */
-export const DEFAULT_CHARACTERISTICS: CharacteristicFlags = {
-  consumables: false,
-};
+export const DEFAULT_CHARACTERISTICS: CharacteristicFlags = {};
 
 /** Every range off. The starting point for a ship's own range flags. */
 export const DEFAULT_RANGE_FLAGS: CharacteristicFlags = Object.fromEntries(
@@ -236,6 +333,7 @@ export const DEFAULT_RANGE_STYLES: RangeStyleMap = {
   mainBattery: { color: '#ff8f5e', opacity: 0.85, lineWidth: 1.5, fill: false, fillOpacity: 0.05, dashed: false, showLabel: true },
   secondary: { color: '#ffb38a', opacity: 0.8, lineWidth: 1.2, fill: false, fillOpacity: 0.05, dashed: true, showLabel: true },
   torpedo: { color: '#8f7bff', opacity: 0.9, lineWidth: 1.5, fill: true, fillOpacity: 0.1, dashed: false, showLabel: true },
+  airstrike: { color: '#ff7ab6', opacity: 0.9, lineWidth: 1.5, fill: true, fillOpacity: 0.07, dashed: false, showLabel: true },
 };
 
 /* ------------------------------------------------------------------ */
@@ -267,21 +365,28 @@ export interface Layer {
 /** Well-known layer ids, so new objects land somewhere sensible. */
 export const LAYER_IDS = {
   grid: 'layer-grid',
+  caps: 'layer-caps',
   ranges: 'layer-ranges',
   annotations: 'layer-annotations',
   ships: 'layer-ships',
 } as const;
 
 /**
- * Four layers, and no more. Shapes, arrows, text and markers all live on
+ * Five layers, and no more. Shapes, arrows, text and markers all live on
  * "Annotations" — they are drawn the same way and are almost always shown or
  * hidden together — while ranges keep their own layer so every circle on the
  * page can be switched off in one click.
+ *
+ * Grid and Cap Zones are background pseudo-layers: they hold no objects and
+ * exist only so the two can be toggled and faded like anything else. Both are
+ * locked, which is what keeps them out of every "which layer does this object
+ * go on" decision.
  */
 export function createDefaultLayers(): Layer[] {
   // Rendered back-to-front in array order.
   return [
     { id: LAYER_IDS.grid, name: 'Grid', visible: true, locked: true, opacity: 1, system: true },
+    { id: LAYER_IDS.caps, name: 'Cap Zones', visible: true, locked: true, opacity: 1, system: true },
     { id: LAYER_IDS.ranges, name: 'Ship Ranges', visible: true, locked: false, opacity: 1, system: true },
     { id: LAYER_IDS.annotations, name: 'Annotations', visible: true, locked: false, opacity: 1, system: true },
     { id: LAYER_IDS.ships, name: 'Ships', visible: true, locked: false, opacity: 1, system: true },
@@ -295,6 +400,25 @@ export const LEGACY_LAYER_REMAP: Record<string, string> = {
   'layer-shapes': LAYER_IDS.annotations,
   'layer-text': LAYER_IDS.annotations,
   'layer-pings': LAYER_IDS.annotations,
+};
+
+/**
+ * The two sides a project starts with. Green and red are the colours the game
+ * itself uses for friendly and enemy, so a plan reads the way a battle does.
+ */
+export const DEFAULT_TEAM_SIDES: { name: string; color: string }[] = [
+  { name: 'Alpha', color: '#3fd68a' },
+  { name: 'Bravo', color: '#ff5f56' },
+];
+
+/**
+ * Sides from before the competitive names, mapped onto what they are now.
+ * A project carrying these still has its two original sides untouched, so the
+ * colour is brought up to convention along with the name.
+ */
+export const LEGACY_TEAM_NAMES: Record<string, { name: string; color: string }> = {
+  'Team North': DEFAULT_TEAM_SIDES[0],
+  'Team South': DEFAULT_TEAM_SIDES[1],
 };
 
 /* ------------------------------------------------------------------ */
@@ -413,6 +537,12 @@ export interface ShipObject extends BaseObject {
   /** Per-ship range style overrides, layered on DEFAULT_RANGE_STYLES. */
   rangeStyles?: Partial<RangeStyleMap>;
   iconScale: number;
+  /**
+   * Overrides the team colour for this ship's marker. Undefined follows the
+   * team, which is what team membership is for; a colour here is for the one
+   * ship that has to stand out from its own side.
+   */
+  iconColor?: string;
   label?: string;
 }
 
@@ -427,6 +557,8 @@ export interface Page {
   name: string;
   mapId: ID | null;
   mapView: MapViewConfig;
+  /** Selected capture point layout, or null for none. */
+  capLayoutId: ID | null;
   layers: Layer[];
   objects: TacticalObject[];
   /**

@@ -372,6 +372,8 @@ function ShipEditor({ ship, onDeleted }: { ship: Ship; onDeleted: () => void }) 
       {numField('Secondary', 'secondaryRange_km', 'km')}
       {numField('Torp range', 'torpedoRange_km', 'km')}
       {numField('Torp arc', 'torpedoArc_deg', '°', 5)}
+      {numField('Airstrike min', 'airstrikeMinRange_km', 'km')}
+      {numField('Airstrike max', 'airstrikeMaxRange_km', 'km')}
       {numField('AA range', 'aaRange_km', 'km')}
 
       <SectionLabel>Consumables</SectionLabel>

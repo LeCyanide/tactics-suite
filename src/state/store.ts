@@ -8,10 +8,12 @@ import {
   DEFAULT_STROKE,
   LAYER_IDS,
   LEGACY_LAYER_REMAP,
+  LEGACY_TEAM_NAMES,
   PAGE_CHARACTERISTIC_KEYS,
   REMOVED_OBJECT_TYPES,
   createDefaultLayers,
   type AppSettings,
+  type CapLayout,
   type CharacteristicFlags,
   type CharacteristicKey,
   type GameMap,
@@ -123,6 +125,8 @@ interface State {
   ships: Ship[];
   icons: ShipIconAsset[];
   maps: GameMap[];
+  /** Read-only cap layout library, shared by every project. */
+  capLayouts: CapLayout[];
   settings: AppSettings;
 
   /* projects */
@@ -185,6 +189,7 @@ interface Actions {
   /** Absolute reorder, used by drag and drop on the board tabs. */
   movePageTo(id: ID, index: number): void;
   setPageMap(mapId: ID | null): void;
+  setPageCapLayout(capLayoutId: ID | null): void;
   patchMapView(patch: Partial<MapViewConfig>): void;
   setNotes(text: string): void;
   setPageDisplay(key: CharacteristicKey, value: boolean): void;
@@ -376,6 +381,7 @@ export const useStore = create<Store>((set, get) => {
     ships: [],
     icons: [],
     maps: [],
+    capLayouts: [],
     settings: clone(DEFAULT_APP_SETTINGS),
     projectList: [],
     project: null,
@@ -402,11 +408,12 @@ export const useStore = create<Store>((set, get) => {
     /* ------------------------------ boot ------------------------------- */
 
     async boot() {
-      const [rawSettings, ships, icons, maps, projectList] = await Promise.all([
+      const [rawSettings, ships, icons, maps, capLayouts, projectList] = await Promise.all([
         window.api.settings.get().catch(() => ({})),
         window.api.ships.list().catch(() => []),
         window.api.icons.list().catch(() => []),
         window.api.maps.list().catch(() => []),
+        window.api.capLayouts.list().catch(() => []),
         window.api.projects.list().catch(() => []),
       ]);
 
@@ -421,6 +428,7 @@ export const useStore = create<Store>((set, get) => {
         ships: ships as Ship[],
         icons: icons as ShipIconAsset[],
         maps: maps as GameMap[],
+        capLayouts: capLayouts as CapLayout[],
         projectList: projectList as ProjectSummary[],
         booted: true,
       });
@@ -519,7 +527,14 @@ export const useStore = create<Store>((set, get) => {
       if (!doc.activePageId || !doc.pages.some((p) => p.id === doc.activePageId)) {
         doc.activePageId = doc.pages[0].id;
       }
-      doc.teams = doc.teams ?? [];
+      // Projects made before the sides were named for the competitive format
+      // carry "Team North"/"Team South". Those untouched defaults take both the
+      // name and the colour of the side they became; a team someone named
+      // themselves is left exactly as it is.
+      doc.teams = (doc.teams ?? []).map((t) => {
+        const side = LEGACY_TEAM_NAMES[t.name];
+        return side ? { ...t, name: side.name, color: side.color } : t;
+      });
       // Rebuilding settings from the known keys drops retired ones (showMinimap)
       // rather than carrying them along in every future save.
       doc.settings = { ...clone(DEFAULT_PROJECT_SETTINGS), ...(doc.settings ?? {}) };
@@ -733,8 +748,17 @@ export const useStore = create<Store>((set, get) => {
     setPageMap(mapId) {
       commitPage((page) => {
         page.mapId = mapId;
+        // A layout belongs to one map; keeping it would draw another map's
+        // caps over this one.
+        page.capLayoutId = null;
       });
       get().requestFit();
+    },
+
+    setPageCapLayout(capLayoutId) {
+      commitPage((page) => {
+        page.capLayoutId = capLayoutId;
+      });
     },
 
     patchMapView(patch) {
@@ -1356,7 +1380,10 @@ export function shipRangeKm(ship: Ship | undefined, key: CharacteristicKey): num
       return ship.secondaryRange_km;
     case 'torpedo':
       return ship.torpedoRange_km;
+    case 'airstrike':
+      return ship.airstrikeMaxRange_km;
     default:
       return undefined;
   }
 }
+

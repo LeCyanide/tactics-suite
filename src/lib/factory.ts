@@ -1,6 +1,7 @@
 import {
   DEFAULT_APP_SETTINGS,
   DEFAULT_CHARACTERISTICS,
+  DEFAULT_TEAM_SIDES,
   DEFAULT_MAP_VIEW,
   DEFAULT_PROJECT_SETTINGS,
   DEFAULT_STROKE,
@@ -24,15 +25,18 @@ import { canvasTheme } from '@/state/theme';
 
 /**
  * Every project starts with the two clan-war sides. The colours are the whole
- * point of team membership now: a ship's marker is painted in its team colour,
- * so Alpha reads green and Bravo reads red at a glance. Both are editable, and
+ * point of team membership: a ship's marker is painted in its team colour, so
+ * Alpha reads green and Bravo reads red at a glance. Both are editable, and
  * further teams can be added with any colour.
  */
 export function createTeams(): Team[] {
-  return [
-    { id: uid('team-'), name: 'Alpha', color: '#3fd68a', visible: true, locked: false },
-    { id: uid('team-'), name: 'Bravo', color: '#ff5f56', visible: true, locked: false },
-  ];
+  return DEFAULT_TEAM_SIDES.map((side) => ({
+    id: uid('team-'),
+    name: side.name,
+    color: side.color,
+    visible: true,
+    locked: false,
+  }));
 }
 
 export function createPage(name: string, mapId: ID | null = null): Page {
@@ -42,6 +46,7 @@ export function createPage(name: string, mapId: ID | null = null): Page {
     name,
     mapId,
     mapView: clone(DEFAULT_MAP_VIEW),
+    capLayoutId: null,
     layers: createDefaultLayers(),
     objects: [],
     display: clone(DEFAULT_CHARACTERISTICS),

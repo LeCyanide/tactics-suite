@@ -43,6 +43,16 @@ asset bytes, backups and id sanitisation):
 npm run selftest
 ```
 
+Seed or refresh the whole ship database from a file, without going through the
+in-app importer. It uses the same parser, matches existing ships by name so
+their ids and any hand-entered data survive, and backs the database up first:
+
+```bash
+node scripts/import-ships.mjs wows_ship_data.csv --data "%APPDATA%\WoWS Tactical Planner\data"
+```
+
+Add `--dry` to see what a run would change before it changes it.
+
 Packaged Windows installer + portable build (via electron-builder):
 
 ```bash
@@ -69,6 +79,13 @@ Everything is stored locally under the OS application-data directory:
 
 Set `WOWSPLAN_DATA_DIR` to point that whole tree somewhere else — a portable
 install on a USB stick, or a second data set for testing.
+
+That override is for those two cases only. It is a *separate* data set, not a
+second view of the same one: a session started with it sees different maps,
+ships and projects from one started without it, and work saved under one is
+invisible to the other. The path above is the single store the application, the
+packaged build and `scripts/import-ships.mjs` all use by default — leave the
+variable unset unless you specifically want an isolated tree.
 
 Writes are atomic (write to `.tmp`, then rename), so a crash mid-save can never
 truncate a project, and per-file write queues keep rapid autosaves from
@@ -163,22 +180,25 @@ Those two are not toggles — they are what a ship marker *is*, so there is
 nothing to switch off. The marker turns with the ship's heading; the name does
 not, staying centred beneath it and horizontal at every angle.
 
-Consumables are the one thing with a **page default** (`Map Display`) and a
-**per-ship override** (`Display on Map` when a ship is selected). Overridden
-entries are marked `OVR`; clicking the badge falls back to the page setting.
-
-Ranges — Detection, Radar, Hydro, Main Battery, Secondary, Torpedo — have no
-page default at all, and so no override badge either. They are set on one ship
-at a time, because a range is a statement about the ship that projects it.
+Ranges — Detection, Radar, Hydro, Main Battery, Secondary, Torpedo, Airstrike
+— are everything a ship can show, and they are set on one ship at a time,
+because a range is a statement about the ship that projects it. There is no
+page default to inherit and no override badge to clear; the `Ranges` panel's
+header button switches every range on that ship back off at once.
 
 When a range characteristic is switched on, its visualisation is generated
 automatically from the ship database — you never draw those circles by hand —
 and it exists *only* while that toggle is on. Every range is a full circle,
-torpedoes included: the ring answers how far the weapon reaches, not which way
-the ship happens to be pointing.
+torpedoes and airstrikes included: the ring answers how far the weapon reaches,
+not which way the ship happens to be pointing, and not where it cannot be
+aimed. An airstrike draws from its maximum range; the minimum is imported and
+kept with the ship, but a hole in the ring buys less clarity than it costs.
 
 Range styling (colour, opacity, line width, fill, dash, label) is configured on
-the ship whose range it is, layered over the built-in defaults.
+the ship whose range it is, layered over the built-in defaults. A ship's marker
+takes its colour from its team; `Icon colour` overrides that for one ship, and
+the `Team` button next to it falls back. Ships always live on the Ships layer,
+so there is no layer to choose.
 
 Hidden characteristics are not rendered, and therefore cannot appear in an
 exported image.

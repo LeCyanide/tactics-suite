@@ -22,6 +22,7 @@ const RANGE_LABEL: Record<string, string> = {
   mainBattery: 'Main Battery',
   secondary: 'Secondary',
   torpedo: 'Torpedo',
+  airstrike: 'Airstrike',
 };
 
 /** Width of the name plate, in screen px, used to centre it under the hull. */
@@ -65,7 +66,7 @@ export const ShipNode = memo(function ShipNode({
   const half = size / 2;
   // Team membership is the only thing that colours a ship. A ship with no
   // team falls back to neutral grey rather than to a class colour.
-  const teamColor = team?.color ?? theme.neutral;
+  const teamColor = obj.iconColor ?? team?.color ?? theme.neutral;
 
   return (
     <Group
@@ -117,7 +118,7 @@ export const ShipNode = memo(function ShipNode({
 });
 
 /**
- * The ship's name (and, when asked for, its consumables).
+ * The ship's name.
  *
  * Drawn as a sibling of the marker rather than a child, for two reasons: it
  * must never turn with the hull, and it must not swell the transformer's
@@ -126,16 +127,12 @@ export const ShipNode = memo(function ShipNode({
  */
 export const ShipLabel = memo(function ShipLabel({
   obj,
-  ship,
-  flags,
   inv,
   baseSize,
   hasIcon,
   theme,
 }: {
   obj: ShipObject;
-  ship?: Ship;
-  flags: CharacteristicFlags;
   inv: number;
   baseSize: number;
   /** Imported icons are drawn at full size; procedural glyphs are scaled. */
@@ -147,20 +144,13 @@ export const ShipLabel = memo(function ShipLabel({
   const glyph = CLASS_GLYPHS[obj.shipClass] ?? CLASS_GLYPHS.CA;
   const half = (baseSize * obj.iconScale * (hasIcon ? 1 : glyph.scale)) / 2;
 
-  const lines: string[] = [obj.label || obj.shipName];
-  if (flags.consumables && ship) {
-    for (const c of ship.consumables ?? []) {
-      lines.push(c.range_km ? `${c.name} ${c.range_km.toFixed(1)} km` : c.name);
-    }
-    if (ship.fighter) lines.push('Fighter');
-    if (ship.spottingAircraft) lines.push('Spotting Aircraft');
-  }
+  const name = obj.label || obj.shipName;
 
   return (
     <Group x={obj.x} y={obj.y} opacity={obj.opacity} listening={false}>
       <Group scaleX={inv} scaleY={inv}>
         <Text
-          text={lines.join('\n')}
+          text={name}
           x={-NAME_PLATE_W / 2}
           y={half + 5}
           width={NAME_PLATE_W}
@@ -243,8 +233,9 @@ export const ShipRanges = memo(function ShipRanges({ obj, ship, flags, inv, them
 
         return (
           <Group key={key}>
-            {/* Every range is a full circle, torpedoes included: the ring says
-                how far the weapon reaches, not which way the ship is facing. */}
+            {/* Every range is a full circle, torpedoes and airstrikes
+                included: the ring says how far the weapon reaches, not which
+                way the ship is facing, and not where it cannot be aimed. */}
             <Circle radius={radius} stroke={stroke} strokeWidth={strokeWidth} fill={fill} dash={dash} />
             {style.showLabel && (
               <Group x={0} y={-radius} scaleX={inv} scaleY={inv}>
