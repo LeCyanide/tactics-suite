@@ -101,6 +101,125 @@ export function ensureDirs(): void {
 }
 
 /* ------------------------------------------------------------------ */
+/* First-run seeding                                                   */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Where the shipped databases live.
+ *
+ * Packaged, electron-builder puts them beside the executable under
+ * `resources/seed`; in development they are the `seed/` directory at the
+ * repository root. Neither is guaranteed to be there — a checkout without the
+ * seed, or a build configured without it, is a normal state — so the caller
+ * treats `null` as "nothing to seed".
+ */
+function seedRoot(): string | null {
+  const candidates: string[] = [];
+  if (process.resourcesPath) candidates.push(path.join(process.resourcesPath, 'seed'));
+  try {
+    candidates.push(path.join(app.getAppPath(), 'seed'));
+  } catch {
+    /* app unavailable; the tests stub it out */
+  }
+  for (const dir of candidates) {
+    try {
+      if (fs.statSync(dir).isDirectory()) return dir;
+    } catch {
+      /* try the next candidate */
+    }
+  }
+  return null;
+}
+
+/** Copies a file only where the destination is absent. Never overwrites. */
+function copyFileIfAbsent(from: string, to: string): void {
+  if (fs.existsSync(to) || !fs.existsSync(from)) return;
+  fs.mkdirSync(path.dirname(to), { recursive: true });
+  fs.copyFileSync(from, to);
+}
+
+/** Copies the contents of `fromDir` into `toDir`, keeping any file already there. */
+function copyTreeInto(fromDir: string, toDir: string): void {
+  let entries: fs.Dirent[];
+  try {
+    entries = fs.readdirSync(fromDir, { withFileTypes: true });
+  } catch {
+    return;
+  }
+  fs.mkdirSync(toDir, { recursive: true });
+  for (const entry of entries) {
+    const from = path.join(fromDir, entry.name);
+    const to = path.join(toDir, entry.name);
+    if (entry.isDirectory()) copyTreeInto(from, to);
+    else copyFileIfAbsent(from, to);
+  }
+}
+
+/**
+ * Installs the ship database, the map library and the capture point layouts
+ * on first run.
+ *
+ * Without this a fresh install opens with no ships, no maps and no layouts,
+ * which is not an editor anyone can use: until now the databases were only
+ * ever created by the import scripts in `scripts/`, on the machine that ran
+ * them.
+ *
+ * Each database is keyed on its own index file and seeded only when that file
+ * is absent, which buys three properties worth having:
+ *
+ *   - an existing store is never overwritten, so a user's edits survive every
+ *     future release;
+ *   - a user who deliberately empties a database keeps it empty, because the
+ *     index file is still there;
+ *   - a later version that adds a database seeds only that one on upgrade and
+ *     leaves the rest alone.
+ *
+ * Individual assets are copied only where absent as well, so a first run
+ * interrupted half way through resumes cleanly on the next start.
+ *
+ * Seeding is best-effort. A missing, partial or unreadable seed leaves the
+ * store as empty as it would have been anyway, and must never stop the
+ * application from starting. Returns the databases it actually filled, for
+ * the startup log.
+ */
+export function seedStore(): string[] {
+  const seed = seedRoot();
+  if (!seed) return [];
+
+  const seeded: string[] = [];
+  const once = (index: string, label: string, fill: () => void): void => {
+    if (fs.existsSync(index)) return;
+    try {
+      fill();
+      seeded.push(label);
+    } catch {
+      /* leave this database empty; the application still runs */
+    }
+  };
+
+  once(P.shipsFile(), 'ships', () => {
+    copyFileIfAbsent(path.join(seed, 'ships', 'ships.json'), P.shipsFile());
+    copyFileIfAbsent(path.join(seed, 'ships', 'icons.json'), P.iconIndex());
+    copyTreeInto(path.join(seed, 'ships', 'icons'), P.iconsDir());
+  });
+
+  once(P.mapsFile(), 'maps', () => {
+    copyFileIfAbsent(path.join(seed, 'maps', 'maps.json'), P.mapsFile());
+    copyTreeInto(path.join(seed, 'maps', 'assets'), P.mapAssetsDir());
+    copyTreeInto(
+      path.join(seed, 'maps', 'archive-clan-battles'),
+      path.join(storageRoot(), 'maps', 'archive-clan-battles'),
+    );
+  });
+
+  once(P.capLayoutsFile(), 'cap layouts', () => {
+    copyFileIfAbsent(path.join(seed, 'maps', 'cap-layouts.json'), P.capLayoutsFile());
+  });
+
+  return seeded;
+}
+
+/* ------------------------------------------------------------------ */
 /* Atomic JSON helpers                                                 */
 /* ------------------------------------------------------------------ */
 

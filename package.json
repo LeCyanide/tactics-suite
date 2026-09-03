@@ -34,7 +34,13 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
-    }
+    },
+    "extraResources": [
+      {
+        "from": "seed",
+        "to": "seed"
+      }
+    ]
   },
   "dependencies": {
     "js-yaml": "^5.4.1",
