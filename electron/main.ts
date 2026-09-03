@@ -1,6 +1,6 @@
 import { app, BrowserWindow, shell, Menu } from 'electron';
 import path from 'node:path';
-import { ensureDirs, storageRoot, sweepTempFiles } from './storage/db';
+import { ensureDirs, seedStore, storageRoot, sweepTempFiles } from './storage/db';
 import { registerIpc } from './ipc';
 
 // This application is entirely local. Disabling remote content behaviours
@@ -74,6 +74,11 @@ function createWindow(): void {
 
 app.whenReady().then(() => {
   ensureDirs();
+  // Fills an empty store with the databases the build ships with. Synchronous
+  // on purpose: the renderer asks for ships and maps as soon as it loads, and
+  // it must not race a half-copied library.
+  const seeded = seedStore();
+  if (seeded.length) console.log(`[seed] installed ${seeded.join(', ')}`);
   // Housekeeping only: clears temp files orphaned by a crash mid-write.
   // It runs alongside startup and can never hold it up or fail it.
   void sweepTempFiles().catch(() => undefined);

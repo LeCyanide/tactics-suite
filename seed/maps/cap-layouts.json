@@ -1,0 +1,2550 @@
+{
+ "schemaVersion": 1,
+ "source": "wows-toolkit cap_layouts + maps.json spaceSize",
+ "notes": {
+  "coords": "nx/ny/nr are fractions of map extent; x = nx * map.widthMeters",
+  "teamId": "-1 = neutral, 0 and 1 = the two teams that start owning it",
+  "cpTypes": {
+   "0": "Control",
+   "1": "Base",
+   "2": "MegaBase",
+   "3": "BuildingCP",
+   "4": "BaseWithPoints",
+   "5": "EpicenterCP"
+  },
+  "naming": "The game's own name for the battle type, with a hyphen for its full stop and the cap count in brackets where it is not the standard three.",
+  "excluded": "Two-cap layouts that are not Standard Battle are brawl layouts and are not listed."
+ },
+ "layouts": [
+  {
+   "id": "cap-52_Britain-506",
+   "mapId": "map-35908291-61a0-4a07-a679-665babf6f314",
+   "spaceName": "spaces/52_Britain",
+   "name": "Domination",
+   "scenario": "domination_3point_revised",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.25,
+     "ny": 0.75,
+     "nr": 0.1,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.5,
+     "ny": 0.5,
+     "nr": 0.1,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.75,
+     "ny": 0.25,
+     "nr": 0.1,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-52_Britain-508",
+   "mapId": "map-35908291-61a0-4a07-a679-665babf6f314",
+   "spaceName": "spaces/52_Britain",
+   "name": "Domination (4 caps)",
+   "scenario": "domination_4point",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.207857,
+     "ny": 0.585714,
+     "nr": 0.078571,
+     "teamId": 0,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.414286,
+     "ny": 0.792143,
+     "nr": 0.078571,
+     "teamId": 1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.5,
+     "ny": 0.5,
+     "nr": 0.085714,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 3,
+     "label": "D",
+     "nx": 0.678571,
+     "ny": 0.321429,
+     "nr": 0.085714,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-46_Estuary-444",
+   "mapId": "map-daa2aa7d-f3f3-4901-b0b7-881de5ee47d7",
+   "spaceName": "spaces/46_Estuary",
+   "name": "Clans - Domination",
+   "scenario": "cvc_domination",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.229286,
+     "ny": 0.5,
+     "nr": 0.071429,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.714286,
+     "ny": 0.357143,
+     "nr": 0.057143,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.714286,
+     "ny": 0.642857,
+     "nr": 0.057143,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-46_Estuary-436",
+   "mapId": "map-daa2aa7d-f3f3-4901-b0b7-881de5ee47d7",
+   "spaceName": "spaces/46_Estuary",
+   "name": "Domination (4 caps)",
+   "scenario": "domination_4point_revised",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.227143,
+     "ny": 0.5,
+     "nr": 0.085714,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.5,
+     "ny": 0.375714,
+     "nr": 0.078571,
+     "teamId": 0,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.5,
+     "ny": 0.624286,
+     "nr": 0.078571,
+     "teamId": 1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 3,
+     "label": "D",
+     "nx": 0.772857,
+     "ny": 0.5,
+     "nr": 0.085714,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-46_Estuary-437",
+   "mapId": "map-daa2aa7d-f3f3-4901-b0b7-881de5ee47d7",
+   "spaceName": "spaces/46_Estuary",
+   "name": "Standard Battle",
+   "scenario": "domination_2point",
+   "gameMode": 11,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.5,
+     "ny": 0.664286,
+     "nr": 0.119286,
+     "teamId": 1,
+     "initiallyEnabled": true,
+     "cpType": 4
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.5,
+     "ny": 0.335714,
+     "nr": 0.119286,
+     "teamId": 0,
+     "initiallyEnabled": true,
+     "cpType": 4
+    }
+   ]
+  },
+  {
+   "id": "cap-51_Greece-484",
+   "mapId": "map-c93f7d4a-ac0f-45cd-9bb7-0138daee81a4",
+   "spaceName": "spaces/51_Greece",
+   "name": "Domination",
+   "scenario": "domination_3point_revised",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.228571,
+     "ny": 0.5,
+     "nr": 0.085714,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.5,
+     "ny": 0.5,
+     "nr": 0.085714,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.771429,
+     "ny": 0.5,
+     "nr": 0.085714,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-51_Greece-485",
+   "mapId": "map-c93f7d4a-ac0f-45cd-9bb7-0138daee81a4",
+   "spaceName": "spaces/51_Greece",
+   "name": "Domination (4 caps)",
+   "scenario": "domination_4point",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.228571,
+     "ny": 0.5,
+     "nr": 0.085714,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.5,
+     "ny": 0.5,
+     "nr": 0.085714,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.771429,
+     "ny": 0.264286,
+     "nr": 0.085714,
+     "teamId": 0,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 3,
+     "label": "D",
+     "nx": 0.771429,
+     "ny": 0.735714,
+     "nr": 0.085714,
+     "teamId": 1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-50_Gold_harbor-457",
+   "mapId": "map-56ef4641-ac72-4204-b831-d06baa4379cb",
+   "spaceName": "spaces/50_Gold_harbor",
+   "name": "Domination (4 caps)",
+   "scenario": "domination_4point",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.313571,
+     "ny": 0.325714,
+     "nr": 0.1,
+     "teamId": 0,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.421429,
+     "ny": 0.578571,
+     "nr": 0.085714,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.578571,
+     "ny": 0.421429,
+     "nr": 0.085714,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 3,
+     "label": "D",
+     "nx": 0.674286,
+     "ny": 0.686429,
+     "nr": 0.1,
+     "teamId": 1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-50_Gold_harbor-479",
+   "mapId": "map-56ef4641-ac72-4204-b831-d06baa4379cb",
+   "spaceName": "spaces/50_Gold_harbor",
+   "name": "Standard Battle",
+   "scenario": "domination_2point_coop",
+   "gameMode": 11,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.313571,
+     "ny": 0.325714,
+     "nr": 0.1,
+     "teamId": 0,
+     "initiallyEnabled": true,
+     "cpType": 4
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.674286,
+     "ny": 0.686429,
+     "nr": 0.1,
+     "teamId": 1,
+     "initiallyEnabled": true,
+     "cpType": 4
+    }
+   ]
+  },
+  {
+   "id": "cap-16_OC_bees_to_honey-145",
+   "mapId": "map-ad0ffc76-e7a7-40b4-81a9-254f4f403281",
+   "spaceName": "spaces/16_OC_bees_to_honey",
+   "name": "Arms Race",
+   "scenario": "armsrace",
+   "gameMode": 15,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.5,
+     "ny": 0.5,
+     "nr": 0.15625,
+     "teamId": -1,
+     "initiallyEnabled": false,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-16_OC_bees_to_honey-122",
+   "mapId": "map-ad0ffc76-e7a7-40b4-81a9-254f4f403281",
+   "spaceName": "spaces/16_OC_bees_to_honey",
+   "name": "Clans - Domination",
+   "scenario": "cvc_domination",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.390625,
+     "ny": 0.375,
+     "nr": 0.0625,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.390625,
+     "ny": 0.625,
+     "nr": 0.0625,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.6775,
+     "ny": 0.5,
+     "nr": 0.083125,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-16_OC_bees_to_honey-141",
+   "mapId": "map-ad0ffc76-e7a7-40b4-81a9-254f4f403281",
+   "spaceName": "spaces/16_OC_bees_to_honey",
+   "name": "Domination",
+   "scenario": "domination_3point",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.290625,
+     "ny": 0.5,
+     "nr": 0.075,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.49375,
+     "ny": 0.5,
+     "nr": 0.075,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.696875,
+     "ny": 0.5,
+     "nr": 0.075,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-16_OC_bees_to_honey-139",
+   "mapId": "map-ad0ffc76-e7a7-40b4-81a9-254f4f403281",
+   "spaceName": "spaces/16_OC_bees_to_honey",
+   "name": "Domination (4 caps)",
+   "scenario": "domination_4point_revised",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.290625,
+     "ny": 0.5,
+     "nr": 0.075,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.49375,
+     "ny": 0.31875,
+     "nr": 0.075,
+     "teamId": 0,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.49375,
+     "ny": 0.68125,
+     "nr": 0.075,
+     "teamId": 1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 3,
+     "label": "D",
+     "nx": 0.696875,
+     "ny": 0.5,
+     "nr": 0.075,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-18_NE_ice_islands-177",
+   "mapId": "map-7a77ed13-a979-4031-9fd6-46f1ddf9a7ba",
+   "spaceName": "spaces/18_NE_ice_islands",
+   "name": "Arms Race",
+   "scenario": "armsrace",
+   "gameMode": 15,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.5,
+     "ny": 0.5,
+     "nr": 0.178571,
+     "teamId": -1,
+     "initiallyEnabled": false,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-18_NE_ice_islands-169",
+   "mapId": "map-7a77ed13-a979-4031-9fd6-46f1ddf9a7ba",
+   "spaceName": "spaces/18_NE_ice_islands",
+   "name": "Domination",
+   "scenario": "domination_3point_revised",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.178571,
+     "ny": 0.5,
+     "nr": 0.107143,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.5,
+     "ny": 0.5,
+     "nr": 0.107143,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.821429,
+     "ny": 0.5,
+     "nr": 0.107143,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-18_NE_ice_islands-170",
+   "mapId": "map-7a77ed13-a979-4031-9fd6-46f1ddf9a7ba",
+   "spaceName": "spaces/18_NE_ice_islands",
+   "name": "Standard Battle",
+   "scenario": "domination_2point",
+   "gameMode": 11,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.5,
+     "ny": 0.178571,
+     "nr": 0.142857,
+     "teamId": 0,
+     "initiallyEnabled": true,
+     "cpType": 4
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.5,
+     "ny": 0.821429,
+     "nr": 0.142857,
+     "teamId": 1,
+     "initiallyEnabled": true,
+     "cpType": 4
+    }
+   ]
+  },
+  {
+   "id": "cap-22_tierra_del_fuego-232",
+   "mapId": "map-3c9da9c9-0de8-4f9a-a4f6-4ed51394413f",
+   "spaceName": "spaces/22_tierra_del_fuego",
+   "name": "Arms Race",
+   "scenario": "armsrace",
+   "gameMode": 15,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.5,
+     "ny": 0.5,
+     "nr": 0.15625,
+     "teamId": -1,
+     "initiallyEnabled": false,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-22_tierra_del_fuego-215",
+   "mapId": "map-3c9da9c9-0de8-4f9a-a4f6-4ed51394413f",
+   "spaceName": "spaces/22_tierra_del_fuego",
+   "name": "Clans - Domination",
+   "scenario": "cvc_domination",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.351875,
+     "ny": 0.3125,
+     "nr": 0.075,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.351875,
+     "ny": 0.6875,
+     "nr": 0.075,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.721875,
+     "ny": 0.5,
+     "nr": 0.06875,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-22_tierra_del_fuego-217",
+   "mapId": "map-3c9da9c9-0de8-4f9a-a4f6-4ed51394413f",
+   "spaceName": "spaces/22_tierra_del_fuego",
+   "name": "Domination",
+   "scenario": "domination_3point",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.16875,
+     "ny": 0.5,
+     "nr": 0.075,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.473125,
+     "ny": 0.5,
+     "nr": 0.06875,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.721875,
+     "ny": 0.5,
+     "nr": 0.06875,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-22_tierra_del_fuego-222",
+   "mapId": "map-3c9da9c9-0de8-4f9a-a4f6-4ed51394413f",
+   "spaceName": "spaces/22_tierra_del_fuego",
+   "name": "Domination (4 caps)",
+   "scenario": "domination_4point_revised",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.278125,
+     "ny": 0.5,
+     "nr": 0.06875,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.5,
+     "ny": 0.286875,
+     "nr": 0.06875,
+     "teamId": 0,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.5,
+     "ny": 0.713125,
+     "nr": 0.06875,
+     "teamId": 1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 3,
+     "label": "D",
+     "nx": 0.721875,
+     "ny": 0.5,
+     "nr": 0.06875,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-22_tierra_del_fuego-219",
+   "mapId": "map-3c9da9c9-0de8-4f9a-a4f6-4ed51394413f",
+   "spaceName": "spaces/22_tierra_del_fuego",
+   "name": "Standard Battle",
+   "scenario": "domination_2point",
+   "gameMode": 11,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.5125,
+     "ny": 0.25,
+     "nr": 0.1125,
+     "teamId": 0,
+     "initiallyEnabled": true,
+     "cpType": 4
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.5125,
+     "ny": 0.75,
+     "nr": 0.1125,
+     "teamId": 1,
+     "initiallyEnabled": true,
+     "cpType": 4
+    }
+   ]
+  },
+  {
+   "id": "cap-45_Zigzag-413",
+   "mapId": "map-553292bd-793b-4ee3-9358-34caec4fc140",
+   "spaceName": "spaces/45_Zigzag",
+   "name": "Arms Race",
+   "scenario": "armsrace",
+   "gameMode": 15,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.5,
+     "ny": 0.5,
+     "nr": 0.15625,
+     "teamId": -1,
+     "initiallyEnabled": false,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-45_Zigzag-401",
+   "mapId": "map-553292bd-793b-4ee3-9358-34caec4fc140",
+   "spaceName": "spaces/45_Zigzag",
+   "name": "Clans - Domination",
+   "scenario": "cvc_domination",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.25,
+     "ny": 0.5,
+     "nr": 0.075,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.653125,
+     "ny": 0.34375,
+     "nr": 0.0625,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.653125,
+     "ny": 0.65625,
+     "nr": 0.0625,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-45_Zigzag-420",
+   "mapId": "map-553292bd-793b-4ee3-9358-34caec4fc140",
+   "spaceName": "spaces/45_Zigzag",
+   "name": "Domination",
+   "scenario": "domination_3point",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.25,
+     "ny": 0.5,
+     "nr": 0.075,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.5,
+     "ny": 0.5,
+     "nr": 0.075,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.75,
+     "ny": 0.5,
+     "nr": 0.075,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-45_Zigzag-400",
+   "mapId": "map-553292bd-793b-4ee3-9358-34caec4fc140",
+   "spaceName": "spaces/45_Zigzag",
+   "name": "Tournament - Domination",
+   "scenario": "domination_tournament_3point",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.25,
+     "ny": 0.5,
+     "nr": 0.075,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.5,
+     "ny": 0.5,
+     "nr": 0.075,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.75,
+     "ny": 0.5,
+     "nr": 0.075,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-45_Zigzag-416",
+   "mapId": "map-553292bd-793b-4ee3-9358-34caec4fc140",
+   "spaceName": "spaces/45_Zigzag",
+   "name": "Tournament - Domination (4 caps)",
+   "scenario": "domination_tournament_4point",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.198125,
+     "ny": 0.3,
+     "nr": 0.08375,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.198125,
+     "ny": 0.7,
+     "nr": 0.08375,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.51375,
+     "ny": 0.5,
+     "nr": 0.0525,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 3,
+     "label": "D",
+     "nx": 0.859375,
+     "ny": 0.5,
+     "nr": 0.0525,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-37_Ridge-323",
+   "mapId": "map-9f671c7e-0b4a-4ee9-adbc-1cc3cbd60bb9",
+   "spaceName": "spaces/37_Ridge",
+   "name": "Arms Race",
+   "scenario": "armsrace",
+   "gameMode": 15,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.5,
+     "ny": 0.5,
+     "nr": 0.15625,
+     "teamId": -1,
+     "initiallyEnabled": false,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-37_Ridge-310",
+   "mapId": "map-9f671c7e-0b4a-4ee9-adbc-1cc3cbd60bb9",
+   "spaceName": "spaces/37_Ridge",
+   "name": "Domination",
+   "scenario": "domination_3point",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.325,
+     "ny": 0.5,
+     "nr": 0.084375,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.59375,
+     "ny": 0.5,
+     "nr": 0.084375,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.835623,
+     "ny": 0.5,
+     "nr": 0.084375,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-42_Neighbors-369",
+   "mapId": "map-52395043-c929-4ec7-a928-d30f4b5135cb",
+   "spaceName": "spaces/42_Neighbors",
+   "name": "Domination",
+   "scenario": "domination_3point",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.307143,
+     "ny": 0.692857,
+     "nr": 0.085714,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.5,
+     "ny": 0.5,
+     "nr": 0.085714,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.692857,
+     "ny": 0.307143,
+     "nr": 0.085714,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-42_Neighbors-372",
+   "mapId": "map-52395043-c929-4ec7-a928-d30f4b5135cb",
+   "spaceName": "spaces/42_Neighbors",
+   "name": "Standard Battle",
+   "scenario": "domination_2point",
+   "gameMode": 11,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.281915,
+     "ny": 0.225147,
+     "nr": 0.1,
+     "teamId": 0,
+     "initiallyEnabled": true,
+     "cpType": 4
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.737804,
+     "ny": 0.758129,
+     "nr": 0.1,
+     "teamId": 1,
+     "initiallyEnabled": true,
+     "cpType": 4
+    }
+   ]
+  },
+  {
+   "id": "cap-13_OC_new_dawn-71",
+   "mapId": "map-14b11e15-d73a-401b-8c88-229e178bca5d",
+   "spaceName": "spaces/13_OC_new_dawn",
+   "name": "Domination",
+   "scenario": "domination_3point_coop",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.25,
+     "ny": 0.25,
+     "nr": 0.0925,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.5,
+     "ny": 0.5,
+     "nr": 0.0925,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.75,
+     "ny": 0.75,
+     "nr": 0.0925,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-15_NE_north-97",
+   "mapId": "map-70f053e0-1422-4342-a7c8-b6853415ae52",
+   "spaceName": "spaces/15_NE_north",
+   "name": "Clans - Domination",
+   "scenario": "cvc_domination",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.42625,
+     "ny": 0.359375,
+     "nr": 0.059375,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.42625,
+     "ny": 0.640625,
+     "nr": 0.059375,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.725,
+     "ny": 0.5,
+     "nr": 0.05625,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-15_NE_north-105",
+   "mapId": "map-70f053e0-1422-4342-a7c8-b6853415ae52",
+   "spaceName": "spaces/15_NE_north",
+   "name": "Domination - Local Weather",
+   "scenario": "domination_localweather_3point",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.234375,
+     "ny": 0.5,
+     "nr": 0.06875,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.49,
+     "ny": 0.5,
+     "nr": 0.05,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.73375,
+     "ny": 0.5,
+     "nr": 0.059375,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-53_Shoreside-529",
+   "mapId": "map-5b617b74-2432-478b-bf4a-60b0198d7427",
+   "spaceName": "spaces/53_Shoreside",
+   "name": "Arms Race",
+   "scenario": "armsrace",
+   "gameMode": 15,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.5,
+     "ny": 0.5,
+     "nr": 0.178571,
+     "teamId": -1,
+     "initiallyEnabled": false,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-53_Shoreside-501",
+   "mapId": "map-5b617b74-2432-478b-bf4a-60b0198d7427",
+   "spaceName": "spaces/53_Shoreside",
+   "name": "Clans - Domination",
+   "scenario": "cvc_domination",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.214286,
+     "ny": 0.5,
+     "nr": 0.078571,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.653571,
+     "ny": 0.321429,
+     "nr": 0.071429,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.653571,
+     "ny": 0.678571,
+     "nr": 0.071429,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-53_Shoreside-523",
+   "mapId": "map-5b617b74-2432-478b-bf4a-60b0198d7427",
+   "spaceName": "spaces/53_Shoreside",
+   "name": "Domination",
+   "scenario": "domination_3point_revised",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.214286,
+     "ny": 0.5,
+     "nr": 0.078571,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.5,
+     "ny": 0.5,
+     "nr": 0.078571,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.785714,
+     "ny": 0.5,
+     "nr": 0.078571,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-05_Ring-37",
+   "mapId": "map-b17da5cf-ee73-4554-afa9-3dae00004d68",
+   "spaceName": "spaces/05_Ring",
+   "name": "Asymmetric Battle - Standard",
+   "scenario": "asymm_2point_coop",
+   "gameMode": 11,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.375,
+     "ny": 0.625,
+     "nr": 0.0925,
+     "teamId": 1,
+     "initiallyEnabled": true,
+     "cpType": 4
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.625,
+     "ny": 0.375,
+     "nr": 0.0925,
+     "teamId": 0,
+     "initiallyEnabled": true,
+     "cpType": 4
+    }
+   ]
+  },
+  {
+   "id": "cap-05_Ring-33",
+   "mapId": "map-b17da5cf-ee73-4554-afa9-3dae00004d68",
+   "spaceName": "spaces/05_Ring",
+   "name": "Domination (4 caps)",
+   "scenario": "domination_4point",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.375,
+     "ny": 0.375,
+     "nr": 0.091667,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.375,
+     "ny": 0.625,
+     "nr": 0.0925,
+     "teamId": 1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.625,
+     "ny": 0.375,
+     "nr": 0.0925,
+     "teamId": 0,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 3,
+     "label": "D",
+     "nx": 0.625,
+     "ny": 0.625,
+     "nr": 0.091667,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-r01_military_navigation-574",
+   "mapId": "map-6b1172bf-9e62-4c5d-a3e1-141f5b1e3e67",
+   "spaceName": "spaces/r01_military_navigation",
+   "name": "Domination (4 caps)",
+   "scenario": "domination_4point_alt",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.392857,
+     "ny": 0.785714,
+     "nr": 0.060714,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.446429,
+     "ny": 0.564286,
+     "nr": 0.05,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.553571,
+     "ny": 0.435714,
+     "nr": 0.05,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 3,
+     "label": "D",
+     "nx": 0.607143,
+     "ny": 0.214286,
+     "nr": 0.060714,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-25_sea_hope-256",
+   "mapId": "map-f766d937-45f8-4723-8f38-22063e7a98fa",
+   "spaceName": "spaces/25_sea_hope",
+   "name": "Clans - Domination",
+   "scenario": "cvc_domination",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.472232,
+     "ny": 0.5,
+     "nr": 0.071875,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.502849,
+     "ny": 0.5,
+     "nr": 0.04125,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.679557,
+     "ny": 0.5,
+     "nr": 0.05,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-25_sea_hope-257",
+   "mapId": "map-f766d937-45f8-4723-8f38-22063e7a98fa",
+   "spaceName": "spaces/25_sea_hope",
+   "name": "Domination",
+   "scenario": "domination_3point",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.326875,
+     "ny": 0.5,
+     "nr": 0.0625,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.5,
+     "ny": 0.5,
+     "nr": 0.0625,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.673125,
+     "ny": 0.5,
+     "nr": 0.0625,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-23_Shards-239",
+   "mapId": "map-7f12acc0-0db8-439c-b6bc-ad9804b39a32",
+   "spaceName": "spaces/23_Shards",
+   "name": "Clans - Domination",
+   "scenario": "cvc_domination",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.285714,
+     "ny": 0.714286,
+     "nr": 0.071429,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.5,
+     "ny": 0.5,
+     "nr": 0.085714,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.714286,
+     "ny": 0.285714,
+     "nr": 0.071429,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-23_Shards-241",
+   "mapId": "map-7f12acc0-0db8-439c-b6bc-ad9804b39a32",
+   "spaceName": "spaces/23_Shards",
+   "name": "Domination",
+   "scenario": "domination_3point_revised",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.285714,
+     "ny": 0.714286,
+     "nr": 0.071429,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.5,
+     "ny": 0.5,
+     "nr": 0.085714,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.714286,
+     "ny": 0.285714,
+     "nr": 0.071429,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-38_Canada-341",
+   "mapId": "map-5e2fe80a-02d8-4d19-a813-68c40614b1c9",
+   "spaceName": "spaces/38_Canada",
+   "name": "Clans - Domination",
+   "scenario": "cvc_domination",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.29125,
+     "ny": 0.5,
+     "nr": 0.0625,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.54375,
+     "ny": 0.375,
+     "nr": 0.05,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.5475,
+     "ny": 0.625,
+     "nr": 0.05,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-38_Canada-333",
+   "mapId": "map-5e2fe80a-02d8-4d19-a813-68c40614b1c9",
+   "spaceName": "spaces/38_Canada",
+   "name": "Domination",
+   "scenario": "domination_3point",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.25,
+     "ny": 0.5,
+     "nr": 0.06875,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.4625,
+     "ny": 0.5,
+     "nr": 0.06875,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.675,
+     "ny": 0.5,
+     "nr": 0.06875,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-38_Canada-335",
+   "mapId": "map-5e2fe80a-02d8-4d19-a813-68c40614b1c9",
+   "spaceName": "spaces/38_Canada",
+   "name": "Standard Battle",
+   "scenario": "domination_2point",
+   "gameMode": 11,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.44375,
+     "ny": 0.30625,
+     "nr": 0.1125,
+     "teamId": 0,
+     "initiallyEnabled": true,
+     "cpType": 4
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.44375,
+     "ny": 0.69375,
+     "nr": 0.1125,
+     "teamId": 1,
+     "initiallyEnabled": true,
+     "cpType": 4
+    }
+   ]
+  },
+  {
+   "id": "cap-47_Sleeping_Giant-447",
+   "mapId": "map-1a6140fd-b543-4fd0-a626-694cf5719f63",
+   "spaceName": "spaces/47_Sleeping_Giant",
+   "name": "Arms Race",
+   "scenario": "armsrace",
+   "gameMode": 15,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.5,
+     "ny": 0.5,
+     "nr": 0.178571,
+     "teamId": -1,
+     "initiallyEnabled": false,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-47_Sleeping_Giant-432",
+   "mapId": "map-1a6140fd-b543-4fd0-a626-694cf5719f63",
+   "spaceName": "spaces/47_Sleeping_Giant",
+   "name": "Clans - Domination",
+   "scenario": "cvc_domination",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.381429,
+     "ny": 0.5,
+     "nr": 0.078571,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.614286,
+     "ny": 0.3,
+     "nr": 0.05,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.614286,
+     "ny": 0.7,
+     "nr": 0.05,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-47_Sleeping_Giant-454",
+   "mapId": "map-1a6140fd-b543-4fd0-a626-694cf5719f63",
+   "spaceName": "spaces/47_Sleeping_Giant",
+   "name": "Domination",
+   "scenario": "domination_3point_revised",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.3,
+     "ny": 0.5,
+     "nr": 0.078571,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.5,
+     "ny": 0.5,
+     "nr": 0.078571,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.7,
+     "ny": 0.5,
+     "nr": 0.078571,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-47_Sleeping_Giant-456",
+   "mapId": "map-1a6140fd-b543-4fd0-a626-694cf5719f63",
+   "spaceName": "spaces/47_Sleeping_Giant",
+   "name": "Domination (4 caps)",
+   "scenario": "domination_4point",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.3,
+     "ny": 0.5,
+     "nr": 0.078571,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.5,
+     "ny": 0.285714,
+     "nr": 0.078571,
+     "teamId": 0,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.5,
+     "ny": 0.714286,
+     "nr": 0.078571,
+     "teamId": 1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 3,
+     "label": "D",
+     "nx": 0.7,
+     "ny": 0.5,
+     "nr": 0.078571,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-28_naval_mission-271",
+   "mapId": "map-6e8be00d-4af4-4a45-ae01-0835eaf300a4",
+   "spaceName": "spaces/28_naval_mission",
+   "name": "Clans - Domination",
+   "scenario": "cvc_domination",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.314286,
+     "ny": 0.314286,
+     "nr": 0.057143,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.427143,
+     "ny": 0.716429,
+     "nr": 0.107143,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.716429,
+     "ny": 0.427143,
+     "nr": 0.107143,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-28_naval_mission-273",
+   "mapId": "map-6e8be00d-4af4-4a45-ae01-0835eaf300a4",
+   "spaceName": "spaces/28_naval_mission",
+   "name": "Domination",
+   "scenario": "domination_3point_revised",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.251429,
+     "ny": 0.251429,
+     "nr": 0.107143,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.5,
+     "ny": 0.5,
+     "nr": 0.107143,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.748571,
+     "ny": 0.748571,
+     "nr": 0.107143,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-28_naval_mission-275",
+   "mapId": "map-6e8be00d-4af4-4a45-ae01-0835eaf300a4",
+   "spaceName": "spaces/28_naval_mission",
+   "name": "Standard Battle",
+   "scenario": "domination_2point",
+   "gameMode": 11,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.321429,
+     "ny": 0.678571,
+     "nr": 0.128571,
+     "teamId": 1,
+     "initiallyEnabled": true,
+     "cpType": 4
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.678571,
+     "ny": 0.321429,
+     "nr": 0.128571,
+     "teamId": 0,
+     "initiallyEnabled": true,
+     "cpType": 4
+    }
+   ]
+  },
+  {
+   "id": "cap-14_Atlantic-80",
+   "mapId": "map-3c82ba15-4803-4d01-beab-370a6a9a43dd",
+   "spaceName": "spaces/14_Atlantic",
+   "name": "Domination",
+   "scenario": "domination_3point_revised",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.242857,
+     "ny": 0.757143,
+     "nr": 0.101429,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.5,
+     "ny": 0.5,
+     "nr": 0.107857,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.757143,
+     "ny": 0.242857,
+     "nr": 0.101429,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-14_Atlantic-81",
+   "mapId": "map-3c82ba15-4803-4d01-beab-370a6a9a43dd",
+   "spaceName": "spaces/14_Atlantic",
+   "name": "Standard Battle",
+   "scenario": "domination_2point",
+   "gameMode": 11,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.303571,
+     "ny": 0.303571,
+     "nr": 0.128571,
+     "teamId": 0,
+     "initiallyEnabled": true,
+     "cpType": 4
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.696429,
+     "ny": 0.696429,
+     "nr": 0.128571,
+     "teamId": 1,
+     "initiallyEnabled": true,
+     "cpType": 4
+    }
+   ]
+  },
+  {
+   "id": "cap-54_Faroe-517",
+   "mapId": "map-cd6ab0b3-181c-4d93-9fff-71f887d24bf6",
+   "spaceName": "spaces/54_Faroe",
+   "name": "Clans - Domination",
+   "scenario": "cvc_domination",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.290625,
+     "ny": 0.521875,
+     "nr": 0.075,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.521875,
+     "ny": 0.290625,
+     "nr": 0.075,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.65625,
+     "ny": 0.65625,
+     "nr": 0.0625,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-54_Faroe-539",
+   "mapId": "map-cd6ab0b3-181c-4d93-9fff-71f887d24bf6",
+   "spaceName": "spaces/54_Faroe",
+   "name": "Domination",
+   "scenario": "domination_3point_revised",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.29375,
+     "ny": 0.29375,
+     "nr": 0.09375,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.5,
+     "ny": 0.5,
+     "nr": 0.09375,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.70625,
+     "ny": 0.70625,
+     "nr": 0.09375,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-54_Faroe-524",
+   "mapId": "map-cd6ab0b3-181c-4d93-9fff-71f887d24bf6",
+   "spaceName": "spaces/54_Faroe",
+   "name": "Domination (4 caps)",
+   "scenario": "domination_4point",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.346875,
+     "ny": 0.346875,
+     "nr": 0.075,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.5,
+     "ny": 0.5,
+     "nr": 0.075,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.5875,
+     "ny": 0.759375,
+     "nr": 0.075,
+     "teamId": 1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 3,
+     "label": "D",
+     "nx": 0.759375,
+     "ny": 0.5875,
+     "nr": 0.075,
+     "teamId": 0,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-19_OC_prey-192",
+   "mapId": "map-430f6cd8-6eb1-4673-9fac-2f705960e801",
+   "spaceName": "spaces/19_OC_prey",
+   "name": "Domination",
+   "scenario": "domination_3point_revised",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.217857,
+     "ny": 0.782143,
+     "nr": 0.128571,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.5,
+     "ny": 0.5,
+     "nr": 0.128571,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.753571,
+     "ny": 0.246429,
+     "nr": 0.128571,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-19_OC_prey-194",
+   "mapId": "map-430f6cd8-6eb1-4673-9fac-2f705960e801",
+   "spaceName": "spaces/19_OC_prey",
+   "name": "Ranked Battle - Domination",
+   "scenario": "ranked_domination",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.357143,
+     "ny": 0.642857,
+     "nr": 0.071429,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.478571,
+     "ny": 0.521429,
+     "nr": 0.071429,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.589286,
+     "ny": 0.410714,
+     "nr": 0.071429,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-41_Conquest-360",
+   "mapId": "map-15605436-6c23-4edb-bafe-c990db5ba754",
+   "spaceName": "spaces/41_Conquest",
+   "name": "Clans - Domination",
+   "scenario": "cvc_domination",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.321429,
+     "ny": 0.5,
+     "nr": 0.078571,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.5,
+     "ny": 0.5,
+     "nr": 0.071429,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.678571,
+     "ny": 0.5,
+     "nr": 0.078571,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-41_Conquest-362",
+   "mapId": "map-15605436-6c23-4edb-bafe-c990db5ba754",
+   "spaceName": "spaces/41_Conquest",
+   "name": "Domination",
+   "scenario": "domination_3point_revised",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.292857,
+     "ny": 0.5,
+     "nr": 0.078571,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.517857,
+     "ny": 0.5,
+     "nr": 0.071429,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.742857,
+     "ny": 0.5,
+     "nr": 0.078571,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-41_Conquest-350",
+   "mapId": "map-15605436-6c23-4edb-bafe-c990db5ba754",
+   "spaceName": "spaces/41_Conquest",
+   "name": "Ranked Battle - Domination",
+   "scenario": "ranked_domination",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.289286,
+     "ny": 0.5,
+     "nr": 0.078571,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.657143,
+     "ny": 0.321429,
+     "nr": 0.078571,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.657143,
+     "ny": 0.678571,
+     "nr": 0.078571,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-41_Conquest-347",
+   "mapId": "map-15605436-6c23-4edb-bafe-c990db5ba754",
+   "spaceName": "spaces/41_Conquest",
+   "name": "Standard Battle",
+   "scenario": "domination_2point",
+   "gameMode": 11,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.5,
+     "ny": 0.249286,
+     "nr": 0.1,
+     "teamId": 0,
+     "initiallyEnabled": true,
+     "cpType": 4
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.5,
+     "ny": 0.750714,
+     "nr": 0.1,
+     "teamId": 1,
+     "initiallyEnabled": true,
+     "cpType": 4
+    }
+   ]
+  },
+  {
+   "id": "cap-44_Path_warrior-411",
+   "mapId": "map-3089dd24-6ae6-459e-b2ba-da2881db11b8",
+   "spaceName": "spaces/44_Path_warrior",
+   "name": "Arms Race",
+   "scenario": "armsrace",
+   "gameMode": 15,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.53125,
+     "ny": 0.5,
+     "nr": 0.15625,
+     "teamId": -1,
+     "initiallyEnabled": false,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-44_Path_warrior-385",
+   "mapId": "map-3089dd24-6ae6-459e-b2ba-da2881db11b8",
+   "spaceName": "spaces/44_Path_warrior",
+   "name": "Clans - Domination",
+   "scenario": "cvc_domination",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.25,
+     "ny": 0.4875,
+     "nr": 0.075,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.6375,
+     "ny": 0.28125,
+     "nr": 0.075,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.6375,
+     "ny": 0.69375,
+     "nr": 0.075,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-44_Path_warrior-404",
+   "mapId": "map-3089dd24-6ae6-459e-b2ba-da2881db11b8",
+   "spaceName": "spaces/44_Path_warrior",
+   "name": "Domination",
+   "scenario": "domination_3point",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.265,
+     "ny": 0.5,
+     "nr": 0.075,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.5625,
+     "ny": 0.5,
+     "nr": 0.075,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.814375,
+     "ny": 0.5,
+     "nr": 0.075,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  }
+ ]
+}

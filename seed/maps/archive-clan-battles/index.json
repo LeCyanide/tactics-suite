@@ -1,0 +1,467 @@
+{
+ "schemaVersion": 1,
+ "note": "Provenance for the archived clan battles map images. The images themselves are registered as ordinary maps (ids prefixed \"map-cb-\", flagged \"archived\": true, names suffixed \" (CB)\") so they can be picked in the planner, and live in maps/assets alongside the rest. Remove them with `node scripts/remove-archived-maps.mjs` once the layout library covers these modes.",
+ "archivedAt": "2026-09-02",
+ "replacedBy": "maps/assets (regenerated from game minimap_water.png + minimap.png)",
+ "maps": [
+  {
+   "mapId": "map-6cf5d057-d3f1-43c2-ae6f-39922d8c621a",
+   "name": "Archipelago",
+   "spaceName": "spaces/04_Archipelago",
+   "originalFile": "map-6cf5d057-d3f1-43c2-ae6f-39922d8c621a.png",
+   "pixelWidth": 1078,
+   "pixelHeight": 1078,
+   "widthMeters": 30000,
+   "heightMeters": 30000,
+   "gridCols": 10,
+   "gridRows": 10,
+   "registeredAs": {
+    "id": "map-cb-6cf5d057-d3f1-43c2-ae6f-39922d8c621a",
+    "name": "Archipelago (CB)",
+    "file": "map-cb-6cf5d057-d3f1-43c2-ae6f-39922d8c621a.png"
+   }
+  },
+  {
+   "mapId": "map-2b6d9944-f777-4e47-9e51-3bac223cf1c7",
+   "name": "Big Race",
+   "spaceName": "spaces/10_NE_big_race",
+   "originalFile": "map-2b6d9944-f777-4e47-9e51-3bac223cf1c7.png",
+   "pixelWidth": 1078,
+   "pixelHeight": 1078,
+   "widthMeters": 30000,
+   "heightMeters": 30000,
+   "gridCols": 10,
+   "gridRows": 10,
+   "registeredAs": {
+    "id": "map-cb-2b6d9944-f777-4e47-9e51-3bac223cf1c7",
+    "name": "Big Race (CB)",
+    "file": "map-cb-2b6d9944-f777-4e47-9e51-3bac223cf1c7.png"
+   }
+  },
+  {
+   "mapId": "map-35908291-61a0-4a07-a679-665babf6f314",
+   "name": "Crash Zone Alpha",
+   "spaceName": "spaces/52_Britain",
+   "originalFile": "map-35908291-61a0-4a07-a679-665babf6f314.png",
+   "pixelWidth": 1078,
+   "pixelHeight": 1078,
+   "widthMeters": 42000,
+   "heightMeters": 42000,
+   "gridCols": 10,
+   "gridRows": 10,
+   "registeredAs": {
+    "id": "map-cb-35908291-61a0-4a07-a679-665babf6f314",
+    "name": "Crash Zone Alpha (CB)",
+    "file": "map-cb-35908291-61a0-4a07-a679-665babf6f314.png"
+   }
+  },
+  {
+   "mapId": "map-daa2aa7d-f3f3-4901-b0b7-881de5ee47d7",
+   "name": "Estuary",
+   "spaceName": "spaces/46_Estuary",
+   "originalFile": "map-daa2aa7d-f3f3-4901-b0b7-881de5ee47d7.png",
+   "pixelWidth": 1078,
+   "pixelHeight": 1078,
+   "widthMeters": 42000,
+   "heightMeters": 42000,
+   "gridCols": 10,
+   "gridRows": 10,
+   "registeredAs": {
+    "id": "map-cb-daa2aa7d-f3f3-4901-b0b7-881de5ee47d7",
+    "name": "Estuary (CB)",
+    "file": "map-cb-daa2aa7d-f3f3-4901-b0b7-881de5ee47d7.png"
+   }
+  },
+  {
+   "mapId": "map-c93f7d4a-ac0f-45cd-9bb7-0138daee81a4",
+   "name": "Greece",
+   "spaceName": "spaces/51_Greece",
+   "originalFile": "map-c93f7d4a-ac0f-45cd-9bb7-0138daee81a4.png",
+   "pixelWidth": 1078,
+   "pixelHeight": 1078,
+   "widthMeters": 42000,
+   "heightMeters": 42000,
+   "gridCols": 10,
+   "gridRows": 10,
+   "registeredAs": {
+    "id": "map-cb-c93f7d4a-ac0f-45cd-9bb7-0138daee81a4",
+    "name": "Greece (CB)",
+    "file": "map-cb-c93f7d4a-ac0f-45cd-9bb7-0138daee81a4.png"
+   }
+  },
+  {
+   "mapId": "map-56ef4641-ac72-4204-b831-d06baa4379cb",
+   "name": "Haven",
+   "spaceName": "spaces/50_Gold_harbor",
+   "originalFile": "map-56ef4641-ac72-4204-b831-d06baa4379cb.png",
+   "pixelWidth": 1078,
+   "pixelHeight": 1078,
+   "widthMeters": 42000,
+   "heightMeters": 42000,
+   "gridCols": 10,
+   "gridRows": 10,
+   "registeredAs": {
+    "id": "map-cb-56ef4641-ac72-4204-b831-d06baa4379cb",
+    "name": "Haven (CB)",
+    "file": "map-cb-56ef4641-ac72-4204-b831-d06baa4379cb.png"
+   }
+  },
+  {
+   "mapId": "map-ad0ffc76-e7a7-40b4-81a9-254f4f403281",
+   "name": "Hotspot",
+   "spaceName": "spaces/16_OC_bees_to_honey",
+   "originalFile": "map-ad0ffc76-e7a7-40b4-81a9-254f4f403281.png",
+   "pixelWidth": 1078,
+   "pixelHeight": 1078,
+   "widthMeters": 48000,
+   "heightMeters": 48000,
+   "gridCols": 10,
+   "gridRows": 10,
+   "registeredAs": {
+    "id": "map-cb-ad0ffc76-e7a7-40b4-81a9-254f4f403281",
+    "name": "Hotspot (CB)",
+    "file": "map-cb-ad0ffc76-e7a7-40b4-81a9-254f4f403281.png"
+   }
+  },
+  {
+   "mapId": "map-7a77ed13-a979-4031-9fd6-46f1ddf9a7ba",
+   "name": "Islands of Ice",
+   "spaceName": "spaces/18_NE_ice_islands",
+   "originalFile": "map-7a77ed13-a979-4031-9fd6-46f1ddf9a7ba.png",
+   "pixelWidth": 1078,
+   "pixelHeight": 1078,
+   "widthMeters": 42000,
+   "heightMeters": 42000,
+   "gridCols": 10,
+   "gridRows": 10,
+   "registeredAs": {
+    "id": "map-cb-7a77ed13-a979-4031-9fd6-46f1ddf9a7ba",
+    "name": "Islands of Ice (CB)",
+    "file": "map-cb-7a77ed13-a979-4031-9fd6-46f1ddf9a7ba.png"
+   }
+  },
+  {
+   "mapId": "map-3c9da9c9-0de8-4f9a-a4f6-4ed51394413f",
+   "name": "Land of Fire",
+   "spaceName": "spaces/22_tierra_del_fuego",
+   "originalFile": "map-3c9da9c9-0de8-4f9a-a4f6-4ed51394413f.png",
+   "pixelWidth": 1078,
+   "pixelHeight": 1078,
+   "widthMeters": 48000,
+   "heightMeters": 48000,
+   "gridCols": 10,
+   "gridRows": 10,
+   "registeredAs": {
+    "id": "map-cb-3c9da9c9-0de8-4f9a-a4f6-4ed51394413f",
+    "name": "Land of Fire (CB)",
+    "file": "map-cb-3c9da9c9-0de8-4f9a-a4f6-4ed51394413f.png"
+   }
+  },
+  {
+   "mapId": "map-553292bd-793b-4ee3-9358-34caec4fc140",
+   "name": "Loop",
+   "spaceName": "spaces/45_Zigzag",
+   "originalFile": "map-553292bd-793b-4ee3-9358-34caec4fc140.png",
+   "pixelWidth": 1078,
+   "pixelHeight": 1078,
+   "widthMeters": 48000,
+   "heightMeters": 48000,
+   "gridCols": 10,
+   "gridRows": 10,
+   "registeredAs": {
+    "id": "map-cb-553292bd-793b-4ee3-9358-34caec4fc140",
+    "name": "Loop (CB)",
+    "file": "map-cb-553292bd-793b-4ee3-9358-34caec4fc140.png"
+   }
+  },
+  {
+   "mapId": "map-9f671c7e-0b4a-4ee9-adbc-1cc3cbd60bb9",
+   "name": "Mountain Range",
+   "spaceName": "spaces/37_Ridge",
+   "originalFile": "map-9f671c7e-0b4a-4ee9-adbc-1cc3cbd60bb9.png",
+   "pixelWidth": 1078,
+   "pixelHeight": 1078,
+   "widthMeters": 48000,
+   "heightMeters": 48000,
+   "gridCols": 10,
+   "gridRows": 10,
+   "registeredAs": {
+    "id": "map-cb-9f671c7e-0b4a-4ee9-adbc-1cc3cbd60bb9",
+    "name": "Mountain Range (CB)",
+    "file": "map-cb-9f671c7e-0b4a-4ee9-adbc-1cc3cbd60bb9.png"
+   }
+  },
+  {
+   "mapId": "map-52395043-c929-4ec7-a928-d30f4b5135cb",
+   "name": "Neighbors",
+   "spaceName": "spaces/42_Neighbors",
+   "originalFile": "map-52395043-c929-4ec7-a928-d30f4b5135cb.png",
+   "pixelWidth": 1078,
+   "pixelHeight": 1078,
+   "widthMeters": 42000,
+   "heightMeters": 42000,
+   "gridCols": 10,
+   "gridRows": 10,
+   "registeredAs": {
+    "id": "map-cb-52395043-c929-4ec7-a928-d30f4b5135cb",
+    "name": "Neighbors (CB)",
+    "file": "map-cb-52395043-c929-4ec7-a928-d30f4b5135cb.png"
+   }
+  },
+  {
+   "mapId": "map-14b11e15-d73a-401b-8c88-229e178bca5d",
+   "name": "New Dawn",
+   "spaceName": "spaces/13_OC_new_dawn",
+   "originalFile": "map-14b11e15-d73a-401b-8c88-229e178bca5d.png",
+   "pixelWidth": 1078,
+   "pixelHeight": 1078,
+   "widthMeters": 36000,
+   "heightMeters": 36000,
+   "gridCols": 10,
+   "gridRows": 10,
+   "registeredAs": {
+    "id": "map-cb-14b11e15-d73a-401b-8c88-229e178bca5d",
+    "name": "New Dawn (CB)",
+    "file": "map-cb-14b11e15-d73a-401b-8c88-229e178bca5d.png"
+   }
+  },
+  {
+   "mapId": "map-70f053e0-1422-4342-a7c8-b6853415ae52",
+   "name": "North",
+   "spaceName": "spaces/15_NE_north",
+   "originalFile": "map-70f053e0-1422-4342-a7c8-b6853415ae52.png",
+   "pixelWidth": 1078,
+   "pixelHeight": 1078,
+   "widthMeters": 48000,
+   "heightMeters": 48000,
+   "gridCols": 10,
+   "gridRows": 10,
+   "registeredAs": {
+    "id": "map-cb-70f053e0-1422-4342-a7c8-b6853415ae52",
+    "name": "North (CB)",
+    "file": "map-cb-70f053e0-1422-4342-a7c8-b6853415ae52.png"
+   }
+  },
+  {
+   "mapId": "map-5b617b74-2432-478b-bf4a-60b0198d7427",
+   "name": "Northern Waters",
+   "spaceName": "spaces/53_Shoreside",
+   "originalFile": "map-5b617b74-2432-478b-bf4a-60b0198d7427.png",
+   "pixelWidth": 1078,
+   "pixelHeight": 1078,
+   "widthMeters": 42000,
+   "heightMeters": 42000,
+   "gridCols": 10,
+   "gridRows": 10,
+   "registeredAs": {
+    "id": "map-cb-5b617b74-2432-478b-bf4a-60b0198d7427",
+    "name": "Northern Waters (CB)",
+    "file": "map-cb-5b617b74-2432-478b-bf4a-60b0198d7427.png"
+   }
+  },
+  {
+   "mapId": "map-b17da5cf-ee73-4554-afa9-3dae00004d68",
+   "name": "Ring",
+   "spaceName": "spaces/05_Ring",
+   "originalFile": "map-b17da5cf-ee73-4554-afa9-3dae00004d68.png",
+   "pixelWidth": 1078,
+   "pixelHeight": 1078,
+   "widthMeters": 36000,
+   "heightMeters": 36000,
+   "gridCols": 10,
+   "gridRows": 10,
+   "registeredAs": {
+    "id": "map-cb-b17da5cf-ee73-4554-afa9-3dae00004d68",
+    "name": "Ring (CB)",
+    "file": "map-cb-b17da5cf-ee73-4554-afa9-3dae00004d68.png"
+   }
+  },
+  {
+   "mapId": "map-6b1172bf-9e62-4c5d-a3e1-141f5b1e3e67",
+   "name": "Riposte",
+   "spaceName": "spaces/r01_military_navigation",
+   "originalFile": "map-6b1172bf-9e62-4c5d-a3e1-141f5b1e3e67.png",
+   "pixelWidth": 1078,
+   "pixelHeight": 1078,
+   "widthMeters": 42000,
+   "heightMeters": 42000,
+   "gridCols": 10,
+   "gridRows": 10,
+   "registeredAs": {
+    "id": "map-cb-6b1172bf-9e62-4c5d-a3e1-141f5b1e3e67",
+    "name": "Riposte (CB)",
+    "file": "map-cb-6b1172bf-9e62-4c5d-a3e1-141f5b1e3e67.png"
+   }
+  },
+  {
+   "mapId": "map-f766d937-45f8-4723-8f38-22063e7a98fa",
+   "name": "Sea of Fortune",
+   "spaceName": "spaces/25_sea_hope",
+   "originalFile": "map-f766d937-45f8-4723-8f38-22063e7a98fa.png",
+   "pixelWidth": 1078,
+   "pixelHeight": 1078,
+   "widthMeters": 48000,
+   "heightMeters": 48000,
+   "gridCols": 10,
+   "gridRows": 10,
+   "registeredAs": {
+    "id": "map-cb-f766d937-45f8-4723-8f38-22063e7a98fa",
+    "name": "Sea of Fortune (CB)",
+    "file": "map-cb-f766d937-45f8-4723-8f38-22063e7a98fa.png"
+   }
+  },
+  {
+   "mapId": "map-7f12acc0-0db8-439c-b6bc-ad9804b39a32",
+   "name": "Shards",
+   "spaceName": "spaces/23_Shards",
+   "originalFile": "map-7f12acc0-0db8-439c-b6bc-ad9804b39a32.png",
+   "pixelWidth": 1078,
+   "pixelHeight": 1078,
+   "widthMeters": 42000,
+   "heightMeters": 42000,
+   "gridCols": 10,
+   "gridRows": 10,
+   "registeredAs": {
+    "id": "map-cb-7f12acc0-0db8-439c-b6bc-ad9804b39a32",
+    "name": "Shards (CB)",
+    "file": "map-cb-7f12acc0-0db8-439c-b6bc-ad9804b39a32.png"
+   }
+  },
+  {
+   "mapId": "map-5e2fe80a-02d8-4d19-a813-68c40614b1c9",
+   "name": "Shatter",
+   "spaceName": "spaces/38_Canada",
+   "originalFile": "map-5e2fe80a-02d8-4d19-a813-68c40614b1c9.png",
+   "pixelWidth": 1078,
+   "pixelHeight": 1078,
+   "widthMeters": 48000,
+   "heightMeters": 48000,
+   "gridCols": 10,
+   "gridRows": 10,
+   "registeredAs": {
+    "id": "map-cb-5e2fe80a-02d8-4d19-a813-68c40614b1c9",
+    "name": "Shatter (CB)",
+    "file": "map-cb-5e2fe80a-02d8-4d19-a813-68c40614b1c9.png"
+   }
+  },
+  {
+   "mapId": "map-1a6140fd-b543-4fd0-a626-694cf5719f63",
+   "name": "Sleeping Giant",
+   "spaceName": "spaces/47_Sleeping_Giant",
+   "originalFile": "map-1a6140fd-b543-4fd0-a626-694cf5719f63.png",
+   "pixelWidth": 1078,
+   "pixelHeight": 1078,
+   "widthMeters": 42000,
+   "heightMeters": 42000,
+   "gridCols": 10,
+   "gridRows": 10,
+   "registeredAs": {
+    "id": "map-cb-1a6140fd-b543-4fd0-a626-694cf5719f63",
+    "name": "Sleeping Giant (CB)",
+    "file": "map-cb-1a6140fd-b543-4fd0-a626-694cf5719f63.png"
+   }
+  },
+  {
+   "mapId": "map-6e8be00d-4af4-4a45-ae01-0835eaf300a4",
+   "name": "Tears of the Desert",
+   "spaceName": "spaces/28_naval_mission",
+   "originalFile": "map-6e8be00d-4af4-4a45-ae01-0835eaf300a4.png",
+   "pixelWidth": 1078,
+   "pixelHeight": 1078,
+   "widthMeters": 42000,
+   "heightMeters": 42000,
+   "gridCols": 10,
+   "gridRows": 10,
+   "registeredAs": {
+    "id": "map-cb-6e8be00d-4af4-4a45-ae01-0835eaf300a4",
+    "name": "Tears of the Desert (CB)",
+    "file": "map-cb-6e8be00d-4af4-4a45-ae01-0835eaf300a4.png"
+   }
+  },
+  {
+   "mapId": "map-3c82ba15-4803-4d01-beab-370a6a9a43dd",
+   "name": "The Atlantic",
+   "spaceName": "spaces/14_Atlantic",
+   "originalFile": "map-3c82ba15-4803-4d01-beab-370a6a9a43dd.png",
+   "pixelWidth": 1078,
+   "pixelHeight": 1078,
+   "widthMeters": 42000,
+   "heightMeters": 42000,
+   "gridCols": 10,
+   "gridRows": 10,
+   "registeredAs": {
+    "id": "map-cb-3c82ba15-4803-4d01-beab-370a6a9a43dd",
+    "name": "The Atlantic (CB)",
+    "file": "map-cb-3c82ba15-4803-4d01-beab-370a6a9a43dd.png"
+   }
+  },
+  {
+   "mapId": "map-cd6ab0b3-181c-4d93-9fff-71f887d24bf6",
+   "name": "The Faroe Islands",
+   "spaceName": "spaces/54_Faroe",
+   "originalFile": "map-cd6ab0b3-181c-4d93-9fff-71f887d24bf6.png",
+   "pixelWidth": 1078,
+   "pixelHeight": 1078,
+   "widthMeters": 48000,
+   "heightMeters": 48000,
+   "gridCols": 10,
+   "gridRows": 10,
+   "registeredAs": {
+    "id": "map-cb-cd6ab0b3-181c-4d93-9fff-71f887d24bf6",
+    "name": "The Faroe Islands (CB)",
+    "file": "map-cb-cd6ab0b3-181c-4d93-9fff-71f887d24bf6.png"
+   }
+  },
+  {
+   "mapId": "map-430f6cd8-6eb1-4673-9fac-2f705960e801",
+   "name": "Trap",
+   "spaceName": "spaces/19_OC_prey",
+   "originalFile": "map-430f6cd8-6eb1-4673-9fac-2f705960e801.png",
+   "pixelWidth": 1078,
+   "pixelHeight": 1078,
+   "widthMeters": 42000,
+   "heightMeters": 42000,
+   "gridCols": 10,
+   "gridRows": 10,
+   "registeredAs": {
+    "id": "map-cb-430f6cd8-6eb1-4673-9fac-2f705960e801",
+    "name": "Trap (CB)",
+    "file": "map-cb-430f6cd8-6eb1-4673-9fac-2f705960e801.png"
+   }
+  },
+  {
+   "mapId": "map-15605436-6c23-4edb-bafe-c990db5ba754",
+   "name": "Trident",
+   "spaceName": "spaces/41_Conquest",
+   "originalFile": "map-15605436-6c23-4edb-bafe-c990db5ba754.png",
+   "pixelWidth": 1078,
+   "pixelHeight": 1078,
+   "widthMeters": 42000,
+   "heightMeters": 42000,
+   "gridCols": 10,
+   "gridRows": 10,
+   "registeredAs": {
+    "id": "map-cb-15605436-6c23-4edb-bafe-c990db5ba754",
+    "name": "Trident (CB)",
+    "file": "map-cb-15605436-6c23-4edb-bafe-c990db5ba754.png"
+   }
+  },
+  {
+   "mapId": "map-3089dd24-6ae6-459e-b2ba-da2881db11b8",
+   "name": "Warrior's Path",
+   "spaceName": "spaces/44_Path_warrior",
+   "originalFile": "map-3089dd24-6ae6-459e-b2ba-da2881db11b8.png",
+   "pixelWidth": 1078,
+   "pixelHeight": 1078,
+   "widthMeters": 48000,
+   "heightMeters": 48000,
+   "gridCols": 10,
+   "gridRows": 10,
+   "registeredAs": {
+    "id": "map-cb-3089dd24-6ae6-459e-b2ba-da2881db11b8",
+    "name": "Warrior's Path (CB)",
+    "file": "map-cb-3089dd24-6ae6-459e-b2ba-da2881db11b8.png"
+   }
+  }
+ ]
+}
