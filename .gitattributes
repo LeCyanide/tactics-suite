@@ -1,0 +1,8 @@
+# The seed is a byte-for-byte mirror of a live store, not source code.
+#
+# With core.autocrlf on, git rewrites checked-out JSON to CRLF while the
+# application writes LF. `npm run refresh-seed` compares the two by content
+# hash, so every run would report the same three databases as changed and
+# rewrite them, and git would convert them straight back. Holding the seed
+# exactly as stored keeps that comparison meaningful.
+seed/** -text

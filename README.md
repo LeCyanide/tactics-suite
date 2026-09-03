@@ -139,6 +139,34 @@ brawl layouts and operations.
 
 ---
 
+## Shipped data
+
+A build carries the ship database, the map library and the cap layouts with it,
+under `seed/`. They are copied into the application-data directory the first
+time the application starts, so a fresh install opens with everything already
+there and nothing to import.
+
+Each database is seeded on its own and only when its index file is absent, so
+an existing store is never overwritten: your edits survive every later version,
+and a database you empty on purpose stays empty.
+
+The import scripts above write to the application-data directory, not to
+`seed/`, so after re-importing anything:
+
+```bash
+npm run refresh-seed
+```
+
+That copies the databases and their assets back out of the live store, prunes
+anything they no longer reference, and refuses to run if a database points at a
+file the store does not have. Projects, backups and settings are never copied,
+and it fails rather than continue if it finds any under `seed/`. Pass `--dry` to
+see the changes first, or `--data <dir>` to read a store other than the default.
+
+Commit the result: `seed/` is the only copy of that data in the repository.
+
+---
+
 ## Layers
 
 Each page carries five layers, drawn back to front: **Grid**, **Cap Zones**,
