@@ -36,7 +36,7 @@ npm run dist
 Everything is stored locally under the OS application-data directory:
 
 ```
-%APPDATA%\WoWS Tactical Planner\data\
+%APPDATA%\WoWS Tactics Toolkit\data\
   settings.json               application settings
   projects/<id>.json          one document per project
   maps/maps.json              map database index
