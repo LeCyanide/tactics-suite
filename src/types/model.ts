@@ -1,5 +1,5 @@
 /**
- * Core data model for the WoWS Tactical Planner.
+ * Core data model for the WoWS Tactics Toolkit.
  *
  * Coordinate system
  * -----------------

@@ -116,7 +116,7 @@ export function TitleBar() {
     <div className="titlebar" ref={barRef}>
       <div className="brand">
         <Crosshair className="mark" size={15} />
-        <span>WoWS Tactical Planner</span>
+        <span>WoWS Tactics Toolkit</span>
       </div>
 
       <div className="menus">

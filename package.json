@@ -1,6 +1,6 @@
 {
-  "name": "wows-tactical-planner",
-  "productName": "WoWS Tactical Planner",
+  "name": "wows-tactics-toolkit",
+  "productName": "WoWS Tactics Toolkit",
   "version": "1.0.0",
   "description": "Offline tactical planning suite for World of Warships",
   "private": true,
@@ -15,8 +15,8 @@
     "selftest": "node scripts/run-selftest.mjs"
   },
   "build": {
-    "appId": "com.local.wowstacticalplanner",
-    "productName": "WoWS Tactical Planner",
+    "appId": "com.local.wowstacticstoolkit",
+    "productName": "WoWS Tactics Toolkit",
     "directories": {
       "output": "release"
     },

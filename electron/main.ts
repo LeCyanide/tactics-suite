@@ -20,7 +20,7 @@ function createWindow(): void {
     show: false,
     frame: false,
     backgroundColor: '#0d1117',
-    title: 'WoWS Tactical Planner',
+    title: 'WoWS Tactics Toolkit',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
