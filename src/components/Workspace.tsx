@@ -211,7 +211,7 @@ export function NotesPanel() {
         <textarea
           value={page.notes}
           placeholder={
-            '# Opening\n\n- DD spots enemy deployment\n- BB holds island\n- [ ] Radar cruiser moves into position\n- [x] Do not contest cap before enemy radar is identified'
+            'Placeholder text for notes. You can use Markdown formatting here, and it will be rendered in the preview.'
           }
           onChange={(e) => s().setNotes(e.target.value)}
           onKeyDown={(e) => e.stopPropagation()}

@@ -1,21 +1,9 @@
-# WoWS Tactical Planner
+# WoWS tactics toolkit
 
-An offline, desktop tactical planning suite for World of Warships — a map-first
-editor in the shape of lightweight CAD software, not a website.
+Awooga I don't know what I am doing. 
 
-No account, no login, no server, no community features, no telemetry. The
-application never makes a network request; everything it needs is on disk.
+locally run wows-tactics alternative
 
-The map is **fixed**: it is always centred and always shown whole, with a small
-margin at the edges. There is no pan and no zoom, so a page always looks the
-same to whoever opens it, and the camera has no state to get lost in.
-
-Dark and light themes are both supported; switch under `Settings ▸ Preferences`
-(or `Settings ▸ Light Theme`). The canvas follows the theme too — its colours
-live in `src/state/theme.ts`, because Konva paints to a bitmap and cannot read
-CSS custom properties.
-
----
 
 ## Running it
 
@@ -35,24 +23,6 @@ Production build (typecheck + bundle):
 npm run build
 ```
 
-Headless checks for the messy-input paths (ship-data parsing across
-JSON/CSV/YAML, and the `.wowsplan` pack → read → import round-trip including
-asset bytes, backups and id sanitisation):
-
-```bash
-npm run selftest
-```
-
-Seed or refresh the whole ship database from a file, without going through the
-in-app importer. It uses the same parser, matches existing ships by name so
-their ids and any hand-entered data survive, and backs the database up first:
-
-```bash
-node scripts/import-ships.mjs wows_ship_data.csv --data "%APPDATA%\WoWS Tactical Planner\data"
-```
-
-Add `--dry` to see what a run would change before it changes it.
-
 Packaged Windows installer + portable build (via electron-builder):
 
 ```bash
@@ -61,7 +31,7 @@ npm run dist
 
 ---
 
-## Where your data lives
+## data storage
 
 Everything is stored locally under the OS application-data directory:
 
@@ -99,111 +69,6 @@ anything else) is a change to one file and touches no editor code.
 
 ---
 
-## The `.wowsplan` format
-
-A project export is a gzip-compressed JSON envelope that embeds everything the
-project references:
-
-```jsonc
-{
-  "format": "wowsplan",
-  "formatVersion": 1,
-  "exportedAt": 1730000000000,
-  "project": { /* metadata, pages, layers, objects, teams */ },
-  "maps":   [ /* map records used by the project */ ],
-  "ships":  [ /* ship records referenced by placed ships */ ],
-  "icons":  [ /* icon asset records */ ],
-  "assets": { "maps/<file>": "<base64>", "icons/<file>": "<base64>" }
-}
-```
-
-Copy the file to another machine, import it, and the project renders
-identically — map images and ship icons travel with it. Import always assigns a
-fresh project id, so importing twice never silently overwrites existing work.
-A plain (ungzipped) JSON file with the same shape is also accepted.
-
----
-
-## Coordinate system
-
-All tactical geometry is stored in **world metres**, origin at the map's
-top-left corner. A map declares its own extent (e.g. 30 000 × 30 000 m) and the
-background image is stretched across it. Ship ranges come out of the database in
-kilometres and are multiplied by 1000 at render time.
-
-This keeps range circles physically correct at any zoom and makes the model
-independent of the pixel size of whatever image was imported.
-
----
-
-## Ship icons
-
-The default representation of a ship on the map is **the icon you imported for
-it**. Icons are PNG/SVG/WEBP with transparency, imported through
-*Ship Database → Import icons…*, and are matched to ships by file name
-automatically (so a bulk import of a full icon set is one step).
-
-Only when a ship has no icon assigned does the map fall back to a class-coded
-vector glyph. Those glyphs follow the game's own class-marker family — the
-heavier the class, the more solid the marker:
-
-| Class | Marker |
-|---|---|
-| CV | filled hull, two diagonal slashes |
-| BB | filled hull, one diagonal slash |
-| CA | hollow hull outline |
-| DD | hollow arrowhead |
-| SS | filled rounded hull (no counterpart in the reference set) |
-
-They are authored bow-up in a 24x24 box, because a ship's rotation on the map
-is its heading and 0 deg is north; the slashes are gaps between separate filled
-pieces rather than cut-outs, so they render identically at any size. The same
-path data drives the SVG markers in the ship browser and the database table
-(`src/components/common/ClassIcon.tsx`), so the two can never drift apart.
-
-Nothing ever replaces an assigned icon with a generic symbol. Team colour is
-applied as a ring and label border around the icon, never painted onto the
-artwork.
-
-Icons are drawn at a constant on-screen size (scaled by 1/zoom) while ranges
-stay in world units. A ship's marker is painted in its team's colour — that is
-the only thing that colours it — and its name is always drawn horizontally and
-centred beneath the hull, whatever heading the ship is pointing.
-
----
-
-## Ship characteristics are opt-in
-
-Placing a ship shows its marker and its name. Nothing else.
-
-Those two are not toggles — they are what a ship marker *is*, so there is
-nothing to switch off. The marker turns with the ship's heading; the name does
-not, staying centred beneath it and horizontal at every angle.
-
-Ranges — Detection, Radar, Hydro, Main Battery, Secondary, Torpedo, Airstrike
-— are everything a ship can show, and they are set on one ship at a time,
-because a range is a statement about the ship that projects it. There is no
-page default to inherit and no override badge to clear; the `Ranges` panel's
-header button switches every range on that ship back off at once.
-
-When a range characteristic is switched on, its visualisation is generated
-automatically from the ship database — you never draw those circles by hand —
-and it exists *only* while that toggle is on. Every range is a full circle,
-torpedoes and airstrikes included: the ring answers how far the weapon reaches,
-not which way the ship happens to be pointing, and not where it cannot be
-aimed. An airstrike draws from its maximum range; the minimum is imported and
-kept with the ship, but a hole in the ring buys less clarity than it costs.
-
-Range styling (colour, opacity, line width, fill, dash, label) is configured on
-the ship whose range it is, layered over the built-in defaults. A ship's marker
-takes its colour from its team; `Icon colour` overrides that for one ship, and
-the `Team` button next to it falls back. Ships always live on the Ships layer,
-so there is no layer to choose.
-
-Hidden characteristics are not rendered, and therefore cannot appear in an
-exported image.
-
----
 
 ## Ship database import
 
@@ -213,24 +78,48 @@ CSV or YAML; the parser is deliberately forgiving:
 - Column names are matched case- and separator-insensitively against a table of
   aliases (`concealment` / `detectability` / `detection_range` / `Concealment
   (sea)` all land in the same field).
-- Unit suffixes are stripped: `"10.0 km"`, `"97,200 HP"`, `"33 kn"`.
+- A unit carried in the column name is dropped rather than read as part of it,
+  so `Detection by Sea (km)` and `Speed, kn` land on the same fields as the
+  bare names. An exact header still wins over a stripped one, so a file holding
+  both `Radar` and `Radar Range (km)` keeps the plain column.
+- Unit suffixes are stripped from the values too: `"10.0 km"`, `"97,200 HP"`,
+  `"33 kn"`.
+- Nation spellings are folded to one label, so `U.S.A.`, `United States` and
+  `USA` cannot put the same navy under three entries in the filters. A nation
+  the table does not know is kept exactly as written.
+- A stat reading `0` is treated as absent rather than as a measurement. Exports
+  routinely write `0` where the cell was meant to be blank, and a ship with
+  "radar 0" has no radar — so this is what keeps zero-radius rings and `0.0 km`
+  labels off the canvas.
 - Tiers may be Arabic or Roman (`10`, `X`).
 - A range given in metres (any value > 100 in a km field) is converted.
 - Accepts an array, a `{ "ships": [...] }` wrapper, or a name-keyed object.
 - Anything it cannot map is preserved in the ship's notes rather than dropped.
 
-Re-importing an updated sheet merges on name + tier, so existing ships update in
-place and keep their icon assignment. Export back out as JSON, CSV or YAML.
+Re-importing an updated sheet merges rather than replaces: a ship already in
+the database keeps its id, its icon and every field the incoming file has
+nothing to say about. Projects reference ships by id, so a re-import never
+detaches the ships already placed on a page.
+
+The two routes pair rows with existing ships on different keys, which is worth
+knowing if you use both. The in-app importer matches on name **and** tier, so a
+ship whose tier changed arrives as a second entry rather than an update.
+`scripts/import-ships.mjs` matches on name alone, ignoring case, punctuation
+and accents, so `Hakuryu` finds `Hakuryū`.
+
+Export back out as JSON, CSV or YAML.
 
 ---
 
 ## Layers
 
-Each page carries four layers: **Grid**, **Ship Ranges**, **Annotations** and
-**Ships**, plus any custom layers you add. Shapes, arrows, text and markers all
-share Annotations, because they are drawn the same way and are almost always
-shown or hidden together. Every layer has visibility, lock, opacity, rename,
-reorder and delete; objects can be moved between layers.
+Each page carries five layers, drawn back to front: **Grid**, **Cap Zones**,
+**Ship Ranges**, **Annotations** and **Ships**, plus any custom layers you add.
+Shapes, arrows, text and markers all share Annotations, because they are drawn
+the same way and are almost always shown or hidden together. Every layer has
+visibility, lock, opacity, rename, reorder and delete; objects can be moved
+between layers. Grid and Cap Zones start locked: nothing on them is yours to
+drag, so the lock keeps a stray click on the canvas from picking one up.
 
 Ship ranges render on their own layer even though they belong to ship objects,
 which is what lets you hide every radar circle on the page with one click while
@@ -276,17 +165,6 @@ src/
   lib/markdown.tsx         notes renderer (returns React nodes, no raw HTML)
 ```
 
-Rendering is Konva on three canvases: a background layer (map + grid, redrawn
-only when the map changes), a content layer (all tactical objects, grouped per
-tactical layer), and an overlay (in-progress drawing, marquee, handles) which is
-excluded from exports.
-
-Undo/redo snapshots the project document; continuous gestures such as dragging
-push one history entry at the start and commit once at the end, so a drag is a
-single undo step.
-
-Object dragging is delegated to the content layer rather than handled per node,
-which keeps one code path for single- and multi-object drags.
 
 ### Deliberate constraints
 
