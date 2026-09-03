@@ -1,7 +1,8 @@
 /**
  * Headless checks for the paths that are pure logic and would otherwise only
  * be exercised by hand: messy ship-data import, the .wowsplan
- * pack/read/import round-trip, and the startup sweep of orphaned temp files.
+ * pack/read/import round-trip, the destinations an export can be written to,
+ * and the startup sweep of orphaned temp files.
  *
  *   npm run selftest
  */
@@ -199,6 +200,48 @@ async function testPackage(): Promise<void> {
   await fs.rm(root, { recursive: true, force: true });
 }
 
+async function testExportDestinations(): Promise<void> {
+  console.log('\nexport destinations');
+
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'wowsplan-selftest4-'));
+  process.env.WOWSPLAN_DATA_DIR = root;
+
+  // The root of a drive is the case that used to break the exporter: it is a
+  // directory that plainly exists, yet Windows answers `mkdir 'Z:\'` with
+  // EPERM rather than EEXIST, and recursive mkdir only forgives EEXIST.
+  const driveRoot = path.parse(root).root;
+  let mkdirRejected = false;
+  try {
+    await fs.mkdir(driveRoot, { recursive: true });
+  } catch {
+    mkdirRejected = true;
+  }
+  if (mkdirRejected) {
+    check('destination: bare mkdir on a drive root does reject', true);
+  } else {
+    console.log(`  skip  destination: mkdir on ${driveRoot} succeeds on this platform`);
+  }
+
+  let rootErr: unknown = null;
+  try {
+    await db.ensureParentDir(path.join(driveRoot, 'plan.wowsplan'));
+  } catch (err) {
+    rootErr = err;
+  }
+  check('destination: saving into a drive root is allowed', rootErr === null, rootErr);
+
+  // A destination whose parent is missing is still created on demand.
+  const nested = path.join(root, 'a', 'b', 'plan.wowsplan');
+  await db.writeFileAbsolute(nested, Buffer.from('bytes'));
+  check('destination: missing parent directories created', (await db.readFileAbsolute(nested)).toString() === 'bytes');
+
+  // Overwriting an existing export must succeed rather than trip on the file.
+  await db.writeFileAbsolute(nested, Buffer.from('newer'));
+  check('destination: existing file overwritten', (await db.readFileAbsolute(nested)).toString() === 'newer');
+
+  await fs.rm(root, { recursive: true, force: true });
+}
+
 async function testTempSweep(): Promise<void> {
   console.log('\ntemp-file sweep');
 
@@ -262,6 +305,7 @@ async function testTempSweep(): Promise<void> {
 async function main(): Promise<void> {
   await testShipImport();
   await testPackage();
+  await testExportDestinations();
   await testTempSweep();
   console.log(failures === 0 ? '\nall checks passed\n' : `\n${failures} check(s) failed\n`);
   process.exit(failures === 0 ? 0 : 1);
