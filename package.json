@@ -12,7 +12,8 @@
     "start": "electron .",
     "dist": "npm run build && electron-builder",
     "dist:dir": "npm run build && electron-builder --dir",
-    "selftest": "node scripts/run-selftest.mjs"
+    "selftest": "node scripts/run-selftest.mjs",
+    "refresh-seed": "node scripts/refresh-seed.mjs"
   },
   "build": {
     "appId": "com.local.wowstacticstoolkit",
