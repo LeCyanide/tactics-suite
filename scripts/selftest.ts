@@ -1,7 +1,7 @@
 /**
- * Headless checks for the two paths that are pure logic and would otherwise
- * only be exercised by hand: messy ship-data import, and the .wowsplan
- * pack/read/import round-trip.
+ * Headless checks for the paths that are pure logic and would otherwise only
+ * be exercised by hand: messy ship-data import, the .wowsplan
+ * pack/read/import round-trip, and the startup sweep of orphaned temp files.
  *
  *   npm run selftest
  */
@@ -199,9 +199,70 @@ async function testPackage(): Promise<void> {
   await fs.rm(root, { recursive: true, force: true });
 }
 
+async function testTempSweep(): Promise<void> {
+  console.log('\ntemp-file sweep');
+
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'wowsplan-selftest3-'));
+  process.env.WOWSPLAN_DATA_DIR = root;
+  db.ensureDirs();
+
+  await db.saveProject({ id: 'prj-sweep', name: 'Sweeper', createdAt: Date.now(), updatedAt: Date.now(), pages: [] });
+  await db.createBackup('prj-sweep');
+
+  const write = async (...parts: string[]): Promise<string> => {
+    const full = path.join(root, ...parts);
+    await fs.writeFile(full, 'half-written', 'utf8');
+    return full;
+  };
+
+  // A pid this high never exists, so each of these stands for a process that
+  // died between writing its temp file and renaming it over the target.
+  const dead = 999999999;
+  const orphans = [
+    await write(`settings.json.${dead}.tmp`),
+    await write('projects', `prj-sweep.json.${dead}.tmp`),
+    await write('maps', `maps.json.${dead}.tmp`),
+    await write('maps', 'assets', `map-x.png.${dead}.tmp`),
+    await write('ships', `ships.json.${dead}.tmp`),
+    await write('ships', 'icons', `icon-x.png.${dead}.tmp`),
+    await write('backups', 'prj-sweep', `2020-01-01.wowsplan.${dead}.tmp`),
+  ];
+
+  // A temp file owned by a running process and written moments ago: a second
+  // instance could be mid-write, so it has to survive.
+  const live = await write('projects', `prj-live.json.${process.pid}.tmp`);
+  // The same pid on an hours-old file can only mean the number was recycled.
+  const stale = await write('projects', `prj-stale.json.${process.pid}.tmp`);
+  const longAgo = new Date(Date.now() - 4 * 60 * 60 * 1000);
+  await fs.utimes(stale, longAgo, longAgo);
+  // No pid suffix, so not ours to delete.
+  const notTmp = await write('projects', 'prj-notes.tmp');
+
+  const removed = await db.sweepTempFiles();
+  const gone = async (f: string) => !(await fs.stat(f).catch(() => null));
+
+  for (const f of orphans) check(`sweep: removed ${path.basename(f)}`, await gone(f));
+  check('sweep: hours-old file from a recycled pid removed', await gone(stale));
+  check('sweep: fresh file from a live pid kept', !(await gone(live)));
+  check('sweep: file without a pid suffix kept', !(await gone(notTmp)));
+  check('sweep: reported every deletion', removed.length === orphans.length + 1, removed.length);
+  check('sweep: real project untouched', (await db.loadProject('prj-sweep'))?.name === 'Sweeper');
+  check('sweep: backup untouched', (await db.listBackups('prj-sweep')).length === 1);
+  check('sweep: second pass finds nothing left', (await db.sweepTempFiles()).length === 0);
+
+  // A data directory that is not there yet must not throw: housekeeping can
+  // never be the reason the application fails to start.
+  process.env.WOWSPLAN_DATA_DIR = path.join(root, 'does-not-exist');
+  check('sweep: absent data directory tolerated', (await db.sweepTempFiles()).length === 0);
+
+  process.env.WOWSPLAN_DATA_DIR = root;
+  await fs.rm(root, { recursive: true, force: true });
+}
+
 async function main(): Promise<void> {
   await testShipImport();
   await testPackage();
+  await testTempSweep();
   console.log(failures === 0 ? '\nall checks passed\n' : `\n${failures} check(s) failed\n`);
   process.exit(failures === 0 ? 0 : 1);
 }

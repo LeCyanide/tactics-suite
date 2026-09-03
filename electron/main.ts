@@ -1,6 +1,6 @@
 import { app, BrowserWindow, shell, Menu } from 'electron';
 import path from 'node:path';
-import { ensureDirs, storageRoot } from './storage/db';
+import { ensureDirs, storageRoot, sweepTempFiles } from './storage/db';
 import { registerIpc } from './ipc';
 
 // This application is entirely local. Disabling remote content behaviours
@@ -74,6 +74,9 @@ function createWindow(): void {
 
 app.whenReady().then(() => {
   ensureDirs();
+  // Housekeeping only: clears temp files orphaned by a crash mid-write.
+  // It runs alongside startup and can never hold it up or fail it.
+  void sweepTempFiles().catch(() => undefined);
   registerIpc(() => mainWindow);
   createWindow();
 
