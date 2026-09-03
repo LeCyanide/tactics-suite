@@ -216,7 +216,11 @@ export interface CapLayout {
   mapId: ID;
   /** Game space it was read from, e.g. "spaces/46_Estuary". */
   spaceName: string;
-  /** Human label, e.g. "Domination · 3 caps". */
+  /**
+   * The game's own name for the battle type this layout belongs to, with a
+   * hyphen for its full stop and the cap count in brackets where it is not
+   * the standard three, e.g. "Tournament - Domination (4 caps)".
+   */
   name: string;
   scenario: string;
   gameMode: number;

@@ -40,6 +40,7 @@ Everything is stored locally under the OS application-data directory:
   settings.json               application settings
   projects/<id>.json          one document per project
   maps/maps.json              map database index
+  maps/cap-layouts.json       capture point layout library
   maps/assets/<id>.png        imported map images
   ships/ships.json            ship database
   ships/icons.json            icon asset index
@@ -108,6 +109,33 @@ ship whose tier changed arrives as a second entry rather than an update.
 and accents, so `Hakuryu` finds `Hakuryū`.
 
 Export back out as JSON, CSV or YAML.
+
+---
+
+## Cap layouts
+
+The capture zones a page can show are read, not drawn: they come from the game
+itself, by way of WoWs Toolkit, which records a map's layout whenever it parses
+a replay of that battle type. Playing a mode once is what puts its caps within
+reach.
+
+```bash
+node scripts/import-cap-layouts.mjs
+```
+
+That rebuilds `maps/cap-layouts.json` from the toolkit's database (pass
+`--toolkit <dir>` if it lives somewhere unusual, `--dry` to see the changes
+first). Rebuilding is safe to repeat — layout ids are derived from the game's
+own scenario ids, so a page keeps the layout it points at.
+
+Layouts are named the way the game names them, with two substitutions: a
+hyphen for its full stop, and the cap count in brackets where the game says
+"— Four Areas". Domination is three caps unless the name says otherwise, so
+`Tournament. Domination — Four Areas` becomes `Tournament - Domination
+(4 caps)` and plain `Tournament. Domination` stays `Tournament - Domination`.
+
+Layouts for a map the database does not have are skipped, as are the two-cap
+brawl layouts and operations.
 
 ---
 
