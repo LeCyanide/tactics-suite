@@ -93,6 +93,9 @@ export function ensureDirs(): void {
     P.projectsDir(),
     path.join(storageRoot(), 'backups'),
   ]) {
+    // Same drive-root caveat as ensureParentDir: a portable install can point
+    // WOWSPLAN_DATA_DIR at the root of a stick, which mkdir refuses to create.
+    if (fs.existsSync(dir)) continue;
     fs.mkdirSync(dir, { recursive: true });
   }
 }
@@ -118,15 +121,38 @@ async function readJson<T>(file: string, fallback: T): Promise<T> {
   }
 }
 
+/**
+ * Creates the directory `file` lives in, if it is not already there.
+ *
+ * `fsp.mkdir(dir, { recursive: true })` is not the harmless no-op it looks
+ * like on Windows: for the root of a drive it fails with EPERM instead of
+ * reporting the directory as existing, so exporting straight onto `Z:\` used
+ * to abort before a single byte was written. Stat first, and treat a racing
+ * creator as success.
+ */
+export async function ensureParentDir(file: string): Promise<void> {
+  const dir = path.dirname(file);
+  try {
+    if ((await fsp.stat(dir)).isDirectory()) return;
+  } catch {
+    /* not there yet - fall through to mkdir */
+  }
+  try {
+    await fsp.mkdir(dir, { recursive: true });
+  } catch (err: any) {
+    if (err?.code !== 'EEXIST') throw err;
+  }
+}
+
 async function writeJson(file: string, value: unknown): Promise<void> {
-  await fsp.mkdir(path.dirname(file), { recursive: true });
+  await ensureParentDir(file);
   const tmp = `${file}.${process.pid}.tmp`;
   await fsp.writeFile(tmp, JSON.stringify(value, null, 2), 'utf8');
   await fsp.rename(tmp, file);
 }
 
 async function writeBinary(file: string, data: Buffer): Promise<void> {
-  await fsp.mkdir(path.dirname(file), { recursive: true });
+  await ensureParentDir(file);
   const tmp = `${file}.${process.pid}.tmp`;
   await fsp.writeFile(tmp, data);
   await fsp.rename(tmp, file);
