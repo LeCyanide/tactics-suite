@@ -31,7 +31,7 @@ import {
   type Team,
   type Vec2,
 } from '@/types/model';
-import { clamp, clone, debounce, uid } from '@/lib/util';
+import { clamp, clone, debounce, foldForSearch, uid } from '@/lib/util';
 import { applyTheme } from './theme';
 import {
   createPage,
@@ -1146,15 +1146,18 @@ export const useStore = create<Store>((set, get) => {
           return;
         }
         // Merge on name+tier so re-importing an updated sheet updates in place.
+        // The key is accent-folded, so a sheet spelling it "Zao" updates the
+        // roster's "Zaō" instead of landing beside it as a second ship.
         const existing = get().ships;
-        const byKey = new Map(existing.map((s) => [`${s.name.toLowerCase()}|${s.tier}`, s]));
+        const byKey = new Map(existing.map((s) => [mergeKey(s.name, s.tier), s]));
         let added = 0;
         let updated = 0;
         for (const ship of parsed) {
-          const key = `${ship.name.toLowerCase()}|${ship.tier}`;
+          const key = mergeKey(ship.name, ship.tier);
           const prev = byKey.get(key);
           if (prev) {
-            byKey.set(key, { ...prev, ...ship, id: prev.id, iconId: ship.iconId ?? prev.iconId });
+            // prev.name wins: matching leniently must not silently respell a ship.
+            byKey.set(key, { ...prev, ...ship, id: prev.id, name: prev.name, iconId: ship.iconId ?? prev.iconId });
             updated++;
           } else {
             byKey.set(key, ship);
@@ -1208,8 +1211,8 @@ export const useStore = create<Store>((set, get) => {
 
     async loadSampleShips() {
       const existing = get().ships;
-      const known = new Set(existing.map((s) => `${s.name.toLowerCase()}|${s.tier}`));
-      const additions = SAMPLE_SHIPS.filter((s) => !known.has(`${s.name.toLowerCase()}|${s.tier}`)).map((s) => ({
+      const known = new Set(existing.map((s) => mergeKey(s.name, s.tier)));
+      const additions = SAMPLE_SHIPS.filter((s) => !known.has(mergeKey(s.name, s.tier))).map((s) => ({
         ...s,
         id: uid('ship-'),
         iconId: null,
@@ -1333,8 +1336,13 @@ function measureImage(dataUrl: string): Promise<{ width: number; height: number 
   });
 }
 
+/** Identity of a roster entry for import merges: same ship, however it is spelled. */
+export function mergeKey(name: string, tier: number): string {
+  return `${foldForSearch(name)}|${tier}`;
+}
+
 function normalizeName(name: string): string {
-  return name.toLowerCase().replace(/[^a-z0-9]/g, '');
+  return foldForSearch(name).replace(/[^a-z0-9]/g, '');
 }
 
 /* ------------------------------------------------------------------ */

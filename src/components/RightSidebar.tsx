@@ -35,7 +35,7 @@ import { CLASS_COLORS } from '@/canvas/shipGlyphs';
 import { useAsset } from '@/state/assets';
 import { canvasApi } from '@/canvas/canvasBridge';
 import { ClassIcon } from './common/ClassIcon';
-import { gridRef } from '@/lib/util';
+import { foldForSearch, gridRef } from '@/lib/util';
 
 export function RightSidebar() {
   const open = useStore((s) => s.rightOpen);
@@ -669,10 +669,10 @@ function ShipBrowserPanel() {
   const tiers = useMemo(() => [...new Set(ships.map((x) => x.tier))].sort((a, b) => b - a), [ships]);
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = foldForSearch(query.trim());
     return ships.filter(
       (ship) =>
-        (!q || ship.name.toLowerCase().includes(q) || ship.nation.toLowerCase().includes(q)) &&
+        (!q || foldForSearch(ship.name).includes(q) || foldForSearch(ship.nation).includes(q)) &&
         (!nation || ship.nation === nation) &&
         (!cls || ship.class === cls) &&
         (!tier || String(ship.tier) === tier),

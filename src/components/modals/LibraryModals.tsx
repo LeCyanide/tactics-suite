@@ -6,7 +6,7 @@ import { useAsset } from '@/state/assets';
 import { SHIP_CLASSES, shipClassCode, type GameMap, type Ship, type ShipClass } from '@/types/model';
 import { CLASS_COLORS } from '@/canvas/shipGlyphs';
 import { ClassIcon } from '../common/ClassIcon';
-import { uid } from '@/lib/util';
+import { foldForSearch, uid } from '@/lib/util';
 
 /* ================================================================== */
 /* Map manager                                                         */
@@ -120,10 +120,10 @@ export function ShipDatabaseModal() {
   const tiers = useMemo(() => [...new Set(ships.map((x) => x.tier))].sort((a, b) => b - a), [ships]);
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = foldForSearch(query.trim());
     return ships.filter(
       (ship) =>
-        (!q || ship.name.toLowerCase().includes(q)) &&
+        (!q || foldForSearch(ship.name).includes(q)) &&
         (!nation || ship.nation === nation) &&
         (!cls || ship.class === cls) &&
         (!tier || String(ship.tier) === tier),

@@ -227,3 +227,36 @@ export function debounce<T extends (...args: any[]) => void>(fn: T, ms: number):
   };
   return wrapped;
 }
+
+/* ------------------------------------------------------------------ */
+/* Text search                                                         */
+/* ------------------------------------------------------------------ */
+
+/** Latin letters that carry no combining mark, so NFD leaves them untouched. */
+const LETTER_FOLDS: Record<string, string> = {
+  'ł': 'l',
+  'ø': 'o',
+  'đ': 'd',
+  'ð': 'd',
+  'þ': 'th',
+  'ß': 'ss',
+  'æ': 'ae',
+  'œ': 'oe',
+  'ħ': 'h',
+  'ŧ': 't',
+  'ı': 'i',
+  'ĸ': 'k',
+};
+
+/**
+ * Case- and accent-insensitive form used for matching. Half the roster is
+ * spelled with diacritics nobody types — Myōkō, Błyskawica, Grosser Kurfürst —
+ * so both the haystack and the needle get folded before comparing.
+ */
+export function foldForSearch(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[\u00df\u00e6\u00f0\u00f8\u00fe\u0111\u0127\u0131\u0138\u0142\u0153\u0167]/g, (c) => LETTER_FOLDS[c] ?? c);
+}

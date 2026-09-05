@@ -2,7 +2,8 @@
  * Headless checks for the paths that are pure logic and would otherwise only
  * be exercised by hand: messy ship-data import, the .wowsplan
  * pack/read/import round-trip, the destinations an export can be written to,
- * and the startup sweep of orphaned temp files.
+ * the accent folding every name lookup goes through, and the startup sweep
+ * of orphaned temp files.
  *
  *   npm run selftest
  */
@@ -10,9 +11,11 @@
 import os from 'node:os';
 import path from 'node:path';
 import fs from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 
 import { parseShipData, serializeShips } from '../src/lib/shipImport';
-import { shipRangeKm } from '../src/state/store';
+import { foldForSearch } from '../src/lib/util';
+import { mergeKey, shipRangeKm } from '../src/state/store';
 import * as db from '../electron/storage/db';
 
 let failures = 0;
@@ -302,8 +305,57 @@ async function testTempSweep(): Promise<void> {
   await fs.rm(root, { recursive: true, force: true });
 }
 
+async function testNameFolding(): Promise<void> {
+  console.log('\nname folding');
+
+  // Typing plain ASCII has to reach the ships nobody can spell on a keyboard.
+  const reaches = (query: string, name: string) => foldForSearch(name).includes(foldForSearch(query));
+  check('fold: "myoko" finds Myōkō', reaches('myoko', 'Myōkō'));
+  check('fold: "irizar" finds Almirante Irízar', reaches('irizar', 'Almirante Irízar'));
+  check('fold: "kurfurst" finds Grosser Kurfürst', reaches('kurfurst', 'Grosser Kurfürst'));
+  check('fold: "ostergotland" finds Östergötland', reaches('ostergotland', 'Östergötland'));
+  check('fold: "republique" finds République', reaches('republique', 'République'));
+
+  // These carry no combining mark, so NFD alone leaves them unmatched.
+  check('fold: "blyskawica" finds Błyskawica', reaches('blyskawica', "Błyskawica '44"));
+  check('fold: "gdansk" finds Gdańsk', reaches('gdansk', 'Gdańsk'));
+
+  // Leniency runs both ways: a pasted accented name finds an ASCII spelling.
+  check('fold: pasted "Zaō" finds Zao', reaches('Zaō', 'Zao'));
+  check('fold: case is folded too', reaches('MYŌKŌ', 'myōkō'));
+  check('fold: distinct ships stay distinct', !reaches('kongō', 'Yamato'));
+
+  // Icon files are matched by a stripped form of the same fold, so an icon
+  // named for the ship attaches without the artist typing macrons.
+  const iconKey = (name: string) => foldForSearch(name).replace(/[^a-z0-9]/g, '');
+  check('fold: Myoko.png matches Myōkō', iconKey('Myōkō') === iconKey('Myoko'));
+  check('fold: Grosser Kurfurst.png matches Grosser Kurfürst',
+    iconKey('Grosser Kurfürst') === iconKey('Grosser Kurfurst'));
+
+  // Import merges on the folded name+tier, so a re-exported sheet updates a
+  // ship in place instead of adding a near-duplicate beside it.
+  check('merge: "Zao" tier 10 is the same row as "Zaō"', mergeKey('Zao', 10) === mergeKey('Zaō', 10));
+  check('merge: tier still separates', mergeKey('Zaō', 10) !== mergeKey('Zaō', 9));
+  check('merge: different ships keep different keys', mergeKey('Kongō', 8) !== mergeKey('Fusō', 8));
+
+  // Folding an identity key can only be safe while no two real ships collapse
+  // onto one key, so the shipped roster is the guard.
+  const rosterPath = path.join(path.dirname(path.dirname(fileURLToPath(import.meta.url))), 'seed', 'ships', 'ships.json');
+  const roster = JSON.parse(await fs.readFile(rosterPath, 'utf8')) as { name: string; tier: number }[];
+  const seen = new Map<string, string>();
+  const collisions: string[] = [];
+  for (const ship of roster) {
+    const key = mergeKey(ship.name, ship.tier);
+    const prev = seen.get(key);
+    if (prev && prev !== ship.name) collisions.push(`${prev} == ${ship.name}`);
+    seen.set(key, ship.name);
+  }
+  check(`merge: no collisions across ${roster.length} shipped ships`, collisions.length === 0, collisions);
+}
+
 async function main(): Promise<void> {
   await testShipImport();
+  await testNameFolding();
   await testPackage();
   await testExportDestinations();
   await testTempSweep();
