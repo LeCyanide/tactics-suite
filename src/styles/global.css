@@ -357,9 +357,14 @@ body {
   /* Never squeeze: the sidebar scrolls instead of clipping panel contents. */
   flex: none;
 }
+/*
+ * Exactly one panel grows: the ship selector. It takes every pixel the panels
+ * above it leave, down to a floor that keeps a few rows readable when a
+ * selection fills the column; past that the sidebar scrolls.
+ */
 .panel.grow {
   flex: 1 1 auto;
-  min-height: 0;
+  min-height: 300px;
 }
 /* A growing panel hands its height to the body, which hands it to the list. */
 .panel.grow .panel-body {
@@ -1565,14 +1570,14 @@ input[type='range']::-webkit-slider-thumb {
 }
 
 /*
- * The ship selector is the main inhabitant of the left sidebar. The column
- * around it scrolls, so flex-grow alone would collapse it back to its content
- * height; a viewport-relative floor is what actually keeps it prominent.
+ * The list is the growing panel's only flexible child, so it inherits the
+ * height the panel was given and stops at the bottom of the sidebar. Sizing it
+ * against the viewport instead left dead space below it on a tall window, and
+ * pushed its last rows out of sight on a crowded one.
  */
 .ship-list {
   flex: 1 1 auto;
-  min-height: 36vh;
-  max-height: 52vh;
+  min-height: 0;
   overflow-y: auto;
 }
 
