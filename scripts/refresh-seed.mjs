@@ -20,6 +20,12 @@
  * The seed is pruned, not just topped up. An image left behind by a map that
  * has since been deleted would otherwise ship forever, so anything the
  * databases no longer reference is removed.
+ *
+ * Copying comes first and pruning second, and every file is replaced by a
+ * rename rather than a truncate. Between them that means the seed is never
+ * missing an image another process might be reading: emptying a directory and
+ * refilling it, however briefly, is enough to make a running application
+ * believe every map it asked for is gone.
  */
 
 import fs from 'node:fs';
@@ -148,6 +154,25 @@ if (missing.length) {
 
 const hash = (file) => crypto.createHash('sha1').update(fs.readFileSync(file)).digest('hex');
 
+/**
+ * Replaces one file without it ever being half there.
+ *
+ * `copyFileSync` truncates the destination and fills it, so anything reading
+ * that file in the meantime gets a short one -- and for an image that is a
+ * decode failure rather than an error worth reporting. Writing beside the
+ * target and renaming over it makes the swap atomic: a reader sees either the
+ * old file or the new one.
+ *
+ * The temporary name carries the process id so two runs at once cannot land
+ * on the same scratch file, which is the same rule the application's own
+ * writes follow.
+ */
+function copyAtomic(from, to) {
+  const tmp = `${to}.${process.pid}.tmp`;
+  fs.copyFileSync(from, tmp);
+  fs.renameSync(tmp, to);
+}
+
 /** Every file under `dir`, relative to it, with forward slashes. */
 function walk(dir, base = dir) {
   if (!fs.existsSync(dir)) return [];
@@ -179,7 +204,7 @@ for (const rel of [...wanted].sort()) {
   else added += 1;
   if (!dry) {
     fs.mkdirSync(path.dirname(to), { recursive: true });
-    fs.copyFileSync(from, to);
+    copyAtomic(from, to);
   }
 }
 
