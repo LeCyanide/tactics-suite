@@ -2,6 +2,13 @@ import { contextBridge, ipcRenderer } from 'electron';
 
 type Result<T> = { ok: true; data: T } | { ok: false; error: string };
 
+/**
+ * One stored image, or why the disk would not give it up. The reason is
+ * carried rather than flattened to null so a failed read can be told apart
+ * from a record that never had an image.
+ */
+export type AssetResult = { dataUrl: string } | { error: string; code: string };
+
 /** Unwraps the {ok,data} envelope so callers get plain values or a throw. */
 async function call<T>(channel: string, ...args: unknown[]): Promise<T> {
   const res = (await ipcRenderer.invoke(channel, ...args)) as Result<T>;
@@ -52,7 +59,7 @@ const api = {
     update: (record: unknown) => call<any[]>('map:update', record),
     replaceImage: (id: string, ext: string, dataUrl: string) => call<any>('map:replaceImage', id, ext, dataUrl),
     remove: (id: string) => call<any[]>('map:delete', id),
-    dataUrl: (file: string, mime: string) => call<string | null>('map:dataUrl', file, mime),
+    dataUrl: (file: string, mime: string) => call<AssetResult>('map:dataUrl', file, mime),
   },
   capLayouts: {
     list: () => call<any[]>('capLayout:list'),
@@ -68,7 +75,7 @@ const api = {
     pickImages: () => call<{ name: string; ext: string; mime: string; dataUrl: string }[]>('icon:pickImages'),
     create: (record: unknown, dataUrl: string) => call<any>('icon:create', record, dataUrl),
     remove: (id: string) => call<any[]>('icon:delete', id),
-    dataUrl: (file: string, mime: string) => call<string | null>('icon:dataUrl', file, mime),
+    dataUrl: (file: string, mime: string) => call<AssetResult>('icon:dataUrl', file, mime),
   },
   exporter: {
     image: (dataUrl: string, name: string, ext: string) => call<string | null>('export:image', dataUrl, name, ext),

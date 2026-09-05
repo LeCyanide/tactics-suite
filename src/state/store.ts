@@ -1110,8 +1110,12 @@ export const useStore = create<Store>((set, get) => {
     async duplicateMap(id) {
       const src = get().maps.find((m) => m.id === id);
       if (!src) return;
-      const dataUrl = await window.api.maps.dataUrl(src.file, src.mime);
-      if (!dataUrl) return;
+      const read = await window.api.maps.dataUrl(src.file, src.mime);
+      if (!('dataUrl' in read)) {
+        get().toast(`Could not read the map image — ${read.error}`);
+        return;
+      }
+      const dataUrl = read.dataUrl;
       const newIdValue = uid('map-');
       const ext = src.file.slice(src.file.lastIndexOf('.'));
       const record = { ...src, id: newIdValue, name: `${src.name} (copy)`, ext, addedAt: Date.now(), updatedAt: Date.now() };

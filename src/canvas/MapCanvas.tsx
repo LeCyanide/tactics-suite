@@ -17,7 +17,7 @@ import {
   type Vec2,
 } from '@/types/model';
 import { effectiveFlags, getActivePage, useStore } from '@/state/store';
-import { useAsset } from '@/state/assets';
+import { useAsset, useAssetState } from '@/state/assets';
 import { MapBackground } from './MapBackground';
 import { CapZones } from './CapZones';
 import { ObjectNode, flatten } from './ObjectNode';
@@ -87,7 +87,7 @@ export default function MapCanvas() {
     () => maps.find((m) => m.id === page?.mapId) ?? null,
     [maps, page?.mapId],
   );
-  const mapImage = useAsset('map', map?.file, map?.mime ?? '');
+  const { image: mapImage, error: mapImageError } = useAssetState('map', map?.file, map?.mime ?? '');
 
   const worldW = map?.widthMeters ?? FALLBACK_W;
   const worldH = map?.heightMeters ?? FALLBACK_H;
@@ -736,6 +736,7 @@ export default function MapCanvas() {
               mapOpacity: show.background ? page.mapView.mapOpacity : 0,
             }}
             image={mapImage}
+            imageError={mapImageError}
             fallbackWidth={FALLBACK_W}
             fallbackHeight={FALLBACK_H}
             theme={theme}
