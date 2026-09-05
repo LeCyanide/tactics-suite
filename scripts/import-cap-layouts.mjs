@@ -140,12 +140,18 @@ function decodeLayout(blob) {
  * count in brackets for its "— Four Areas". Domination is three caps unless
  * it says otherwise, so only another count is spelled out.
  *
- * The suffixes the game gives a scenario for laying the same battle type over
- * different water — _revised, _romb, _alt, _coop — say nothing about what a
- * player picked in port, so they are dropped.
+ * Two of the suffixes the game gives a scenario say nothing a player picked
+ * in port and are dropped: _coop lays the same battle type over the same
+ * water for a PvE room, and _revised is a reworked arrangement that replaced
+ * the one it revised rather than joining it. _alt and _romb do join it — the
+ * game offers both on the same map — so they are kept and spelled out in the
+ * same brackets as the cap count.
  */
 const FAMILIES = [
   { match: /^domination_tournament_/, name: 'Tournament - Domination', counted: true },
+  // Clan brawl is its own battle type with its own caps, and on seven maps it
+  // sits beside the clan battle layout, so it cannot borrow that name.
+  { match: /^cvc_domination_brawl/, name: 'Clans - Brawl', counted: true },
   { match: /^cvc_domination/, name: 'Clans - Domination', counted: true },
   { match: /^ranked_domination/, name: 'Ranked Battle - Domination', counted: true },
   { match: /^domination_localweather_/, name: 'Domination - Local Weather', counted: true },
@@ -167,11 +173,21 @@ const FAMILIES = [
 /** What a domination layout has unless its name says otherwise. */
 const STANDARD_CAPS = 3;
 
+/** The suffixes that move the caps, in the wording the brackets use. */
+const VARIANTS = [
+  { match: /_alt$/, note: 'alt' },
+  { match: /_romb$/, note: 'romb' },
+];
+
 function layoutName(scenario, gameMode, caps) {
   const family = FAMILIES.find((f) => f.match.test(scenario));
   if (!family) return null;
   const base = typeof family.name === 'function' ? family.name(gameMode) : family.name;
-  return family.counted && caps !== STANDARD_CAPS ? `${base} (${caps} caps)` : base;
+  const notes = [];
+  if (family.counted && caps !== STANDARD_CAPS) notes.push(`${caps} caps`);
+  const variant = VARIANTS.find((v) => v.match.test(scenario));
+  if (variant) notes.push(variant.note);
+  return notes.length ? `${base} (${notes.join(', ')})` : base;
 }
 
 /**
