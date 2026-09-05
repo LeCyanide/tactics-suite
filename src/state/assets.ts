@@ -2,18 +2,34 @@
  * Image asset cache.
  *
  * Map backgrounds and ship icons live on disk; they are pulled through IPC as
- * data URLs exactly once and then kept as decoded HTMLImageElements. Data URLs
- * (rather than a custom protocol) keep the export canvas untainted, so
- * `toDataURL` works for image export.
+ * data URLs and then kept as decoded HTMLImageElements. Data URLs (rather
+ * than a custom protocol) keep the export canvas untainted, so `toDataURL`
+ * works for image export.
+ *
+ * A read can fail for reasons that pass: the store is being rewritten by an
+ * import, a sync client has the file open, the disk is slow to answer. Once
+ * that happened the image was gone for the life of the window, because a
+ * failure resolved to null and nothing asked again -- and the canvas draws
+ * its empty sheet for a missing image, so a map that failed to load looked
+ * exactly like a map with no image. So a failed read is retried a few times
+ * before it is believed, and when it is finally given up on the reason is
+ * kept and handed to whoever asked, rather than being swallowed here.
  */
 
 import { useEffect, useState } from 'react';
 
 type Kind = 'map' | 'icon';
 
+/** How hard to try before a read is called a failure, and how long between. */
+const ATTEMPTS = 3;
+const RETRY_MS = 250;
+
 const cache = new Map<string, HTMLImageElement>();
 const pending = new Map<string, Promise<HTMLImageElement | null>>();
+const failures = new Map<string, string>();
 const listeners = new Set<() => void>();
+
+const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 function key(kind: Kind, file: string): string {
   return `${kind}:${file}`;
@@ -24,6 +40,23 @@ export function getCachedAsset(kind: Kind, file?: string | null): HTMLImageEleme
   return cache.get(key(kind, file)) ?? null;
 }
 
+/** Why the last attempt at this asset failed, if it did. */
+export function getAssetError(kind: Kind, file?: string | null): string | null {
+  if (!file) return null;
+  return failures.get(key(kind, file)) ?? null;
+}
+
+async function fetchOnce(kind: Kind, file: string, mime: string): Promise<HTMLImageElement> {
+  const res =
+    kind === 'map' ? await window.api.maps.dataUrl(file, mime) : await window.api.icons.dataUrl(file, mime);
+  // A build older than this one answered with the data URL itself.
+  const asResult = typeof res === 'string' ? { dataUrl: res } : (res ?? { error: 'no answer', code: 'EMPTY' });
+  if (!('dataUrl' in asResult)) throw new Error(asResult.error);
+  const img = await decode(asResult.dataUrl);
+  if (!img) throw new Error('the image could not be decoded');
+  return img;
+}
+
 export function loadAsset(kind: Kind, file: string, mime: string): Promise<HTMLImageElement | null> {
   const k = key(kind, file);
   const hit = cache.get(k);
@@ -32,18 +65,27 @@ export function loadAsset(kind: Kind, file: string, mime: string): Promise<HTMLI
   if (inflight) return inflight;
 
   const task = (async () => {
-    const dataUrl =
-      kind === 'map' ? await window.api.maps.dataUrl(file, mime) : await window.api.icons.dataUrl(file, mime);
-    if (!dataUrl) return null;
-    const img = await decode(dataUrl);
-    if (img) {
-      cache.set(k, img);
-      listeners.forEach((fn) => fn());
+    let last = 'unknown';
+    for (let attempt = 1; attempt <= ATTEMPTS; attempt++) {
+      try {
+        const img = await fetchOnce(kind, file, mime);
+        cache.set(k, img);
+        failures.delete(k);
+        listeners.forEach((fn) => fn());
+        return img;
+      } catch (err: any) {
+        last = String(err?.message ?? err);
+        if (attempt < ATTEMPTS) await wait(RETRY_MS * attempt);
+      }
     }
-    return img;
-  })()
-    .catch(() => null)
-    .finally(() => pending.delete(k));
+    // Only a settled failure is recorded, and never in `cache`: the next
+    // component to ask starts the attempts again, so a file that comes back
+    // is picked up without restarting the application.
+    failures.set(k, last);
+    console.error(`[assets] ${kind} ${file}: ${last}`);
+    listeners.forEach((fn) => fn());
+    return null;
+  })().finally(() => pending.delete(k));
 
   pending.set(k, task);
   return task;
@@ -58,30 +100,49 @@ function decode(dataUrl: string): Promise<HTMLImageElement | null> {
   });
 }
 
-/** Subscribes a component to one asset; re-renders when it finishes decoding. */
-export function useAsset(kind: Kind, file?: string | null, mime = ''): HTMLImageElement | null {
-  const [img, setImg] = useState<HTMLImageElement | null>(() => getCachedAsset(kind, file));
+/**
+ * Subscribes a component to one asset; re-renders when it finishes decoding.
+ *
+ * `error` is set only once the retries above are spent, and only for a file
+ * that was actually asked for -- a record with no image at all reports
+ * neither an image nor an error.
+ */
+export function useAssetState(
+  kind: Kind,
+  file?: string | null,
+  mime = '',
+): { image: HTMLImageElement | null; error: string | null } {
+  const [state, setState] = useState<{ image: HTMLImageElement | null; error: string | null }>(() => ({
+    image: getCachedAsset(kind, file),
+    error: getAssetError(kind, file),
+  }));
 
   useEffect(() => {
     let alive = true;
     if (!file) {
-      setImg(null);
+      setState({ image: null, error: null });
       return;
     }
     const hit = getCachedAsset(kind, file);
     if (hit) {
-      setImg(hit);
+      setState({ image: hit, error: null });
       return;
     }
+    setState({ image: null, error: null });
     void loadAsset(kind, file, mime).then((loaded) => {
-      if (alive) setImg(loaded);
+      if (alive) setState({ image: loaded, error: loaded ? null : getAssetError(kind, file) });
     });
     return () => {
       alive = false;
     };
   }, [kind, file, mime]);
 
-  return img;
+  return state;
+}
+
+/** The image alone, for the callers that have nothing to say about a failure. */
+export function useAsset(kind: Kind, file?: string | null, mime = ''): HTMLImageElement | null {
+  return useAssetState(kind, file, mime).image;
 }
 
 /** Warms the cache for a batch of icons so the canvas does not pop in. */

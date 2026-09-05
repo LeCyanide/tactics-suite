@@ -8,6 +8,8 @@ interface Props {
   map: GameMap | null;
   view: MapViewConfig;
   image: HTMLImageElement | null;
+  /** Why the map's image could not be read, once the retries are spent. */
+  imageError?: string | null;
   /** World extent used when no map is assigned yet. */
   fallbackWidth: number;
   fallbackHeight: number;
@@ -29,6 +31,7 @@ export const MapBackground = memo(function MapBackground({
   map,
   view,
   image,
+  imageError,
   fallbackWidth,
   fallbackHeight,
   theme,
@@ -63,6 +66,27 @@ export const MapBackground = memo(function MapBackground({
       <Rect x={0} y={0} width={w} height={h} fill={theme.sheet} />
 
       {image && <KonvaImage image={image} x={0} y={0} width={w} height={h} opacity={view.mapOpacity} />}
+
+      {/*
+        A map whose image would not load draws the same empty sheet as a map
+        that has no image, and the two are worth telling apart: the first is a
+        fault to go and fix, the second is just an unassigned page. Say so on
+        the sheet rather than leaving open water to be read as the terrain.
+      */}
+      {!image && imageError && (
+        <Text
+          text={`Map image could not be loaded
+${imageError}`}
+          x={0}
+          y={h / 2 - labelSize}
+          width={w}
+          align="center"
+          lineHeight={1.6}
+          fontSize={labelSize * 0.6}
+          fontFamily="JetBrains Mono, Consolas, monospace"
+          fill={theme.gridLabel}
+        />
+      )}
 
       {grid && (
         <Group opacity={view.gridOpacity}>

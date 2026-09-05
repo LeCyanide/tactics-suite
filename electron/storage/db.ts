@@ -528,9 +528,42 @@ export async function writeMapAsset(id: string, ext: string, data: Buffer): Prom
   return file;
 }
 
+/**
+ * Reads one asset, saying why it could not be read.
+ *
+ * A missing file and an unreadable one look the same to a caller that only
+ * gets `null` back, and the canvas draws its empty sheet for both — so a map
+ * whose image the disk refused is indistinguishable from a map with no image
+ * at all. The reason travels with the result so the renderer can say which
+ * happened, and the code (ENOENT, EACCES, EBUSY) is kept because that is the
+ * part worth acting on.
+ */
+export type AssetRead = { data: Buffer } | { error: string; code: string };
+
+async function readAssetIn(dir: string, file: string): Promise<AssetRead> {
+  const full = path.join(dir, path.basename(file));
+  try {
+    return { data: await fsp.readFile(full) };
+  } catch (err: any) {
+    const code = String(err?.code ?? 'UNKNOWN');
+    // Node already opens the message with the code, so only spell it out for
+    // the odd failure that does not carry one.
+    const message = String(err?.message ?? 'read failed');
+    return { error: message.startsWith(code) ? message : `${code}: ${message}`, code };
+  }
+}
+
+export function readMapAssetResult(file: string): Promise<AssetRead> {
+  return readAssetIn(P.mapAssetsDir(), file);
+}
+
+export function readIconAssetResult(file: string): Promise<AssetRead> {
+  return readAssetIn(P.iconsDir(), file);
+}
+
 export async function readMapAsset(file: string): Promise<Buffer | null> {
-  const full = path.join(P.mapAssetsDir(), path.basename(file));
-  return fsp.readFile(full).catch(() => null);
+  const res = await readMapAssetResult(file);
+  return 'data' in res ? res.data : null;
 }
 
 export async function deleteMap(id: string): Promise<AnyMap[]> {
@@ -582,8 +615,8 @@ export async function writeIconAsset(id: string, ext: string, data: Buffer): Pro
 }
 
 export async function readIconAsset(file: string): Promise<Buffer | null> {
-  const full = path.join(P.iconsDir(), path.basename(file));
-  return fsp.readFile(full).catch(() => null);
+  const res = await readIconAssetResult(file);
+  return 'data' in res ? res.data : null;
 }
 
 export async function saveIconRecord(icon: AnyIcon): Promise<AnyIcon[]> {

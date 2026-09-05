@@ -176,9 +176,9 @@ export function registerIpc(getWindow: GetWindow): void {
   handle('map:delete', (id: string) => db.deleteMap(id));
 
   handle('map:dataUrl', async (file: string, mime: string) => {
-    const buf = await db.readMapAsset(file);
-    if (!buf) return null;
-    return `data:${mime || mimeFor(path.extname(file))};base64,${buf.toString('base64')}`;
+    const res = await db.readMapAssetResult(file);
+    if (!('data' in res)) return { error: res.error, code: res.code };
+    return { dataUrl: `data:${mime || mimeFor(path.extname(file))};base64,${res.data.toString('base64')}` };
   });
 
   /* ---------------- ships ---------------- */
@@ -240,9 +240,9 @@ export function registerIpc(getWindow: GetWindow): void {
   handle('icon:delete', (id: string) => db.deleteIcon(id));
 
   handle('icon:dataUrl', async (file: string, mime: string) => {
-    const buf = await db.readIconAsset(file);
-    if (!buf) return null;
-    return `data:${mime || mimeFor(path.extname(file))};base64,${buf.toString('base64')}`;
+    const res = await db.readIconAssetResult(file);
+    if (!('data' in res)) return { error: res.error, code: res.code };
+    return { dataUrl: `data:${mime || mimeFor(path.extname(file))};base64,${res.data.toString('base64')}` };
   });
 
   /* ---------------- image / vector export ---------------- */
