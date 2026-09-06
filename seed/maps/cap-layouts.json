@@ -14,7 +14,8 @@
   },
   "naming": "The game's own name for the battle type, with a hyphen for its full stop and the cap count in brackets where it is not the standard three.",
   "excluded": "Two-cap layouts that are not Standard Battle are brawl layouts and are not listed.",
-  "aliases": "A map keeps one layout per name. Scenarios that share a name and draw the same caps — a PvE room, or a revision of another — are aliases of the mode already listed, and only one is kept."
+  "aliases": "A map keeps one layout per name. Scenarios that share a name and draw the same caps — a PvE room, or a revision of another — are aliases of the mode already listed, and only one is kept.",
+  "localWeather": "Local weather runs the same battle over the same caps with squalls added, so it is dropped where it duplicates the layout it was drawn from, and kept only if no other layout on that map has those caps."
  },
  "layouts": [
   {
@@ -1008,96 +1009,6 @@
    ]
   },
   {
-   "id": "cap-51_Greece-473",
-   "mapId": "map-c93f7d4a-ac0f-45cd-9bb7-0138daee81a4",
-   "spaceName": "spaces/51_Greece",
-   "name": "Domination - Local Weather",
-   "scenario": "domination_localweather_3point",
-   "gameMode": 7,
-   "points": [
-    {
-     "index": 0,
-     "label": "A",
-     "nx": 0.228571,
-     "ny": 0.5,
-     "nr": 0.085714,
-     "teamId": -1,
-     "initiallyEnabled": true,
-     "cpType": 0
-    },
-    {
-     "index": 1,
-     "label": "B",
-     "nx": 0.5,
-     "ny": 0.5,
-     "nr": 0.085714,
-     "teamId": -1,
-     "initiallyEnabled": true,
-     "cpType": 0
-    },
-    {
-     "index": 2,
-     "label": "C",
-     "nx": 0.771429,
-     "ny": 0.5,
-     "nr": 0.085714,
-     "teamId": -1,
-     "initiallyEnabled": true,
-     "cpType": 0
-    }
-   ]
-  },
-  {
-   "id": "cap-51_Greece-474",
-   "mapId": "map-c93f7d4a-ac0f-45cd-9bb7-0138daee81a4",
-   "spaceName": "spaces/51_Greece",
-   "name": "Domination - Local Weather (4 caps)",
-   "scenario": "domination_localweather_4point",
-   "gameMode": 7,
-   "points": [
-    {
-     "index": 0,
-     "label": "A",
-     "nx": 0.228571,
-     "ny": 0.5,
-     "nr": 0.085714,
-     "teamId": -1,
-     "initiallyEnabled": true,
-     "cpType": 0
-    },
-    {
-     "index": 1,
-     "label": "B",
-     "nx": 0.5,
-     "ny": 0.5,
-     "nr": 0.085714,
-     "teamId": -1,
-     "initiallyEnabled": true,
-     "cpType": 0
-    },
-    {
-     "index": 2,
-     "label": "C",
-     "nx": 0.771429,
-     "ny": 0.264286,
-     "nr": 0.085714,
-     "teamId": 0,
-     "initiallyEnabled": true,
-     "cpType": 0
-    },
-    {
-     "index": 3,
-     "label": "D",
-     "nx": 0.771429,
-     "ny": 0.735714,
-     "nr": 0.085714,
-     "teamId": 1,
-     "initiallyEnabled": true,
-     "cpType": 0
-    }
-   ]
-  },
-  {
    "id": "cap-51_Greece-485",
    "mapId": "map-c93f7d4a-ac0f-45cd-9bb7-0138daee81a4",
    "spaceName": "spaces/51_Greece",
@@ -1503,46 +1414,6 @@
    "spaceName": "spaces/16_OC_bees_to_honey",
    "name": "Domination",
    "scenario": "domination_3point",
-   "gameMode": 7,
-   "points": [
-    {
-     "index": 0,
-     "label": "A",
-     "nx": 0.290625,
-     "ny": 0.5,
-     "nr": 0.075,
-     "teamId": -1,
-     "initiallyEnabled": true,
-     "cpType": 0
-    },
-    {
-     "index": 1,
-     "label": "B",
-     "nx": 0.49375,
-     "ny": 0.5,
-     "nr": 0.075,
-     "teamId": -1,
-     "initiallyEnabled": true,
-     "cpType": 0
-    },
-    {
-     "index": 2,
-     "label": "C",
-     "nx": 0.696875,
-     "ny": 0.5,
-     "nr": 0.075,
-     "teamId": -1,
-     "initiallyEnabled": true,
-     "cpType": 0
-    }
-   ]
-  },
-  {
-   "id": "cap-16_OC_bees_to_honey-127",
-   "mapId": "map-ad0ffc76-e7a7-40b4-81a9-254f4f403281",
-   "spaceName": "spaces/16_OC_bees_to_honey",
-   "name": "Domination - Local Weather",
-   "scenario": "domination_localweather_3point",
    "gameMode": 7,
    "points": [
     {
@@ -3323,46 +3194,6 @@
    "spaceName": "spaces/15_NE_north",
    "name": "Domination",
    "scenario": "domination_3point",
-   "gameMode": 7,
-   "points": [
-    {
-     "index": 0,
-     "label": "A",
-     "nx": 0.234375,
-     "ny": 0.5,
-     "nr": 0.06875,
-     "teamId": -1,
-     "initiallyEnabled": true,
-     "cpType": 0
-    },
-    {
-     "index": 1,
-     "label": "B",
-     "nx": 0.49,
-     "ny": 0.5,
-     "nr": 0.05,
-     "teamId": -1,
-     "initiallyEnabled": true,
-     "cpType": 0
-    },
-    {
-     "index": 2,
-     "label": "C",
-     "nx": 0.73375,
-     "ny": 0.5,
-     "nr": 0.059375,
-     "teamId": -1,
-     "initiallyEnabled": true,
-     "cpType": 0
-    }
-   ]
-  },
-  {
-   "id": "cap-15_NE_north-105",
-   "mapId": "map-70f053e0-1422-4342-a7c8-b6853415ae52",
-   "spaceName": "spaces/15_NE_north",
-   "name": "Domination - Local Weather",
-   "scenario": "domination_localweather_3point",
    "gameMode": 7,
    "points": [
     {
