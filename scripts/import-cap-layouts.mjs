@@ -234,6 +234,12 @@ const maps = JSON.parse(await fsp.readFile(mapsFile, 'utf8'));
 const bySpace = new Map(
   maps.filter((m) => !m.archived && m.spaceName).map((m) => [m.spaceName, m]),
 );
+// A space the game reworked keeps its old layouts, and the stand-in is the
+// only map they still fit. Saying so is worth the extra line: "no map" reads
+// as a database that needs filling, when nothing is missing at all.
+const archivedSpace = new Map(
+  maps.filter((m) => m.archived && m.spaceName).map((m) => [m.spaceName, m]),
+);
 
 /* ------------------------------------------------------------------ */
 /* Convert                                                             */
@@ -248,7 +254,12 @@ for (const row of rows) {
   const decoded = decodeLayout(row.layout_data);
   const map = bySpace.get(decoded.spaceName);
   if (!map) {
-    skipped.push(`${decoded.spaceName} ${decoded.scenario}: no map`);
+    const standIn = archivedSpace.get(decoded.spaceName);
+    skipped.push(
+      standIn
+        ? `${standIn.name} ${decoded.scenario}: archived stand-in, caps already in the image`
+        : `${decoded.spaceName} ${decoded.scenario}: no map`,
+    );
     continue;
   }
   const why = excluded(decoded);
