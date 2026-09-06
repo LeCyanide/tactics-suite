@@ -16,7 +16,9 @@
  * Several scenarios of one battle type share both a name and the caps they
  * draw — a PvE room, or a revision that replaced what it revised. A map keeps
  * one layout per name, so the picker never offers the same mode twice; see
- * "Collapse aliases" below.
+ * "Collapse aliases" below. A local weather scenario is the same battle with
+ * squalls over it and the very same caps, so it is dropped wherever it
+ * duplicates the layout it was drawn from; see "Local weather".
  *
  * The toolkit may be running, so the database is copied before it is read.
  */
@@ -370,8 +372,44 @@ for (const [key, group] of groups) {
   kept.push(winner);
 }
 
+/* ------------------------------------------------------------------ */
+/* Local weather                                                       */
+/* ------------------------------------------------------------------ */
+
+/*
+ * A local weather scenario is the ordinary domination battle with squalls
+ * rolling over it. The weather moves; the caps do not, and the game ties the
+ * scenario to the same mode and the same points as the plain layout it is
+ * drawn from. In the picker it is therefore a second entry that selects the
+ * same circles as the first, and nothing about planning a cap changes for
+ * having chosen it.
+ *
+ * Dropping it is only safe while that stays true, so each one is matched
+ * against the layouts kept for its map and removed only where it duplicates
+ * one exactly. A weather layout whose caps sit anywhere else is the only
+ * record of that arrangement, so it is kept and reported rather than quietly
+ * discarded.
+ */
+const isWeather = (l) => /_localweather_/.test(l.scenario);
+const survivors = [];
+for (const l of kept) {
+  if (!isWeather(l)) {
+    survivors.push(l);
+    continue;
+  }
+  const twin = kept.find((o) => o !== l && o.mapId === l.mapId && geometry(o) === geometry(l));
+  if (twin) {
+    console.log(`weather    ${mapName(l)} — ${l.name}  (same caps as ${twin.name})`);
+  } else {
+    console.log(
+      `weather    ${mapName(l)} — ${l.name}  KEPT: no other layout on this map has these caps`,
+    );
+    survivors.push(l);
+  }
+}
+
 layouts.length = 0;
-layouts.push(...kept);
+layouts.push(...survivors);
 layouts.sort((a, b) => mapName(a).localeCompare(mapName(b)) || a.name.localeCompare(b.name));
 
 /* ------------------------------------------------------------------ */
@@ -416,6 +454,10 @@ const doc = {
       'A map keeps one layout per name. Scenarios that share a name and draw the ' +
       'same caps — a PvE room, or a revision of another — are aliases of the mode ' +
       'already listed, and only one is kept.',
+    localWeather:
+      'Local weather runs the same battle over the same caps with squalls added, so ' +
+      'it is dropped where it duplicates the layout it was drawn from, and kept only ' +
+      'if no other layout on that map has those caps.',
   },
   layouts,
 };
