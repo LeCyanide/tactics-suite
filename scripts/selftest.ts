@@ -353,12 +353,127 @@ async function testNameFolding(): Promise<void> {
   check(`merge: no collisions across ${roster.length} shipped ships`, collisions.length === 0, collisions);
 }
 
+/**
+ * Seeding across releases.
+ *
+ * The interesting cases are all about telling a user's intent from a shipped
+ * change: a record they deleted must not come back, a record they edited must
+ * not be overwritten, and a record they never touched must follow the seed.
+ */
+async function testSeeding(): Promise<void> {
+  console.log('\nseed install and upgrade');
+
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'wowsplan-seed-store-'));
+  const seed = await fs.mkdtemp(path.join(os.tmpdir(), 'wowsplan-seed-src-'));
+  process.env.WOWSPLAN_DATA_DIR = root;
+  process.env.WOWSPLAN_SEED_DIR = seed;
+
+  const writeSeed = async (
+    maps: unknown[],
+    ships: unknown[],
+    layouts: unknown[],
+  ): Promise<void> => {
+    await fs.mkdir(path.join(seed, 'maps'), { recursive: true });
+    await fs.mkdir(path.join(seed, 'ships'), { recursive: true });
+    await fs.writeFile(path.join(seed, 'maps', 'maps.json'), JSON.stringify(maps));
+    await fs.writeFile(
+      path.join(seed, 'maps', 'cap-layouts.json'),
+      JSON.stringify({ schemaVersion: 1, layouts }),
+    );
+    await fs.writeFile(path.join(seed, 'ships', 'ships.json'), JSON.stringify(ships));
+  };
+
+  const m = (id: string, name: string) => ({ id, name, file: `${id}.png` });
+
+  // --- first run: an empty store takes everything ---
+  await writeSeed([m('map-a', 'Alpha'), m('map-b', 'Bravo')], [{ id: 'sh-1', name: 'Ship One' }], [
+    { id: 'cap-1', mapId: 'map-a', name: 'Domination' },
+  ]);
+  db.ensureDirs();
+  db.seedStore();
+  check('first run: maps installed', (await db.listMaps()).length === 2);
+  check('first run: ships installed', (await db.listShips()).length === 1);
+  check('first run: cap layouts installed', (await db.listCapLayouts()).length === 1);
+
+  // --- an unchanged seed does nothing at all ---
+  const before = JSON.stringify(await db.listMaps());
+  check('unchanged seed: reports no work', db.seedStore().length === 0);
+  check('unchanged seed: maps untouched', JSON.stringify(await db.listMaps()) === before);
+
+  // --- the user makes the store their own ---
+  await db.deleteMap('map-b'); // deleted on purpose
+  const maps = await db.listMaps();
+  const edited = { ...maps.find((x) => x.id === 'map-a')!, name: 'Alpha (renamed)' };
+  await db.saveMapRecord(edited as never);
+  await db.saveShips([{ id: 'sh-1', name: 'Ship One' }, { id: 'sh-mine', name: 'My Import' }] as never);
+
+  // --- a later release: new records, and a change to one the user edited ---
+  await writeSeed(
+    [m('map-a', 'Alpha revised'), m('map-b', 'Bravo'), m('map-c', 'Charlie')],
+    [
+      { id: 'sh-1', name: 'Ship One revised' },
+      { id: 'sh-2', name: 'Ship Two' },
+    ],
+    [
+      { id: 'cap-1', mapId: 'map-a', name: 'Domination' },
+      { id: 'cap-2', mapId: 'map-a', name: 'Clans - Brawl' },
+    ],
+  );
+  db.seedStore();
+
+  const after = await db.listMaps();
+  const ids = after.map((x) => x.id).sort();
+  check('upgrade: new map added', ids.includes('map-c'), ids);
+  check('upgrade: deleted map stays deleted', !ids.includes('map-b'), ids);
+  check(
+    'upgrade: edited map keeps the user text',
+    after.find((x) => x.id === 'map-a')?.name === 'Alpha (renamed)',
+    after.find((x) => x.id === 'map-a')?.name,
+  );
+
+  const ships = await db.listShips();
+  check(
+    'upgrade: untouched ship follows the seed',
+    ships.find((s) => s.id === 'sh-1')?.name === 'Ship One revised',
+    ships.find((s) => s.id === 'sh-1')?.name,
+  );
+  check('upgrade: new ship added', ships.some((s) => s.id === 'sh-2'));
+  check("upgrade: the user's own ship survives", ships.some((s) => s.id === 'sh-mine'));
+
+  // Reference data the editor never writes is replaced outright.
+  check('upgrade: cap layouts replaced wholesale', (await db.listCapLayouts()).length === 2);
+
+  // --- a store predating the receipt: add-only, nothing overwritten ---
+  const legacy = await fs.mkdtemp(path.join(os.tmpdir(), 'wowsplan-seed-legacy-'));
+  process.env.WOWSPLAN_DATA_DIR = legacy;
+  db.ensureDirs();
+  await fs.mkdir(path.join(legacy, 'maps'), { recursive: true });
+  await fs.writeFile(
+    path.join(legacy, 'maps', 'maps.json'),
+    JSON.stringify([{ id: 'map-a', name: 'Old Alpha', file: 'map-a.png' }]),
+  );
+  db.seedStore();
+  const migrated = await db.listMaps();
+  check(
+    'legacy store: existing record left alone',
+    migrated.find((x) => x.id === 'map-a')?.name === 'Old Alpha',
+    migrated.find((x) => x.id === 'map-a')?.name,
+  );
+  check('legacy store: missing records added', migrated.length === 3, migrated.length);
+
+  delete process.env.WOWSPLAN_SEED_DIR;
+  await fs.rm(root, { recursive: true, force: true });
+  await fs.rm(seed, { recursive: true, force: true });
+  await fs.rm(legacy, { recursive: true, force: true });
+}
+
 async function main(): Promise<void> {
   await testShipImport();
   await testNameFolding();
   await testPackage();
   await testExportDestinations();
   await testTempSweep();
+  await testSeeding();
   console.log(failures === 0 ? '\nall checks passed\n' : `\n${failures} check(s) failed\n`);
   process.exit(failures === 0 ? 0 : 1);
 }

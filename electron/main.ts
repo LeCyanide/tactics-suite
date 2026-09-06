@@ -74,11 +74,11 @@ function createWindow(): void {
 
 app.whenReady().then(() => {
   ensureDirs();
-  // Fills an empty store with the databases the build ships with. Synchronous
-  // on purpose: the renderer asks for ships and maps as soon as it loads, and
-  // it must not race a half-copied library.
+  // Installs the databases the build ships with, and brings an existing store
+  // up to date with them. Synchronous on purpose: the renderer asks for ships
+  // and maps as soon as it loads, and it must not race a half-copied library.
   const seeded = seedStore();
-  if (seeded.length) console.log(`[seed] installed ${seeded.join(', ')}`);
+  if (seeded.length) console.log(`[seed] ${seeded.join('; ')}`);
   // Housekeeping only: clears temp files orphaned by a crash mid-write.
   // It runs alongside startup and can never hold it up or fail it.
   void sweepTempFiles().catch(() => undefined);
