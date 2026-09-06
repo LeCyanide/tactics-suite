@@ -14,6 +14,7 @@
  *     maps/assets/<id>.<ext>        imported map images
  *     projects/<id>.json            one document per project
  *     backups/<id>/<ts>.wowsplan    rolling backups
+ *     seed-state.json               which shipped databases this store has taken
  *
  * Writes are atomic: content goes to a sibling `.tmp` file which is then
  * renamed over the target, so a crash mid-write can never leave a truncated
@@ -74,6 +75,7 @@ const P = {
   projectsDir: () => path.join(storageRoot(), 'projects'),
   projectFile: (id: string) => path.join(storageRoot(), 'projects', `${safeId(id)}.json`),
   backupsDir: (id: string) => path.join(storageRoot(), 'backups', safeId(id)),
+  seedState: () => path.join(storageRoot(), 'seed-state.json'),
 };
 
 /** Guards against an id ever escaping the storage root. */
@@ -115,6 +117,9 @@ export function ensureDirs(): void {
  */
 function seedRoot(): string | null {
   const candidates: string[] = [];
+  // Mirrors WOWSPLAN_DATA_DIR: lets a test point at a fixture seed, and lets a
+  // portable install carry its own.
+  if (process.env.WOWSPLAN_SEED_DIR) candidates.push(path.resolve(process.env.WOWSPLAN_SEED_DIR));
   if (process.resourcesPath) candidates.push(path.join(process.resourcesPath, 'seed'));
   try {
     candidates.push(path.join(app.getAppPath(), 'seed'));
@@ -156,67 +161,248 @@ function copyTreeInto(fromDir: string, toDir: string): void {
 }
 
 /**
- * Installs the ship database, the map library and the capture point layouts
- * on first run.
+ * Installs the ship database, the map library and the capture point layouts,
+ * and keeps them current as later releases change them.
  *
  * Without this a fresh install opens with no ships, no maps and no layouts,
- * which is not an editor anyone can use: until now the databases were only
- * ever created by the import scripts in `scripts/`, on the machine that ran
- * them.
+ * which is not an editor anyone can use: the databases were once only ever
+ * created by the import scripts in `scripts/`, on the machine that ran them.
  *
- * Each database is keyed on its own index file and seeded only when that file
- * is absent, which buys three properties worth having:
+ * Seeding used to be keyed on the mere presence of each index file, which had
+ * the property it was chosen for -- a user's edits survived every release --
+ * and one nobody wanted: a store that existed could never receive anything
+ * new. A release that added forty maps delivered them only to people who had
+ * never run the application before. What the check was missing is not the
+ * file but its version, so each database now records the digest of the seed
+ * it was filled from, and a start where nothing shipped has changed costs one
+ * hash and no writes.
+ */
+/**
+ * What the store has already taken from a seed.
  *
- *   - an existing store is never overwritten, so a user's edits survive every
- *     future release;
- *   - a user who deliberately empties a database keeps it empty, because the
- *     index file is still there;
- *   - a later version that adds a database seeds only that one on upgrade and
- *     leaves the rest alone.
+ * `digest` is of the seed file as shipped, so a release that changes nothing
+ * does no work. `records` maps each seeded id to a digest of the record as it
+ * was installed, which is what makes the three outcomes below distinguishable
+ * on the next run.
+ */
+interface SeedReceipt {
+  digest?: string;
+  records?: Record<string, string>;
+}
+
+interface SeedState {
+  schemaVersion: number;
+  appVersion?: string;
+  updatedAt?: number;
+  databases: Record<string, SeedReceipt>;
+}
+
+const SEED_STATE_VERSION = 1;
+
+function digestOf(value: string | Buffer): string {
+  return crypto.createHash('sha256').update(value).digest('hex').slice(0, 32);
+}
+
+function readSeedState(): SeedState {
+  try {
+    const parsed = JSON.parse(fs.readFileSync(P.seedState(), 'utf8')) as SeedState;
+    if (parsed && typeof parsed === 'object' && parsed.databases) return parsed;
+  } catch {
+    /* absent or unreadable: treated as "nothing recorded" */
+  }
+  return { schemaVersion: SEED_STATE_VERSION, databases: {} };
+}
+
+function writeSeedState(state: SeedState): void {
+  state.schemaVersion = SEED_STATE_VERSION;
+  state.updatedAt = Date.now();
+  try {
+    state.appVersion = app.getVersion();
+  } catch {
+    /* not running under electron; the version is only for diagnostics */
+  }
+  const tmp = `${P.seedState()}.${process.pid}.tmp`;
+  fs.mkdirSync(path.dirname(P.seedState()), { recursive: true });
+  fs.writeFileSync(tmp, JSON.stringify(state, null, 2), 'utf8');
+  fs.renameSync(tmp, P.seedState());
+}
+
+function readJsonSync<T>(file: string, fallback: T): T {
+  try {
+    return JSON.parse(fs.readFileSync(file, 'utf8')) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeJsonSync(file: string, value: unknown): void {
+  const tmp = `${file}.${process.pid}.tmp`;
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(tmp, JSON.stringify(value, null, 2), 'utf8');
+  fs.renameSync(tmp, file);
+}
+
+interface WithId {
+  id: string;
+  [k: string]: unknown;
+}
+
+/**
+ * Merge a shipped collection into the one on disk.
  *
- * Individual assets are copied only where absent as well, so a first run
- * interrupted half way through resumes cleanly on the next start.
+ * A record can be in one of three states, and only the receipt tells them
+ * apart:
  *
- * Seeding is best-effort. A missing, partial or unreadable seed leaves the
- * store as empty as it would have been anyway, and must never stop the
- * application from starting. Returns the databases it actually filled, for
- * the startup log.
+ *   - absent from the store and never seeded  -> new in this release, add it;
+ *   - absent but recorded as seeded before    -> the user deleted it, leave it
+ *     deleted, or every release would resurrect it;
+ *   - present and byte-identical to what was  -> untouched, safe to update;
+ *     seeded, otherwise                       -> the user edited it, keep theirs.
+ *
+ * Records the store has that the seed does not are the user's own and are
+ * never touched. A record dropped from a later seed also stays: a project may
+ * still point at it, and deleting it would break that page.
+ *
+ * With no receipt at all -- an install predating this mechanism -- there is no
+ * way to tell "deleted by the user" from "new in this release", so the pass is
+ * add-only and nothing existing is modified. That can restore a map someone
+ * deleted, once, which is the conservative direction: an unwanted row is a
+ * nuisance, an overwritten edit is lost work.
+ */
+function mergeRecords(
+  current: WithId[],
+  incoming: WithId[],
+  receipt: SeedReceipt,
+): { merged: WithId[]; records: Record<string, string>; added: number; updated: number; kept: number } {
+  const previous = receipt.records;
+  const firstTime = previous === undefined;
+  const byId = new Map(current.map((r) => [r.id, r]));
+  const merged = current.slice();
+  const records: Record<string, string> = {};
+  let added = 0;
+  let updated = 0;
+  let kept = 0;
+
+  for (const record of incoming) {
+    if (!record || typeof record.id !== 'string') continue;
+    const seedDigest = digestOf(JSON.stringify(record));
+    records[record.id] = seedDigest;
+
+    const existing = byId.get(record.id);
+    if (!existing) {
+      // Deleted on purpose, or genuinely new?
+      if (!firstTime && previous[record.id] !== undefined) continue;
+      merged.push(record);
+      added++;
+      continue;
+    }
+    if (firstTime) {
+      kept++;
+      continue;
+    }
+    if (previous[record.id] === digestOf(JSON.stringify(existing))) {
+      merged[merged.indexOf(existing)] = record;
+      updated++;
+    } else {
+      kept++;
+    }
+  }
+
+  return { merged, records, added, updated, kept };
+}
+
+/**
+ * Install or refresh the shipped databases.
+ *
+ * Runs on every start, not just the first: a release that adds maps, ships or
+ * capture point layouts has to be able to deliver them to a store that already
+ * exists, which keying on the mere presence of an index file could never do.
+ * Each database carries the digest of the seed it was filled from, so a start
+ * that changes nothing costs one hash and no writes.
+ *
+ * The two kinds of database are treated differently because they are owned
+ * differently. Ships and maps are the user's to extend and edit, so a new seed
+ * is merged into them record by record (see `mergeRecords`). The capture point
+ * layouts describe how the game itself lays a map out and nothing in the
+ * editor writes them back, so a new seed simply replaces them.
+ *
+ * Best-effort throughout: a missing, partial or unreadable seed leaves the
+ * store as it was and must never stop the application from starting. Returns
+ * one line per database it changed, for the startup log.
  */
 export function seedStore(): string[] {
   const seed = seedRoot();
   if (!seed) return [];
 
-  const seeded: string[] = [];
-  const once = (index: string, label: string, fill: () => void): void => {
-    if (fs.existsSync(index)) return;
+  const state = readSeedState();
+  const changes: string[] = [];
+  let dirty = false;
+
+  const sync = (label: string, key: string, file: string, apply: (receipt: SeedReceipt) => string | null): void => {
     try {
-      fill();
-      seeded.push(label);
+      if (!fs.existsSync(file)) return;
+      const digest = digestOf(fs.readFileSync(file));
+      const receipt = state.databases[key] ?? {};
+      // Nothing shipped has changed since this store was last filled, and the
+      // store has been filled at least once.
+      if (receipt.digest === digest && receipt.records !== undefined) return;
+      const note = apply(receipt);
+      state.databases[key] = { ...state.databases[key], digest };
+      dirty = true;
+      if (note) changes.push(`${label}: ${note}`);
     } catch {
-      /* leave this database empty; the application still runs */
+      /* leave this database as it is; the application still runs */
     }
   };
 
-  once(P.shipsFile(), 'ships', () => {
-    copyFileIfAbsent(path.join(seed, 'ships', 'ships.json'), P.shipsFile());
+  sync('ships', 'ships', path.join(seed, 'ships', 'ships.json'), (receipt) => {
+    const incoming = readJsonSync<WithId[]>(path.join(seed, 'ships', 'ships.json'), []);
+    const current = readJsonSync<WithId[]>(P.shipsFile(), []);
+    const { merged, records, added, updated } = mergeRecords(current, incoming, receipt);
+    if (added || updated || !fs.existsSync(P.shipsFile())) writeJsonSync(P.shipsFile(), merged);
+    state.databases.ships = { ...state.databases.ships, records };
     copyFileIfAbsent(path.join(seed, 'ships', 'icons.json'), P.iconIndex());
     copyTreeInto(path.join(seed, 'ships', 'icons'), P.iconsDir());
+    return added || updated ? `${added} added, ${updated} updated` : null;
   });
 
-  once(P.mapsFile(), 'maps', () => {
-    copyFileIfAbsent(path.join(seed, 'maps', 'maps.json'), P.mapsFile());
+  sync('maps', 'maps', path.join(seed, 'maps', 'maps.json'), (receipt) => {
+    const incoming = readJsonSync<WithId[]>(path.join(seed, 'maps', 'maps.json'), []);
+    const current = readJsonSync<WithId[]>(P.mapsFile(), []);
+    const { merged, records, added, updated } = mergeRecords(current, incoming, receipt);
+    if (added || updated || !fs.existsSync(P.mapsFile())) writeJsonSync(P.mapsFile(), merged);
+    state.databases.maps = { ...state.databases.maps, records };
+    // Images are named for the record that references them, so copying only
+    // what is absent brings a new map's picture without disturbing any other.
     copyTreeInto(path.join(seed, 'maps', 'assets'), P.mapAssetsDir());
     copyTreeInto(
       path.join(seed, 'maps', 'archive-clan-battles'),
       path.join(storageRoot(), 'maps', 'archive-clan-battles'),
     );
+    return added || updated ? `${added} added, ${updated} updated` : null;
   });
 
-  once(P.capLayoutsFile(), 'cap layouts', () => {
-    copyFileIfAbsent(path.join(seed, 'maps', 'cap-layouts.json'), P.capLayoutsFile());
+  sync('cap layouts', 'capLayouts', path.join(seed, 'maps', 'cap-layouts.json'), () => {
+    const from = path.join(seed, 'maps', 'cap-layouts.json');
+    const had = readJsonSync<{ layouts?: unknown[] }>(P.capLayoutsFile(), {}).layouts?.length ?? 0;
+    fs.mkdirSync(path.dirname(P.capLayoutsFile()), { recursive: true });
+    const tmp = `${P.capLayoutsFile()}.${process.pid}.tmp`;
+    fs.copyFileSync(from, tmp);
+    fs.renameSync(tmp, P.capLayoutsFile());
+    const now = readJsonSync<{ layouts?: unknown[] }>(P.capLayoutsFile(), {}).layouts?.length ?? 0;
+    // Marked as fully known so the receipt reads the same as the collections.
+    state.databases.capLayouts = { ...state.databases.capLayouts, records: {} };
+    return had === now ? null : `${had} -> ${now}`;
   });
 
-  return seeded;
+  if (dirty) {
+    try {
+      writeSeedState(state);
+    } catch {
+      /* the next start will simply do the same work again */
+    }
+  }
+  return changes;
 }
 
 /* ------------------------------------------------------------------ */

@@ -46,6 +46,7 @@ Everything is stored locally under the OS application-data directory:
   ships/icons.json            icon asset index
   ships/icons/<id>.png        imported ship icons
   backups/<projectId>/*.wowsplan
+  seed-state.json             which shipped databases this store has taken
 ```
 
 Set `WOWSPLAN_DATA_DIR` to point that whole tree somewhere else — a portable
