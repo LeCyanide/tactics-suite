@@ -13,6 +13,11 @@
  * pointing at it. Layouts for a space with no map — or with only an archived
  * stand-in — are skipped, as are the two-cap brawl layouts.
  *
+ * Several scenarios of one battle type share both a name and the caps they
+ * draw — a PvE room, or a revision that replaced what it revised. A map keeps
+ * one layout per name, so the picker never offers the same mode twice; see
+ * "Collapse aliases" below.
+ *
  * The toolkit may be running, so the database is copied before it is read.
  */
 import fs from 'node:fs';
@@ -283,26 +288,85 @@ for (const row of rows) {
 }
 
 const mapName = (l) => bySpace.get(l.spaceName).name;
-layouts.sort((a, b) => mapName(a).localeCompare(mapName(b)) || a.name.localeCompare(b.name));
 
-// Two layouts sharing a name on one map would be indistinguishable in the
-// picker, which is the one thing the naming rule has to get right.
-const clashes = new Map();
+const previous = fs.existsSync(layoutsFile)
+  ? (JSON.parse(await fsp.readFile(layoutsFile, 'utf8')).layouts ?? [])
+  : [];
+
+/* ------------------------------------------------------------------ */
+/* Collapse aliases                                                    */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The game records one layout per scenario config, and several scenarios of a
+ * battle type share both a name and the very caps they draw: a PvE room and
+ * its PvP original, or a revision that replaced what it revised. The picker
+ * lists layouts by name alone, so those arrive as two or three entries that
+ * read identically and draw the same circles — one is the mode, the rest are
+ * aliases of it.
+ *
+ * So a map keeps one layout per name. The survivor is whichever the library
+ * already published, because a page stores the id it was pointed at and must
+ * keep resolving; failing that the scenario the game did not qualify, and
+ * failing that the lowest config id, so a rebuild is repeatable.
+ *
+ * Sharing a name while drawing different caps is a different matter — it
+ * means the naming rule cannot tell two real arrangements apart, and dropping
+ * one would lose caps rather than a duplicate. Those are kept and reported.
+ */
+
+/** The drawn shape, as the picker would render it. */
+const geometry = (l) =>
+  l.points
+    .map((p) => `${p.index},${p.nx},${p.ny},${p.nr},${p.teamId},${p.cpType}`)
+    .join('|');
+
+/** A scenario the game qualified — a PvE room, or a revision of another. */
+const qualified = (scenario) => /_(coop|revised|revised_coop)$/.test(scenario);
+
+const published = new Set(previous.map((l) => l.id));
+
+const groups = new Map();
 for (const l of layouts) {
   const key = `${l.mapId}/${l.name}`;
-  clashes.set(key, (clashes.get(key) ?? 0) + 1);
+  if (!groups.has(key)) groups.set(key, []);
+  groups.get(key).push(l);
 }
-for (const [key, n] of clashes) {
-  if (n > 1) console.log(`clash      ${n} layouts named ${key.split('/').pop()} on one map`);
+
+const kept = [];
+for (const [key, group] of groups) {
+  if (group.length === 1) {
+    kept.push(group[0]);
+    continue;
+  }
+  const shapes = new Set(group.map(geometry));
+  if (shapes.size > 1) {
+    // Not aliases: the name is hiding a real difference in the caps.
+    console.log(
+      `clash      ${group.length} layouts named ${key.split('/').pop()} on one map ` +
+        `draw ${shapes.size} different arrangements — keeping all`,
+    );
+    kept.push(...group);
+    continue;
+  }
+  const winner =
+    group.find((l) => published.has(l.id)) ??
+    group.find((l) => !qualified(l.scenario)) ??
+    group.slice().sort((a, b) => a.id.localeCompare(b.id))[0];
+  for (const l of group) {
+    if (l !== winner) console.log(`alias      ${mapName(l)} — ${l.name}  (${l.scenario})`);
+  }
+  kept.push(winner);
 }
+
+layouts.length = 0;
+layouts.push(...kept);
+layouts.sort((a, b) => mapName(a).localeCompare(mapName(b)) || a.name.localeCompare(b.name));
 
 /* ------------------------------------------------------------------ */
 /* Compare and write                                                   */
 /* ------------------------------------------------------------------ */
 
-const previous = fs.existsSync(layoutsFile)
-  ? (JSON.parse(await fsp.readFile(layoutsFile, 'utf8')).layouts ?? [])
-  : [];
 const before = new Map(previous.map((l) => [l.id, l]));
 const after = new Map(layouts.map((l) => [l.id, l]));
 
@@ -337,6 +401,10 @@ const doc = {
       'and the cap count in brackets where it is not the standard three.',
     excluded:
       'Two-cap layouts that are not Standard Battle are brawl layouts and are not listed.',
+    aliases:
+      'A map keeps one layout per name. Scenarios that share a name and draw the ' +
+      'same caps — a PvE room, or a revision of another — are aliases of the mode ' +
+      'already listed, and only one is kept.',
   },
   layouts,
 };
