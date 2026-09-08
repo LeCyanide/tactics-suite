@@ -281,6 +281,11 @@ export default function MapCanvas() {
       return;
     }
     if (tool === 'text') {
+      // The editor that opens below focuses itself, and the browser's default
+      // mousedown action would immediately hand focus back to the document:
+      // the editor would blur, commit an empty string and delete itself before
+      // a single key could be typed.
+      e.evt.preventDefault();
       const obj = createText(layerFor(), world, '', toolOptions.fontSize);
       useStore.getState().addObjects([obj]);
       setEditingText({ id: obj.id, value: '' });

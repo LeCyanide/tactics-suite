@@ -164,14 +164,21 @@ export function formatRelative(ts: number): string {
   return formatDate(ts);
 }
 
-/** Big Race style grid reference, e.g. "F7". */
+/**
+ * Minimap grid reference, e.g. "F7".
+ *
+ * Lettered the way the game letters it: rows run A-J down the left edge and
+ * columns run 1-10 across the top, so the letter names the row and the number
+ * names the column.
+ */
 export function gridRef(x: number, y: number, widthM: number, heightM: number, cols: number, rows: number): string {
   const c = clamp(Math.floor((x / widthM) * cols), 0, cols - 1);
   const r = clamp(Math.floor((y / heightM) * rows), 0, rows - 1);
-  return `${columnLabel(c)}${r + 1}`;
+  return `${rowLabel(r)}${c + 1}`;
 }
 
-export function columnLabel(index: number): string {
+/** Row index -> A, B, ... Z, AA, for grids taller than the alphabet. */
+export function rowLabel(index: number): string {
   let n = index;
   let label = '';
   do {
