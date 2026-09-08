@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import Konva from 'konva';
-import { Group, Layer, Line, Rect, Stage, Text, Transformer } from 'react-konva';
+import { Circle, Group, Layer, Line, Rect, Stage, Text, Transformer } from 'react-konva';
 import type { KonvaEventObject } from 'konva/lib/Node';
 import {
   LAYER_IDS,
@@ -37,6 +37,19 @@ const FALLBACK_H = 30000;
  * camera state the canvas ever has.
  */
 const FIT_MARGIN = 0.94;
+
+/** How long a click ping takes to spread and fade, in milliseconds. */
+const PING_MS = 620;
+/** How far behind the leading ring the second one follows, as a fraction of PING_MS. */
+const PING_TRAIL = 0.22;
+
+/** A click ping in flight. Purely a flash of feedback: never part of the plan. */
+interface Ping {
+  id: ID;
+  x: number;
+  y: number;
+  colour: string;
+}
 
 type DraftState =
   | { kind: 'shape'; obj: TacticalObject; start: Vec2 }
@@ -79,6 +92,7 @@ export default function MapCanvas() {
   const [editingText, setEditingText] = useState<{ id: ID; value: string } | null>(null);
   const [menu, setMenu] = useState<ContextMenuState | null>(null);
   const [exportOpts, setExportOpts] = useState<ExportOptions | null>(null);
+  const [pings, setPings] = useState<Ping[]>([]);
 
   const dragRef = useRef<{ last: Vec2; ids: ID[] } | null>(null);
   const fitScaleRef = useRef(0.02);
@@ -98,6 +112,13 @@ export default function MapCanvas() {
 
   const theme = canvasThemeFor(themeName);
   const inv = 1 / camera.scale;
+  const gridCols = page?.mapView.gridCols ?? map?.gridCols ?? 10;
+  const gridRows = page?.mapView.gridRows ?? map?.gridRows ?? 10;
+  /**
+   * At its widest a ping spans about half a grid square, so it reads as a
+   * gesture at the spot rather than as something drawn on the plan.
+   */
+  const pingRadius = Math.min(worldW / gridCols, worldH / gridRows) / 4;
   const snapStep = project?.settings.snapStep ?? 500;
   const snapOn = !!project?.settings.snapToGrid;
   const iconSize = project?.settings.shipIconSize ?? 30;
@@ -383,6 +404,16 @@ export default function MapCanvas() {
     });
   };
 
+  /**
+   * Marks a spot on the water for a moment. Used to answer a click that
+   * selected nothing, which would otherwise land with no response at all.
+   */
+  const ping = (world: Vec2) => {
+    const id = uid('ping-');
+    // Bounded so a drummed-on canvas cannot pile up animations.
+    setPings((prev) => [...prev.slice(-4), { id, x: world.x, y: world.y, colour: toolOptions.stroke.color }]);
+  };
+
   const finishMarquee = () => {
     if (!marquee || !page) return setMarquee(null);
     const box = {
@@ -392,7 +423,10 @@ export default function MapCanvas() {
       height: Math.abs(marquee.h),
     };
     setMarquee(null);
-    if (box.width < 3 && box.height < 3) return;
+    if (box.width < 3 && box.height < 3) {
+      ping(toWorld({ x: marquee.x, y: marquee.y }));
+      return;
+    }
 
     const layer = contentRef.current;
     if (!layer) return;
@@ -872,6 +906,23 @@ export default function MapCanvas() {
             onDragEnd={onTransformEnd}
           />
         </Layer>
+
+        {/* Click pings, above everything and part of nothing: left out of exports. */}
+        {!exportOpts && pings.length > 0 && (
+          <Layer listening={false}>
+            {pings.map((p) => (
+              <Ping
+                key={p.id}
+                x={p.x}
+                y={p.y}
+                colour={p.colour}
+                radius={pingRadius}
+                inv={inv}
+                onDone={() => setPings((prev) => prev.filter((q) => q.id !== p.id))}
+              />
+            ))}
+          </Layer>
+        )}
       </Stage>
 
       {/* Marquee is drawn in the DOM so it stays crisp regardless of zoom */}
@@ -913,7 +964,7 @@ export default function MapCanvas() {
 
       <div className="canvas-readout">
         <span className="mono">
-          {gridRef(cursorWorld.x, cursorWorld.y, worldW, worldH, page.mapView.gridCols ?? map?.gridCols ?? 10, page.mapView.gridRows ?? map?.gridRows ?? 10)}
+          {gridRef(cursorWorld.x, cursorWorld.y, worldW, worldH, gridCols, gridRows)}
         </span>
         <span className="mono dim">
           {(cursorWorld.x / 1000).toFixed(2)} , {(cursorWorld.y / 1000).toFixed(2)} km
@@ -979,6 +1030,79 @@ function ShipWithIcon(props: {
   const { iconFile, iconMime, ...rest } = props;
   const icon = useAsset('icon', iconFile, iconMime ?? '');
   return <ShipNode {...rest} icon={icon} />;
+}
+
+/**
+ * One expanding ring, with a second following it out, drawn straight onto the
+ * Konva node so the frames never pass through React. The whole thing lasts
+ * well under a second and then asks to be taken off the page.
+ */
+function Ping({
+  x,
+  y,
+  colour,
+  radius,
+  inv,
+  onDone,
+}: {
+  x: number;
+  y: number;
+  colour: string;
+  radius: number;
+  inv: number;
+  onDone: () => void;
+}) {
+  const lead = useRef<Konva.Circle>(null);
+  const trail = useRef<Konva.Circle>(null);
+  // Read at the end of the animation rather than captured with it, so the
+  // removal always reaches the list the ping is actually in.
+  const done = useRef(onDone);
+  done.current = onDone;
+
+  useEffect(() => {
+    const layer = lead.current?.getLayer();
+    if (!layer) return;
+
+    // Fast off the mark and slowing as it spreads, the way a real one does.
+    const step = (node: Konva.Circle | null, t: number) => {
+      if (!node) return;
+      const p = clamp(t, 0, 1);
+      node.radius(radius * (1 - Math.pow(1 - p, 3)));
+      node.opacity(p <= 0 || p >= 1 ? 0 : (1 - p) * 0.85);
+    };
+
+    const anim = new Konva.Animation((frame) => {
+      const t = (frame?.time ?? 0) / PING_MS;
+      step(lead.current, t);
+      step(trail.current, t - PING_TRAIL);
+      if (t >= 1 + PING_TRAIL) {
+        anim.stop();
+        done.current();
+      }
+    }, layer);
+    anim.start();
+    return () => {
+      anim.stop();
+    };
+  }, [radius]);
+
+  const ring = {
+    x,
+    y,
+    radius: 0,
+    opacity: 0,
+    stroke: colour,
+    strokeWidth: 2.2 * inv,
+    listening: false,
+    perfectDrawEnabled: false,
+  };
+
+  return (
+    <Group listening={false}>
+      <Circle ref={lead} {...ring} />
+      <Circle ref={trail} {...ring} strokeWidth={1.4 * inv} />
+    </Group>
+  );
 }
 
 function TextEditor({
