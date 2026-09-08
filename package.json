@@ -1,7 +1,7 @@
 {
   "name": "wows-tactics-toolkit",
   "productName": "WoWS Tactics Toolkit",
-  "version": "1.2.2",
+  "version": "1.2.4",
   "description": "Offline tactical planning suite for World of Warships",
   "private": true,
   "main": "dist-electron/main.js",
