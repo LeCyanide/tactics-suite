@@ -187,6 +187,10 @@ export default function MapCanvas() {
     const stage = stageRef.current;
     if (!stage) return null;
     const prevCamera = useStore.getState().camera;
+    // Selection is a working state, not part of the plan: highlights and the
+    // transformer handles would otherwise be baked into the file.
+    const prevSelection = useStore.getState().selection;
+    useStore.getState().clearSelection();
 
     setExportOpts(opts);
     const scale = Math.min(size.width / worldW, size.height / worldH);
@@ -221,6 +225,7 @@ export default function MapCanvas() {
 
     setExportOpts(null);
     useStore.getState().setCamera(prevCamera);
+    useStore.getState().select(prevSelection);
     return url;
   };
 
@@ -1024,11 +1029,23 @@ function CanvasContextMenu({ state, onClose }: { state: ContextMenuState; onClos
 
   useEffect(() => {
     const close = () => onClose();
+    /**
+     * Escape dismisses the menu and stops there. It is caught before the
+     * global map, or the same key would also drop the selection the menu was
+     * opened on, leaving nothing to act on once it reopens.
+     */
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      e.stopPropagation();
+      onClose();
+    };
     window.addEventListener('mousedown', close);
     window.addEventListener('blur', close);
+    window.addEventListener('keydown', onKeyDown, true);
     return () => {
       window.removeEventListener('mousedown', close);
       window.removeEventListener('blur', close);
+      window.removeEventListener('keydown', onKeyDown, true);
     };
   }, [onClose]);
 
