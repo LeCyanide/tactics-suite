@@ -1,7 +1,7 @@
 import { memo, useMemo } from 'react';
 import { Group, Image as KonvaImage, Line, Rect, Text } from 'react-konva';
 import type { GameMap, MapViewConfig } from '@/types/model';
-import { columnLabel } from '@/lib/util';
+import { rowLabel } from '@/lib/util';
 import type { CanvasTheme } from '@/state/theme';
 
 interface Props {
@@ -101,10 +101,11 @@ ${imageError}`}
 
       {view.showCoordinates && (
         <Group opacity={0.55}>
+          {/* As in the game: numbers across the top, letters down the side. */}
           {Array.from({ length: cols }, (_, c) => (
             <Text
               key={`c${c}`}
-              text={columnLabel(c)}
+              text={String(c + 1)}
               x={cellW * c}
               y={labelSize * 0.35}
               width={cellW}
@@ -117,7 +118,7 @@ ${imageError}`}
           {Array.from({ length: rows }, (_, r) => (
             <Text
               key={`r${r}`}
-              text={String(r + 1)}
+              text={rowLabel(r)}
               x={labelSize * 0.35}
               y={cellH * r + cellH / 2 - labelSize * 0.6}
               fontSize={labelSize}
