@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Clipboard, HardDrive, ImageDown, Keyboard } from 'lucide-react';
+import { Clipboard, HardDrive, ImageDown, Keyboard, RefreshCw } from 'lucide-react';
 import { getActivePage, useStore } from '@/state/store';
 import { Check, Field, Modal, NumInput, SectionLabel, Slider } from '../common/ui';
 import { canvasApi, DEFAULT_EXPORT, type ExportOptions } from '@/canvas/canvasBridge';
 import { SHORTCUT_REFERENCE } from '@/state/shortcuts';
 import { formatBytes } from '@/lib/util';
+import { restartToUpdate, useUpdateState, type UpdateState } from '@/state/updates';
 import type { ThemeName } from '@/types/model';
 
 /* ================================================================== */
@@ -238,6 +239,9 @@ export function SettingsModal() {
         <HardDrive size={12} /> Open storage folder
       </button>
 
+      <SectionLabel>Updates</SectionLabel>
+      <UpdateSection />
+
       <SectionLabel>About</SectionLabel>
       <div className="faint" style={{ fontSize: 11.5, lineHeight: 1.7 }}>
         WoWS Tactics Toolkit {info?.version ?? ''} — Awooga I don't know what I am doing. language versions below:
@@ -246,6 +250,55 @@ export function SettingsModal() {
         </div>
       </div>
     </Modal>
+  );
+}
+
+function describeUpdate(u: UpdateState): string {
+  switch (u.status) {
+    case 'disabled':
+      return u.reason;
+    case 'idle':
+      return 'Not checked yet.';
+    case 'checking':
+      return 'Checking…';
+    case 'current':
+      return `You have the latest version (${u.version}).`;
+    case 'available':
+      return `Version ${u.version} is available.`;
+    case 'downloading':
+      return `Downloading ${u.version}… ${Math.round(u.percent)}%`;
+    case 'ready':
+      return `Version ${u.version} is downloaded and ready.`;
+    case 'error':
+      return u.message;
+  }
+}
+
+function UpdateSection() {
+  const u = useUpdateState();
+  return (
+    <>
+      <div className="faint" style={{ fontSize: 11.5, marginBottom: 8, color: u.status === 'error' ? 'var(--danger)' : undefined }}>
+        {describeUpdate(u)}
+      </div>
+      {u.status === 'available' ? (
+        <button className="btn sm primary" onClick={() => void window.api.updates.download()}>
+          Download {u.version}
+        </button>
+      ) : u.status === 'ready' ? (
+        <button className="btn sm primary" onClick={() => void restartToUpdate()}>
+          Restart to update
+        </button>
+      ) : (
+        <button
+          className="btn sm"
+          disabled={u.status === 'disabled' || u.status === 'checking' || u.status === 'downloading'}
+          onClick={() => void window.api.updates.check()}
+        >
+          <RefreshCw size={12} /> Check for updates
+        </button>
+      )}
+    </>
   );
 }
 

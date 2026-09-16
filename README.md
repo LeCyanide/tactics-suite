@@ -29,6 +29,37 @@ Packaged Windows installer + portable build (via electron-builder):
 npm run dist
 ```
 
+## Updates
+
+Installed copies check a private update server on the VPS at startup and ask
+before downloading anything. The GitHub repo is never involved: builds carry
+their own update token, which only unlocks the release folder on the server.
+The NSIS install updates through `electron-updater`; the portable exe downloads
+its replacement beside itself, swaps the files and relaunches.
+
+**One-time server setup** (Debian/Ubuntu VPS, DNS for the domain pointed at it):
+
+```bash
+scp deploy/Caddyfile deploy/setup-vps.sh you@vps:
+ssh you@vps 'sudo bash setup-vps.sh updates.example.com'
+```
+
+It installs Caddy (automatic HTTPS), creates `/srv/wows-updates`, generates the
+token and prints the values for `.env.release`. Copy `.env.release.example` to
+`.env.release` (untracked) and fill them in.
+
+**Releasing:** bump the version, then
+
+```bash
+npm run dist
+npm run release
+```
+
+`release` refuses to upload a build that was compiled without the token, then
+uploads the installer, blockmap and portable exe before the `latest.yml` and
+`portable.json` manifests. Keep the token stable: builds made with an old token
+can no longer update once it changes.
+
 ---
 
 ## data storage

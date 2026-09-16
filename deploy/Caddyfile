@@ -1,0 +1,21 @@
+# Update server for WoWS Tactics Toolkit.
+#
+# Serves the release folder over HTTPS (certificate handled by Caddy) to
+# requests carrying the update token, and nothing to anyone else. Both values
+# come from /etc/caddy/wows-updates.env, which deploy/setup-vps.sh writes.
+
+{$UPDATE_DOMAIN} {
+	@authorized header Authorization "Bearer {$UPDATE_TOKEN}"
+
+	handle @authorized {
+		root * /srv/wows-updates
+		# Manifests must never be served stale; the installers are versioned.
+		@manifests path /latest.yml /portable.json
+		header @manifests Cache-Control "no-store"
+		file_server
+	}
+
+	handle {
+		respond 401
+	}
+}

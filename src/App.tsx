@@ -11,6 +11,7 @@ import { BackupsModal, NewProjectModal, ProjectsModal } from './components/modal
 import { MapManagerModal, ShipDatabaseModal } from './components/modals/LibraryModals';
 import { ExportModal, SettingsModal, ShortcutsModal } from './components/modals/SystemModals';
 import { preloadIcons } from './state/assets';
+import { UpdateNotice } from './components/UpdateNotice';
 
 export default function App() {
   const booted = useStore((s) => s.booted);
@@ -77,6 +78,8 @@ export default function App() {
       {modal === 'settings' && <SettingsModal />}
       {modal === 'shortcuts' && <ShortcutsModal />}
       {modal === 'backups' && <BackupsModal />}
+
+      <UpdateNotice />
 
       <div className="toasts">
         {toasts.map((t) => (

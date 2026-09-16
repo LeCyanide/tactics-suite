@@ -1,4 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron';
+import type { UpdateState } from './updater';
+
+export type { UpdateState };
 
 type Result<T> = { ok: true; data: T } | { ok: false; error: string };
 
@@ -32,6 +35,19 @@ const api = {
   },
   app: {
     info: () => call<any>('app:info'),
+  },
+  updates: {
+    state: () => call<UpdateState>('update:state'),
+    check: () => call<UpdateState>('update:check'),
+    download: () => call<void>('update:download'),
+    install: () => call<void>('update:install'),
+    onStateChange: (cb: (s: UpdateState) => void) => {
+      const listener = (_e: unknown, s: UpdateState) => cb(s);
+      ipcRenderer.on('update:state', listener);
+      return () => {
+        ipcRenderer.off('update:state', listener);
+      };
+    },
   },
   storage: {
     usage: () => call<{ path: string; bytes: number; files: number }[]>('storage:usage'),

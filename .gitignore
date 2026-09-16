@@ -3,6 +3,10 @@ dist/
 dist-electron/
 release/
 
+# update server, token and VPS login for publishing; never committed
+.env.release
+.env*.local
+
 # graphify keeps its output here; the graph is rebuildable from source
 graphify-out/
 

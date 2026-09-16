@@ -2,14 +2,15 @@
  * The complete surface the renderer is allowed to touch.
  *
  * Every handler is local: file dialogs, disk reads/writes and the project
- * database. There is deliberately no HTTP client, no fetch and no outbound
- * socket anywhere in this file.
+ * database. The update handlers delegate to updater.ts, the only module that
+ * touches the network; nothing in this file opens a socket itself.
  */
 
 import { BrowserWindow, ClipboardItem, dialog, ipcMain, shell, app, clipboard } from 'electron';
 import fsp from 'node:fs/promises';
 import path from 'node:path';
 import * as db from './storage/db';
+import * as updater from './updater';
 
 type GetWindow = () => BrowserWindow | null;
 
@@ -87,6 +88,12 @@ export function registerIpc(getWindow: GetWindow): void {
     storageRoot: db.storageRoot(),
   }));
   handle('storage:usage', () => db.storageUsage());
+
+  /* ---------------- updates ---------------- */
+  handle('update:state', () => updater.updateState());
+  handle('update:check', () => updater.checkForUpdates());
+  handle('update:download', () => updater.downloadUpdate());
+  handle('update:install', () => updater.installUpdate());
   handle('storage:reveal', () => {
     shell.openPath(db.storageRoot());
     return true;
