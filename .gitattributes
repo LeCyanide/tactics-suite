@@ -6,3 +6,6 @@
 # rewrite them, and git would convert them straight back. Holding the seed
 # exactly as stored keeps that comparison meaningful.
 seed/** -text
+# Run on the Linux VPS; Windows line endings would break bash and Caddy.
+*.sh text eol=lf
+deploy/Caddyfile text eol=lf
