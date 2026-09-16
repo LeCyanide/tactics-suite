@@ -7,7 +7,8 @@
  * name and then renamed, so a client checking mid-upload never sees a version
  * whose files are not there yet. Once the new manifests are live, releases
  * older than the previous one are deleted from the server; the previous one
- * stays so its blockmap can serve differential downloads. Needs the OpenSSH client (ships with
+ * stays so its blockmap can serve differential downloads. release/ on this
+ * machine is then trimmed the same way. Needs the OpenSSH client (ships with
  * Windows 10+) and key-based login to VPS_SSH.
  */
 
@@ -16,7 +17,8 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import semver from 'semver';
+import { pruneLocalReleases } from './prune-local-releases.mjs';
+import { staleReleases } from './release-files.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const releaseDir = path.join(root, 'release');
@@ -41,9 +43,6 @@ function capture(cmd, args) {
   if (res.status !== 0) throw new Error(`${cmd} ${args.join(' ')} failed`);
   return res.stdout;
 }
-
-/** Release files on the server, by version. Anything else in the folder is left alone. */
-const RELEASE_FILE = /^WoWS-Tactics-Toolkit-(?:Setup-)?(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)\.exe(?:\.blockmap)?$/;
 
 const env = { ...readEnv(path.join(root, '.env.release')), ...process.env };
 for (const key of ['VPS_SSH', 'VPS_DIR', 'UPDATE_URL', 'UPDATE_TOKEN']) {
@@ -90,14 +89,11 @@ console.log(`Published ${version}.`);
 
 // Keep this release and the newest one before it; delete everything else.
 const remoteFiles = capture('ssh', [env.VPS_SSH, `ls -1 '${env.VPS_DIR}'`]).split(/\r?\n/).filter(Boolean);
-const versions = [...new Set(remoteFiles.map((f) => RELEASE_FILE.exec(f)?.[1]).filter((v) => v && semver.valid(v)))];
-const previous = versions.filter((v) => semver.lt(v, version)).sort(semver.rcompare)[0];
-const stale = remoteFiles.filter((f) => {
-  const v = RELEASE_FILE.exec(f)?.[1];
-  return v && v !== version && v !== previous;
-});
+const { previous, stale } = staleReleases(remoteFiles, version);
 if (stale.length) {
   run('ssh', [env.VPS_SSH, `cd '${env.VPS_DIR}' && rm -f -- ${stale.map((f) => `'${f}'`).join(' ')}`]);
   console.log(`Removed from the server: ${stale.join(', ')}`);
 }
 console.log(`Server keeps ${previous ? `${version} and ${previous}` : version}.`);
+
+pruneLocalReleases(version);
