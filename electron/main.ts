@@ -2,9 +2,10 @@ import { app, BrowserWindow, shell, Menu } from 'electron';
 import path from 'node:path';
 import { ensureDirs, seedStore, storageRoot, sweepTempFiles } from './storage/db';
 import { registerIpc } from './ipc';
+import { checkForUpdates, initUpdater } from './updater';
 
-// This application is entirely local. Disabling remote content behaviours
-// keeps it honest: nothing here ever wants the network.
+// This application is local. The only network traffic is the update check
+// in updater.ts, which talks to our own release server and nothing else.
 app.commandLine.appendSwitch('disable-http-cache');
 
 const isDev = !!process.env.VITE_DEV_SERVER_URL;
@@ -33,7 +34,11 @@ function createWindow(): void {
   // The renderer draws its own title bar; there is no native menu.
   Menu.setApplicationMenu(null);
 
-  mainWindow.once('ready-to-show', () => mainWindow?.show());
+  mainWindow.once('ready-to-show', () => {
+    mainWindow?.show();
+    // Late enough not to compete with the first paint; only asks, never downloads.
+    setTimeout(() => void checkForUpdates(true), 4000);
+  });
 
   const send = (channel: string, payload?: unknown) => mainWindow?.webContents.send(channel, payload);
   mainWindow.on('maximize', () => send('window:state', { maximized: true }));
@@ -83,6 +88,7 @@ app.whenReady().then(() => {
   // It runs alongside startup and can never hold it up or fail it.
   void sweepTempFiles().catch(() => undefined);
   registerIpc(() => mainWindow);
+  initUpdater(() => mainWindow);
   createWindow();
 
   app.on('activate', () => {

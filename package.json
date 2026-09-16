@@ -10,10 +10,11 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "start": "electron .",
-    "dist": "npm run build && electron-builder",
-    "dist:dir": "npm run build && electron-builder --dir",
+    "dist": "npm run build && electron-builder --publish never",
+    "dist:dir": "npm run build && electron-builder --dir --publish never",
     "selftest": "node scripts/run-selftest.mjs",
-    "refresh-seed": "node scripts/refresh-seed.mjs"
+    "refresh-seed": "node scripts/refresh-seed.mjs",
+    "release": "node scripts/publish-release.mjs"
   },
   "build": {
     "appId": "com.local.wowstacticstoolkit",
@@ -35,12 +36,22 @@
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "WoWS-Tactics-Toolkit-Setup-${version}.${ext}"
     },
     "extraResources": [
       {
         "from": "seed",
         "to": "seed"
+      }
+    ],
+    "portable": {
+      "artifactName": "WoWS-Tactics-Toolkit-${version}.${ext}"
+    },
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "https://updates.invalid/"
       }
     ]
   },
@@ -60,10 +71,14 @@
     "@types/papaparse": "^5.5.2",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
+    "@types/semver": "^7.8.0",
     "@vitejs/plugin-react": "^6.1.1",
+    "builder-util-runtime": "^9.7.0",
     "electron": "^44.1.0",
     "electron-builder": "^26.15.3",
+    "electron-updater": "^6.8.9",
     "esbuild": "^0.28.2",
+    "semver": "^7.8.5",
     "typescript": "^7.0.2",
     "vite": "^8.2.2",
     "vite-plugin-electron": "^1.1.2",

@@ -1459,6 +1459,54 @@ input[type='range']::-webkit-slider-thumb {
 
 /* Toasts ----------------------------------------------------------- */
 
+.update-notice {
+  position: fixed;
+  right: 14px;
+  bottom: 34px;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--bg-2);
+  border: 1px solid var(--line-strong);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  font-size: 12px;
+  line-height: 1.5;
+  z-index: 790;
+  animation: toast-in 0.16s ease-out;
+}
+.update-notice.error {
+  border-left-color: var(--danger);
+}
+.update-notice-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.update-notice-head strong {
+  flex: 1;
+  font-weight: 600;
+}
+.update-notice-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.update-progress {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--bg-3);
+  overflow: hidden;
+}
+.update-progress > div {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.2s ease-out;
+}
+
 .toasts {
   position: fixed;
   bottom: 34px;
