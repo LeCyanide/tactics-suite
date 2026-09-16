@@ -163,7 +163,7 @@ export async function downloadUpdate(): Promise<void> {
 /** Restarts into the downloaded version. The renderer saves before calling this. */
 export async function installUpdate(): Promise<void> {
   if (state.status !== 'ready') return;
-  if (portableExe) await swapPortable(portableExe);
+  if (portableExe) await swapPortable(portableExe, state.version);
   // Silent install into the existing location, then launch the new version.
   else autoUpdater.quitAndInstall(true, true);
 }
@@ -231,11 +231,14 @@ async function downloadPortable(manifest: PortableManifest, exe: string, version
 /**
  * The portable launcher (this process's parent) holds its own exe open until
  * it exits, so the file cannot be renamed or replaced from in here. A hidden
- * helper waits for both processes to go, replaces the exe, retrying while the
- * launcher releases its lock, and starts whichever version is then in place:
- * the new one, or the old one if the swap never went through.
+ * helper waits for both processes to go, swaps in the new exe, retrying while
+ * the launcher releases its lock, and starts whichever version is then in
+ * place: the new one, or the old one if the swap never went through.
+ *
+ * A file named after its version (WoWS-Tactics-Toolkit-1.3.2.exe) is renamed
+ * to the new one; a name without the running version is kept as it is.
  */
-async function swapPortable(exe: string): Promise<void> {
+async function swapPortable(exe: string, newVersion: string): Promise<void> {
   const staged = `${exe}.update`;
   await fsp.access(staged);
   // Fail here, where the user can still be told, rather than after quitting.
@@ -243,7 +246,26 @@ async function swapPortable(exe: string): Promise<void> {
   await fsp.writeFile(probe, '');
   await fsp.rm(probe, { force: true });
 
+  const name = path.basename(exe);
+  const at = name.lastIndexOf(app.getVersion());
+  const target =
+    at >= 0
+      ? path.join(path.dirname(exe), name.slice(0, at) + newVersion + name.slice(at + app.getVersion().length))
+      : exe;
+
   const quote = (s: string) => `'${s.replace(/'/g, "''")}'`;
+  // Retries `action` until it stops throwing or a minute has passed.
+  const retry = (action: string, done: string) =>
+    `while ($true) { try { ${action}; Log ${quote(done)}; break } catch { if ((Get-Date) -gt $deadline) { Log ('gave up: ' + $_.Exception.Message); break }; Start-Sleep -Milliseconds 500 } }`;
+  // [NullString]::Value, not $null: PowerShell would pass "" as the backup path.
+  const swap =
+    target === exe
+      ? [retry(`[System.IO.File]::Replace(${quote(staged)}, ${quote(exe)}, [NullString]::Value)`, 'replaced the exe'), `$start = ${quote(exe)}`]
+      : [
+          `$start = ${quote(exe)}`,
+          `try { if ([System.IO.File]::Exists(${quote(target)})) { [System.IO.File]::Replace(${quote(staged)}, ${quote(target)}, [NullString]::Value) } else { [System.IO.File]::Move(${quote(staged)}, ${quote(target)}) }; $start = ${quote(target)}; Log ${quote(`saved the new exe as ${path.basename(target)}`)} } catch { Log ('could not save the new exe: ' + $_.Exception.Message) }`,
+          `if ($start -ne ${quote(exe)}) { ${retry(`[System.IO.File]::Delete(${quote(exe)})`, 'removed the old exe')} }`,
+        ];
   // What happened is only visible after this process is gone, so the helper
   // leaves a short trail in the temp folder.
   const log = path.join(app.getPath('temp'), 'wows-tactics-update.log');
@@ -252,10 +274,9 @@ async function swapPortable(exe: string): Promise<void> {
     `Log 'waiting for the app to exit'`,
     `Wait-Process -Id ${process.pid},${process.ppid} -Timeout 60 -ErrorAction SilentlyContinue`,
     `$deadline = (Get-Date).AddSeconds(60)`,
-    // [NullString]::Value, not $null: PowerShell would pass "" as the backup path.
-    `while ($true) { try { [System.IO.File]::Replace(${quote(staged)}, ${quote(exe)}, [NullString]::Value); Log 'replaced the exe'; break } catch { if ((Get-Date) -gt $deadline) { Log ('gave up: ' + $_.Exception.Message); break }; Start-Sleep -Milliseconds 500 } }`,
-    `Start-Process -FilePath ${quote(exe)}`,
-    `Log 'started the app'`,
+    ...swap,
+    `Start-Process -FilePath $start`,
+    `Log ('started ' + [System.IO.Path]::GetFileName($start))`,
   ].join('; ');
   // PowerShell spawned directly from here dies as soon as this process exits,
   // before running a line. Handing it through `cmd /c start` detaches it for real.
