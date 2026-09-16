@@ -2,15 +2,19 @@
 # One-time setup of the update server on a fresh Debian/Ubuntu VPS.
 #
 #   scp deploy/Caddyfile deploy/setup-vps.sh you@vps:
-#   ssh you@vps 'sudo bash setup-vps.sh updates.example.com'
+#   ssh you@vps 'sudo bash setup-vps.sh updates.example.com [uploader]'
+#
+# Releases are uploaded as <uploader>: the sudo user by default, or, when run
+# as root, a dedicated wows-release account created here with root's SSH keys
+# so the build machine never needs root to publish.
 #
 # Point the domain's DNS A/AAAA record at the VPS first; Caddy fetches the
 # HTTPS certificate on start. Safe to re-run: it keeps an existing token.
 set -euo pipefail
 
-DOMAIN="${1:?usage: sudo bash setup-vps.sh <domain>}"
+DOMAIN="${1:?usage: sudo bash setup-vps.sh <domain> [uploader]}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
-UPLOADER="${SUDO_USER:?run with sudo from the account that will upload releases}"
+UPLOADER="${2:-${SUDO_USER:-wows-release}}"
 ROOT=/srv/wows-updates
 ENV_FILE=/etc/caddy/wows-updates.env
 
@@ -21,6 +25,12 @@ if ! command -v caddy >/dev/null; then
   curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' > /etc/apt/sources.list.d/caddy-stable.list
   apt-get update
   apt-get install -y caddy
+fi
+
+if ! id "$UPLOADER" >/dev/null 2>&1; then
+  useradd --create-home --shell /bin/bash "$UPLOADER"
+  install -d -m 700 -o "$UPLOADER" -g "$UPLOADER" "/home/$UPLOADER/.ssh"
+  install -m 600 -o "$UPLOADER" -g "$UPLOADER" /root/.ssh/authorized_keys "/home/$UPLOADER/.ssh/authorized_keys"
 fi
 
 # Release folder: the uploader writes, Caddy reads.
@@ -43,7 +53,7 @@ if [[ -f /etc/caddy/Caddyfile ]] && ! cmp -s "$HERE/Caddyfile" /etc/caddy/Caddyf
 fi
 install -m 644 "$HERE/Caddyfile" /etc/caddy/Caddyfile
 
-if command -v ufw >/dev/null && ufw status | grep -q active; then
+if command -v ufw >/dev/null && ufw status | grep -q "Status: active"; then
   ufw allow 80/tcp
   ufw allow 443/tcp
 fi
@@ -58,6 +68,6 @@ Update server is up. Put these in .env.release on your build machine:
 
 UPDATE_URL=https://$DOMAIN
 UPDATE_TOKEN=$TOKEN
-VPS_SSH=$UPLOADER@<this server>
+VPS_SSH=$UPLOADER@$(hostname -I | awk '{print $1}')
 VPS_DIR=$ROOT
 DONE
