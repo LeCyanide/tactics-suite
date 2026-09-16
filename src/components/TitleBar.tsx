@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Crosshair, Minus, Square, X, Copy as CopyIcon } from 'lucide-react';
+import { TEST_BUILD_LABEL } from '@/lib/testBuild';
 import { getActivePage, useStore } from '@/state/store';
 
 interface MenuEntry {
@@ -117,6 +118,7 @@ export function TitleBar() {
       <div className="brand">
         <Crosshair className="mark" size={15} />
         <span>WoWS Tactics Toolkit</span>
+        {TEST_BUILD_LABEL && <span className="test-build">{TEST_BUILD_LABEL}</span>}
       </div>
 
       <div className="menus">
