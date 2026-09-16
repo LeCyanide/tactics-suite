@@ -5,6 +5,7 @@ import { Check, Field, Modal, NumInput, SectionLabel, Slider } from '../common/u
 import { canvasApi, DEFAULT_EXPORT, type ExportOptions } from '@/canvas/canvasBridge';
 import { SHORTCUT_REFERENCE } from '@/state/shortcuts';
 import { formatBytes } from '@/lib/util';
+import { TEST_BUILD_LABEL } from '@/lib/testBuild';
 import { restartToUpdate, useUpdateState, type UpdateState } from '@/state/updates';
 import type { ThemeName } from '@/types/model';
 
@@ -244,7 +245,8 @@ export function SettingsModal() {
 
       <SectionLabel>About</SectionLabel>
       <div className="faint" style={{ fontSize: 11.5, lineHeight: 1.7 }}>
-        WoWS Tactics Toolkit {info?.version ?? ''} — Awooga I don't know what I am doing. language versions below:
+        WoWS Tactics Toolkit {info?.version ?? ''}
+        {TEST_BUILD_LABEL && <strong style={{ color: 'var(--warn)' }}> ({TEST_BUILD_LABEL})</strong>} — Awooga I don't know what I am doing. language versions below:
         <div className="mono" style={{ marginTop: 6, fontSize: 10.5 }}>
           Electron {info?.electron} · Chromium {info?.chrome} · Node {info?.node}
         </div>
