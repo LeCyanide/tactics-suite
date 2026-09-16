@@ -22,6 +22,7 @@ import { spawn } from 'node:child_process';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
+import path from 'node:path';
 
 declare const __UPDATE_URL__: string;
 declare const __UPDATE_TOKEN__: string;
@@ -81,8 +82,7 @@ export function initUpdater(windowGetter: () => BrowserWindow | null): void {
   if (!feedUrl || !__UPDATE_TOKEN__) return setState({ status: 'disabled', reason: 'This build has no update server.' });
 
   if (portableExe) {
-    // Left behind by the previous swap, or by a download that never finished.
-    void fsp.rm(`${portableExe}.old`, { force: true }).catch(() => undefined);
+    // Left behind by a download that never finished or a swap that timed out.
     void fsp.rm(`${portableExe}.update`, { force: true }).catch(() => undefined);
     return;
   }
@@ -229,32 +229,42 @@ async function downloadPortable(manifest: PortableManifest, exe: string, version
 }
 
 /**
- * Windows lets a running exe be renamed but not overwritten: the old one steps
- * aside, the new one takes its name, and a hidden helper starts it once this
- * process and the portable launcher around it have exited.
+ * The portable launcher (this process's parent) holds its own exe open until
+ * it exits, so the file cannot be renamed or replaced from in here. A hidden
+ * helper waits for both processes to go, replaces the exe, retrying while the
+ * launcher releases its lock, and starts whichever version is then in place:
+ * the new one, or the old one if the swap never went through.
  */
 async function swapPortable(exe: string): Promise<void> {
   const staged = `${exe}.update`;
-  const old = `${exe}.old`;
-  await fsp.rm(old, { force: true });
-  await fsp.rename(exe, old);
-  try {
-    await fsp.rename(staged, exe);
-  } catch (err) {
-    await fsp.rename(old, exe);
-    throw err;
-  }
+  await fsp.access(staged);
+  // Fail here, where the user can still be told, rather than after quitting.
+  const probe = `${exe}.write-test`;
+  await fsp.writeFile(probe, '');
+  await fsp.rm(probe, { force: true });
 
   const quote = (s: string) => `'${s.replace(/'/g, "''")}'`;
+  // What happened is only visible after this process is gone, so the helper
+  // leaves a short trail in the temp folder.
+  const log = path.join(app.getPath('temp'), 'wows-tactics-update.log');
   const script = [
+    `function Log($m) { Add-Content -LiteralPath ${quote(log)} -Value ("{0:u} {1}" -f (Get-Date), $m) }`,
+    `Log 'waiting for the app to exit'`,
     `Wait-Process -Id ${process.pid},${process.ppid} -Timeout 60 -ErrorAction SilentlyContinue`,
+    `$deadline = (Get-Date).AddSeconds(60)`,
+    // [NullString]::Value, not $null: PowerShell would pass "" as the backup path.
+    `while ($true) { try { [System.IO.File]::Replace(${quote(staged)}, ${quote(exe)}, [NullString]::Value); Log 'replaced the exe'; break } catch { if ((Get-Date) -gt $deadline) { Log ('gave up: ' + $_.Exception.Message); break }; Start-Sleep -Milliseconds 500 } }`,
     `Start-Process -FilePath ${quote(exe)}`,
+    `Log 'started the app'`,
   ].join('; ');
-  spawn(
-    'powershell.exe',
-    ['-NoProfile', '-NonInteractive', '-WindowStyle', 'Hidden', '-EncodedCommand', Buffer.from(script, 'utf16le').toString('base64')],
-    { detached: true, stdio: 'ignore', windowsHide: true },
-  ).unref();
+  // PowerShell spawned directly from here dies as soon as this process exits,
+  // before running a line. Handing it through `cmd /c start` detaches it for real.
+  const powershell = ['powershell.exe', '-NoProfile', '-NonInteractive', '-WindowStyle', 'Hidden', '-EncodedCommand'];
+  spawn('cmd.exe', ['/d', '/c', 'start', '""', '/b', ...powershell, Buffer.from(script, 'utf16le').toString('base64')], {
+    detached: true,
+    stdio: 'ignore',
+    windowsHide: true,
+  }).unref();
   app.quit();
 }
 
