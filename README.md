@@ -57,7 +57,8 @@ npm run release
 
 `release` refuses to upload a build that was compiled without the token, then
 uploads the installer, blockmap and portable exe before the `latest.yml` and
-`portable.json` manifests. Keep the token stable: builds made with an old token
+`portable.json` manifests. Once those are live it deletes every release on the
+server except the new one and the one before it. Keep the token stable: builds made with an old token
 can no longer update once it changes.
 
 ---
