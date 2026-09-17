@@ -23,10 +23,41 @@ Production build (typecheck + bundle):
 npm run build
 ```
 
-Packaged Windows installer + portable build (via electron-builder):
+Packaged Windows installer + portable build (via electron-builder). The
+installer also carries the replay viewer sidecar, which the portable exe cannot
+use; building it needs Rust:
 
 ```bash
 npm run dist
+```
+
+Headless checks for the logic that would otherwise only be exercised by hand:
+
+```bash
+npm run selftest
+```
+
+The one seam `selftest` cannot reach is Electron's own IPC, which carries tens
+of megabytes of replay timeline per bake. That has its own check, run inside a
+real Electron process against a throwaway store:
+
+```bash
+npm run ipc-check
+```
+
+Point it at a battle to exercise a real bake end to end; without these it still
+covers the bridge and says what it skipped:
+
+```bash
+set WOWSPLAN_GAME_DIR=C:\Games\World_of_Warships
+set WOWSPLAN_REPLAY=%WOWSPLAN_GAME_DIR%\replays\<version>\<file>.wowsreplay
+```
+
+The replay viewer's own renderer can be driven in a plain browser, without
+Electron, against a stubbed `window.api`:
+
+```bash
+npm run dev:replay -- dev/fixtures/<file>.wtreply
 ```
 
 ## Updates
