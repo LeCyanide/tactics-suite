@@ -75,6 +75,7 @@ function ArchivePanel() {
     <Panel
       title="Replay archive"
       count={archive.length}
+      grow
       storageKey="replayArchive"
       actions={
         <>
@@ -105,10 +106,7 @@ function ArchivePanel() {
           {loaded ? 'The archive is empty. Add replay files, or import them from the game folder.' : 'Reading…'}
         </div>
       ) : (
-        // The archive grows without bound, but the transport controls below it
-        // are what a viewer reaches for constantly. Cap the list and let it
-        // scroll on its own rather than pushing playback off the panel.
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, maxHeight: 280, overflowY: 'auto' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {archive.map((r) => (
             <ReplayRow key={r.id} replay={r} selected={r.id === selectedId} />
           ))}
@@ -128,24 +126,23 @@ function ReplayRow({
   const s = () => useReplayStore.getState();
   const probe = replay.probe;
   const map = probe?.map?.displayName ?? probe?.map?.name ?? replay.originalName;
-  // The recorded date is what people actually recognise a battle by.
-  const when = probe?.dateTime ?? '';
-  const ship = probe?.player?.vehicle ?? '';
+  const detail = [probe?.dateTime, probe?.mode?.scenario, shipName(probe?.player?.vehicle)]
+    .filter(Boolean)
+    .join(' · ');
 
   return (
     <div
-      className={`row${selected ? ' selected' : ''}`}
+      className={`row stacked${selected ? ' active' : ''}`}
       onClick={() => void s().open(replay.id)}
-      style={{ cursor: 'pointer', alignItems: 'flex-start', gap: 6 }}
-      title={replay.originalName}
+      style={{ cursor: 'pointer' }}
+      title={`${map}
+${detail || replay.originalName}`}
     >
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{map}</div>
-        <div className="faint" style={{ fontSize: 10.5, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          {[when, probe?.mode?.scenario, ship].filter(Boolean).join(' · ') ||
-            replay.probeError ||
-            `${(replay.size / 1048576).toFixed(1)} MB`}
-        </div>
+      <div className="stacked-text">
+        <span className="stacked-title">{map}</span>
+        <span className="stacked-sub">
+          {detail || replay.probeError || `${(replay.size / 1048576).toFixed(1)} MB`}
+        </span>
       </div>
       <button
         className="icon-btn"
@@ -159,6 +156,18 @@ function ReplayRow({
       </button>
     </div>
   );
+}
+
+/**
+ * The readable part of a game vehicle id.
+ *
+ * The replay names the player's ship as the game does — `PASC020-Des-Moines-1948`
+ * — where the leading code is nation, class and tier. None of that belongs in a
+ * list you are scanning for a battle you remember playing.
+ */
+function shipName(vehicle: string | undefined): string {
+  if (!vehicle) return '';
+  return vehicle.replace(/^P[A-Z]{2,3}[0-9]{3}-/, '').replace(/-/g, ' ');
 }
 
 /* ------------------------------------------------------------------ */

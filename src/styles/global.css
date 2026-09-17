@@ -1508,6 +1508,42 @@ input[type='range']::-webkit-slider-thumb {
 }
 /* Replay viewer ---------------------------------------------------- */
 
+/*
+ * A row carrying two lines: a name and a detail line under it.
+ *
+ * `.row` is fixed at 26px for single-line lists, so a second line spills out of
+ * it and lands on top of the row below. This one sizes to its content.
+ */
+.row.stacked {
+  height: auto;
+  min-height: 36px;
+  align-items: flex-start;
+  padding: 5px 6px;
+}
+.row.stacked .stacked-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+/* Both lines truncate rather than wrap: a wrapped line would reintroduce the
+   overlap this class exists to fix. */
+.row.stacked .stacked-title,
+.row.stacked .stacked-sub {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.row.stacked .stacked-title {
+  font-size: 12px;
+  color: var(--fg);
+}
+.row.stacked .stacked-sub {
+  font-size: 10.5px;
+  color: var(--fg-dim);
+}
+
 /* Generic progress bar. The updater has its own, sized for a notice; this
    one is for panels, where a bake reports how far through a battle it is. */
 .progress {
