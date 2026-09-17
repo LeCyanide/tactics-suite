@@ -244,7 +244,9 @@ async function downloadPortable(manifest: PortableManifest, exe: string, version
  * place: the new one, or the old one if the swap never went through.
  *
  * A file named after its version (WoWS-Tactics-Toolkit-1.3.2.exe) is renamed
- * to the new one; a name without the running version is kept as it is.
+ * to the new one; a name without the running version is kept as it is. The
+ * new version starts as soon as it is in place, and only then is the old file
+ * removed, so a file that is slow or unable to go never holds up the restart.
  */
 async function swapPortable(exe: string, newVersion: string): Promise<void> {
   const staged = `${exe}.update`;
@@ -266,14 +268,18 @@ async function swapPortable(exe: string, newVersion: string): Promise<void> {
   const retry = (action: string, done: string) =>
     `while ($true) { try { ${action}; Log ${quote(done)}; break } catch { if ((Get-Date) -gt $deadline) { Log ('gave up: ' + $_.Exception.Message); break }; Start-Sleep -Milliseconds 500 } }`;
   // [NullString]::Value, not $null: PowerShell would pass "" as the backup path.
-  const swap =
+  const place =
     target === exe
       ? [retry(`[System.IO.File]::Replace(${quote(staged)}, ${quote(exe)}, [NullString]::Value)`, 'replaced the exe'), `$start = ${quote(exe)}`]
       : [
           `$start = ${quote(exe)}`,
           `try { if ([System.IO.File]::Exists(${quote(target)})) { [System.IO.File]::Replace(${quote(staged)}, ${quote(target)}, [NullString]::Value) } else { [System.IO.File]::Move(${quote(staged)}, ${quote(target)}) }; $start = ${quote(target)}; Log ${quote(`saved the new exe as ${path.basename(target)}`)} } catch { Log ('could not save the new exe: ' + $_.Exception.Message) }`,
-          `if ($start -ne ${quote(exe)}) { ${retry(`[System.IO.File]::Delete(${quote(exe)})`, 'removed the old exe')} }`,
         ];
+  // Runs after the new version has started; its minute of retries is its own.
+  const cleanUp =
+    target === exe
+      ? []
+      : [`if ($start -ne ${quote(exe)}) { $deadline = (Get-Date).AddSeconds(60); ${retry(`[System.IO.File]::Delete(${quote(exe)})`, 'removed the old exe')} }`];
   // What happened is only visible after this process is gone, so the helper
   // leaves a short trail in the temp folder.
   const log = path.join(app.getPath('temp'), 'wows-tactics-update.log');
@@ -283,9 +289,10 @@ async function swapPortable(exe: string, newVersion: string): Promise<void> {
     `Log 'waiting for the app to exit'`,
     `Wait-Process -Id ${process.pid},${process.ppid} -Timeout 60 -ErrorAction SilentlyContinue`,
     `$deadline = (Get-Date).AddSeconds(60)`,
-    ...swap,
+    ...place,
     `Start-Process -FilePath $start`,
     `Log ('started ' + [System.IO.Path]::GetFileName($start))`,
+    ...cleanUp,
   ].join('; ');
   launchHidden(script);
   app.quit();
