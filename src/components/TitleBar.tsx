@@ -170,15 +170,7 @@ export function TitleBar() {
       <ModeSwitch />
 
       <div className="title-center">
-        {project ? (
-          <>
-            <span className="project-name">{project.name}</span>
-            {page && <span>— {page.name}</span>}
-            {dirty && <span className="dirty-dot" title="Unsaved changes" />}
-          </>
-        ) : (
-          <span className="faint">No project open</span>
-        )}
+        <TitleCaption />
       </div>
 
       <div className="win-controls">
@@ -193,6 +185,45 @@ export function TitleBar() {
         </button>
       </div>
     </div>
+  );
+}
+
+/**
+ * What the window is showing.
+ *
+ * In tactics mode that is the project and page being planned. While a replay is
+ * up the page is not what you are looking at — the map, the ships and the whole
+ * canvas belong to the battle — so the battle is what gets named.
+ */
+function TitleCaption() {
+  const project = useStore((s) => s.project);
+  const page = useStore(getActivePage);
+  const dirty = useStore((s) => s.dirty);
+  const timeline = useReplayStore((s) => s.timeline);
+  const inReplay = useReplayStore((s) => s.mode) === 'replay';
+
+  if (!project) return <span className="faint">No project open</span>;
+
+  if (inReplay && timeline) {
+    const map = timeline.header.map?.displayName ?? timeline.header.map?.name ?? 'Replay';
+    // Seconds are noise in a title; the date and time already identify the
+    // battle among an evening's worth of them.
+    const when = (timeline.header.dateTime ?? '').replace(/:\d{2}$/, '');
+    return (
+      <>
+        <span className="project-name">{map}</span>
+        {when && <span>— {when}</span>}
+      </>
+    );
+  }
+
+  return (
+    <>
+      <span className="project-name">{project.name}</span>
+      {page && <span>— {page.name}</span>}
+      {inReplay && <span className="faint">— no replay open</span>}
+      {dirty && <span className="dirty-dot" title="Unsaved changes" />}
+    </>
   );
 }
 
