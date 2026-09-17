@@ -69,5 +69,16 @@ export default defineConfig({
   root,
   resolve: { alias: { '@': path.join(root, 'src') } },
   plugins: [react(), fixtures()],
-  server: { host: '127.0.0.1', port: 5601, strictPort: false, open: '/dev/replay-preview.html' },
+  server: {
+    host: '127.0.0.1',
+    port: 5601,
+    strictPort: false,
+    open: '/dev/replay-preview.html',
+    // The root is the whole repository, so without this the watcher tries to
+    // follow build output — and dies with EBUSY the moment it meets an
+    // installer that electron-builder still has open.
+    watch: {
+      ignored: ['**/release/**', '**/dist/**', '**/dist-electron/**', '**/sidecar/target/**', '**/dev/fixtures/**'],
+    },
+  },
 });

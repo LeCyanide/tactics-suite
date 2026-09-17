@@ -301,6 +301,9 @@ export default function MapCanvas() {
    */
   const layerFor = (): ID => {
     const layers = page?.layers ?? [];
+    // In replay mode there is only one layer being drawn, so anything created
+    // goes there regardless of what the Layers panel has selected.
+    if (inReplay) return LAYER_IDS.replay;
     const usable = (id: string) => layers.some((l) => l.id === id && !l.locked && l.id !== LAYER_IDS.grid);
 
     // The planner's selected layer, if it can actually hold objects; every
@@ -855,12 +858,13 @@ export default function MapCanvas() {
           {/* Invisible backdrop that catches clicks on empty water */}
           <Rect name="backdrop" x={-worldW} y={-worldH} width={worldW * 3} height={worldH * 3} />
 
-          {/* The plan is hidden while a replay is up. Its ships and drawings
-              were laid out against the page's map, which is usually not the map
-              the battle was played on, so showing them here would place them on
-              ground they were never drawn for. */}
-          {!inReplay && page.layers.map((layer) => {
+          {/* The two modes never show each other's work. The plan was laid out
+              against the page's map, which is usually not the map the battle was
+              played on; replay notes were drawn over a battle. Each is nonsense
+              on the other's ground, so each mode renders only its own layer. */}
+          {page.layers.map((layer) => {
             if (!layer.visible) return null;
+            if (inReplay !== (layer.id === LAYER_IDS.replay)) return null;
 
             if (layer.id === LAYER_IDS.ranges) {
               if (!show.ranges) return null;
