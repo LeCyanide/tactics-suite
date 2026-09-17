@@ -373,6 +373,8 @@ export const LAYER_IDS = {
   ranges: 'layer-ranges',
   annotations: 'layer-annotations',
   ships: 'layer-ships',
+  /** Drawn over a replay, and only ever shown there. */
+  replay: 'layer-replay',
 } as const;
 
 /**
@@ -394,6 +396,10 @@ export function createDefaultLayers(): Layer[] {
     { id: LAYER_IDS.ranges, name: 'Ship Ranges', visible: true, locked: false, opacity: 1, system: true },
     { id: LAYER_IDS.annotations, name: 'Annotations', visible: true, locked: false, opacity: 1, system: true },
     { id: LAYER_IDS.ships, name: 'Ships', visible: true, locked: false, opacity: 1, system: true },
+    // Replay notes are a plan for a battle that already happened, on ground the
+    // page may not even be planning against, so they are kept apart from the
+    // plan and drawn only in replay mode.
+    { id: LAYER_IDS.replay, name: 'Replay Notes', visible: true, locked: false, opacity: 1, system: true },
   ];
 }
 
