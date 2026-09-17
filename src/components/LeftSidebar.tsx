@@ -22,12 +22,15 @@ import {
 } from 'lucide-react';
 import { getActivePage, useStore } from '@/state/store';
 import { Check, ColorInput, Field, InlineEdit, Panel, Slider, Tip } from './common/ui';
+import { ReplaySidebar } from './ReplaySidebar';
+import { useReplayStore } from '@/state/replay';
 import { LAYER_IDS, type ID } from '@/types/model';
 import { formatRelative } from '@/lib/util';
 import { renderMarkdown } from '@/lib/markdown';
 
 export function LeftSidebar() {
   const open = useStore((s) => s.leftOpen);
+  const mode = useReplayStore((s) => s.mode);
   const width = useStore((s) => s.settings.leftSidebarWidth);
   const patchSettings = useStore((s) => s.patchSettings);
   const resizing = useRef(false);
@@ -54,12 +57,18 @@ export function LeftSidebar() {
     <div className="sidebar left" style={{ width }}>
       <div className="sidebar-resizer" onMouseDown={startResize} />
       <div style={{ overflowY: 'auto', display: 'flex', flexDirection: 'column', minHeight: 0, flex: 1 }}>
-        <ProjectPanel />
-        <PagesPanel />
-        <MapPanel />
-        <TeamsPanel />
-        <LayersPanel />
-        <NotesPreviewPanel />
+        {mode === 'replay' ? (
+          <ReplaySidebar />
+        ) : (
+          <>
+            <ProjectPanel />
+            <PagesPanel />
+            <MapPanel />
+            <TeamsPanel />
+            <LayersPanel />
+            <NotesPreviewPanel />
+          </>
+        )}
       </div>
     </div>
   );

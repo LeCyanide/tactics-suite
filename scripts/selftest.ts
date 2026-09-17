@@ -17,6 +17,9 @@ import { parseShipData, serializeShips } from '../src/lib/shipImport';
 import { foldForSearch } from '../src/lib/util';
 import { mergeKey, shipRangeKm } from '../src/state/store';
 import * as db from '../electron/storage/db';
+import { testReplayArchive } from './selftest-archive';
+import { testSidecar } from './selftest-sidecar';
+import { testReplayTimeline } from './selftest-timeline';
 
 let failures = 0;
 
@@ -474,6 +477,9 @@ async function main(): Promise<void> {
   await testExportDestinations();
   await testTempSweep();
   await testSeeding();
+  await testReplayTimeline(check);
+  await testSidecar(check);
+  await testReplayArchive(check);
   console.log(failures === 0 ? '\nall checks passed\n' : `\n${failures} check(s) failed\n`);
   process.exit(failures === 0 ? 0 : 1);
 }

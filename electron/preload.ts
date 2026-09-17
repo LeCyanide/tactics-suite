@@ -1,7 +1,19 @@
 import { contextBridge, ipcRenderer } from 'electron';
+import type { ArchiveUsage, ArchivedReplay, FoundReplay, ImportOutcome } from './replay/archive';
+import type { GameDirCheck, ReplayProbe, SidecarEvent, SidecarStatus } from './replay/sidecar';
 import type { UpdateState } from './updater';
 
-export type { UpdateState };
+export type {
+  ArchiveUsage,
+  ArchivedReplay,
+  FoundReplay,
+  GameDirCheck,
+  ImportOutcome,
+  ReplayProbe,
+  SidecarEvent,
+  SidecarStatus,
+  UpdateState,
+};
 
 type Result<T> = { ok: true; data: T } | { ok: false; error: string };
 
@@ -97,6 +109,41 @@ const api = {
     image: (dataUrl: string, name: string, ext: string) => call<string | null>('export:image', dataUrl, name, ext),
     text: (text: string, name: string, ext: string) => call<string | null>('export:text', text, name, ext),
     toClipboard: (dataUrl: string) => call<boolean>('clipboard:writeImage', dataUrl),
+  },
+  replay: {
+    /** Whether the replay viewer add-on is present, and why not if it is not. */
+    status: () => call<SidecarStatus>('replay:status'),
+    checkGameDir: (dir: string) => call<GameDirCheck>('replay:checkGameDir', dir),
+    pickGameDir: () => call<({ dir: string } & GameDirCheck) | null>('replay:pickGameDir'),
+
+    /* archive */
+    list: () => call<ArchivedReplay[]>('replay:list'),
+    usage: () => call<ArchiveUsage>('replay:usage'),
+    /** Opens a file picker and imports whatever is chosen. Null if cancelled. */
+    pickReplays: () => call<ImportOutcome | null>('replay:pickReplays'),
+    importPaths: (paths: string[]) => call<ImportOutcome>('replay:import', paths),
+    remove: (id: string) => call<ArchivedReplay[]>('replay:remove', id),
+    /** Re-reads metadata for one imported before the add-on was available. */
+    refreshProbe: (id: string) => call<ArchivedReplay>('replay:refreshProbe', id),
+    /** Lists the game's own recorded replays. Looks only; importing is separate. */
+    scanGame: (gameDir: string, limit?: number) => call<FoundReplay[]>('replay:scanGame', gameDir, limit),
+    revealArchive: () => call<boolean>('replay:revealArchive'),
+
+    /* playback */
+    /**
+     * Bakes an archived replay into a timeline. Seconds of work, so subscribe
+     * with `onProgress` first; the bytes come back whole for `ReplayTimeline`.
+     */
+    bake: (opts: { id: string; gameDir: string; fps?: number }) =>
+      call<{ data: Uint8Array; summary: Record<string, unknown> | null }>('replay:bake', opts),
+    cancelBake: () => call<boolean>('replay:cancelBake'),
+    onProgress: (cb: (e: SidecarEvent) => void) => {
+      const listener = (_e: unknown, event: SidecarEvent) => cb(event);
+      ipcRenderer.on('replay:progress', listener);
+      return () => {
+        ipcRenderer.off('replay:progress', listener);
+      };
+    },
   },
   dialog: {
     confirm: (opts: { title: string; message: string; detail?: string; confirmLabel?: string; danger?: boolean }) =>

@@ -1,0 +1,28 @@
+[package]
+name = "wows-replay-sidecar"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "Bakes a WoWS replay into a compact draw-command timeline for the Tactics Planner replay viewer"
+
+[[bin]]
+name = "wows-replay-sidecar"
+path = "src/main.rs"
+
+[dependencies]
+# landaire's wows-toolkit crates, from crates.io. The encoder features
+# (vulkan/cpu/cpu-av1) are deliberately off: we never rasterize or encode
+# video, so none of wgpu/openh264/rav1e is linked.
+wows_minimap_renderer = { version = "0.39", default-features = false, features = ["rendering", "vfs", "arc"] }
+wows_replays = { version = "0.46", default-features = false, features = ["arc", "parsing", "vfs"] }
+wowsunpack = { version = "0.45", default-features = false, features = ["arc", "vfs-mmap", "json", "parsing"] }
+wows-battle-world = { version = "0.13", default-features = false, features = ["vfs"] }
+wows-replay-insights = { version = "0.13", default-features = false, features = ["build", "arc"] }
+# Ship names live in the game's gettext catalog; without it the renderer emits
+# no ship_name at all.
+gettext = "0.4"
+serde_json = "1"
+
+[profile.release]
+opt-level = 3
+strip = true

@@ -13,3 +13,9 @@ graphify-out/
 *.log
 .DS_Store
 Thumbs.db
+
+# Rust build output for the replay viewer sidecar
+sidecar/target/
+resources/sidecar/
+.electron-builder.*.json
+dev/fixtures/
