@@ -15,6 +15,7 @@
     "build:sidecar": "node scripts/build-sidecar.mjs",
     "dev:replay": "node scripts/dev-replay.mjs",
     "selftest": "node scripts/run-selftest.mjs",
+    "ipc-check": "node scripts/run-ipc-check.mjs",
     "refresh-seed": "node scripts/refresh-seed.mjs",
     "release": "node scripts/publish-release.mjs"
   },
