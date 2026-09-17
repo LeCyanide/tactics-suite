@@ -66,6 +66,8 @@ let portableManifest: PortableManifest | null = null;
 let checkGeneration = 0;
 /** Restarted by each chunk received; fires the abort for the running download. */
 let stallWatch: { kick(): void; stop(): void } | null = null;
+/** Set once Restart has been handled, so a second click cannot start a second swap. */
+let installing = false;
 
 function setState(next: UpdateState): void {
   state = next;
@@ -162,10 +164,16 @@ export async function downloadUpdate(): Promise<void> {
 
 /** Restarts into the downloaded version. The renderer saves before calling this. */
 export async function installUpdate(): Promise<void> {
-  if (state.status !== 'ready') return;
-  if (portableExe) await swapPortable(portableExe, state.version);
+  if (state.status !== 'ready' || installing) return;
+  installing = true;
+  try {
+    if (portableExe) await swapPortable(portableExe, state.version);
+  } catch (err) {
+    installing = false;
+    throw err;
+  }
   // Silent install into the existing location, then launch the new version.
-  else autoUpdater.quitAndInstall(true, true);
+  if (!portableExe) autoUpdater.quitAndInstall(true, true);
 }
 
 /* ---------------- portable ---------------- */
@@ -270,7 +278,8 @@ async function swapPortable(exe: string, newVersion: string): Promise<void> {
   // leaves a short trail in the temp folder.
   const log = path.join(app.getPath('temp'), 'wows-tactics-update.log');
   const script = [
-    `function Log($m) { Add-Content -LiteralPath ${quote(log)} -Value ("{0:u} {1}" -f (Get-Date), $m) }`,
+    // Logging is best effort: a log another process holds open must not stop the swap.
+    `function Log($m) { try { Add-Content -LiteralPath ${quote(log)} -Value ("{0:u} {1}" -f (Get-Date), $m) -ErrorAction Stop } catch {} }`,
     `Log 'waiting for the app to exit'`,
     `Wait-Process -Id ${process.pid},${process.ppid} -Timeout 60 -ErrorAction SilentlyContinue`,
     `$deadline = (Get-Date).AddSeconds(60)`,
@@ -278,15 +287,35 @@ async function swapPortable(exe: string, newVersion: string): Promise<void> {
     `Start-Process -FilePath $start`,
     `Log ('started ' + [System.IO.Path]::GetFileName($start))`,
   ].join('; ');
-  // PowerShell spawned directly from here dies as soon as this process exits,
-  // before running a line. Handing it through `cmd /c start` detaches it for real.
-  const powershell = ['powershell.exe', '-NoProfile', '-NonInteractive', '-WindowStyle', 'Hidden', '-EncodedCommand'];
-  spawn('cmd.exe', ['/d', '/c', 'start', '""', '/b', ...powershell, Buffer.from(script, 'utf16le').toString('base64')], {
+  launchHidden(script);
+  app.quit();
+}
+
+/**
+ * Runs a PowerShell script detached from this process and without a window.
+ *
+ * PowerShell spawned directly from here dies as soon as this process exits,
+ * before running a line, so it needs a launcher that outlives us. `cmd /c
+ * start` survives but opens a console that Windows Terminal, when it is the
+ * default terminal, takes over and shows. wscript starting PowerShell with a
+ * hidden window avoids both. VBScript is being retired from Windows, so
+ * without wscript.exe the cmd route is still better than no update.
+ */
+function launchHidden(script: string): void {
+  const command = `powershell.exe -NoProfile -NonInteractive -WindowStyle Hidden -EncodedCommand ${Buffer.from(script, 'utf16le').toString('base64')}`;
+  const wscript = path.join(process.env.SystemRoot ?? 'C:\\Windows', 'System32', 'wscript.exe');
+  if (fs.existsSync(wscript)) {
+    const vbs = path.join(app.getPath('temp'), 'wows-tactics-update.vbs');
+    // Window style 0: hidden from the start, so no terminal ever claims it.
+    fs.writeFileSync(vbs, `CreateObject("WScript.Shell").Run "${command}", 0, False\r\n`);
+    spawn(wscript, ['//B', '//Nologo', vbs], { detached: true, stdio: 'ignore', windowsHide: true }).unref();
+    return;
+  }
+  spawn('cmd.exe', ['/d', '/c', 'start', '""', '/b', ...command.split(' ')], {
     detached: true,
     stdio: 'ignore',
     windowsHide: true,
   }).unref();
-  app.quit();
 }
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
