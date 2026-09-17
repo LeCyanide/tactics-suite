@@ -14,6 +14,8 @@
  *     maps/assets/<id>.<ext>        imported map images
  *     projects/<id>.json            one document per project
  *     backups/<id>/<ts>.wowsplan    rolling backups
+ *     replays/index.json            the replay archive (electron/replay/archive.ts)
+ *     replays/files/<id>.wowsreplay archived replays
  *     seed-state.json               which shipped databases this store has taken
  *
  * Writes are atomic: content goes to a sibling `.tmp` file which is then
@@ -94,6 +96,7 @@ export function ensureDirs(): void {
     P.mapAssetsDir(),
     P.projectsDir(),
     path.join(storageRoot(), 'backups'),
+    path.join(storageRoot(), 'replays', 'files'),
   ]) {
     // Same drive-root caveat as ensureParentDir: a portable install can point
     // WOWSPLAN_DATA_DIR at the root of a stick, which mkdir refuses to create.
@@ -409,7 +412,8 @@ export function seedStore(): string[] {
 /* Atomic JSON helpers                                                 */
 /* ------------------------------------------------------------------ */
 
-async function readJson<T>(file: string, fallback: T): Promise<T> {
+/** Shared with the replay archive, which needs the same corrupt-file rescue. */
+export async function readJson<T>(file: string, fallback: T): Promise<T> {
   try {
     const raw = await fsp.readFile(file, 'utf8');
     return JSON.parse(raw) as T;
@@ -449,7 +453,8 @@ export async function ensureParentDir(file: string): Promise<void> {
   }
 }
 
-async function writeJson(file: string, value: unknown): Promise<void> {
+/** Shared with the replay archive, which needs the same atomic rename. */
+export async function writeJson(file: string, value: unknown): Promise<void> {
   await ensureParentDir(file);
   const tmp = `${file}.${process.pid}.tmp`;
   await fsp.writeFile(tmp, JSON.stringify(value, null, 2), 'utf8');

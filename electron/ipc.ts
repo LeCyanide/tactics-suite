@@ -10,6 +10,8 @@ import { BrowserWindow, ClipboardItem, dialog, ipcMain, shell, app, clipboard } 
 import fsp from 'node:fs/promises';
 import path from 'node:path';
 import * as db from './storage/db';
+import * as archive from './replay/archive';
+import * as replay from './replay/sidecar';
 import * as updater from './updater';
 
 type GetWindow = () => BrowserWindow | null;
@@ -18,6 +20,7 @@ const IMAGE_FILTERS = [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'web
 const ICON_FILTERS = [{ name: 'Icons', extensions: ['png', 'svg', 'webp'] }];
 const SHIP_DATA_FILTERS = [{ name: 'Ship data', extensions: ['json', 'csv', 'yaml', 'yml'] }];
 const PLAN_FILTERS = [{ name: 'WoWS Plan', extensions: ['wowsplan'] }];
+const REPLAY_FILTERS = [{ name: 'World of Warships replay', extensions: ['wowsreplay'] }];
 
 function mimeFor(ext: string): string {
   const e = ext.toLowerCase().replace('.', '');
@@ -282,6 +285,66 @@ export function registerIpc(getWindow: GetWindow): void {
     const mime = /^data:([^;,]+)/.exec(dataUrl)?.[1] ?? 'image/png';
     const blob = new Blob([Uint8Array.from(decodeDataUrl(dataUrl))], { type: mime });
     await clipboard.write([new ClipboardItem({ [mime]: blob })]);
+    return true;
+  });
+
+  /* ---------------- replay viewer ---------------- */
+
+  handle('replay:status', () => replay.sidecarStatus());
+  handle('replay:checkGameDir', (dir: string) => replay.checkGameDir(dir));
+  handle('replay:pickGameDir', async () => {
+    const res = await dialog.showOpenDialog(getWindow()!, {
+      title: 'Select your World of Warships folder',
+      properties: ['openDirectory'],
+    });
+    if (res.canceled || !res.filePaths[0]) return null;
+    const dir = res.filePaths[0];
+    return { dir, ...replay.checkGameDir(dir) };
+  });
+  /* ---- archive ---- */
+
+  handle('replay:list', () => archive.listReplays());
+  handle('replay:usage', () => archive.archiveUsage());
+  handle('replay:remove', (id: string) => archive.removeReplay(id));
+  handle('replay:refreshProbe', (id: string) => archive.refreshProbe(id));
+  handle('replay:scanGame', (gameDir: string, limit?: number) => archive.scanGameReplays(gameDir, limit));
+  handle('replay:import', (paths: string[]) => archive.importReplays(paths));
+  handle('replay:pickReplays', async () => {
+    const res = await dialog.showOpenDialog(getWindow()!, {
+      title: 'Add replays to the archive',
+      filters: REPLAY_FILTERS,
+      properties: ['openFile', 'multiSelections'],
+    });
+    if (res.canceled || !res.filePaths.length) return null;
+    return archive.importReplays(res.filePaths);
+  });
+  handle('replay:revealArchive', async () => {
+    const usage = await archive.archiveUsage();
+    shell.openPath(usage.path);
+    return true;
+  });
+
+  /* ---- playback ---- */
+
+  /**
+   * The timeline comes back as bytes in the reply rather than as a file the
+   * renderer reads: it is 7-41 MB, wanted whole, and never needed again once
+   * the viewer closes. Progress arrives separately on `replay:progress`,
+   * because a bake takes seconds and the UI has to stay honest about it.
+   *
+   * The replay is named by archive id, not by path: the renderer never gets to
+   * hand the sidecar an arbitrary file to open.
+   */
+  handle('replay:bake', async (opts: { id: string; gameDir: string; fps?: number }) => {
+    const file = await archive.replayPath(opts.id);
+    const { data, summary } = await replay.bakeReplay(
+      { replay: file, gameDir: opts.gameDir, fps: opts.fps },
+      replay.emitToRenderer,
+    );
+    return { data, summary };
+  });
+  handle('replay:cancelBake', () => {
+    replay.cancelBake();
     return true;
   });
 

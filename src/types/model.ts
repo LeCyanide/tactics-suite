@@ -634,6 +634,12 @@ export interface AppSettings {
   maxBackupsPerProject: number;
   leftSidebarWidth: number;
   rightSidebarWidth: number;
+  /**
+   * World of Warships install, for the replay viewer add-on. Empty until the
+   * user points at it; the game can be anywhere, and no amount of guessing
+   * beats asking once.
+   */
+  wowsGameDir: string;
 }
 
 export const DEFAULT_APP_SETTINGS: AppSettings = {
@@ -648,4 +654,5 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   maxBackupsPerProject: 15,
   leftSidebarWidth: 288,
   rightSidebarWidth: 300,
+  wowsGameDir: '',
 };

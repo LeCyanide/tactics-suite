@@ -19,7 +19,16 @@ const electronStub = {
   setup(b) {
     b.onResolve({ filter: /^electron$/ }, () => ({ path: 'electron', namespace: 'stub' }));
     b.onLoad({ filter: /.*/, namespace: 'stub' }, () => ({
-      contents: `export const app = { getPath: () => { throw new Error('WOWSPLAN_DATA_DIR must be set in tests'); } };`,
+      // `app` is stubbed because both modules under test use it only to
+      // derive paths, and both accept being told where to look instead:
+      // db.ts through WOWSPLAN_DATA_DIR, the replay sidecar through
+      // WOWSPLAN_SIDECAR. getAppPath resolves to the repository root so the
+      // sidecar locator finds a real crate build when one exists.
+      contents: `export const app = {
+  getPath: () => { throw new Error('WOWSPLAN_DATA_DIR must be set in tests'); },
+  getAppPath: () => ${JSON.stringify(root)},
+  isPackaged: false,
+};`,
       loader: 'js',
     }));
   },

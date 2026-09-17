@@ -2,6 +2,7 @@ import { app, BrowserWindow, shell, Menu } from 'electron';
 import path from 'node:path';
 import { ensureDirs, seedStore, storageRoot, sweepTempFiles } from './storage/db';
 import { registerIpc } from './ipc';
+import { initSidecar, shutdownSidecar } from './replay/sidecar';
 import { checkForUpdates, initUpdater } from './updater';
 
 // This application is local. The only network traffic is the update check
@@ -89,6 +90,7 @@ app.whenReady().then(() => {
   void sweepTempFiles().catch(() => undefined);
   registerIpc(() => mainWindow);
   initUpdater(() => mainWindow);
+  initSidecar(() => mainWindow);
   createWindow();
 
   app.on('activate', () => {
@@ -100,6 +102,10 @@ app.whenReady().then(() => {
     console.log('[storage]', storageRoot());
   }
 });
+
+// A bake is a child process holding a file handle on the game install; left
+// running it would outlive the window that asked for it.
+app.on('before-quit', () => shutdownSidecar());
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();

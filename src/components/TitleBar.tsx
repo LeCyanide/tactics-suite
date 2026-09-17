@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Crosshair, Minus, Square, X, Copy as CopyIcon } from 'lucide-react';
+import { Clapperboard, Crosshair, Map as MapIcon, Minus, Square, X, Copy as CopyIcon } from 'lucide-react';
 import { TEST_BUILD_LABEL } from '@/lib/testBuild';
 import { getActivePage, useStore } from '@/state/store';
+import { useReplayStore } from '@/state/replay';
 
 interface MenuEntry {
   label?: string;
@@ -166,6 +167,8 @@ export function TitleBar() {
         ))}
       </div>
 
+      <ModeSwitch />
+
       <div className="title-center">
         {project ? (
           <>
@@ -189,6 +192,39 @@ export function TitleBar() {
           <X size={14} />
         </button>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Tactics or Replay.
+ *
+ * Both modes share the map, the tool rail and the right sidebar; what changes
+ * is the left sidebar and whether a replay is drawn over the plan. Replay mode
+ * still needs a project open, because the map it draws on belongs to the page.
+ */
+function ModeSwitch() {
+  const mode = useReplayStore((s) => s.mode);
+  const setMode = useReplayStore((s) => s.setMode);
+  const hasProject = useStore((s) => !!s.project);
+
+  return (
+    <div className="mode-switch">
+      <button
+        className={mode === 'tactics' ? 'active' : ''}
+        onClick={() => setMode('tactics')}
+        title="Plan on the map"
+      >
+        <MapIcon size={12} /> Tactics
+      </button>
+      <button
+        className={mode === 'replay' ? 'active' : ''}
+        onClick={() => setMode('replay')}
+        disabled={!hasProject}
+        title={hasProject ? 'Watch a replay on the map' : 'Open a project first'}
+      >
+        <Clapperboard size={12} /> Replay
+      </button>
     </div>
   );
 }

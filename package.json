@@ -10,8 +10,10 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "start": "electron .",
-    "dist": "npm run build && electron-builder --publish never",
+    "dist": "node scripts/dist.mjs",
     "dist:dir": "npm run build && electron-builder --dir --publish never",
+    "build:sidecar": "node scripts/build-sidecar.mjs",
+    "dev:replay": "node scripts/dev-replay.mjs",
     "selftest": "node scripts/run-selftest.mjs",
     "refresh-seed": "node scripts/refresh-seed.mjs",
     "release": "node scripts/publish-release.mjs"

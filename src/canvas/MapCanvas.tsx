@@ -17,8 +17,10 @@ import {
   type Vec2,
 } from '@/types/model';
 import { effectiveFlags, getActivePage, useStore } from '@/state/store';
+import { useReplayStore } from '@/state/replay';
 import { useAsset, useAssetState } from '@/state/assets';
 import { MapBackground } from './MapBackground';
+import { ReplayLayer } from './ReplayLayer';
 import { CapZones } from './CapZones';
 import { ObjectNode, flatten } from './ObjectNode';
 import { ShipLabel, ShipNode, ShipRanges } from './ShipNode';
@@ -84,6 +86,15 @@ export default function MapCanvas() {
   // Subscribing here is what makes a theme switch repaint the map: the palette
   // then flows down as a prop and invalidates every memoised Konva node.
   const themeName = useStore((s) => s.settings.theme);
+
+  // Replay playback. Subscribed here rather than passed down so a frame change
+  // repaints the canvas without touching the project store or the undo stack.
+  const replayMode = useReplayStore((s) => s.mode);
+  const replayTimelineRaw = useReplayStore((s) => s.timeline);
+  const replayFrame = useReplayStore((s) => s.frame);
+  const replayView = useReplayStore((s) => s.view);
+  const replayOpacity = useReplayStore((s) => s.opacity);
+  const replayTimeline = replayMode === 'replay' ? replayTimelineRaw : null;
 
   const [size, setSize] = useState({ width: 800, height: 600 });
   const [draft, setDraft] = useState<DraftState>(null);
@@ -792,6 +803,22 @@ export default function MapCanvas() {
           {/* Above the grid, below every tactical object. */}
           <CapZones layout={capLayout} map={map} opacity={capsLayer?.opacity ?? 1} />
         </Layer>
+
+        {/* Replay playback. Its own layer between the map and the plan: the
+            battle reads as something happening underneath the drawing, and
+            every tool keeps working on top of it. */}
+        {replayTimeline && (
+          <Layer listening={false}>
+            <ReplayLayer
+              timeline={replayTimeline}
+              frame={replayFrame}
+              map={map}
+              options={replayView}
+              inv={inv}
+              opacity={replayOpacity}
+            />
+          </Layer>
+        )}
 
         {/* Content: one Konva group per tactical layer, back to front */}
         <Layer
