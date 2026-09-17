@@ -293,6 +293,10 @@ function ViewPanel() {
   const timeline = useReplayStore((s) => s.timeline);
   const s = () => useReplayStore.getState();
 
+  const maps = useStore((s) => s.maps);
+  const space = timeline?.header.map?.name;
+  const haveMap = !!space && maps.some((m) => m.spaceName === space);
+
   const roster = useMemo(() => {
     const vehicles = timeline?.header.vehicles ?? [];
     return {
@@ -310,6 +314,15 @@ function ViewPanel() {
         <br />
         {roster.allies} v {roster.enemies} · {formatClock(timeline.battleSeconds)} long
       </div>
+
+      {/* Without the battle's map the replay is still drawn to scale, just over
+          bare water. Better to say so than to leave it looking broken. */}
+      {!haveMap && (
+        <div style={{ fontSize: 10.5, lineHeight: 1.6, marginBottom: 8, color: 'var(--warn, #d8b25e)' }}>
+          {timeline.header.map?.displayName} is not in your map library, so the battle is drawn over open water.
+          Import it from the Map Manager to see the islands.
+        </div>
+      )}
 
       <label className="field" style={{ marginBottom: 8 }}>
         <span>Layer opacity</span>

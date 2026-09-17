@@ -108,14 +108,37 @@ export default function MapCanvas() {
   const dragRef = useRef<{ last: Vec2; ids: ID[] } | null>(null);
   const fitScaleRef = useRef(0.02);
 
-  const map: GameMap | null = useMemo(
+  const plannedMap: GameMap | null = useMemo(
     () => maps.find((m) => m.id === page?.mapId) ?? null,
     [maps, page?.mapId],
   );
+
+  /**
+   * The map the replay was actually played on.
+   *
+   * A replay knows its own ground, and it has nothing to do with whichever map
+   * the page was planning against. Matched on `spaceName`, which the timeline
+   * header carries in the game's own form, preferring a live map over an
+   * archived stand-in — those have a cap layout burned into the artwork.
+   */
+  const replayMap: GameMap | null = useMemo(() => {
+    const space = replayTimelineRaw?.header.map?.name;
+    if (!space) return null;
+    const matches = maps.filter((m) => m.spaceName === space);
+    return matches.find((m) => !m.archived) ?? matches[0] ?? null;
+  }, [maps, replayTimelineRaw]);
+
+  // Replay mode draws the battle's own map, never the page's.
+  const inReplay = replayMode === 'replay';
+  const map: GameMap | null = inReplay ? replayMap : plannedMap;
   const { image: mapImage, error: mapImageError } = useAssetState('map', map?.file, map?.mime ?? '');
 
-  const worldW = map?.widthMeters ?? FALLBACK_W;
-  const worldH = map?.heightMeters ?? FALLBACK_H;
+  // With no map for the battle in the library, the timeline still knows how
+  // big the ground is, so the replay can be drawn to scale over bare water
+  // rather than over the wrong island chain.
+  const replayExtent = replayTimelineRaw ? replayTimelineRaw.spaceSize * 30 : 0;
+  const worldW = map?.widthMeters ?? (inReplay && replayExtent ? replayExtent : FALLBACK_W);
+  const worldH = map?.heightMeters ?? (inReplay && replayExtent ? replayExtent : FALLBACK_H);
 
   const shipById = useMemo(() => new Map(ships.map((s) => [s.id, s])), [ships]);
   const iconById = useMemo(() => new Map(icons.map((i) => [i.id, i])), [icons]);
@@ -801,7 +824,9 @@ export default function MapCanvas() {
             theme={theme}
           />
           {/* Above the grid, below every tactical object. */}
-          <CapZones layout={capLayout} map={map} opacity={capsLayer?.opacity ?? 1} />
+          {/* The page's cap layout is part of the plan, and the replay carries
+              its own capture points with real ownership over time. */}
+          {!inReplay && <CapZones layout={capLayout} map={map} opacity={capsLayer?.opacity ?? 1} />}
         </Layer>
 
         {/* Replay playback. Its own layer between the map and the plan: the
@@ -830,7 +855,11 @@ export default function MapCanvas() {
           {/* Invisible backdrop that catches clicks on empty water */}
           <Rect name="backdrop" x={-worldW} y={-worldH} width={worldW * 3} height={worldH * 3} />
 
-          {page.layers.map((layer) => {
+          {/* The plan is hidden while a replay is up. Its ships and drawings
+              were laid out against the page's map, which is usually not the map
+              the battle was played on, so showing them here would place them on
+              ground they were never drawn for. */}
+          {!inReplay && page.layers.map((layer) => {
             if (!layer.visible) return null;
 
             if (layer.id === LAYER_IDS.ranges) {

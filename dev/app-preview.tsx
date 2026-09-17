@@ -15,7 +15,7 @@
  * so a green result here still leaves the Electron hop untested.
  */
 
-import { createProject } from '@/lib/factory';
+import { createProject, createText } from '@/lib/factory';
 import type { GameMap, Project } from '@/types/model';
 
 /* ------------------------------------------------------------------ */
@@ -69,10 +69,19 @@ async function makeProject(): Promise<Project> {
       /* fall back to Okinawa */
     }
   }
-  const map = maps.find((m) => m.spaceName === space) ?? maps[0]!;
+  // Deliberately NOT the replay's map: the page plans against different ground,
+  // which is the situation that showed the plan bleeding into replay mode.
+  const map = maps.find((m) => m.spaceName !== space && !m.archived) ?? maps[0]!;
   const p = createProject('Replay preview');
   p.pages[0]!.mapId = map.id;
   p.pages[0]!.name = map.name;
+
+  // A planned ship, so it is obvious whether the plan leaks over the battle.
+  const layerId = p.pages[0]!.layers.find((l) => l.name === 'Annotations')?.id ?? p.pages[0]!.layers[0]!.id;
+  p.pages[0]!.objects.push({
+    ...createText(layerId, { x: map.widthMeters / 2, y: map.heightMeters / 2 }, 'PLAN — should not show over a replay'),
+    fontSize: 1400,
+  });
   return p;
 }
 
