@@ -345,6 +345,49 @@ export async function bakeReplay(opts: BakeOptions, onEvent?: (e: SidecarEvent) 
   }
 }
 
+/**
+ * Bakes a replay into a file, for the library to keep.
+ *
+ * With no `slot` this is the user's bake: it takes the single interactive slot,
+ * so `cancelBake` stops it and opening another replay replaces it. With a
+ * slot it is a background bake that the caller stops itself.
+ *
+ * Written beside and renamed, so an interrupted bake never leaves a truncated
+ * timeline where a complete one is expected.
+ */
+export async function bakeToFile(
+  opts: BakeOptions & { out: string },
+  onEvent?: (e: SidecarEvent) => void,
+  slot?: { child?: ChildProcessWithoutNullStreams },
+): Promise<Record<string, unknown> | null> {
+  const game = checkGameDir(opts.gameDir);
+  if (!game.ok) throw new SidecarError(game.reason!);
+  const fps = opts.fps ?? DEFAULT_FPS;
+  if (!(fps > 0 && fps <= 60)) throw new SidecarError(`${fps} is not a usable frame rate.`);
+
+  let own: { child?: ChildProcessWithoutNullStreams; replay: string } | null = null;
+  if (!slot) {
+    cancelBake();
+    own = { replay: opts.replay };
+    current = own;
+  }
+  const tmp = `${opts.out}.${process.pid}.tmp`;
+  try {
+    const { events } = await run(
+      ['bake', '--game', opts.gameDir, '--replay', opts.replay, '--fps', String(fps), '--out', tmp],
+      { onEvent, signal: slot ?? own! },
+    );
+    const size = fs.statSync(tmp, { throwIfNoEntry: false })?.size ?? 0;
+    if (!size) throw new SidecarError('The replay viewer produced an empty timeline.');
+    fs.renameSync(tmp, opts.out);
+    const done = events.find((e) => e.t === 'done') as (Record<string, unknown> & { t: 'done' }) | undefined;
+    return done ?? null;
+  } finally {
+    fs.rmSync(tmp, { force: true });
+    if (own && current === own) current = null;
+  }
+}
+
 /* ------------------------------------------------------------------ */
 /* Renderer notifications                                             */
 /* ------------------------------------------------------------------ */
@@ -358,6 +401,15 @@ export function initSidecar(windowGetter: () => BrowserWindow | null): void {
 /** Forwards one sidecar event to the renderer. */
 export function emitToRenderer(event: SidecarEvent): void {
   getWindow()?.webContents.send('replay:progress', event);
+}
+
+/** What the library tells the renderer while it bakes in the background. */
+export type LibraryEvent =
+  | { t: 'queue'; done: number; total: number; current: string | null }
+  | { t: 'baked'; id: string };
+
+export function emitLibrary(event: LibraryEvent): void {
+  getWindow()?.webContents.send('replay:library', event);
 }
 
 /** Kills a running bake when the app is going away. */

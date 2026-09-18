@@ -267,15 +267,28 @@ export function InlineEdit({
   value,
   onCommit,
   className,
+  startEditing = false,
 }: {
   value: string;
   onCommit: (v: string) => void;
   className?: string;
+  /** Opens in edit mode, for something just created that wants a name. */
+  startEditing?: boolean;
 }) {
-  const [editing, setEditing] = useState(false);
+  const [editing, setEditing] = useState(startEditing);
   const [draft, setDraft] = useState(value);
 
   useEffect(() => setDraft(value), [value]);
+  // Also on a later change, since the thing being named may render before
+  // anyone knows it wants one.
+  useEffect(() => {
+    if (startEditing) setEditing(true);
+  }, [startEditing]);
+  // Selected on opening, so typing replaces the old name rather than adding to it.
+  const input = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (editing) input.current?.select();
+  }, [editing]);
 
   if (!editing) {
     return (
@@ -287,6 +300,7 @@ export function InlineEdit({
   return (
     <input
       className="inline-edit"
+      ref={input}
       autoFocus
       value={draft}
       onChange={(e) => setDraft(e.target.value)}

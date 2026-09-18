@@ -10,7 +10,7 @@
 
 import { create } from 'zustand';
 import { DEFAULT_REPLAY_VIEW, type ReplayViewOptions } from '@/canvas/ReplayLayer';
-import { ReplayTimeline } from '@/replay/timeline';
+import { ReplayTimeline, TimelineFormatError } from '@/replay/timeline';
 import { useStore } from './store';
 
 export type AppMode = 'tactics' | 'replay';
@@ -41,9 +41,14 @@ export const SPEEDS = [0.25, 0.5, 1, 2, 4, 8, 10, 20] as const;
  */
 export const BAKE_FPS = 10;
 
-interface ArchivedReplay {
+/** Whether a replay can be watched. See `ReplayState` in the library. */
+export type ReplayPlayState = 'baked' | 'bakeable' | 'unplayable';
+
+export interface LibraryReplay {
   id: string;
-  originalName: string;
+  path: string;
+  name: string;
+  collection: string | null;
   size: number;
   addedAt: number;
   probe: {
@@ -55,6 +60,13 @@ interface ArchivedReplay {
     vehicles?: { name: string; relation: number }[];
   } | null;
   probeError?: string;
+  build: number | null;
+  state: ReplayPlayState;
+  bakeError?: string;
+}
+
+export interface ReplayCollection {
+  name: string;
 }
 
 interface SidecarStatus {
@@ -62,12 +74,25 @@ interface SidecarStatus {
   reason?: string;
 }
 
+/** Background baking, for the status line under the archive header. */
+export interface BakeQueue {
+  done: number;
+  total: number;
+  current: string | null;
+}
+
 interface ReplayState {
   mode: AppMode;
   /** Null until checked; the add-on may not be installed. */
   status: SidecarStatus | null;
-  archive: ArchivedReplay[];
+  /** The library folder, once one is chosen and usable. */
+  root: string | null;
+  /** Where the library would go if the user takes the suggestion. Set while none is chosen. */
+  suggestedRoot: string | null;
+  archive: LibraryReplay[];
+  collections: ReplayCollection[];
   archiveLoaded: boolean;
+  queue: BakeQueue;
   selectedId: string | null;
   timeline: ReplayTimeline | null;
   bake: BakeState;
@@ -80,10 +105,17 @@ interface ReplayState {
 
   setMode(mode: AppMode): void;
   init(): Promise<void>;
+  /** Uses `dir` as the library, or asks for a folder when none is given. */
+  chooseRoot(dir?: string): Promise<void>;
   refreshArchive(): Promise<void>;
-  addReplays(): Promise<void>;
+  addReplays(collection?: string | null): Promise<void>;
   importFromGame(): Promise<void>;
   removeReplay(id: string): Promise<void>;
+  /** Makes a collection and returns its name, or null if it failed. */
+  createCollection(): Promise<string | null>;
+  renameCollection(from: string, to: string): Promise<boolean>;
+  deleteCollection(name: string): Promise<void>;
+  moveReplays(ids: string[], collection: string | null): Promise<void>;
   chooseGameDir(): Promise<void>;
   open(id: string): Promise<void>;
   close(): void;
@@ -97,6 +129,9 @@ interface ReplayState {
   setOpacity(value: number): void;
 }
 
+/** Set once the add-on is known to be there and the library events are wired. */
+let initialised = false;
+
 /** Playback advances on wall-clock time, not on how often React renders. */
 let raf = 0;
 let lastTick = 0;
@@ -105,8 +140,12 @@ let carry = 0;
 export const useReplayStore = create<ReplayState>((set, get) => ({
   mode: 'tactics',
   status: null,
+  root: null,
+  suggestedRoot: null,
   archive: [],
+  collections: [],
   archiveLoaded: false,
+  queue: { done: 0, total: 0, current: null },
   selectedId: null,
   timeline: null,
   bake: { phase: 'idle' },
@@ -124,23 +163,65 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
   },
 
   async init() {
+    if (initialised) {
+      // Coming back to replay mode: the folder may have changed meanwhile.
+      if (get().root) await get().refreshArchive();
+      return;
+    }
     const status = await window.api.replay.status();
     set({ status });
-    if (status.available && !get().archiveLoaded) await get().refreshArchive();
+    if (!status.available) return;
+    initialised = true;
+    listenToLibrary();
+
+    const { replayDir, wowsGameDir } = useStore.getState().settings;
+    if (!replayDir) {
+      set({ suggestedRoot: await window.api.replay.defaultRoot(), archiveLoaded: true });
+      return;
+    }
+    const res = await window.api.replay.configure({ root: replayDir, gameDir: wowsGameDir });
+    if (!res.ok) {
+      // The folder is gone or unwritable — a removed drive, say. Offer to
+      // choose again rather than failing every action after this one.
+      useStore.getState().toast(res.reason ?? 'The replay folder cannot be used.', 'error');
+      set({ suggestedRoot: replayDir, archiveLoaded: true });
+      return;
+    }
+    set({ root: replayDir });
+    await get().refreshArchive();
+  },
+
+  async chooseRoot(dir) {
+    const picked = dir ?? (await window.api.replay.pickRoot());
+    if (!picked) return;
+    const res = await window.api.replay.configure({ root: picked, gameDir: useStore.getState().settings.wowsGameDir });
+    if (!res.ok) {
+      useStore.getState().toast(res.reason ?? 'That folder cannot be used.', 'error');
+      return;
+    }
+    useStore.getState().patchSettings({ replayDir: picked });
+    set({ root: picked, suggestedRoot: null });
+    if (res.migrated) {
+      useStore
+        .getState()
+        .toast(`Moved ${res.migrated} replay${res.migrated === 1 ? '' : 's'} from the old archive into ${picked}.`);
+    }
+    await get().refreshArchive();
   },
 
   async refreshArchive() {
+    if (!get().root) return;
     try {
-      const archive = await window.api.replay.list();
-      set({ archive, archiveLoaded: true });
+      const listing = await window.api.replay.list();
+      set({ archive: listing.replays, collections: listing.collections, archiveLoaded: true });
     } catch (err) {
-      useStore.getState().toast(`Could not read the replay archive: ${message(err)}`, 'error');
+      useStore.getState().toast(`Could not read the replay folder: ${message(err)}`, 'error');
     }
   },
 
-  async addReplays() {
+  async addReplays(collection = null) {
     try {
-      const outcome = await window.api.replay.pickReplays();
+      const outcome = await window.api.replay.pickReplays(collection);
       if (!outcome) return;
       await get().refreshArchive();
       reportImport(outcome);
@@ -158,14 +239,14 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
       const fresh = found.filter((f) => !f.archived);
       if (!fresh.length) {
         s.toast(
-          found.length ? 'Every recent replay is already in the archive.' : 'No replays found in the game folder.',
+          found.length ? 'Every recent replay is already in your library.' : 'No replays found in the game folder.',
         );
         return;
       }
       const ok = await window.api.dialog.confirm({
         title: 'Import from the game folder',
-        message: `Add ${fresh.length} replay${fresh.length === 1 ? '' : 's'} to the archive?`,
-        detail: `${(fresh.reduce((n, f) => n + f.size, 0) / 1048576).toFixed(0)} MB will be copied into the planner's storage. The originals are left alone.`,
+        message: `Add ${fresh.length} replay${fresh.length === 1 ? '' : 's'} to your library?`,
+        detail: `${(fresh.reduce((n, f) => n + f.size, 0) / 1048576).toFixed(0)} MB will be copied into ${get().root}. The originals are left alone.`,
         confirmLabel: 'Import',
       });
       if (!ok) return;
@@ -178,17 +259,79 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
   },
 
   async removeReplay(id) {
+    const replay = get().archive.find((r) => r.id === id);
     const ok = await window.api.dialog.confirm({
-      title: 'Remove replay',
-      message: 'Remove this replay from the archive?',
-      detail: 'The file is deleted from the planner. The original in the game folder is untouched.',
-      confirmLabel: 'Remove',
+      title: 'Delete replay',
+      message: 'Delete this replay?',
+      detail:
+        `${replay?.path ?? 'The file'} is deleted from your replay folder, together with its saved timeline.` +
+        (replay?.state === 'baked' && replay.build !== null
+          ? ' If its patch is gone from the game, it cannot be baked again.'
+          : ''),
+      confirmLabel: 'Delete',
       danger: true,
     });
     if (!ok) return;
-    const archive = await window.api.replay.remove(id);
-    set({ archive });
+    try {
+      const listing = await window.api.replay.remove(id);
+      set({ archive: listing.replays, collections: listing.collections });
+    } catch (err) {
+      useStore.getState().toast(`Could not delete the replay: ${message(err)}`, 'error');
+    }
     if (get().selectedId === id) get().close();
+  },
+
+  async createCollection() {
+    try {
+      const collection = await window.api.replay.createCollection();
+      await get().refreshArchive();
+      return collection.name;
+    } catch (err) {
+      useStore.getState().toast(`Could not create the collection: ${message(err)}`, 'error');
+      return null;
+    }
+  },
+
+  async renameCollection(from, to) {
+    try {
+      await window.api.replay.renameCollection(from, to);
+      await get().refreshArchive();
+      return true;
+    } catch (err) {
+      useStore.getState().toast(`Could not rename the collection: ${message(err)}`, 'error');
+      return false;
+    }
+  },
+
+  async deleteCollection(name) {
+    const held = get().archive.filter((r) => r.collection === name).length;
+    // An empty folder costs nothing to lose, so it goes without asking.
+    if (held) {
+      const ok = await window.api.dialog.confirm({
+        title: 'Delete collection',
+        message: `Delete "${name}"?`,
+        detail: `Its ${held} replay${held === 1 ? '' : 's'} move back to the top of your replay folder, unsorted.`,
+        confirmLabel: 'Delete',
+        danger: true,
+      });
+      if (!ok) return;
+    }
+    try {
+      const { kept } = await window.api.replay.deleteCollection(name);
+      if (kept) useStore.getState().toast(`The "${name}" folder holds other files, so it was left in place.`);
+    } catch (err) {
+      useStore.getState().toast(`Could not delete the collection: ${message(err)}`, 'error');
+    }
+    await get().refreshArchive();
+  },
+
+  async moveReplays(ids, collection) {
+    try {
+      const listing = await window.api.replay.move(ids, collection);
+      set({ archive: listing.replays, collections: listing.collections });
+    } catch (err) {
+      useStore.getState().toast(`Could not move the replay: ${message(err)}`, 'error');
+    }
   },
 
   async chooseGameDir() {
@@ -199,16 +342,15 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
       return;
     }
     useStore.getState().patchSettings({ wowsGameDir: picked.dir });
+    // The library bakes against the install, so it has to hear about it.
+    const root = get().root;
+    if (root) {
+      await window.api.replay.configure({ root, gameDir: picked.dir });
+      await get().refreshArchive();
+    }
   },
 
   async open(id) {
-    const s = useStore.getState();
-    const gameDir = s.settings.wowsGameDir;
-    if (!gameDir) {
-      await get().chooseGameDir();
-      if (!useStore.getState().settings.wowsGameDir) return;
-    }
-
     get().pause();
     set({ selectedId: id, timeline: null, frame: 0, bake: { phase: 'baking', stage: 'starting', frame: 0, total: 1 } });
 
@@ -221,13 +363,17 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
     });
 
     try {
-      const { data } = await window.api.replay.bake({
-        id,
-        gameDir: useStore.getState().settings.wowsGameDir,
-        fps: BAKE_FPS,
-      });
+      let timeline: ReplayTimeline;
+      try {
+        timeline = new ReplayTimeline(await window.api.replay.load({ id }));
+      } catch (err) {
+        // A stored timeline this version cannot read, from an older planner.
+        // Rebaking works only while the patch is installed; the library says
+        // so plainly if it is not.
+        if (!(err instanceof TimelineFormatError)) throw err;
+        timeline = new ReplayTimeline(await window.api.replay.load({ id, rebake: true }));
+      }
       if (get().selectedId !== id) return;
-      const timeline = new ReplayTimeline(data);
       set({ timeline, frame: firstActiveFrame(timeline), bake: { phase: 'idle' } });
     } catch (err) {
       if (get().selectedId !== id) return;
@@ -305,6 +451,27 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
     set({ opacity: Math.max(0, Math.min(1, value)) });
   },
 }));
+
+/**
+ * Keeps the list in step with what the library does on its own: background
+ * bakes finishing, and changes made to the folder in Explorer, which show up
+ * when the window comes back into focus.
+ */
+function listenToLibrary(): void {
+  window.api.replay.onLibrary((e) => {
+    const st = useReplayStore.getState();
+    if (e.t === 'queue') useReplayStore.setState({ queue: { done: e.done, total: e.total, current: e.current } });
+    else if (e.t === 'baked') {
+      useReplayStore.setState({
+        archive: st.archive.map((r) => (r.id === e.id ? { ...r, state: 'baked', bakeError: undefined } : r)),
+      });
+    }
+  });
+  window.addEventListener('focus', () => {
+    const st = useReplayStore.getState();
+    if (st.mode === 'replay' && st.root) void st.refreshArchive();
+  });
+}
 
 /**
  * The first frame with a ship on it.

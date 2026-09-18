@@ -646,6 +646,11 @@ export interface AppSettings {
    * beats asking once.
    */
   wowsGameDir: string;
+  /**
+   * The replay library: a folder of replays, with sub-folders as collections.
+   * Empty until the user confirms one the first time they open replay mode.
+   */
+  replayDir: string;
 }
 
 export const DEFAULT_APP_SETTINGS: AppSettings = {
@@ -661,4 +666,5 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   leftSidebarWidth: 288,
   rightSidebarWidth: 300,
   wowsGameDir: '',
+  replayDir: '',
 };

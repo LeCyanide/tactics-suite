@@ -19,7 +19,7 @@ declare global {
       fatal(text: string): void;
     };
     /** Inputs handed over by the preload; the renderer has no `process`. */
-    __env: { replay: string; gameDir: string };
+    __env: { replay: string; gameDir: string; replayDir: string };
   }
 }
 
@@ -27,11 +27,11 @@ const check = (label: string, ok: boolean, detail?: unknown) => window.__check.r
 const info = (text: string) => window.__check.info(text);
 
 async function run(): Promise<void> {
-  const { replay, gameDir } = window.__env;
+  const { replay, gameDir, replayDir } = window.__env;
 
   /* ---- the surface exists at all ---- */
 
-  check('window.api.replay is exposed', typeof window.api?.replay?.bake === 'function');
+  check('window.api.replay is exposed', typeof window.api?.replay?.load === 'function');
 
   const status = await window.api.replay.status();
   check('status crosses IPC', typeof status.available === 'boolean', status);
@@ -41,14 +41,16 @@ async function run(): Promise<void> {
     return;
   }
 
+  const configured = await window.api.replay.configure({ root: replayDir, gameDir });
+  check('configure crosses IPC', configured.ok, configured);
   const empty = await window.api.replay.list();
-  check('archive list crosses IPC', Array.isArray(empty), empty.length);
+  check('library listing crosses IPC', Array.isArray(empty.replays), empty.replays.length);
 
   /* ---- errors survive the hop as errors ---- */
 
   let rejected = false;
   try {
-    await window.api.replay.bake({ id: 'does-not-exist', gameDir: gameDir ?? 'x' });
+    await window.api.replay.load({ id: 'does-not-exist' });
   } catch (err) {
     rejected = true;
     check('a failing handler rejects in the renderer', (err as Error).message.length > 0, (err as Error).message);
@@ -69,7 +71,7 @@ async function run(): Promise<void> {
     duplicates: outcome.duplicates.length,
     failed: outcome.failed,
   });
-  const id = outcome.added[0]?.id ?? (await window.api.replay.list())[0]?.id;
+  const id = outcome.added[0]?.id ?? (await window.api.replay.list()).replays[0]?.id;
   check('the archived replay has an id', !!id);
   if (!id) return void window.__check.done();
 
@@ -77,7 +79,9 @@ async function run(): Promise<void> {
   const off = window.api.replay.onProgress((e) => events.push(e.t));
 
   const started = performance.now();
-  const { data, summary } = await window.api.replay.bake({ id, gameDir, fps: 10 });
+  // Rebake: the background queue may have baked it already, and this check
+  // is about the bake's bytes crossing, not about reading a stored file.
+  const data = await window.api.replay.load({ id, rebake: true });
   const elapsed = Math.round(performance.now() - started);
   off();
 
@@ -86,11 +90,6 @@ async function run(): Promise<void> {
   // bridge" are different claims.
   check('bake returns a Uint8Array', data instanceof Uint8Array, Object.prototype.toString.call(data));
   check('the timeline has bytes', data.byteLength > 0, data.byteLength);
-  check(
-    'byte count matches what the sidecar reported',
-    summary?.bytes === data.byteLength,
-    { reported: summary?.bytes, received: data.byteLength },
-  );
   check('progress events crossed IPC', events.length > 0, events.length);
 
   // Bytes surviving is not the same as bytes arriving in order. Decoding every
@@ -105,8 +104,11 @@ async function run(): Promise<void> {
   });
   info(`${(data.byteLength / 1048576).toFixed(1)} MB across IPC, ${records} records, bake ${elapsed} ms`);
 
+  const again = await window.api.replay.load({ id });
+  check('a second load is served from the stored bake', again.byteLength === data.byteLength, again.byteLength);
+
   const remaining = await window.api.replay.remove(id);
-  check('remove crosses IPC', Array.isArray(remaining), remaining.length);
+  check('remove crosses IPC', !remaining.replays.some((r) => r.id === id), remaining.replays.length);
 
   window.__check.done();
 }

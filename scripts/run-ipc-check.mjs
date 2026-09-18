@@ -80,6 +80,8 @@ const res = spawnSync(electronPath, [path.join(outDir, 'main.js')], {
   env: {
     ...process.env,
     WOWSPLAN_DATA_DIR: dataDir,
+    // The replay library is a folder of the user's choosing; this is the check's.
+    WOWSPLAN_REPLAY_DIR: path.join(dataDir, 'library'),
     // The locator's packaged and repo-relative candidates do not apply to a
     // bundle living under node_modules, so point straight at the binary.
     WOWSPLAN_SIDECAR:
