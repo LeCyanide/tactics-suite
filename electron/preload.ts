@@ -1,14 +1,24 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import type { ArchiveUsage, ArchivedReplay, FoundReplay, ImportOutcome } from './replay/archive';
-import type { GameDirCheck, ReplayProbe, SidecarEvent, SidecarStatus } from './replay/sidecar';
+import type {
+  ConfigureResult,
+  FoundReplay,
+  ImportOutcome,
+  LibraryListing,
+  LibraryReplay,
+  ReplayCollection,
+} from './replay/archive';
+import type { GameDirCheck, LibraryEvent, ReplayProbe, SidecarEvent, SidecarStatus } from './replay/sidecar';
 import type { UpdateState } from './updater';
 
 export type {
-  ArchiveUsage,
-  ArchivedReplay,
+  ConfigureResult,
   FoundReplay,
   GameDirCheck,
   ImportOutcome,
+  LibraryEvent,
+  LibraryListing,
+  LibraryReplay,
+  ReplayCollection,
   ReplayProbe,
   SidecarEvent,
   SidecarStatus,
@@ -116,26 +126,44 @@ const api = {
     checkGameDir: (dir: string) => call<GameDirCheck>('replay:checkGameDir', dir),
     pickGameDir: () => call<({ dir: string } & GameDirCheck) | null>('replay:pickGameDir'),
 
-    /* archive */
-    list: () => call<ArchivedReplay[]>('replay:list'),
-    usage: () => call<ArchiveUsage>('replay:usage'),
+    /* library */
+    /** Where the library goes if the user takes the suggestion. */
+    defaultRoot: () => call<string>('replay:defaultRoot'),
+    pickRoot: () => call<string | null>('replay:pickRoot'),
+    /** Points the library at a folder and the game install. Call on start and on every change. */
+    configure: (opts: { root: string; gameDir?: string }) => call<ConfigureResult>('replay:configure', opts),
+    /** Reads the folder, picking up anything changed outside the app. */
+    list: () => call<LibraryListing>('replay:list'),
     /** Opens a file picker and imports whatever is chosen. Null if cancelled. */
-    pickReplays: () => call<ImportOutcome | null>('replay:pickReplays'),
-    importPaths: (paths: string[]) => call<ImportOutcome>('replay:import', paths),
-    remove: (id: string) => call<ArchivedReplay[]>('replay:remove', id),
-    /** Re-reads metadata for one imported before the add-on was available. */
-    refreshProbe: (id: string) => call<ArchivedReplay>('replay:refreshProbe', id),
+    pickReplays: (collection?: string | null) => call<ImportOutcome | null>('replay:pickReplays', collection ?? null),
+    importPaths: (paths: string[], collection?: string | null) =>
+      call<ImportOutcome>('replay:import', paths, collection ?? null),
+    /** Deletes the file and its baked timeline. */
+    remove: (id: string) => call<LibraryListing>('replay:remove', id),
+    /** Makes a folder named "New collection", or "New collection (2)" if taken. */
+    createCollection: () => call<ReplayCollection>('replay:createCollection'),
+    renameCollection: (from: string, to: string) => call<ReplayCollection>('replay:renameCollection', from, to),
+    /** Deletes the folder only; its replays go back to unsorted. */
+    deleteCollection: (name: string) => call<{ kept: boolean }>('replay:deleteCollection', name),
+    /** Moves replays into a collection, or back to unsorted with null. */
+    move: (ids: string[], collection: string | null) => call<LibraryListing>('replay:move', ids, collection),
     /** Lists the game's own recorded replays. Looks only; importing is separate. */
     scanGame: (gameDir: string, limit?: number) => call<FoundReplay[]>('replay:scanGame', gameDir, limit),
-    revealArchive: () => call<boolean>('replay:revealArchive'),
+    revealLibrary: () => call<boolean>('replay:revealLibrary'),
+    onLibrary: (cb: (e: LibraryEvent) => void) => {
+      const listener = (_e: unknown, event: LibraryEvent) => cb(event);
+      ipcRenderer.on('replay:library', listener);
+      return () => {
+        ipcRenderer.off('replay:library', listener);
+      };
+    },
 
     /* playback */
     /**
-     * Bakes an archived replay into a timeline. Seconds of work, so subscribe
-     * with `onProgress` first; the bytes come back whole for `ReplayTimeline`.
+     * The timeline for a replay, baked first if it has not been. Seconds of
+     * work in that case, so subscribe with `onProgress` first.
      */
-    bake: (opts: { id: string; gameDir: string; fps?: number }) =>
-      call<{ data: Uint8Array; summary: Record<string, unknown> | null }>('replay:bake', opts),
+    load: (opts: { id: string; rebake?: boolean }) => call<Uint8Array>('replay:load', opts),
     cancelBake: () => call<boolean>('replay:cancelBake'),
     onProgress: (cb: (e: SidecarEvent) => void) => {
       const listener = (_e: unknown, event: SidecarEvent) => cb(event);

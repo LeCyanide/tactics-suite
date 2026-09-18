@@ -35,7 +35,7 @@ after game data is loaded. Packet parsing and world simulation account for only
 
 ```sh
 # Battle metadata only — instant, and needs no game install. This is what the
-# replay archive list is built from.
+# replay library list is built from.
 wows-replay-sidecar probe --replay <file.wowsreplay>
 
 # The full timeline.
@@ -84,9 +84,14 @@ At `--fps 10`, on the 15.8.0.0 replay corpus:
 
 Bake times include the one-time game data load.
 
-These are too large to cache the whole corpus — 664 replays would run to several
-GB — and small enough that they do not need caching. Bake on open, hold in
-memory, discard on close.
+Speed alone would not justify keeping them: at a few seconds each, baking on open
+is fine. What forces it is patches. A bake needs the game data of the exact build
+the replay was recorded on, and the game keeps only the current one, so after an
+update every older replay can no longer be baked at all. The planner therefore
+bakes each replay while its build is still installed and keeps the `.wtreply` in
+the library folder (`.wowstactics/baked/<sha256>.wtreply`). That costs disk —
+several GB for a corpus of hundreds — but a timeline from a past patch cannot be
+made again.
 
 ## Format
 

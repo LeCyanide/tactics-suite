@@ -21,4 +21,5 @@ contextBridge.exposeInMainWorld('__check', {
 contextBridge.exposeInMainWorld('__env', {
   replay: process.env.WOWSPLAN_REPLAY ?? '',
   gameDir: process.env.WOWSPLAN_GAME_DIR ?? '',
+  replayDir: process.env.WOWSPLAN_REPLAY_DIR ?? '',
 });

@@ -301,27 +301,38 @@ export function registerIpc(getWindow: GetWindow): void {
     const dir = res.filePaths[0];
     return { dir, ...replay.checkGameDir(dir) };
   });
-  /* ---- archive ---- */
+  /* ---- library ---- */
 
-  handle('replay:list', () => archive.listReplays());
-  handle('replay:usage', () => archive.archiveUsage());
-  handle('replay:remove', (id: string) => archive.removeReplay(id));
-  handle('replay:refreshProbe', (id: string) => archive.refreshProbe(id));
-  handle('replay:scanGame', (gameDir: string, limit?: number) => archive.scanGameReplays(gameDir, limit));
-  handle('replay:import', (paths: string[]) => archive.importReplays(paths));
-  handle('replay:pickReplays', async () => {
+  handle('replay:defaultRoot', () => path.join(app.getPath('documents'), 'WoWS Tactics', 'Replays'));
+  handle('replay:pickRoot', async () => {
     const res = await dialog.showOpenDialog(getWindow()!, {
-      title: 'Add replays to the archive',
+      title: 'Choose a folder for your replays',
+      properties: ['openDirectory', 'createDirectory'],
+    });
+    return res.canceled || !res.filePaths[0] ? null : res.filePaths[0];
+  });
+  handle('replay:configure', (opts: { root: string; gameDir?: string }) => archive.configure(opts));
+  handle('replay:list', () => archive.listLibrary());
+  handle('replay:remove', (id: string) => archive.removeReplay(id));
+  handle('replay:scanGame', (gameDir: string, limit?: number) => archive.scanGameReplays(gameDir, limit));
+  handle('replay:import', (paths: string[], collection?: string | null) => archive.importReplays(paths, collection ?? null));
+  handle('replay:pickReplays', async (collection?: string | null) => {
+    const res = await dialog.showOpenDialog(getWindow()!, {
+      title: 'Add replays to the library',
       filters: REPLAY_FILTERS,
       properties: ['openFile', 'multiSelections'],
     });
     if (res.canceled || !res.filePaths.length) return null;
-    return archive.importReplays(res.filePaths);
+    return archive.importReplays(res.filePaths, collection ?? null);
   });
-  handle('replay:revealArchive', async () => {
-    const usage = await archive.archiveUsage();
-    shell.openPath(usage.path);
-    return true;
+  handle('replay:createCollection', () => archive.createUntitledCollection());
+  handle('replay:renameCollection', (from: string, to: string) => archive.renameCollection(from, to));
+  handle('replay:deleteCollection', (name: string) => archive.deleteCollection(name));
+  handle('replay:move', (ids: string[], collection: string | null) => archive.moveReplays(ids, collection));
+  handle('replay:revealLibrary', async () => {
+    const root = archive.currentRoot();
+    if (root) await shell.openPath(root);
+    return !!root;
   });
 
   /* ---- playback ---- */
@@ -329,20 +340,13 @@ export function registerIpc(getWindow: GetWindow): void {
   /**
    * The timeline comes back as bytes in the reply rather than as a file the
    * renderer reads: it is 7-41 MB, wanted whole, and never needed again once
-   * the viewer closes. Progress arrives separately on `replay:progress`,
-   * because a bake takes seconds and the UI has to stay honest about it.
+   * the viewer closes. A replay not yet baked is baked first, with progress on
+   * `replay:progress`.
    *
-   * The replay is named by archive id, not by path: the renderer never gets to
-   * hand the sidecar an arbitrary file to open.
+   * The replay is named by library id, not by path: the renderer never gets
+   * to hand the sidecar an arbitrary file to open.
    */
-  handle('replay:bake', async (opts: { id: string; gameDir: string; fps?: number }) => {
-    const file = await archive.replayPath(opts.id);
-    const { data, summary } = await replay.bakeReplay(
-      { replay: file, gameDir: opts.gameDir, fps: opts.fps },
-      replay.emitToRenderer,
-    );
-    return { data, summary };
-  });
+  handle('replay:load', (opts: { id: string; rebake?: boolean }) => archive.loadTimeline(opts.id, { rebake: opts.rebake }));
   handle('replay:cancelBake', () => {
     replay.cancelBake();
     return true;

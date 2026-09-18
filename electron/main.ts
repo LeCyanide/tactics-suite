@@ -2,6 +2,7 @@ import { app, BrowserWindow, shell, Menu } from 'electron';
 import path from 'node:path';
 import { ensureDirs, seedStore, storageRoot, sweepTempFiles } from './storage/db';
 import { registerIpc } from './ipc';
+import { shutdownLibrary } from './replay/archive';
 import { initSidecar, shutdownSidecar } from './replay/sidecar';
 import { checkForUpdates, initUpdater } from './updater';
 
@@ -105,7 +106,10 @@ app.whenReady().then(() => {
 
 // A bake is a child process holding a file handle on the game install; left
 // running it would outlive the window that asked for it.
-app.on('before-quit', () => shutdownSidecar());
+app.on('before-quit', () => {
+  shutdownLibrary();
+  shutdownSidecar();
+});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();

@@ -85,6 +85,56 @@ async function makeProject(): Promise<Project> {
   return p;
 }
 
+/**
+ * A fake replay library, in memory: a reload starts it over. A spread of
+ * realistic entries, so the list can be judged for spacing and truncation,
+ * and a mix of states, so every marker on a row gets seen.
+ */
+const library = {
+  root: '',
+  collections: ['Clan battles', 'Ranked'],
+  replays: [
+    ['23_Shards', '17.09.2026 22:52:37', 'PFSD508-Le-Terrible', 'Clan battles', 'baked'],
+    ['25_sea_hope', '17.09.2026 22:38:08', 'PASC020-Des-Moines-1948', 'Clan battles', 'baked'],
+    ['38_Canada', '17.09.2026 22:25:00', 'PGSB210-Schlieffen', 'Ranked', 'bakeable'],
+    ['05_Ring', '17.09.2026 22:13:52', 'PRSC610-Smolensk', null, 'bakeable'],
+    ['50_Gold_harbor', '17.09.2026 21:57:01', 'PJSD018-Harugumo', null, 'baked'],
+    ['18_NE_ice_islands', '17.09.2026 21:47:44', 'PBSB210-St-Vincent', null, 'baked'],
+    ['25_sea_hope', '17.09.2026 21:35:32', 'PISB518-Vittorio-Veneto', null, 'baked'],
+    ['40_Okinawa', '16.08.2026 22:30:11', 'PASC020-Des-Moines-1948', null, 'unplayable'],
+    ['22_tierra_del_fuego', '16.08.2026 22:02:44', 'PVSB010-Libertad', null, 'unplayable'],
+  ].map(([map, dateTime, vehicle, collection, state], i) => {
+    const name = `${dateTime!.slice(0, 10)}_${vehicle}_${map}.wowsreplay`;
+    return {
+      id: i === 0 ? 'preview' : `preview-${i}`,
+      path: collection ? `${collection}/${name}` : name,
+      name,
+      collection: collection as string | null,
+      size: 2_500_000,
+      addedAt: Date.now() - i * 1000,
+      build: state === 'unplayable' ? 13015811 : 13187581,
+      state: state as string,
+      probe: {
+        dateTime,
+        map: { displayName: map, name: `spaces/${map}` },
+        mode: { scenario: 'cvc_domination' },
+        player: { name: 'SyeRex', vehicle },
+      },
+    };
+  }),
+};
+
+/** Copies, as IPC would give: handing out the arrays themselves would let the store and this stub share them. */
+const listing = () => ({
+  root: library.root,
+  replays: library.replays.map((r) => ({ ...r, path: r.collection ? `${r.collection}/${r.name}` : r.name })),
+  collections: library.collections
+    .slice()
+    .sort((a, b) => a.localeCompare(b))
+    .map((name) => ({ name })),
+  duplicates: [],
+});
+
 const api = {
   window: {
     minimize: () => {},
@@ -152,49 +202,52 @@ const api = {
     status: async () => ({ available: true }),
     checkGameDir: async () => ({ ok: true, builds: [13187581] }),
     pickGameDir: async () => null,
-    // A spread of realistic entries, so the archive list can be judged for
-    // spacing and truncation rather than eyeballed one row at a time.
-    list: async () =>
-      [
-        ['23_Shards', '17.09.2026 22:52:37', 'PFSD508-Le-Terrible'],
-        ['25_sea_hope', '17.09.2026 22:38:08', 'PASC020-Des-Moines-1948'],
-        ['38_Canada', '17.09.2026 22:25:00', 'PGSB210-Schlieffen'],
-        ['05_Ring', '17.09.2026 22:13:52', 'PRSC610-Smolensk'],
-        ['50_Gold_harbor', '17.09.2026 21:57:01', 'PJSD018-Harugumo'],
-        ['18_NE_ice_islands', '17.09.2026 21:47:44', 'PBSB210-St-Vincent'],
-        ['25_sea_hope', '17.09.2026 21:35:32', 'PISB518-Vittorio-Veneto'],
-        ['23_Shards', '17.09.2026 21:24:28', 'PASC710-Salem'],
-        ['50_Gold_harbor', '17.09.2026 21:13:30', 'PGSC890-Azur-Hindenburg'],
-        ['50_Gold_harbor', '16.09.2026 22:51:52', 'PFSB510-Republique'],
-        ['40_Okinawa', '16.09.2026 22:30:11', 'PASC020-Des-Moines-1948'],
-        ['22_tierra_del_fuego', '16.09.2026 22:02:44', 'PVSB010-Libertad'],
-      ].map(([map, dateTime, vehicle], i) => ({
-        id: i === 0 ? 'preview' : `preview-${i}`,
-        file: `preview-${i}.wowsreplay`,
-        originalName: `${dateTime.slice(0, 10)}_${vehicle}_${map}.wowsreplay`,
-        size: 2_500_000,
-        sha256: String(i),
-        addedAt: Date.now() - i * 1000,
-        probe: {
-          dateTime,
-          map: { displayName: map, name: `spaces/${map}` },
-          mode: { scenario: 'cvc_domination' },
-          player: { name: 'SyeRex', vehicle },
-        },
-      })),
-    usage: async () => ({ count: 1, bytes: 0, path: 'preview' }),
+    defaultRoot: async () => String.raw`C:\Users\preview\Documents\WoWS Tactics\Replays`,
+    pickRoot: async () => null,
+    configure: async (o: { root: string }) => {
+      library.root = o.root;
+      return { ok: true, migrated: 0 };
+    },
+    list: async () => listing(),
     pickReplays: async () => null,
     importPaths: async () => ({ added: [], duplicates: [], failed: [] }),
-    remove: async () => [],
-    refreshProbe: async () => null,
+    remove: async (id: string) => {
+      library.replays = library.replays.filter((r) => r.id !== id);
+      return listing();
+    },
+    createCollection: async () => {
+      let name = 'New collection';
+      for (let i = 2; library.collections.includes(name); i++) name = `New collection (${i})`;
+      library.collections.push(name);
+      return { name };
+    },
+    renameCollection: async (from: string, to: string) => {
+      if (library.collections.includes(to)) throw new Error(`There is already a collection called "${to}".`);
+      library.collections = library.collections.map((c) => (c === from ? to : c));
+      for (const r of library.replays) if (r.collection === from) r.collection = to;
+      return { name: to };
+    },
+    deleteCollection: async (name: string) => {
+      library.collections = library.collections.filter((c) => c !== name);
+      for (const r of library.replays) if (r.collection === name) r.collection = null;
+      return { kept: false };
+    },
+    move: async (ids: string[], collection: string | null) => {
+      for (const r of library.replays) if (ids.includes(r.id)) r.collection = collection;
+      return listing();
+    },
     scanGame: async () => [],
-    revealArchive: async () => true,
+    revealLibrary: async () => true,
+    onLibrary: (cb: (e: unknown) => void) => {
+      // One background bake going, so the status line and the spinner show.
+      setTimeout(() => cb({ t: 'queue', done: 0, total: 2, current: 'preview-3' }), 300);
+      return () => {};
+    },
     // Serves the timeline the dev server was launched with, after a short
     // pause so the progress state in the sidebar is actually visible.
-    bake: async () => {
+    load: async () => {
       await new Promise((r) => setTimeout(r, 600));
-      const buf = await (await fetch('/__timeline')).arrayBuffer();
-      return { data: new Uint8Array(buf), summary: null };
+      return new Uint8Array(await (await fetch('/__timeline')).arrayBuffer());
     },
     cancelBake: async () => true,
     onProgress: (cb: (e: unknown) => void) => {
