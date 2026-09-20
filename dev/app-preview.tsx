@@ -151,7 +151,7 @@ const api = {
     install: async () => {},
     onStateChange: () => () => {},
   },
-  storage: { usage: async () => [], reveal: async () => true },
+  storage: { usage: async () => [], reveal: async () => true, revealLicenses: async () => true },
   settings: {
     get: async () => settings,
     save: async (s: Record<string, unknown>) => void Object.assign(settings, s),

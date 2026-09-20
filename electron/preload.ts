@@ -74,6 +74,8 @@ const api = {
   storage: {
     usage: () => call<{ path: string; bytes: number; files: number }[]>('storage:usage'),
     reveal: () => call<boolean>('storage:reveal'),
+    /** Opens the third-party notices file. False when it is not shipped. */
+    revealLicenses: () => call<boolean>('storage:revealLicenses'),
   },
   settings: {
     get: () => call<Record<string, unknown>>('settings:get'),

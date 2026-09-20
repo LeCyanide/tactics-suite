@@ -1549,11 +1549,20 @@ input[type='range']::-webkit-slider-thumb {
  * The rule down the left of a collection's children ties them to it, the way
  * a file browser does.
  */
+/*
+ * The list is the growing panel's flexible child, so it takes the height the
+ * panel was given and scrolls past it. Without this it shrank as a flex item
+ * while its rows kept their own height, and the rows spilled over the folder
+ * line below the list.
+ */
 .replay-tree {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  flex: 1 1 auto;
+  /* Keeps a drop target when there is nothing in the library yet. */
   min-height: 40px;
+  overflow-y: auto;
   border-radius: 3px;
 }
 .replay-folder {
@@ -1576,11 +1585,31 @@ input[type='range']::-webkit-slider-thumb {
 .row.stacked.unplayable .stacked-sub {
   opacity: 0.55;
 }
+/* The MIT notice in the About panel: shown in full, but not at the cost of the
+   panel's height. */
+.licence {
+  max-height: 120px;
+  overflow: auto;
+  margin: 8px 0 0;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--bg-1);
+  color: var(--fg-faint);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
 /* The library folder, under the list: where the files are, and a way to move them. */
 .replay-root {
   display: flex;
   gap: 8px;
-  margin-top: 10px;
+  flex: none;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--line);
   font-size: 10.5px;
 }
 .replay-root .link:first-child {
