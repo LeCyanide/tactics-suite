@@ -1,0 +1,36 @@
+WoWS Tactics Toolkit — third-party notices
+==========================================
+
+wows-toolkit
+------------
+
+The replay viewer add-on is built on landaire's wows-toolkit
+(https://github.com/landaire/wows-toolkit), used through the crates
+wows_replays, wowsunpack, wows_minimap_renderer, wows-battle-world and
+wows-replay-insights. Everything difficult about reading a replay is theirs:
+decrypting the file, parsing the packet stream, simulating the battle world,
+deciding what each side could see, and resolving all of it into draw commands.
+This app only takes those commands and draws them on its own map.
+
+Copyright 2026 Lander Brandt
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+Electron, Chromium and Node.js
+------------------------------
+
+The app runs on Electron, which carries its own notices in the install folder:
+LICENSE.electron.txt and LICENSES.chromium.html.
+
+
+World of Warships
+-----------------
+
+World of Warships is a trademark of Wargaming. This is an unofficial tool, not
+made by or endorsed by Wargaming. It reads the game's own files and replays on
+your machine and redistributes none of them.

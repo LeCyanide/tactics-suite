@@ -20,6 +20,7 @@ const IMAGE_FILTERS = [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'web
 const ICON_FILTERS = [{ name: 'Icons', extensions: ['png', 'svg', 'webp'] }];
 const SHIP_DATA_FILTERS = [{ name: 'Ship data', extensions: ['json', 'csv', 'yaml', 'yml'] }];
 const PLAN_FILTERS = [{ name: 'WoWS Plan', extensions: ['wowsplan'] }];
+const NOTICES = 'THIRD-PARTY-NOTICES.txt';
 const REPLAY_FILTERS = [{ name: 'World of Warships replay', extensions: ['wowsreplay'] }];
 
 function mimeFor(ext: string): string {
@@ -100,6 +101,24 @@ export function registerIpc(getWindow: GetWindow): void {
   handle('storage:reveal', () => {
     shell.openPath(db.storageRoot());
     return true;
+  });
+  /**
+   * The third-party notices, shipped beside the app. MIT asks that the notice
+   * travel with every copy, so it is a real file rather than only a string in
+   * the About panel.
+   */
+  handle('storage:revealLicenses', async () => {
+    const candidates = [
+      process.resourcesPath ? path.join(process.resourcesPath, 'licenses', NOTICES) : '',
+      path.join(app.getAppPath(), 'resources', 'licenses', NOTICES),
+    ].filter(Boolean);
+    for (const file of candidates) {
+      if (await fsp.stat(file).then(() => true, () => false)) {
+        await shell.openPath(file);
+        return true;
+      }
+    }
+    return false;
   });
 
   /* ---------------- settings ---------------- */

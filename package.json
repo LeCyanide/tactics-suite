@@ -46,6 +46,10 @@
       {
         "from": "seed",
         "to": "seed"
+      },
+      {
+        "from": "resources/licenses",
+        "to": "licenses"
       }
     ],
     "portable": {

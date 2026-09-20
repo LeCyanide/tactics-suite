@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Clipboard, HardDrive, ImageDown, Keyboard, RefreshCw } from 'lucide-react';
+import { Clipboard, HardDrive, ImageDown, Keyboard, RefreshCw, Scale } from 'lucide-react';
 import { getActivePage, useStore } from '@/state/store';
 import { Check, Field, Modal, NumInput, SectionLabel, Slider } from '../common/ui';
 import { canvasApi, DEFAULT_EXPORT, type ExportOptions } from '@/canvas/canvasBridge';
@@ -251,9 +251,51 @@ export function SettingsModal() {
           Electron {info?.electron} · Chromium {info?.chrome} · Node {info?.node}
         </div>
       </div>
+
+      <SectionLabel>Credits</SectionLabel>
+      <Credits />
+
+      <button className="btn sm" style={{ marginTop: 8 }} onClick={() => void window.api.storage.revealLicenses()}>
+        <Scale size={12} /> Open licence notices
+      </button>
     </Modal>
   );
 }
+
+/**
+ * Who else's work is in here.
+ *
+ * The replay viewer is not ours in any meaningful sense: decrypting replays,
+ * parsing the packet stream, simulating the battle and deciding what each side
+ * could see is all landaire's wows-toolkit, used through its draw-command seam.
+ * It is MIT, which asks that the copyright and permission notice travel with
+ * every copy — hence the notice below and the file shipped beside the app.
+ */
+function Credits() {
+  return (
+    <div className="faint" style={{ fontSize: 11.5, lineHeight: 1.7 }}>
+      The replay viewer is built on{' '}
+      <a className="link" href={TOOLKIT_URL} target="_blank" rel="noreferrer noopener">
+        wows-toolkit
+      </a>{' '}
+      by Lander Brandt (landaire), which does all of the real work of reading a replay: decrypting it, parsing the
+      packet stream, simulating the battle and resolving it into the draw commands this app renders on its own map.
+      Used under the MIT licence.
+      <pre className="licence">{TOOLKIT_LICENCE}</pre>
+    </div>
+  );
+}
+
+const TOOLKIT_URL = 'https://github.com/landaire/wows-toolkit';
+
+/** Verbatim, because MIT requires exactly that. */
+const TOOLKIT_LICENCE = `Copyright 2026 Lander Brandt
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.`;
 
 function describeUpdate(u: UpdateState): string {
   switch (u.status) {
