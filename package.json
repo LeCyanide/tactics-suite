@@ -58,7 +58,8 @@
     "publish": [
       {
         "provider": "generic",
-        "url": "https://updates.invalid/"
+        "url": "https://updates.invalid/",
+        "channel": "latest"
       }
     ]
   },
