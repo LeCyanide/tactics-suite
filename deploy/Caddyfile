@@ -1,3 +1,9 @@
+# Anything else served from this box drops a file in here. This line exists
+# because setup-vps.sh overwrites this Caddyfile every time it runs, so a
+# second service configured by hand would be silently dropped on the next
+# update-server re-run.
+import /etc/caddy/conf.d/*.caddy
+
 # Update server for WoWS Tactics Toolkit.
 #
 # Serves the release folder over HTTPS (certificate handled by Caddy) to
