@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Clipboard, HardDrive, ImageDown, Keyboard, RefreshCw, Scale } from 'lucide-react';
+import { Clipboard, HardDrive, ImageDown, Keyboard, RefreshCw, Scale, Send } from 'lucide-react';
 import { getActivePage, useStore } from '@/state/store';
-import { Check, Field, Modal, NumInput, SectionLabel, Slider } from '../common/ui';
+import { Check, Field, Modal, NumInput, SectionLabel, Slider, Tip } from '../common/ui';
 import { canvasApi, DEFAULT_EXPORT, type ExportOptions } from '@/canvas/canvasBridge';
 import { SHORTCUT_REFERENCE } from '@/state/shortcuts';
 import { formatBytes } from '@/lib/util';
@@ -18,12 +18,15 @@ const RESOLUTIONS = [1280, 1920, 2560, 3840, 5120];
 export function ExportModal() {
   const page = useStore(getActivePage);
   const project = useStore((s) => s.project);
+  const discord = useStore((st) => st.settings);
   const s = () => useStore.getState();
   const [opts, setOpts] = useState<ExportOptions>(DEFAULT_EXPORT);
   const [busy, setBusy] = useState(false);
 
   if (!page || !project) return null;
   const patch = (p: Partial<ExportOptions>) => setOpts((o) => ({ ...o, ...p }));
+  const shareReady =
+    discord.discordUrl.trim() !== '' && discord.discordToken.trim() !== '' && discord.discordChannel.trim() !== '';
 
   const run = async (toClipboard: boolean) => {
     setBusy(true);
@@ -48,6 +51,38 @@ export function ExportModal() {
     }
   };
 
+  /**
+   * The bot cannot read this machine's projects, so sharing is a push: render
+   * the page here and hand the image to the bot's endpoint.
+   */
+  const share = async () => {
+    setBusy(true);
+    try {
+      // Discord re-encodes anything it shows anyway, and a 5120px map makes a
+      // file nobody can load on a phone.
+      const image = await canvasApi()?.exportImage({ ...opts, format: 'png', width: Math.min(opts.width, 2560) });
+      if (!image) {
+        s().toast('Export failed', 'error');
+        return;
+      }
+
+      const url = await window.api.discord.share({
+        url: discord.discordUrl,
+        token: discord.discordToken,
+        channelId: discord.discordChannel,
+        title: `${project.name} — ${page.name}`,
+        note: page.notes.trim() || undefined,
+        image,
+      });
+
+      s().toast(url ? 'Posted to Discord' : 'Posted', 'success');
+    } catch (err) {
+      s().toast(`Share failed: ${(err as Error).message}`, 'error');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const cat = (key: keyof ExportOptions, label: string) => (
     <Check label={label} checked={opts[key] as boolean} onChange={(v) => patch({ [key]: v } as Partial<ExportOptions>)} />
   );
@@ -65,6 +100,18 @@ export function ExportModal() {
           <button className="btn" disabled={busy} onClick={() => void run(true)}>
             <Clipboard size={13} /> Copy to clipboard
           </button>
+          <Tip
+            label={
+              shareReady
+                ? 'Post this page to the clan Discord'
+                : 'Set the bot URL, token and channel in Settings first'
+            }
+            side="top"
+          >
+            <button className="btn" disabled={busy || !shareReady} onClick={() => void share()}>
+              <Send size={13} /> Share to Discord
+            </button>
+          </Tip>
           <span className="spacer" />
           <button className="btn ghost" onClick={() => s().closeModal()}>
             Cancel
@@ -153,6 +200,37 @@ export function SettingsModal() {
           <option value="light">Light</option>
         </select>
       </Field>
+
+      <SectionLabel>Share to Discord</SectionLabel>
+      <Field label="Bot URL">
+        <input
+          type="text"
+          placeholder="https://bot.example.com"
+          value={settings.discordUrl}
+          onChange={(e) => s().patchSettings({ discordUrl: e.target.value })}
+        />
+      </Field>
+      <Field label="Token">
+        <input
+          type="password"
+          placeholder="from the bot's .env"
+          value={settings.discordToken}
+          onChange={(e) => s().patchSettings({ discordToken: e.target.value })}
+        />
+      </Field>
+      <Field label="Channel ID">
+        <input
+          type="text"
+          placeholder="right-click a channel, Copy Channel ID"
+          value={settings.discordChannel}
+          onChange={(e) => s().patchSettings({ discordChannel: e.target.value })}
+        />
+      </Field>
+      <div className="faint" style={{ fontSize: 11, marginTop: 8, lineHeight: 1.5 }}>
+        Fills in the Share to Discord button on the export dialog. The bot never reads anything from this machine — the
+        app sends it the rendered image. The token is stored with the rest of your settings, so treat this machine as
+        you would the bot itself.
+      </div>
 
       <SectionLabel>Editor</SectionLabel>
       {project && (

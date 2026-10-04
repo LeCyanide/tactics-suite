@@ -68,6 +68,49 @@ export function registerIpc(getWindow: GetWindow): void {
     });
   };
 
+  /* ---------------- discord ---------------- */
+
+  /**
+   * Push a rendered page to the bot's plan endpoint.
+   *
+   * The bot runs on a server and cannot reach the project store on this
+   * machine, so sharing is a push from here rather than a fetch from there.
+   */
+  handle(
+    'discord:share',
+    async (opts: {
+      url: string;
+      token: string;
+      channelId: string;
+      title: string;
+      note?: string;
+      image: string;
+    }) => {
+      const base = opts.url.trim().replace(/\/+$/, '');
+      if (!/^https?:\/\//.test(base)) throw new Error('The bot URL must start with http:// or https://');
+
+      const response = await fetch(`${base}/plan`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', authorization: `Bearer ${opts.token}` },
+        body: JSON.stringify({
+          channelId: opts.channelId,
+          title: opts.title,
+          note: opts.note,
+          image: opts.image,
+        }),
+        signal: AbortSignal.timeout(30_000),
+      });
+
+      const body = (await response.json().catch(() => ({}))) as { url?: string; error?: string };
+
+      if (!response.ok) {
+        throw new Error(body.error ?? `the bot answered ${response.status}`);
+      }
+
+      return body.url ?? null;
+    },
+  );
+
   /* ---------------- window ---------------- */
 
   ipcMain.on('window:minimize', () => getWindow()?.minimize());
