@@ -117,6 +117,10 @@ const api = {
     remove: (id: string) => call<any[]>('icon:delete', id),
     dataUrl: (file: string, mime: string) => call<AssetResult>('icon:dataUrl', file, mime),
   },
+  discord: {
+    share: (opts: { url: string; token: string; channelId: string; title: string; note?: string; image: string }) =>
+      call<string | null>('discord:share', opts),
+  },
   exporter: {
     image: (dataUrl: string, name: string, ext: string) => call<string | null>('export:image', dataUrl, name, ext),
     text: (text: string, name: string, ext: string) => call<string | null>('export:text', text, name, ext),
