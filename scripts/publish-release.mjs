@@ -3,6 +3,14 @@
  *
  *   npm run dist && npm run release
  *
+ * Once the manifests are live it announces the release in Discord, if
+ * BOT_URL, BOT_TOKEN and BOT_CHANNEL are set. The notes come from the commit
+ * subjects since the previous tag, which already read as release notes.
+ *
+ *   --no-announce          upload without posting
+ *   --announce-only        post without uploading, for a retry
+ *   --notes-file <path>    one note per line, instead of the commit log
+ *
  * Installers go up first and the manifests last, each manifest under a temp
  * name and then renamed, so a client checking mid-upload never sees a version
  * whose files are not there yet. Once the new manifests are live, releases
@@ -44,9 +52,70 @@ function capture(cmd, args) {
   return res.stdout;
 }
 
+const args = process.argv.slice(2);
+const has = (flag) => args.includes(flag);
+const arg = (flag) => {
+  const at = args.indexOf(flag);
+  return at >= 0 ? args[at + 1] : undefined;
+};
+
 const env = { ...readEnv(path.join(root, '.env.release')), ...process.env };
 for (const key of ['VPS_SSH', 'VPS_DIR', 'UPDATE_URL', 'UPDATE_TOKEN']) {
   if (!env[key]) throw new Error(`${key} is not set in .env.release`);
+}
+
+
+/* ------------------------------------------------------------------ */
+/* Announcing                                                          */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Commit subjects since the previous tag. They are written as release notes
+ * already ("Name the replay in the title bar"), so there is no changelog file
+ * to keep in step with the code.
+ */
+function notesFromGit(version) {
+  const tags = capture('git', ['tag', '--sort=-creatordate']).split(/\r?\n/).filter(Boolean);
+  const previous = tags.find((tag) => tag !== `v${version}`);
+  const range = previous ? `${previous}..HEAD` : 'HEAD';
+
+  return capture('git', ['log', '--no-merges', '--format=%s', range])
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .filter((line) => !/^release\b/i.test(line));
+}
+
+async function announce(version) {
+  for (const key of ['BOT_URL', 'BOT_TOKEN', 'BOT_CHANNEL']) {
+    if (!env[key]) {
+      console.log(`Not announcing: ${key} is not set in .env.release.`);
+      return;
+    }
+  }
+
+  const notesFile = arg('--notes-file');
+  const notes = notesFile
+    ? fs.readFileSync(notesFile, 'utf8').split(/\r?\n/).map((l) => l.trim()).filter(Boolean)
+    : notesFromGit(version);
+
+  const base = env.BOT_URL.trim().replace(/\/+$/, '');
+
+  const response = await fetch(`${base}/release`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', authorization: `Bearer ${env.BOT_TOKEN}` },
+    body: JSON.stringify({ channelId: env.BOT_CHANNEL, version, notes, url: env.UPDATE_URL }),
+    signal: AbortSignal.timeout(30_000),
+  });
+
+  const body = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(body.error ?? `the bot answered ${response.status}`);
+  }
+
+  if (body.skipped) console.log(`${version} had already been announced.`);
+  else console.log(`Announced ${version} with ${notes.length} note(s): ${body.url ?? ''}`);
 }
 
 const { version } = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
@@ -65,6 +134,13 @@ if (!new RegExp(`^version: ${version.replace(/\./g, '\.')}$`, 'm').test(latest))
 const mainJs = fs.readFileSync(path.join(root, 'dist-electron', 'main.js'), 'utf8');
 if (!mainJs.includes(env.UPDATE_TOKEN) || !mainJs.includes(env.UPDATE_URL)) {
   throw new Error('dist-electron/main.js was built without the update URL/token from .env.release; rebuild.');
+}
+
+// Posting without uploading, for when the upload worked and the announcement
+// did not.
+if (has('--announce-only')) {
+  await announce(version);
+  process.exit(0);
 }
 
 const portableBytes = fs.readFileSync(path.join(releaseDir, portable));
@@ -97,3 +173,15 @@ if (stale.length) {
 console.log(`Server keeps ${previous ? `${version} and ${previous}` : version}.`);
 
 pruneLocalReleases(version);
+
+// Last, and never fatal: the download already works from the moment the
+// manifests landed, so a Discord outage must not fail a good release or stop
+// the server being tidied.
+if (!has('--no-announce')) {
+  try {
+    await announce(version);
+  } catch (err) {
+    console.error(`Release published, but announcing it failed: ${err.message}`);
+    console.error('Retry with:  npm run release -- --announce-only');
+  }
+}
