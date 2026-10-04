@@ -51,6 +51,7 @@ printf '[Service]\nEnvironmentFile=%s\n' "$ENV_FILE" > /etc/systemd/system/caddy
 if [[ -f /etc/caddy/Caddyfile ]] && ! cmp -s "$HERE/Caddyfile" /etc/caddy/Caddyfile; then
   cp /etc/caddy/Caddyfile "/etc/caddy/Caddyfile.bak-$(date +%s)"
 fi
+mkdir -p /etc/caddy/conf.d
 install -m 644 "$HERE/Caddyfile" /etc/caddy/Caddyfile
 
 if command -v ufw >/dev/null && ufw status | grep -q "Status: active"; then
