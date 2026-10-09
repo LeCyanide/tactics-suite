@@ -16,7 +16,7 @@ import /etc/caddy/conf.d/*.caddy
 	handle @authorized {
 		root * /srv/wows-updates
 		# Manifests must never be served stale; the installers are versioned.
-		@manifests path /latest.yml /portable.json
+		@manifests path /latest.yml /portable.json /patch-notes.json
 		header @manifests Cache-Control "no-store"
 		file_server
 	}
