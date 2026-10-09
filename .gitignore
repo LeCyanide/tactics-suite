@@ -16,6 +16,8 @@ Thumbs.db
 
 # Rust build output for the replay viewer sidecar
 sidecar/target/
+# landaire's wows-toolkit, fetched at a pinned commit by build-sidecar.mjs
+sidecar/vendor/
 resources/sidecar/
 .electron-builder.*.json
 dev/fixtures/

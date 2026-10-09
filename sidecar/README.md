@@ -12,7 +12,9 @@ frame and encodes an mp4, the sidecar writes the commands out structured, so the
 renderer can draw them on the planner's own map, in the planner's own
 coordinates, with the drawing tools still live.
 
-The toolkit crates come from crates.io, so this builds standalone. The encoder
+The toolkit crates come from a checkout of the toolkit pinned to one commit,
+which `scripts/build-sidecar.mjs` fetches into `vendor/`: a game patch can break
+replay parsing, and the fix is upstream well before it is on crates.io. The encoder
 features (`vulkan`, `cpu`, `cpu-av1`) are off: nothing is ever rasterized, so
 none of wgpu, openh264 or rav1e is linked.
 
@@ -43,7 +45,14 @@ wows-replay-sidecar bake --game <game dir> --replay <file.wowsreplay> \
     [--fps 10] [--out <file.wtreply>]
 ```
 
-`probe` prints JSON on stdout. `bake` writes the blob to `--out`, or stdout when
+```sh
+# The capture points a battle opens with. Reads only the burst of packets at
+# clock zero, so a training room abandoned after a few seconds is enough.
+# `scripts/import-cap-layouts.mjs --replays <dir>` is what calls this.
+wows-replay-sidecar caps --game <game dir> --replay <file.wowsreplay>
+```
+
+`probe` and `caps` print JSON on stdout. `bake` writes the blob to `--out`, or stdout when
 omitted. Progress, warnings and errors are newline-delimited JSON on stderr, so
 stdout stays a clean byte stream:
 
@@ -165,7 +174,12 @@ worth adding) and `BattleResultOverlay`.
 
 ## Building
 
-Requires a linker. This machine has no MSVC, so use the GNU toolchain:
+`npm run build:sidecar` fetches the pinned toolkit checkout, builds and stages
+the binary. To move to a newer upstream commit, change `TOOLKIT_REV` in
+`scripts/build-sidecar.mjs` and run it again.
+
+A bare cargo build works once that checkout exists. It requires a linker; this
+machine has no MSVC, so use the GNU toolchain:
 
 ```sh
 rustup run stable-x86_64-pc-windows-gnu cargo build --release

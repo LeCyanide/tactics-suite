@@ -10,14 +10,16 @@ name = "wows-replay-sidecar"
 path = "src/main.rs"
 
 [dependencies]
-# landaire's wows-toolkit crates, from crates.io. The encoder features
-# (vulkan/cpu/cpu-av1) are deliberately off: we never rasterize or encode
-# video, so none of wgpu/openh264/rav1e is linked.
-wows_minimap_renderer = { version = "0.39", default-features = false, features = ["rendering", "vfs", "arc"] }
-wows_replays = { version = "0.46", default-features = false, features = ["arc", "parsing", "vfs"] }
-wowsunpack = { version = "0.45", default-features = false, features = ["arc", "vfs-mmap", "json", "parsing"] }
-wows-battle-world = { version = "0.13", default-features = false, features = ["vfs"] }
-wows-replay-insights = { version = "0.13", default-features = false, features = ["build", "arc"] }
+# landaire's wows-toolkit crates, from a checkout pinned to one upstream commit
+# by scripts/build-sidecar.mjs (see TOOLKIT_REV there for why not crates.io);
+# run that script, or its ensureToolkit step, before a bare `cargo build`. The
+# encoder features (vulkan/cpu/cpu-av1) are deliberately off: we never
+# rasterize or encode video, so none of wgpu/openh264/rav1e is linked.
+wows_minimap_renderer = { path = "vendor/wows-toolkit/crates/minimap-renderer", default-features = false, features = ["rendering", "vfs", "arc"] }
+wows_replays = { path = "vendor/wows-toolkit/crates/wows-replays", default-features = false, features = ["arc", "parsing", "vfs"] }
+wowsunpack = { path = "vendor/wows-toolkit/crates/wowsunpack", default-features = false, features = ["arc", "vfs-mmap", "json", "parsing"] }
+wows-battle-world = { path = "vendor/wows-toolkit/crates/wows-battle-world", default-features = false, features = ["vfs"] }
+wows-replay-insights = { path = "vendor/wows-toolkit/crates/wows-replay-insights", default-features = false, features = ["build", "arc"] }
 # Ship names live in the game's gettext catalog; without it the renderer emits
 # no ship_name at all.
 gettext = "0.4"

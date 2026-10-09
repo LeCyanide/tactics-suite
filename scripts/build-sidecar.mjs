@@ -37,10 +37,53 @@ export function clearStagedSidecar() {
   fs.rmSync(stageDir, { recursive: true, force: true });
 }
 
+/**
+ * landaire's wows-toolkit, at the commit the sidecar is built against.
+ *
+ * The crates are published to crates.io, but a game patch can break replay
+ * parsing and the fix lands upstream days before a release does — 15.9 moved
+ * the roster packet's fields and left every ship without a name. So the
+ * sidecar builds from a checkout pinned here instead.
+ *
+ * It is a sparse checkout made with git itself rather than a cargo git
+ * dependency: the repository carries a Buck prelude whose paths run past
+ * Windows' 260 characters, and cargo's own checkout fails on them.
+ */
+const TOOLKIT_REPO = 'https://github.com/landaire/wows-toolkit';
+const TOOLKIT_REV = '1c1ef3ed37b39924322b7a9c6ce1812b48e536fc';
+const toolkitDir = path.join(crateDir, 'vendor', 'wows-toolkit');
+
+function git(args, cwd) {
+  const res = spawnSync('git', args, { cwd, encoding: 'utf8' });
+  if (res.error?.code === 'ENOENT') throw new Error('git is not on PATH; it is needed to fetch wows-toolkit.');
+  if (res.status !== 0) throw new Error(`git ${args.join(' ')} failed: ${(res.stderr ?? '').trim()}`);
+  return res.stdout.trim();
+}
+
+/** Puts the pinned toolkit checkout in place; a no-op once it is there. */
+export function ensureToolkit() {
+  if (!fs.existsSync(path.join(toolkitDir, '.git'))) {
+    console.log(`[sidecar] fetching wows-toolkit ${TOOLKIT_REV.slice(0, 8)}`);
+    fs.mkdirSync(path.dirname(toolkitDir), { recursive: true });
+    git(['clone', '--filter=blob:none', '--no-checkout', '--sparse', TOOLKIT_REPO, toolkitDir]);
+    git(['sparse-checkout', 'set', 'crates', 'build-support'], toolkitDir);
+  }
+  if (git(['rev-parse', 'HEAD'], toolkitDir) === TOOLKIT_REV) return;
+  console.log(`[sidecar] moving wows-toolkit to ${TOOLKIT_REV.slice(0, 8)}`);
+  try {
+    git(['checkout', '--quiet', TOOLKIT_REV], toolkitDir);
+  } catch {
+    // The pin moved to a commit this clone has not seen yet.
+    git(['fetch', '--filter=blob:none', 'origin'], toolkitDir);
+    git(['checkout', '--quiet', TOOLKIT_REV], toolkitDir);
+  }
+}
+
 export function buildSidecar() {
   if (!fs.existsSync(path.join(crateDir, 'Cargo.toml'))) {
     throw new Error('sidecar/Cargo.toml is missing; nothing to build.');
   }
+  ensureToolkit();
 
   const toolchain =
     process.env.SIDECAR_TOOLCHAIN ?? (process.platform === 'win32' ? 'stable-x86_64-pc-windows-gnu' : '');

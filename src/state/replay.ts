@@ -137,6 +137,9 @@ let raf = 0;
 let lastTick = 0;
 let carry = 0;
 
+/** Replays already rebaked once this session for want of players; never twice. */
+const rebakedForPlayers = new Set<string>();
+
 export const useReplayStore = create<ReplayState>((set, get) => ({
   mode: 'tactics',
   status: null,
@@ -372,6 +375,17 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
         // so plainly if it is not.
         if (!(err instanceof TimelineFormatError)) throw err;
         timeline = new ReplayTimeline(await window.api.replay.load({ id, rebake: true }));
+      }
+      if (timeline.lacksPlayers && !rebakedForPlayers.has(id)) {
+        rebakedForPlayers.add(id);
+        // Baked before the sidecar could read this patch's roster. Worth one
+        // more bake while the build is installed; when it is not, or the bake
+        // fails, the nameless timeline is still better than none.
+        try {
+          timeline = new ReplayTimeline(await window.api.replay.load({ id, rebake: true }));
+        } catch {
+          /* keep what we have */
+        }
       }
       if (get().selectedId !== id) return;
       set({ timeline, frame: firstActiveFrame(timeline), bake: { phase: 'idle' } });
