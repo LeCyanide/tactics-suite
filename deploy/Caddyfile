@@ -4,7 +4,7 @@
 # update-server re-run.
 import /etc/caddy/conf.d/*.caddy
 
-# Update server for WoWS Tactics Toolkit.
+# Update server for WoWs Tactics Suite.
 #
 # Serves the release folder over HTTPS (certificate handled by Caddy) to
 # requests carrying the update token, and nothing to anyone else. Both values

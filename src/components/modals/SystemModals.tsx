@@ -323,7 +323,7 @@ export function SettingsModal() {
 
       <SectionLabel>About</SectionLabel>
       <div className="faint" style={{ fontSize: 11.5, lineHeight: 1.7 }}>
-        WoWS Tactics Toolkit {info?.version ?? ''}
+        WoWs Tactics Suite {info?.version ?? ''}
         {TEST_BUILD_LABEL && <strong style={{ color: 'var(--warn)' }}> ({TEST_BUILD_LABEL})</strong>} — Awooga I don't know what I am doing. language versions below:
         <div className="mono" style={{ marginTop: 6, fontSize: 10.5 }}>
           Electron {info?.electron} · Chromium {info?.chrome} · Node {info?.node}

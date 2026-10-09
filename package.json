@@ -1,6 +1,6 @@
 {
-  "name": "wows-tactics-toolkit",
-  "productName": "WoWS Tactics Toolkit",
+  "name": "wows-tactics-suite",
+  "productName": "WoWs Tactics Suite",
   "version": "2.1.0",
   "description": "Offline tactical planning suite for World of Warships",
   "private": true,
@@ -21,7 +21,7 @@
   },
   "build": {
     "appId": "com.local.wowstacticstoolkit",
-    "productName": "WoWS Tactics Toolkit",
+    "productName": "WoWs Tactics Suite",
     "directories": {
       "output": "release"
     },
@@ -40,7 +40,7 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "artifactName": "WoWS-Tactics-Toolkit-Setup-${version}.${ext}"
+      "artifactName": "WoWs-Tactics-Suite-Setup-${version}.${ext}"
     },
     "extraResources": [
       {
@@ -53,7 +53,7 @@
       }
     ],
     "portable": {
-      "artifactName": "WoWS-Tactics-Toolkit-${version}.${ext}"
+      "artifactName": "WoWs-Tactics-Suite-${version}.${ext}"
     },
     "publish": [
       {
