@@ -215,7 +215,8 @@
     "concealmentAir_km": 3.16,
     "mainBatteryRange_km": 11.2,
     "torpedoRange_km": 15,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-joshua-humphreys",
@@ -227,7 +228,10 @@
     "concealmentAir_km": 3.37,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 16.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-kunming",
@@ -240,7 +244,10 @@
     "mainBatteryRange_km": 13.4,
     "torpedoRange_km": 13.5,
     "radar_km": 7.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-yamagiri",
@@ -252,7 +259,10 @@
     "concealmentAir_km": 3.16,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 20,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-zorkiy",
@@ -264,7 +274,10 @@
     "concealmentAir_km": 3.21,
     "mainBatteryRange_km": 12.3,
     "torpedoRange_km": 10,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-aki",
@@ -2005,7 +2018,8 @@
     "concealmentAir_km": 2.36,
     "mainBatteryRange_km": 12.7,
     "torpedoRange_km": 10,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-al-shimakaze",
@@ -2017,7 +2031,10 @@
     "concealmentAir_km": 2.74,
     "mainBatteryRange_km": 11.4,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-alberico-da-barbiano",
@@ -2028,7 +2045,10 @@
     "concealment_km": 7.96,
     "concealmentAir_km": 3.69,
     "mainBatteryRange_km": 11.4,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 45
   },
   {
     "id": "ship-alvaro-de-bazan",
@@ -2040,7 +2060,10 @@
     "concealmentAir_km": 3.46,
     "mainBatteryRange_km": 12.6,
     "torpedoRange_km": 13.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-attilio-regolo",
@@ -2052,7 +2075,10 @@
     "concealmentAir_km": 3.46,
     "mainBatteryRange_km": 9.6,
     "torpedoRange_km": 13.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 40
   },
   {
     "id": "ship-burrows",
@@ -2064,7 +2090,10 @@
     "concealmentAir_km": 3.47,
     "mainBatteryRange_km": 13.1,
     "torpedoRange_km": 10.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 200
   },
   {
     "id": "ship-cassard",
@@ -2076,7 +2105,8 @@
     "concealmentAir_km": 3.11,
     "mainBatteryRange_km": 12.6,
     "torpedoRange_km": 13.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-chateaurenault",
@@ -2088,7 +2118,8 @@
     "concealmentAir_km": 3.01,
     "mainBatteryRange_km": 12.4,
     "torpedoRange_km": 20,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "name": "Daring",
@@ -2105,8 +2136,8 @@
     "torpedoArc_deg": 40,
     "aaRange_km": 5.8,
     "hydro_km": 3,
-    "smokeDuration_s": 15,
-    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 10,
+    "smokeRadius_km": 0.6,
     "rudderShift_s": 4.2,
     "turningCircle_m": 620,
     "consumables": [
@@ -2125,7 +2156,8 @@
     ],
     "id": "ship-1c15c9e9-3b45-4b2e-b017-6a5b7d04dfa0",
     "iconId": null,
-    "concealmentAir_km": 2.8
+    "concealmentAir_km": 2.8,
+    "smoke": true
   },
   {
     "id": "ship-delny",
@@ -2137,7 +2169,10 @@
     "concealmentAir_km": 3.6,
     "mainBatteryRange_km": 13.1,
     "torpedoRange_km": 10,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-druid",
@@ -2149,7 +2184,10 @@
     "concealmentAir_km": 3.3,
     "mainBatteryRange_km": 12.1,
     "hydro_km": 3,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 10
   },
   {
     "id": "ship-elbing",
@@ -2161,7 +2199,10 @@
     "concealmentAir_km": 4.06,
     "mainBatteryRange_km": 13.3,
     "torpedoRange_km": 13.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-forrest-sherman",
@@ -2174,7 +2215,10 @@
     "mainBatteryRange_km": 12.6,
     "torpedoRange_km": 16.5,
     "hydro_km": 5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-fuyutsuki",
@@ -2186,7 +2230,10 @@
     "concealmentAir_km": 2.9,
     "mainBatteryRange_km": 12.4,
     "torpedoRange_km": 12,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 40
   },
   {
     "id": "ship-gdansk",
@@ -2199,7 +2246,10 @@
     "mainBatteryRange_km": 12,
     "torpedoRange_km": 10,
     "radar_km": 9,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "name": "Gearing",
@@ -2217,7 +2267,7 @@
     "torpedoes": "2 x 5 533 mm",
     "aaRange_km": 5,
     "hydro_km": 5,
-    "smokeDuration_s": 81,
+    "smokeDuration_s": 30,
     "smokeRadius_km": 0.45,
     "rudderShift_s": 4,
     "turningCircle_m": 640,
@@ -2234,7 +2284,8 @@
     ],
     "id": "ship-bc8bad68-6cff-4adb-808e-5a7073f3fa7f",
     "iconId": null,
-    "concealmentAir_km": 2.76
+    "concealmentAir_km": 2.76,
+    "smoke": true
   },
   {
     "id": "ship-georg-hoffmann",
@@ -2247,7 +2298,10 @@
     "mainBatteryRange_km": 11.2,
     "torpedoRange_km": 12,
     "hydro_km": 6,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-georg-hoffmann-golden",
@@ -2260,7 +2314,10 @@
     "mainBatteryRange_km": 11.2,
     "torpedoRange_km": 12,
     "hydro_km": 6,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "name": "Grozovoi",
@@ -2277,7 +2334,7 @@
     "torpedoArc_deg": 45,
     "aaRange_km": 5.8,
     "smokeDuration_s": 20,
-    "smokeRadius_km": 0.6,
+    "smokeRadius_km": 0.45,
     "rudderShift_s": 5.5,
     "turningCircle_m": 700,
     "consumables": [
@@ -2293,7 +2350,8 @@
     ],
     "id": "ship-40deca51-f559-44c6-8eb2-afe90f2531e7",
     "iconId": null,
-    "concealmentAir_km": 3.09
+    "concealmentAir_km": 3.09,
+    "smoke": true
   },
   {
     "id": "ship-halland",
@@ -2305,7 +2363,8 @@
     "concealmentAir_km": 2.74,
     "mainBatteryRange_km": 10.5,
     "torpedoRange_km": 15,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-harugumo",
@@ -2317,7 +2376,10 @@
     "concealmentAir_km": 3.39,
     "mainBatteryRange_km": 12.6,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-hayate",
@@ -2329,7 +2391,10 @@
     "concealmentAir_km": 3.06,
     "mainBatteryRange_km": 11.6,
     "torpedoRange_km": 12,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-hull",
@@ -2341,7 +2406,8 @@
     "concealmentAir_km": 3.11,
     "mainBatteryRange_km": 12.3,
     "torpedoRange_km": 16.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-khabarovsk",
@@ -2353,7 +2419,10 @@
     "concealmentAir_km": 3.21,
     "mainBatteryRange_km": 11.2,
     "torpedoRange_km": 6,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-kleber",
@@ -2365,7 +2434,8 @@
     "concealmentAir_km": 4.36,
     "mainBatteryRange_km": 13.6,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-kleber-clr",
@@ -2377,7 +2447,8 @@
     "concealmentAir_km": 4.36,
     "mainBatteryRange_km": 13.6,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-la-pampa",
@@ -2389,7 +2460,10 @@
     "concealmentAir_km": 2.85,
     "mainBatteryRange_km": 12.3,
     "torpedoRange_km": 10.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-laffey",
@@ -2401,7 +2475,10 @@
     "concealmentAir_km": 2.96,
     "mainBatteryRange_km": 12.4,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 80
   },
   {
     "id": "ship-lushun",
@@ -2414,7 +2491,8 @@
     "mainBatteryRange_km": 12.8,
     "torpedoRange_km": 11,
     "hydro_km": 5.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-lushun-b",
@@ -2427,7 +2505,8 @@
     "mainBatteryRange_km": 12.8,
     "torpedoRange_km": 11,
     "hydro_km": 5.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-marceau",
@@ -2439,7 +2518,8 @@
     "concealmentAir_km": 3.92,
     "mainBatteryRange_km": 11.5,
     "torpedoRange_km": 9,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-ovasen",
@@ -2452,7 +2532,8 @@
     "mainBatteryRange_km": 11.5,
     "torpedoRange_km": 12,
     "radar_km": 7.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-ragnar",
@@ -2464,7 +2545,8 @@
     "concealmentAir_km": 3.82,
     "mainBatteryRange_km": 13,
     "radar_km": 7.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-sharqi",
@@ -2477,7 +2559,10 @@
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 10.5,
     "hydro_km": 6,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "name": "Shimakaze",
@@ -2494,7 +2579,7 @@
     "torpedoArc_deg": 45,
     "torpedoes": "3 x 5 610 mm",
     "aaRange_km": 4.6,
-    "smokeDuration_s": 30,
+    "smokeDuration_s": 20,
     "smokeRadius_km": 0.45,
     "rudderShift_s": 4.4,
     "turningCircle_m": 700,
@@ -2511,7 +2596,8 @@
     ],
     "id": "ship-eb805d76-af60-4ea1-853e-8b068e9c4582",
     "iconId": null,
-    "concealmentAir_km": 2.74
+    "concealmentAir_km": 2.74,
+    "smoke": true
   },
   {
     "id": "ship-smaland",
@@ -2524,7 +2610,8 @@
     "mainBatteryRange_km": 11.5,
     "torpedoRange_km": 12,
     "radar_km": 7.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-somers",
@@ -2536,7 +2623,10 @@
     "concealmentAir_km": 2.53,
     "mainBatteryRange_km": 11.7,
     "torpedoRange_km": 16.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-tromp",
@@ -2550,7 +2640,8 @@
     "torpedoRange_km": 12,
     "airstrikeMinRange_km": 1.5,
     "airstrikeMaxRange_km": 12,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-vampire-ii",
@@ -2563,7 +2654,10 @@
     "mainBatteryRange_km": 12.8,
     "torpedoRange_km": 12,
     "hydro_km": 5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 102
   },
   {
     "id": "ship-yueyang",
@@ -2576,7 +2670,10 @@
     "mainBatteryRange_km": 11.9,
     "torpedoRange_km": 13.5,
     "radar_km": 7.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-z-42",
@@ -2589,7 +2686,10 @@
     "mainBatteryRange_km": 12.6,
     "torpedoRange_km": 10,
     "hydro_km": 6,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 10
   },
   {
     "id": "ship-z-52",
@@ -2602,7 +2702,10 @@
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 10.5,
     "hydro_km": 6,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-archerfish",
@@ -4265,7 +4368,10 @@
     "concealmentAir_km": 3.36,
     "mainBatteryRange_km": 9.5,
     "torpedoRange_km": 12,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 40
   },
   {
     "id": "ship-al-tashkent",
@@ -4277,7 +4383,10 @@
     "concealmentAir_km": 3.48,
     "mainBatteryRange_km": 12.7,
     "torpedoRange_km": 10,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-barfleur",
@@ -4289,7 +4398,10 @@
     "concealmentAir_km": 2.71,
     "mainBatteryRange_km": 11.6,
     "torpedoRange_km": 12,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-benham",
@@ -4301,7 +4413,10 @@
     "concealmentAir_km": 2.32,
     "mainBatteryRange_km": 12.6,
     "torpedoRange_km": 10.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-black",
@@ -4314,7 +4429,10 @@
     "mainBatteryRange_km": 12.9,
     "torpedoRange_km": 13.7,
     "radar_km": 7.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-black-b",
@@ -4327,7 +4445,10 @@
     "mainBatteryRange_km": 12.9,
     "torpedoRange_km": 13.7,
     "radar_km": 7.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-byskawica-52",
@@ -4340,7 +4461,8 @@
     "mainBatteryRange_km": 12.7,
     "torpedoRange_km": 10.5,
     "radar_km": 9,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-cayuga",
@@ -4352,7 +4474,10 @@
     "concealmentAir_km": 2.88,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 10,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 250
   },
   {
     "id": "ship-christopher",
@@ -4364,7 +4489,10 @@
     "concealmentAir_km": 3.3,
     "mainBatteryRange_km": 12.8,
     "torpedoRange_km": 10,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 180
   },
   {
     "id": "ship-chung-mu",
@@ -4377,7 +4505,10 @@
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 10.5,
     "radar_km": 7.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-felix-schultz",
@@ -4389,7 +4520,10 @@
     "concealmentAir_km": 3.38,
     "mainBatteryRange_km": 12.6,
     "torpedoRange_km": 12,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-fletcher",
@@ -4401,7 +4535,10 @@
     "concealmentAir_km": 2.62,
     "mainBatteryRange_km": 12.9,
     "torpedoRange_km": 10.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-friesland",
@@ -4413,7 +4550,10 @@
     "concealmentAir_km": 2.35,
     "mainBatteryRange_km": 12.4,
     "hydro_km": 5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-gq-johnny",
@@ -4425,7 +4565,10 @@
     "concealmentAir_km": 2.65,
     "mainBatteryRange_km": 12.5,
     "torpedoRange_km": 13.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-groningen",
@@ -4437,7 +4580,10 @@
     "concealmentAir_km": 2.35,
     "mainBatteryRange_km": 12.4,
     "hydro_km": 5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-halford",
@@ -4449,7 +4595,10 @@
     "concealmentAir_km": 2.76,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 13.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-jager",
@@ -4461,7 +4610,8 @@
     "concealmentAir_km": 2.8,
     "mainBatteryRange_km": 9.5,
     "torpedoRange_km": 12,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-johnston",
@@ -4473,7 +4623,10 @@
     "concealmentAir_km": 2.65,
     "mainBatteryRange_km": 12.5,
     "torpedoRange_km": 13.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-jutland",
@@ -4486,7 +4639,10 @@
     "mainBatteryRange_km": 12.5,
     "torpedoRange_km": 10,
     "hydro_km": 3,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 10
   },
   {
     "id": "ship-kitakaze",
@@ -4498,7 +4654,10 @@
     "concealmentAir_km": 2.96,
     "mainBatteryRange_km": 12.5,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-lambros-katsonis",
@@ -4511,7 +4670,10 @@
     "mainBatteryRange_km": 11.5,
     "torpedoRange_km": 9,
     "radar_km": 9,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-minegumo",
@@ -4523,7 +4685,10 @@
     "concealmentAir_km": 2.45,
     "mainBatteryRange_km": 11,
     "torpedoRange_km": 15,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-mogador",
@@ -4535,7 +4700,8 @@
     "concealmentAir_km": 3.72,
     "mainBatteryRange_km": 12.8,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-nanning",
@@ -4547,7 +4713,10 @@
     "concealmentAir_km": 3.11,
     "mainBatteryRange_km": 11.8,
     "torpedoRange_km": 12,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-neustrashimy",
@@ -4559,7 +4728,10 @@
     "concealmentAir_km": 2.43,
     "mainBatteryRange_km": 12.8,
     "torpedoRange_km": 10,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-neustrashimy-b",
@@ -4571,7 +4743,10 @@
     "concealmentAir_km": 2.43,
     "mainBatteryRange_km": 12.8,
     "torpedoRange_km": 10,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-nueva-esparta",
@@ -4583,7 +4758,8 @@
     "concealmentAir_km": 2.83,
     "mainBatteryRange_km": 12.4,
     "torpedoRange_km": 10,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-orage",
@@ -4595,7 +4771,8 @@
     "concealmentAir_km": 3.05,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 12,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-ostergotland",
@@ -4607,7 +4784,8 @@
     "concealmentAir_km": 2.66,
     "mainBatteryRange_km": 10.2,
     "torpedoRange_km": 13.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-paolo-emilio",
@@ -4619,7 +4797,10 @@
     "concealmentAir_km": 2.98,
     "mainBatteryRange_km": 11.3,
     "torpedoRange_km": 6,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.51,
+    "smokeDuration_s": 35
   },
   {
     "id": "ship-somme",
@@ -4632,7 +4813,10 @@
     "mainBatteryRange_km": 12.5,
     "torpedoRange_km": 10,
     "hydro_km": 3,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 10
   },
   {
     "id": "ship-star-kitakaze",
@@ -4644,7 +4828,10 @@
     "concealmentAir_km": 2.96,
     "mainBatteryRange_km": 12.5,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-tashkent",
@@ -4656,7 +4843,10 @@
     "concealmentAir_km": 3.48,
     "mainBatteryRange_km": 12.7,
     "torpedoRange_km": 10,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-udaloi",
@@ -4668,7 +4858,10 @@
     "concealmentAir_km": 2.62,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 10,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-velos",
@@ -4680,7 +4873,10 @@
     "concealmentAir_km": 2.72,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 10.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-yugumo",
@@ -4692,7 +4888,10 @@
     "concealmentAir_km": 2.53,
     "mainBatteryRange_km": 12,
     "torpedoRange_km": 12,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-z-44",
@@ -4704,7 +4903,10 @@
     "concealmentAir_km": 2.83,
     "mainBatteryRange_km": 11.1,
     "torpedoRange_km": 12,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-z-46",
@@ -4717,7 +4919,10 @@
     "mainBatteryRange_km": 11,
     "torpedoRange_km": 10,
     "hydro_km": 5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-zf-6",
@@ -4729,7 +4934,10 @@
     "concealmentAir_km": 2.59,
     "mainBatteryRange_km": 11.9,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-zf-6-golden",
@@ -4741,7 +4949,10 @@
     "concealmentAir_km": 2.59,
     "mainBatteryRange_km": 11.9,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-zh-1",
@@ -4756,7 +4967,10 @@
     "airstrikeMinRange_km": 0.5,
     "airstrikeMaxRange_km": 10,
     "hydro_km": 5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 10
   },
   {
     "id": "ship-al-bismarck",
@@ -6535,7 +6749,10 @@
     "concealmentAir_km": 2.88,
     "mainBatteryRange_km": 12.5,
     "torpedoRange_km": 10,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-al-yukikaze",
@@ -6547,7 +6764,10 @@
     "concealmentAir_km": 2.49,
     "mainBatteryRange_km": 9.4,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-asashio",
@@ -6559,7 +6779,10 @@
     "concealmentAir_km": 2.45,
     "mainBatteryRange_km": 11,
     "torpedoRange_km": 20,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-asashio-b",
@@ -6571,7 +6794,10 @@
     "concealmentAir_km": 2.45,
     "mainBatteryRange_km": 11,
     "torpedoRange_km": 20,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-benson",
@@ -6583,7 +6809,10 @@
     "concealmentAir_km": 2.33,
     "mainBatteryRange_km": 11.6,
     "torpedoRange_km": 9.2,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-byskawica-44",
@@ -6596,7 +6825,8 @@
     "mainBatteryRange_km": 11.5,
     "torpedoRange_km": 12,
     "hydro_km": 5,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-cossack",
@@ -6609,7 +6839,10 @@
     "mainBatteryRange_km": 11.9,
     "torpedoRange_km": 10,
     "hydro_km": 3,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 10
   },
   {
     "id": "ship-cossack-b",
@@ -6622,7 +6855,10 @@
     "mainBatteryRange_km": 11.9,
     "torpedoRange_km": 10,
     "hydro_km": 3,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 10
   },
   {
     "id": "ship-cuauhtemoc",
@@ -6634,7 +6870,8 @@
     "concealmentAir_km": 2.36,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-eskimo",
@@ -6646,7 +6883,10 @@
     "concealmentAir_km": 2.75,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 12,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-fenyang",
@@ -6658,7 +6898,10 @@
     "concealmentAir_km": 2.88,
     "mainBatteryRange_km": 12.5,
     "torpedoRange_km": 12,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-gustav-julius-maerker",
@@ -6670,7 +6913,10 @@
     "concealmentAir_km": 3.53,
     "mainBatteryRange_km": 11.9,
     "torpedoRange_km": 12,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-hoche",
@@ -6682,7 +6928,8 @@
     "concealmentAir_km": 3.02,
     "mainBatteryRange_km": 13,
     "torpedoRange_km": 9,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-hsf-harekaze",
@@ -6694,7 +6941,10 @@
     "concealmentAir_km": 2.49,
     "mainBatteryRange_km": 9.4,
     "torpedoRange_km": 10,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-hsf-harekaze-ii",
@@ -6707,7 +6957,10 @@
     "mainBatteryRange_km": 11.4,
     "torpedoRange_km": 10,
     "hydro_km": 5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-hsienyang",
@@ -6720,7 +6973,10 @@
     "mainBatteryRange_km": 12.5,
     "torpedoRange_km": 9.5,
     "radar_km": 7.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-kagero",
@@ -6732,7 +6988,10 @@
     "concealmentAir_km": 2.49,
     "mainBatteryRange_km": 9.4,
     "torpedoRange_km": 10,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-kidd",
@@ -6744,7 +7003,10 @@
     "concealmentAir_km": 2.66,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 9.2,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-kiev",
@@ -6756,7 +7018,10 @@
     "concealmentAir_km": 3.14,
     "mainBatteryRange_km": 12.3,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-l-aventurier",
@@ -6768,7 +7033,8 @@
     "concealmentAir_km": 2.64,
     "mainBatteryRange_km": 12,
     "torpedoRange_km": 11,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-le-fantasque",
@@ -6780,7 +7046,8 @@
     "concealmentAir_km": 3.34,
     "mainBatteryRange_km": 13,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-le-terrible",
@@ -6792,7 +7059,8 @@
     "concealmentAir_km": 2.97,
     "mainBatteryRange_km": 12.3,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-lightning",
@@ -6805,7 +7073,10 @@
     "mainBatteryRange_km": 12.2,
     "torpedoRange_km": 8,
     "hydro_km": 3,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 10
   },
   {
     "id": "ship-loyang",
@@ -6818,7 +7089,10 @@
     "mainBatteryRange_km": 11.6,
     "torpedoRange_km": 6.7,
     "hydro_km": 5.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-loyang-b",
@@ -6831,7 +7105,10 @@
     "mainBatteryRange_km": 11.6,
     "torpedoRange_km": 6.7,
     "hydro_km": 5.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-ognevoi",
@@ -6843,7 +7120,10 @@
     "concealmentAir_km": 2.45,
     "mainBatteryRange_km": 12,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-oland",
@@ -6855,7 +7135,8 @@
     "concealmentAir_km": 2.59,
     "mainBatteryRange_km": 10.1,
     "torpedoRange_km": 12,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-orkan",
@@ -6868,7 +7149,8 @@
     "mainBatteryRange_km": 11.6,
     "torpedoRange_km": 12,
     "radar_km": 7.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-osborne",
@@ -6880,7 +7162,10 @@
     "concealmentAir_km": 2.81,
     "mainBatteryRange_km": 12.5,
     "torpedoRange_km": 9,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 160
   },
   {
     "id": "ship-provorny",
@@ -6892,7 +7177,8 @@
     "concealmentAir_km": 3.22,
     "mainBatteryRange_km": 11.6,
     "torpedoRange_km": 10,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-shigure",
@@ -6904,7 +7190,10 @@
     "concealmentAir_km": 2.25,
     "mainBatteryRange_km": 11.3,
     "torpedoRange_km": 10,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-ship-smasha",
@@ -6916,7 +7205,10 @@
     "concealmentAir_km": 2.88,
     "mainBatteryRange_km": 12.5,
     "torpedoRange_km": 12,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-siliwangi",
@@ -6929,7 +7221,10 @@
     "mainBatteryRange_km": 12.5,
     "torpedoRange_km": 10,
     "hydro_km": 5.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-split",
@@ -6942,7 +7237,10 @@
     "mainBatteryRange_km": 11.3,
     "torpedoRange_km": 8.5,
     "radar_km": 9,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-vittorio-cuniberti",
@@ -6954,7 +7252,10 @@
     "concealmentAir_km": 2.58,
     "mainBatteryRange_km": 8.6,
     "torpedoRange_km": 12,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 25
   },
   {
     "id": "ship-z-23",
@@ -6967,7 +7268,10 @@
     "mainBatteryRange_km": 10.8,
     "torpedoRange_km": 9.5,
     "hydro_km": 5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-z-35",
@@ -6980,7 +7284,10 @@
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 6,
     "hydro_km": 5.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 10
   },
   {
     "id": "ship-zhu-que",
@@ -6992,7 +7299,10 @@
     "concealmentAir_km": 2.66,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 9.2,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-alliance",
@@ -8123,7 +8433,10 @@
     "concealmentAir_km": 2.72,
     "mainBatteryRange_km": 10.4,
     "torpedoRange_km": 10,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-byskawica",
@@ -8135,7 +8448,10 @@
     "concealmentAir_km": 2.76,
     "mainBatteryRange_km": 12,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-fr25",
@@ -8147,7 +8463,10 @@
     "concealmentAir_km": 3.21,
     "mainBatteryRange_km": 12.7,
     "torpedoRange_km": 7,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-gadjah-mada",
@@ -8159,7 +8478,10 @@
     "concealmentAir_km": 2.61,
     "mainBatteryRange_km": 11.9,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-grom",
@@ -8171,7 +8493,10 @@
     "concealmentAir_km": 2.92,
     "mainBatteryRange_km": 10.9,
     "torpedoRange_km": 7.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-haida",
@@ -8184,7 +8509,10 @@
     "mainBatteryRange_km": 12.3,
     "torpedoRange_km": 8,
     "hydro_km": 3.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 102
   },
   {
     "id": "ship-hughes",
@@ -8196,7 +8524,10 @@
     "concealmentAir_km": 2.55,
     "mainBatteryRange_km": 12.3,
     "torpedoRange_km": 9.2,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 140
   },
   {
     "id": "ship-huron",
@@ -8209,7 +8540,8 @@
     "mainBatteryRange_km": 12.3,
     "torpedoRange_km": 8,
     "hydro_km": 4,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-jervis",
@@ -8222,7 +8554,10 @@
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 7,
     "hydro_km": 3,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 10
   },
   {
     "id": "ship-jupiter-42",
@@ -8235,7 +8570,10 @@
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 7,
     "hydro_km": 3,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 10
   },
   {
     "id": "ship-le-hardi",
@@ -8247,7 +8585,8 @@
     "concealmentAir_km": 2.97,
     "mainBatteryRange_km": 12,
     "torpedoRange_km": 10,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-leberecht-maass",
@@ -8260,7 +8599,10 @@
     "mainBatteryRange_km": 10.8,
     "torpedoRange_km": 8.5,
     "hydro_km": 4,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-leningrad",
@@ -8272,7 +8614,10 @@
     "concealmentAir_km": 3.11,
     "mainBatteryRange_km": 11.6,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-luca-tarigo",
@@ -8284,7 +8629,10 @@
     "concealmentAir_km": 2.84,
     "mainBatteryRange_km": 7.5,
     "torpedoRange_km": 10,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 25
   },
   {
     "id": "ship-mahan",
@@ -8296,7 +8644,10 @@
     "concealmentAir_km": 2.57,
     "mainBatteryRange_km": 11.7,
     "torpedoRange_km": 9.2,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-marcilio-dias",
@@ -8308,7 +8659,8 @@
     "concealmentAir_km": 2.48,
     "mainBatteryRange_km": 12,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-minsk",
@@ -8320,7 +8672,10 @@
     "concealmentAir_km": 3.11,
     "mainBatteryRange_km": 12.2,
     "torpedoRange_km": 7,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-scarlet-storm",
@@ -8332,7 +8687,10 @@
     "concealmentAir_km": 2.92,
     "mainBatteryRange_km": 10.9,
     "torpedoRange_km": 7.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-shiratsuyu",
@@ -8344,7 +8702,10 @@
     "concealmentAir_km": 2.5,
     "mainBatteryRange_km": 11,
     "torpedoRange_km": 10,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-sims",
@@ -8356,7 +8717,10 @@
     "concealmentAir_km": 2.64,
     "mainBatteryRange_km": 12.9,
     "torpedoRange_km": 10.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-sims-b",
@@ -8368,7 +8732,10 @@
     "concealmentAir_km": 2.64,
     "mainBatteryRange_km": 12.9,
     "torpedoRange_km": 10.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-skane",
@@ -8380,7 +8747,8 @@
     "concealmentAir_km": 2.92,
     "mainBatteryRange_km": 10.1,
     "torpedoRange_km": 12,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-stord-43",
@@ -8392,7 +8760,10 @@
     "concealmentAir_km": 3.05,
     "mainBatteryRange_km": 11.8,
     "torpedoRange_km": 10,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-tashkent-39",
@@ -8404,7 +8775,10 @@
     "concealmentAir_km": 3.65,
     "mainBatteryRange_km": 10.5,
     "torpedoRange_km": 10,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-vauquelin",
@@ -8416,7 +8790,8 @@
     "concealmentAir_km": 3.16,
     "mainBatteryRange_km": 13,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-yudachi",
@@ -8428,7 +8803,10 @@
     "concealmentAir_km": 2.71,
     "mainBatteryRange_km": 11.8,
     "torpedoRange_km": 15,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-z-31",
@@ -8440,7 +8818,10 @@
     "concealmentAir_km": 3.16,
     "mainBatteryRange_km": 11.5,
     "torpedoRange_km": 10,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-z-39",
@@ -8453,7 +8834,10 @@
     "mainBatteryRange_km": 11.8,
     "torpedoRange_km": 8.5,
     "hydro_km": 5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-andrea-doria",
@@ -9246,7 +9630,10 @@
     "concealmentAir_km": 3.13,
     "mainBatteryRange_km": 12.8,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-anshan",
@@ -9258,7 +9645,10 @@
     "concealmentAir_km": 2.59,
     "mainBatteryRange_km": 11.9,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-aviere",
@@ -9270,7 +9660,10 @@
     "concealmentAir_km": 2.64,
     "mainBatteryRange_km": 6.9,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 25
   },
   {
     "id": "ship-cervantes",
@@ -9282,7 +9675,8 @@
     "concealmentAir_km": 2.59,
     "mainBatteryRange_km": 11.7,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-duchaffault",
@@ -9294,7 +9688,8 @@
     "concealmentAir_km": 2.51,
     "mainBatteryRange_km": 11.4,
     "torpedoRange_km": 9,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-ernst-gaede",
@@ -9307,7 +9702,10 @@
     "mainBatteryRange_km": 10.9,
     "torpedoRange_km": 8,
     "hydro_km": 4,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-farragut",
@@ -9319,7 +9717,10 @@
     "concealmentAir_km": 2.47,
     "mainBatteryRange_km": 12.6,
     "torpedoRange_km": 6.4,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-fubuki",
@@ -9331,7 +9732,10 @@
     "concealmentAir_km": 2.69,
     "mainBatteryRange_km": 11.5,
     "torpedoRange_km": 10,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-fushun",
@@ -9343,7 +9747,10 @@
     "concealmentAir_km": 2.57,
     "mainBatteryRange_km": 11.9,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-gallant",
@@ -9355,7 +9762,10 @@
     "concealmentAir_km": 2.42,
     "mainBatteryRange_km": 10.2,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-gnevny",
@@ -9367,7 +9777,10 @@
     "concealmentAir_km": 2.59,
     "mainBatteryRange_km": 11.9,
     "torpedoRange_km": 7,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-guepard",
@@ -9379,7 +9792,8 @@
     "concealmentAir_km": 3.21,
     "mainBatteryRange_km": 13,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-hatsuharu",
@@ -9391,7 +9805,10 @@
     "concealmentAir_km": 2.53,
     "mainBatteryRange_km": 10.8,
     "torpedoRange_km": 10,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-icarus",
@@ -9404,7 +9821,10 @@
     "mainBatteryRange_km": 11.6,
     "torpedoRange_km": 7,
     "hydro_km": 3,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 10
   },
   {
     "id": "ship-jurua",
@@ -9416,7 +9836,10 @@
     "concealmentAir_km": 2.42,
     "mainBatteryRange_km": 10.2,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-karl-von-schonberg",
@@ -9428,7 +9851,8 @@
     "concealmentAir_km": 3.09,
     "mainBatteryRange_km": 11.9,
     "torpedoRange_km": 7.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-leone",
@@ -9440,7 +9864,10 @@
     "concealmentAir_km": 2.7,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 12,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-monaghan",
@@ -9452,7 +9879,10 @@
     "concealmentAir_km": 2.5,
     "mainBatteryRange_km": 12.5,
     "torpedoRange_km": 9.2,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-shinonome",
@@ -9464,7 +9894,10 @@
     "concealmentAir_km": 2.72,
     "mainBatteryRange_km": 9,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-shinonome-b",
@@ -9476,7 +9909,10 @@
     "concealmentAir_km": 2.72,
     "mainBatteryRange_km": 9,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-stord",
@@ -9488,7 +9924,10 @@
     "concealmentAir_km": 2.84,
     "mainBatteryRange_km": 11,
     "torpedoRange_km": 7.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-t-61",
@@ -9501,7 +9940,10 @@
     "mainBatteryRange_km": 11.6,
     "torpedoRange_km": 8,
     "hydro_km": 4,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-vasteras",
@@ -9513,7 +9955,8 @@
     "concealmentAir_km": 2.69,
     "mainBatteryRange_km": 9.9,
     "torpedoRange_km": 10,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-cachalot",
@@ -10184,7 +10627,10 @@
     "concealmentAir_km": 2.31,
     "mainBatteryRange_km": 11.1,
     "torpedoRange_km": 6,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 10
   },
   {
     "id": "ship-antioquia",
@@ -10196,7 +10642,8 @@
     "concealmentAir_km": 2.27,
     "mainBatteryRange_km": 11.2,
     "torpedoRange_km": 6,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-fujin",
@@ -10208,7 +10655,10 @@
     "concealmentAir_km": 2.25,
     "mainBatteryRange_km": 8.7,
     "torpedoRange_km": 7,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-gremyashchy",
@@ -10220,7 +10670,10 @@
     "concealmentAir_km": 2.59,
     "mainBatteryRange_km": 11.9,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-hill",
@@ -10232,7 +10685,10 @@
     "concealmentAir_km": 2.57,
     "mainBatteryRange_km": 11.4,
     "torpedoRange_km": 5.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-jaguar",
@@ -10244,7 +10700,8 @@
     "concealmentAir_km": 3.05,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 7.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-jianwei",
@@ -10256,7 +10713,10 @@
     "concealmentAir_km": 2.33,
     "mainBatteryRange_km": 10.9,
     "torpedoRange_km": 6.4,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-kalmar",
@@ -10268,7 +10728,8 @@
     "concealmentAir_km": 2.27,
     "mainBatteryRange_km": 9.7,
     "torpedoRange_km": 10,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-kamikaze",
@@ -10280,7 +10741,10 @@
     "concealmentAir_km": 2.25,
     "mainBatteryRange_km": 8.7,
     "torpedoRange_km": 7,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-kamikaze-r",
@@ -10292,7 +10756,10 @@
     "concealmentAir_km": 2.25,
     "mainBatteryRange_km": 8.7,
     "torpedoRange_km": 7,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-l-adroit",
@@ -10304,7 +10771,8 @@
     "concealmentAir_km": 2.43,
     "mainBatteryRange_km": 11.2,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-maestrale",
@@ -10316,7 +10784,10 @@
     "concealmentAir_km": 2.58,
     "mainBatteryRange_km": 6.8,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 25
   },
   {
     "id": "ship-minekaze",
@@ -10328,7 +10799,10 @@
     "concealmentAir_km": 2.25,
     "mainBatteryRange_km": 8.9,
     "torpedoRange_km": 7,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-muavenet",
@@ -10340,7 +10814,10 @@
     "concealmentAir_km": 2.43,
     "mainBatteryRange_km": 10.5,
     "torpedoRange_km": 7,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-mutsuki",
@@ -10352,7 +10829,10 @@
     "concealmentAir_km": 2.25,
     "mainBatteryRange_km": 8.9,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-nicholas",
@@ -10364,7 +10844,10 @@
     "concealmentAir_km": 2.21,
     "mainBatteryRange_km": 10.9,
     "torpedoRange_km": 5.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30
   },
   {
     "id": "ship-okhotnik",
@@ -10376,7 +10859,10 @@
     "concealmentAir_km": 3.13,
     "mainBatteryRange_km": 9.2,
     "torpedoRange_km": 4.5,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-podvoisky",
@@ -10388,7 +10874,10 @@
     "concealmentAir_km": 2.89,
     "mainBatteryRange_km": 10.5,
     "torpedoRange_km": 6,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-siroco",
@@ -10400,7 +10889,8 @@
     "concealmentAir_km": 2.43,
     "mainBatteryRange_km": 11.8,
     "torpedoRange_km": 7,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   },
   {
     "id": "ship-t-22",
@@ -10413,7 +10903,10 @@
     "mainBatteryRange_km": 10,
     "torpedoRange_km": 7.5,
     "hydro_km": 4,
-    "iconId": null
+    "iconId": null,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20
   },
   {
     "id": "ship-visby",
@@ -10425,6 +10918,7 @@
     "concealmentAir_km": 2.38,
     "mainBatteryRange_km": 9.5,
     "torpedoRange_km": 8,
-    "iconId": null
+    "iconId": null,
+    "smoke": false
   }
 ]
