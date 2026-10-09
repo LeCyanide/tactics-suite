@@ -78,7 +78,8 @@ function publishNotes() {
     env.VPS_SSH,
     `cd '${env.VPS_DIR}' && chmod g+r,o-rwx ${PUBLISHED_NAME}.tmp && mv -f ${PUBLISHED_NAME}.tmp ${PUBLISHED_NAME}`,
   ]);
-  console.log(`Published ${notes.notes.filter(Boolean).length} patch note(s) for ${version}.`);
+  const count = notes.sections.reduce((sum, section) => sum + section.notes.length, 0);
+  console.log(`Published ${count} patch note(s) for ${version} under ${notes.sections.map((s) => s.title).join(', ')}.`);
 }
 
 // The notes alone, for a typo found after the installers went out.

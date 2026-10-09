@@ -1,11 +1,13 @@
 # Patch notes
 
-One section per version, newest first, one note per list item. `npm run
-release` publishes the section for the version in `package.json`, and `/release`
-in Discord posts it. Write for the people using the app: what changed for them,
-not what changed in the code.
+One section per version, newest first. `npm run release` publishes the section
+for the version in `package.json`, and `/release` in Discord posts it. Write
+for the people using the app: what changed for them, not what changed in the
+code.
 
-A blank line between two items starts a new paragraph in the post.
+Under a version, each `###` heading becomes a header in the post and each list
+item under it one note. Use `### Changelog` for what is finished and
+`### In testing` for what is shipped but not settled.
 
 Collect notes under `## Unreleased` as work lands, and rename that heading to
 the version number when it is bumped.
@@ -13,6 +15,8 @@ the version number when it is bumped.
 ## Unreleased
 
 ## 2.1.0
+
+### Changelog
 
 - New: rulesets. Add one to a project to limit ships by tier and class, ban individual ships, cap a group ("max 2 of these") and set a team size
 - New: ship filter for radar and smoke
@@ -23,4 +27,6 @@ the version number when it is bumped.
 - Fixed: replay render display issues in 15.9
 - Fixed: switching pages no longer marks a saved project as unsaved
 
-- *In testing:* share a page straight to Discord from the export dialog
+### In testing
+
+- Share a page straight to Discord from the export dialog
