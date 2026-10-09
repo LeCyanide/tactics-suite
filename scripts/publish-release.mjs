@@ -78,7 +78,7 @@ function publishNotes() {
     env.VPS_SSH,
     `cd '${env.VPS_DIR}' && chmod g+r,o-rwx ${PUBLISHED_NAME}.tmp && mv -f ${PUBLISHED_NAME}.tmp ${PUBLISHED_NAME}`,
   ]);
-  console.log(`Published ${notes.notes.length} patch note(s) for ${version}.`);
+  console.log(`Published ${notes.notes.filter(Boolean).length} patch note(s) for ${version}.`);
 }
 
 // The notes alone, for a typo found after the installers went out.
