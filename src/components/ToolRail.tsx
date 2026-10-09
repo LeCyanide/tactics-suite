@@ -23,8 +23,8 @@ interface ToolDef {
 
 const GROUPS: ToolDef[][] = [
   [
-    { id: 'select', icon: MousePointer2, label: 'Select', shortcut: 'V' },
-    { id: 'marquee', icon: SquareDashed, label: 'Multi-select', shortcut: 'Shift+V' },
+    { id: 'select', icon: MousePointer2, label: 'Select — one object: move, rotate, resize', shortcut: 'V' },
+    { id: 'marquee', icon: SquareDashed, label: 'Multi-select — box or click a group, drag to move it', shortcut: 'Shift+V' },
   ],
   [{ id: 'freehand', icon: Pencil, label: 'Freehand', shortcut: 'F' }],
   [
