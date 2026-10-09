@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url';
 
 import { parseShipData, serializeShips } from '../src/lib/shipImport';
 import { foldForSearch } from '../src/lib/util';
-import { allowedBy, filterShips, hasRadar, hasSmoke, type ShipFilter } from '../src/lib/shipFilters';
+import { allowedBy, filterShips, hasRadar, hasSmoke, inScope, limitUse, type ShipFilter } from '../src/lib/shipFilters';
 import { mergeKey, shipRangeKm } from '../src/state/store';
 import * as db from '../electron/storage/db';
 import { testReplayArchive } from './selftest-archive';
@@ -163,10 +163,25 @@ async function testShipFilters(): Promise<void> {
   check('filter: no smoke', names({ smoke: 'no' }) === 'Des Moines,Yamato', names({ smoke: 'no' }));
   check('filter: radar and smoke together', names({ radar: 'yes', smoke: 'yes' }) === 'Minotaur');
 
-  const open = { id: 'r', name: 'Open', tiers: [], classes: [], banned: [] };
+  const open = { id: 'r', name: 'Open', tiers: [], classes: [], banned: [], limits: [], maxShips: 0 };
   check('ruleset: an empty one allows everything', ships.every((s) => allowedBy(open, s)));
   const season = { ...open, tiers: [10], classes: ['CA' as const, 'DD' as const], banned: [named('Minotaur').id] };
   check('ruleset: tier, class and ban all apply', names({ ruleset: season }) === 'Des Moines,Shimakaze', names({ ruleset: season }));
+  check('ruleset: a banned ship is still in scope', inScope(season, named('Minotaur')) && !inScope(season, named('Kagero')));
+
+  const [mino, dm, shima] = ['Minotaur', 'Des Moines', 'Shimakaze'].map((n) => named(n).id);
+  const capped = {
+    ...open,
+    limits: [
+      { id: 'a', max: 2, ships: [mino, dm, shima] },
+      { id: 'b', max: 1, ships: [dm] },
+    ],
+  };
+  check('limit: a ship no limit names has none', limitUse(capped, named('Yamato').id, [mino, dm]) === null);
+  const twoPlaced = limitUse(capped, shima, [mino, mino, null, named('Yamato').id]);
+  check('limit: the same ship twice counts twice', twoPlaced?.used === 2 && twoPlaced.max === 2, twoPlaced);
+  const tight = limitUse(capped, dm, []);
+  check('limit: the tightest of several limits is reported', tight?.used === 0 && tight.max === 1, tight);
 }
 
 async function testPackage(): Promise<void> {
