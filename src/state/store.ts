@@ -28,6 +28,7 @@ import {
   type ShipObject,
   type StrokeStyle,
   type TacticalObject,
+  type ShipRuleset,
   type Team,
   type Vec2,
 } from '@/types/model';
@@ -224,6 +225,9 @@ interface Actions {
   updateTeam(id: ID, patch: Partial<Team>): void;
   removeTeam(id: ID): void;
 
+  /* ship rulesets */
+  setRulesets(rulesets: ShipRuleset[]): void;
+
   /* history */
   pushHistory(): void;
   undo(): void;
@@ -296,6 +300,13 @@ export function getActivePage(state: State): Page | null {
 function groupSelection(tool: ToolId, selection: ID[]): { selection: ID[]; tool: ToolId } {
   return { selection, tool: tool === 'select' && selection.length > 1 ? 'marquee' : tool };
 }
+
+/**
+ * The open project's rulesets. With no project open this is one shared empty
+ * list rather than a fresh one, so a selector returning it stays stable.
+ */
+const NO_RULESETS: ShipRuleset[] = [];
+export const getRulesets = (s: Store): ShipRuleset[] => s.project?.rulesets ?? NO_RULESETS;
 
 export const useStore = create<Store>((set, get) => {
   /** Persists the current project; debounced for autosave. */
@@ -540,6 +551,8 @@ export const useStore = create<Store>((set, get) => {
       // carry "Team North"/"Team South". Those untouched defaults take both the
       // name and the colour of the side they became; a team someone named
       // themselves is left exactly as it is.
+      // Projects from before rulesets carry none.
+      doc.rulesets = doc.rulesets ?? [];
       doc.teams = (doc.teams ?? []).map((t) => {
         const side = LEGACY_TEAM_NAMES[t.name];
         return side ? { ...t, name: side.name, color: side.color } : t;
@@ -1008,6 +1021,12 @@ export const useStore = create<Store>((set, get) => {
     updateTeam(id, patch) {
       commit((draft) => {
         draft.teams = draft.teams.map((t) => (t.id === id ? { ...t, ...patch } : t));
+      });
+    },
+
+    setRulesets(rulesets) {
+      commit((draft) => {
+        draft.rulesets = rulesets;
       });
     },
 

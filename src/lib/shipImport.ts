@@ -75,7 +75,10 @@ const FIELD_ALIASES: Record<string, string[]> = {
   hydro_km: ['hydro', 'hydrorange', 'hydroacoustic', 'hydroacousticsearch', 'sonar'],
   hydroDuration_s: ['hydroduration', 'hydrotime'],
   smokeDuration_s: ['smokeduration', 'smoketime'],
-  smokeRadius_km: ['smokeradius', 'smokerange', 'smoke'],
+  smokeRadius_km: ['smokeradius', 'smokerange'],
+  // A column headed just "smoke" holds a yes/no as often as a radius, so it is
+  // read as both and each side keeps only what it can parse.
+  smoke: ['smoke', 'hassmoke', 'smokegenerator', 'smokescreen'],
   fighter: ['fighter', 'catapultfighter'],
   spottingAircraft: ['spottingaircraft', 'spotter', 'spotteraircraft', 'spottingplane'],
   notes: ['notes', 'comment', 'comments', 'description'],
@@ -145,6 +148,15 @@ function bool(value: unknown): boolean | undefined {
   if (['true', 'yes', 'y', '1', 'x'].includes(t)) return true;
   if (['false', 'no', 'n', '0', '', '-', 'n/a'].includes(t)) return false;
   return undefined;
+}
+
+/**
+ * A yes/no column, and nothing else. `bool` reads 1 and 0 as answers, which
+ * would turn a smoke radius of 1 km into a flag; a number here is left for
+ * the numeric field sharing the column.
+ */
+function yesNo(value: unknown): boolean | undefined {
+  return typeof value === 'number' || num(value) !== undefined ? undefined : bool(value);
 }
 
 function toTier(value: unknown): number {
@@ -282,7 +294,8 @@ export function normalizeShip(raw: Raw, existing?: Ship): Ship {
     hydro_km: toKm(pick(raw, 'hydro_km')) ?? existing?.hydro_km,
     hydroDuration_s: pos(pick(raw, 'hydroDuration_s')) ?? existing?.hydroDuration_s,
     smokeDuration_s: pos(pick(raw, 'smokeDuration_s')) ?? existing?.smokeDuration_s,
-    smokeRadius_km: toKm(pick(raw, 'smokeRadius_km')) ?? existing?.smokeRadius_km,
+    smokeRadius_km: toKm(pick(raw, 'smokeRadius_km')) ?? toKm(pick(raw, 'smoke')) ?? existing?.smokeRadius_km,
+    smoke: yesNo(pick(raw, 'smoke')) ?? existing?.smoke,
     fighter: bool(pick(raw, 'fighter')) ?? existing?.fighter,
     spottingAircraft: bool(pick(raw, 'spottingAircraft')) ?? existing?.spottingAircraft,
     consumables: parseConsumables(raw) ?? existing?.consumables,
@@ -367,7 +380,7 @@ const CSV_COLUMNS: (keyof Ship)[] = [
   'concealment_km', 'concealmentAir_km', 'mainBatteryRange_km', 'mainBattery', 'secondaryRange_km',
   'torpedoRange_km', 'torpedoSpeed_kn', 'torpedoArc_deg', 'torpedoes',
   'airstrikeMinRange_km', 'airstrikeMaxRange_km', 'aaRange_km', 'aa',
-  'radar_km', 'radarDuration_s', 'hydro_km', 'hydroDuration_s', 'smokeDuration_s', 'smokeRadius_km',
+  'radar_km', 'radarDuration_s', 'hydro_km', 'hydroDuration_s', 'smoke', 'smokeDuration_s', 'smokeRadius_km',
   'fighter', 'spottingAircraft', 'notes',
 ];
 

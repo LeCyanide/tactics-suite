@@ -69,6 +69,7 @@ export function createProject(name = 'Untitled Project', pageNames?: string[]): 
     pages,
     activePageId: pages[0]?.id ?? null,
     teams,
+    rulesets: [],
     settings: { ...clone(DEFAULT_PROJECT_SETTINGS), defaultTeamId: teams[0].id },
   };
 }

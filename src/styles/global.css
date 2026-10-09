@@ -788,6 +788,31 @@ input[type='range']::-webkit-slider-thumb {
   padding: 0 0 5px;
 }
 
+/* Ruleset editor, in the ship database */
+.ruleset-editor {
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+}
+.ruleset-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.ruleset-head .spacer {
+  flex: 1;
+}
+.ruleset-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.ruleset-chips .variant-chip {
+  padding: 2px 8px;
+}
+
 .ship-item {
   display: flex;
   align-items: center;

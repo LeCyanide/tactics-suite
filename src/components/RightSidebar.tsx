@@ -24,6 +24,7 @@ import {
   SHAPE_TOOL_LABELS,
   effectiveFlags,
   getActivePage,
+  getRulesets,
   shipRangeKm,
   useStore,
   type ArrowTool,
@@ -35,7 +36,8 @@ import { CLASS_COLORS } from '@/canvas/shipGlyphs';
 import { useAsset } from '@/state/assets';
 import { canvasApi } from '@/canvas/canvasBridge';
 import { ClassIcon } from './common/ClassIcon';
-import { foldForSearch, gridRef } from '@/lib/util';
+import { gridRef } from '@/lib/util';
+import { filterShips, type Availability } from '@/lib/shipFilters';
 
 export function RightSidebar() {
   const open = useStore((s) => s.rightOpen);
@@ -662,22 +664,21 @@ function ShipBrowserPanel() {
   const [nation, setNation] = useState('');
   const [cls, setCls] = useState<'' | ShipClass>('');
   const [tier, setTier] = useState('');
+  const [radar, setRadar] = useState<Availability>('');
+  const [smoke, setSmoke] = useState<Availability>('');
+  const [rulesetId, setRulesetId] = useState('');
   const [team, setTeam] = useState<ID | ''>('');
+  const rulesets = useStore(getRulesets);
   const s = () => useStore.getState();
 
   const nations = useMemo(() => [...new Set(ships.map((x) => x.nation))].sort(), [ships]);
   const tiers = useMemo(() => [...new Set(ships.map((x) => x.tier))].sort((a, b) => b - a), [ships]);
+  const ruleset = rulesets.find((r) => r.id === rulesetId) ?? null;
 
-  const filtered = useMemo(() => {
-    const q = foldForSearch(query.trim());
-    return ships.filter(
-      (ship) =>
-        (!q || foldForSearch(ship.name).includes(q) || foldForSearch(ship.nation).includes(q)) &&
-        (!nation || ship.nation === nation) &&
-        (!cls || ship.class === cls) &&
-        (!tier || String(ship.tier) === tier),
-    );
-  }, [ships, query, nation, cls, tier]);
+  const filtered = useMemo(
+    () => filterShips(ships, { query, searchNation: true, nation, cls, tier, radar, smoke, ruleset }),
+    [ships, query, nation, cls, tier, radar, smoke, ruleset],
+  );
 
   const teamId = team || project?.settings.defaultTeamId || project?.teams[0]?.id || null;
   const iconById = useMemo(() => new Map(icons.map((i) => [i.id, i])), [icons]);
@@ -743,6 +744,28 @@ function ShipBrowserPanel() {
               {tiers.map((t) => (
                 <option key={t} value={t}>
                   {t}
+                </option>
+              ))}
+            </select>
+            <select value={radar} onChange={(e) => setRadar(e.target.value as Availability)}>
+              <option value="">Radar</option>
+              <option value="yes">Has radar</option>
+              <option value="no">No radar</option>
+            </select>
+            <select value={smoke} onChange={(e) => setSmoke(e.target.value as Availability)}>
+              <option value="">Smoke</option>
+              <option value="yes">Has smoke</option>
+              <option value="no">No smoke</option>
+            </select>
+            <select
+              value={ruleset?.id ?? ''}
+              title="This project's ship restrictions — add and edit them in the ship database"
+              onChange={(e) => setRulesetId(e.target.value)}
+            >
+              <option value="">Ruleset</option>
+              {rulesets.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.name}
                 </option>
               ))}
             </select>

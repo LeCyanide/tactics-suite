@@ -103,6 +103,12 @@ export interface Ship {
   hydroDuration_s?: number;
   smokeDuration_s?: number;
   smokeRadius_km?: number;
+  /**
+   * Whether the ship carries a smoke generator at all. Most sources say that
+   * much and nothing about radius or duration, so it is its own field; left
+   * unset, the smoke figures and the consumable list decide.
+   */
+  smoke?: boolean;
   fighter?: boolean;
   spottingAircraft?: boolean;
   consumables?: Consumable[];
@@ -111,6 +117,23 @@ export interface Ship {
   iconId?: ID | null;
 
   notes?: string;
+}
+
+/**
+ * Which ships a competition lets you bring — a clan battle season, a
+ * tournament. Rulesets belong to the project that was made for that
+ * competition: there are no standard ones, and a new project starts with none.
+ * A ruleset only narrows the ship lists; it never touches what is on a page.
+ */
+export interface ShipRuleset {
+  id: ID;
+  name: string;
+  /** Tiers allowed. Empty means every tier. */
+  tiers: number[];
+  /** Classes allowed. Empty means every class. */
+  classes: ShipClass[];
+  /** Ships ruled out by name, on top of the tier and class limits. */
+  banned: ID[];
 }
 
 export interface ShipIconAsset {
@@ -591,6 +614,8 @@ export interface Project {
   pages: Page[];
   activePageId: ID | null;
   teams: Team[];
+  /** Ship restrictions for this project, offered as a filter wherever ships are listed. */
+  rulesets: ShipRuleset[];
   /** Grid snapping and other editor prefs stored with the project. */
   settings: ProjectSettings;
 }
