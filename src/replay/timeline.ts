@@ -362,6 +362,19 @@ export class ReplayTimeline {
   private readonly framesAt: number;
 
   /**
+   * True for a bake that never learned who was in the battle.
+   *
+   * Game 15.9 moved the fields of the roster packet, and a sidecar from before
+   * it knew that resolved no players at all: ships came out without names,
+   * relations or view direction. The recording player's own ship is drawn in
+   * every battle, so their name missing from the string table is the tell.
+   */
+  get lacksPlayers(): boolean {
+    const name = this.header.player?.name;
+    return !!name && !this.header.strings.includes(name);
+  }
+
+  /**
    * Accepts either an ArrayBuffer or a view of one. A `Uint8Array` arriving
    * over IPC need not start at offset zero, and every read here is relative to
    * the start of the timeline, so the view's own bounds are what count — taking
