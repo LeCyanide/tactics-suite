@@ -10,7 +10,7 @@
 //! planner's own map, in the planner's own coordinates, with the drawing tools
 //! still live.
 //!
-//! Two subcommands:
+//! Three subcommands:
 //!
 //!   probe --replay <file>
 //!       Battle metadata only, as JSON on stdout. Fast — it reads the replay
@@ -19,6 +19,10 @@
 //!
 //!   bake --game <dir> --replay <file> [--fps 10] [--out <file>]
 //!       The full timeline. Writes the blob to `--out`, or stdout if omitted.
+//!
+//!   caps --game <dir> --replay <file>
+//!       The capture points the battle opens with, as JSON on stdout. This is
+//!       what `scripts/import-cap-layouts.mjs` builds the layout library from.
 //!
 //! Progress and diagnostics go to stderr as newline-delimited JSON, so stdout
 //! stays a clean byte stream.
@@ -55,6 +59,7 @@ fn main() {
     let result = match args.first().map(String::as_str) {
         Some("probe") => probe(&args[1..]),
         Some("bake") => bake(&args[1..]),
+        Some("caps") => caps(&args[1..]),
         Some("--help") | Some("-h") | None => {
             eprintln!("{USAGE}");
             return;
@@ -73,6 +78,7 @@ wows-replay-sidecar
 
   probe --replay <file>
   bake  --game <dir> --replay <file> [--fps <n>] [--out <file>]
+  caps  --game <dir> --replay <file>
 
 Progress and errors are newline-delimited JSON on stderr.";
 
@@ -347,6 +353,73 @@ fn bake(args: &[String]) -> Result<(), String> {
         "skipped": serde_json::Value::Object(skipped),
         "out": out_path.as_ref().map(|p| p.display().to_string()),
     }));
+    Ok(())
+}
+
+/// The capture point layout a battle opens with.
+///
+/// Every zone is created in the burst of packets at clock zero, before anything
+/// has moved, so that burst is all this reads — a replay abandoned seconds into
+/// a training room is as good a source as a full battle. Positions are BigWorld
+/// units from the centre of the map with +y north, the same frame the planner's
+/// importer already expects.
+fn caps(args: &[String]) -> Result<(), String> {
+    let flags = parse_flags(args, &["game", "replay"])?;
+    let game_dir = PathBuf::from(require(&flags, "game")?);
+    let replay_path = PathBuf::from(require(&flags, "replay")?);
+
+    let replay = ReplayFile::from_file(&replay_path).map_err(|e| format!("could not read replay: {e:?}"))?;
+    let version = Version::from_client_exe(&replay.meta.clientVersionFromExe);
+    let resources = game_data::load_game_resources(&game_dir, &version)
+        .map_err(|e| format!("could not load game data for {version:?}: {e}"))?;
+    let vfs = resources.vfs;
+    let specs = resources.specs;
+    let provider =
+        GameMetadataProvider::from_vfs(&vfs).map_err(|e| format!("could not load GameParams: {e:?}"))?;
+    let constants = GameConstants::from_vfs(&vfs);
+
+    let mut world = wows_battle_world::BattleWorld::new(&replay.meta, &provider, Some(&constants));
+    let mut parser = wows_replays::packet2::Parser::with_version(&specs, version);
+    let mut remaining = replay.packet_data();
+    while !remaining.is_empty() {
+        let Ok(packet) = parser.parse_packet(&mut remaining) else { break };
+        if packet.clock.0 > 0.0 {
+            break;
+        }
+        world.process(&packet);
+    }
+
+    let points: Vec<serde_json::Value> = world
+        .capture_points()
+        .iter()
+        .filter_map(|cp| {
+            let pos = cp.position?;
+            // The game numbers these from Control = 0 in declaration order, and
+            // a type this build of the crates does not know is drawn as one.
+            let cp_type = cp.control_point_type.as_ref().and_then(|r| r.known().copied()).map_or(0, |t| t as i64);
+            Some(serde_json::json!({
+                "index": cp.index,
+                "x": pos.x,
+                "y": pos.z,
+                "radius": cp.radius,
+                "cpType": cp_type,
+                "teamId": cp.team_id,
+                "initiallyEnabled": cp.is_enabled,
+            }))
+        })
+        .collect();
+
+    let json = serde_json::json!({
+        "file": replay_path.file_name().map(|n| n.to_string_lossy().into_owned()),
+        "clientVersion": replay.meta.clientVersionFromExe,
+        "mapId": replay.meta.mapId,
+        "scenarioId": replay.meta.scenarioConfigId,
+        "spaceName": replay.meta.mapName,
+        "scenario": replay.meta.scenario,
+        "gameMode": replay.meta.gameMode,
+        "points": points,
+    });
+    println!("{json}");
     Ok(())
 }
 

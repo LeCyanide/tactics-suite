@@ -1,6 +1,6 @@
 {
  "schemaVersion": 1,
- "source": "wows-toolkit cap_layouts + maps.json spaceSize",
+ "source": "wows-toolkit cap_layouts and replays + maps.json spaceSize",
  "notes": {
   "coords": "nx/ny/nr are fractions of map extent; x = nx * map.widthMeters",
   "teamId": "-1 = neutral, 0 and 1 = the two teams that start owning it",
@@ -2479,9 +2479,9 @@
     {
      "index": 0,
      "label": "A",
-     "nx": 0.25,
+     "nx": 0.35,
      "ny": 0.5,
-     "nr": 0.075,
+     "nr": 0.09375,
      "teamId": -1,
      "initiallyEnabled": true,
      "cpType": 0
@@ -2489,9 +2489,9 @@
     {
      "index": 1,
      "label": "B",
-     "nx": 0.5,
+     "nx": 0.65,
      "ny": 0.5,
-     "nr": 0.075,
+     "nr": 0.09375,
      "teamId": -1,
      "initiallyEnabled": true,
      "cpType": 0
@@ -2499,9 +2499,9 @@
     {
      "index": 2,
      "label": "C",
-     "nx": 0.75,
+     "nx": 0.89,
      "ny": 0.5,
-     "nr": 0.075,
+     "nr": 0.09375,
      "teamId": -1,
      "initiallyEnabled": true,
      "cpType": 0
@@ -2725,6 +2725,46 @@
      "teamId": 1,
      "initiallyEnabled": true,
      "cpType": 4
+    }
+   ]
+  },
+  {
+   "id": "cap-58_RidgeNew-domination_tournament_3point",
+   "mapId": "map-9f671c7e-0b4a-4ee9-adbc-1cc3cbd60bb9",
+   "spaceName": "spaces/58_RidgeNew",
+   "name": "Tournament - Domination",
+   "scenario": "domination_tournament_3point",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0,
+     "ny": 0.501739,
+     "nr": 0.208333,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.4,
+     "ny": 0.5,
+     "nr": 0.072917,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.625,
+     "ny": 0.5,
+     "nr": 0.072917,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
     }
    ]
   },
@@ -4069,6 +4109,56 @@
    ]
   },
   {
+   "id": "cap-40_Okinawa-domination_tournament_4point",
+   "mapId": "map-6ee47435-da4d-4a4f-a059-1fe62e61df6b",
+   "spaceName": "spaces/40_Okinawa",
+   "name": "Tournament - Domination (4 caps)",
+   "scenario": "domination_tournament_4point",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.1,
+     "ny": 0.22,
+     "nr": 0.047619,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.22,
+     "ny": 0.1,
+     "nr": 0.047619,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.467,
+     "ny": 0.467,
+     "nr": 0.118571,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 3,
+     "label": "D",
+     "nx": 0.7,
+     "ny": 0.7,
+     "nr": 0.071429,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
    "id": "cap-33_new_tierra-287",
    "mapId": "map-57c3b8c9-8825-4194-80ba-ee1089c9f955",
    "spaceName": "spaces/33_new_tierra",
@@ -4325,6 +4415,46 @@
      "teamId": 0,
      "initiallyEnabled": true,
      "cpType": 4
+    }
+   ]
+  },
+  {
+   "id": "cap-r01_military_navigation-asymm_3point_coop",
+   "mapId": "map-6b1172bf-9e62-4c5d-a3e1-141f5b1e3e67",
+   "spaceName": "spaces/r01_military_navigation",
+   "name": "Asymmetric Battle - Domination",
+   "scenario": "asymm_3point_coop",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.285714,
+     "ny": 0.285714,
+     "nr": 0.071429,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.5,
+     "ny": 0.5,
+     "nr": 0.071429,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.714286,
+     "ny": 0.714286,
+     "nr": 0.071429,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
     }
    ]
   },
@@ -4700,6 +4830,56 @@
      "index": 2,
      "label": "C",
      "nx": 0.673125,
+     "ny": 0.5,
+     "nr": 0.0625,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    }
+   ]
+  },
+  {
+   "id": "cap-25_sea_hope-domination_tournament_4point_alt",
+   "mapId": "map-f766d937-45f8-4723-8f38-22063e7a98fa",
+   "spaceName": "spaces/25_sea_hope",
+   "name": "Tournament - Domination (4 caps, alt)",
+   "scenario": "domination_tournament_4point_alt",
+   "gameMode": 7,
+   "points": [
+    {
+     "index": 0,
+     "label": "A",
+     "nx": 0.2,
+     "ny": 0.35,
+     "nr": 0.083333,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 1,
+     "label": "B",
+     "nx": 0.2,
+     "ny": 0.65,
+     "nr": 0.083333,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 2,
+     "label": "C",
+     "nx": 0.44,
+     "ny": 0.5,
+     "nr": 0.0625,
+     "teamId": -1,
+     "initiallyEnabled": true,
+     "cpType": 0
+    },
+    {
+     "index": 3,
+     "label": "D",
+     "nx": 0.76,
      "ny": 0.5,
      "nr": 0.0625,
      "teamId": -1,

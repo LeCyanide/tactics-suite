@@ -1,17 +1,28 @@
 /**
- * Rebuilds the capture point layout library from the WoWs Toolkit database.
+ * Rebuilds the capture point layout library from the WoWs Toolkit database
+ * and, optionally, from replays directly.
  *
  *   node scripts/import-cap-layouts.mjs [--toolkit <dir|db>] [--data <dir>] [--dry]
+ *                                       [--replays <dir> [--game <dir>] [--sidecar <exe>]]
  *
  * The toolkit records one layout per map and scenario the moment it parses a
  * replay of that battle type, so playing a mode once is what puts its caps
  * within reach. This reads that table straight out of its SQLite file and
  * rewrites maps/cap-layouts.json in the planner's data directory.
  *
- * Rebuilding is safe to repeat: a layout's id is derived from the space and
- * the game's own scenario config id, so a page already pointing at one keeps
- * pointing at it. Layouts for a space with no map — or with only an archived
- * stand-in — are skipped, as are the two-cap brawl layouts.
+ * --replays reads the caps out of every replay in a folder with the replay
+ * viewer sidecar instead of waiting for the toolkit to have scanned them, and
+ * a replay outranks the toolkit's row for the same scenario. That matters
+ * after a patch: the toolkit files a layout under the game's scenario config
+ * id and never overwrites a row, and 15.9 renumbered those ids, so a reworked
+ * scenario can land on a number the toolkit already holds and be refused. The
+ * game directory defaults to the one in the planner's settings.
+ *
+ * Rebuilding is safe to repeat: a layout is the same layout for as long as it
+ * is the same scenario on the same space, so it keeps the id it was first
+ * published under and a page already pointing at one keeps pointing at it.
+ * Layouts for a space with no map — or with only an archived stand-in — are
+ * skipped, as are the two-cap brawl layouts.
  *
  * Several scenarios of one battle type share both a name and the caps they
  * draw — a PvE room, or a revision that replaced what it revised. A map keeps
@@ -26,7 +37,11 @@ import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { DatabaseSync } from 'node:sqlite';
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 /* ------------------------------------------------------------------ */
 /* Arguments                                                           */
@@ -52,15 +67,25 @@ const defaultToolkit = path.join(
 const toolkitArg = opt('--toolkit') ? path.resolve(opt('--toolkit')) : defaultToolkit;
 const toolkitDb = toolkitArg.endsWith('.db') ? toolkitArg : path.join(toolkitArg, 'wows_toolkit.db');
 
+const replaysDir = opt('--replays') && path.resolve(opt('--replays'));
+
 if (!dataDir) {
   console.error(
     'usage: node scripts/import-cap-layouts.mjs --data <dir> [--toolkit <dir|db>] [--dry]',
   );
+  console.error('         [--replays <dir> [--game <dir>] [--sidecar <exe>]]');
   console.error('       (--data may be omitted when WOWSPLAN_DATA_DIR is set)');
   process.exit(1);
 }
-if (!fs.existsSync(toolkitDb)) {
+// Replays alone are a complete source, so the toolkit is only insisted on
+// when it is the only one — or when it was asked for by name.
+const haveToolkit = fs.existsSync(toolkitDb);
+if (!haveToolkit && (!replaysDir || opt('--toolkit'))) {
   console.error(`No toolkit database at ${toolkitDb}`);
+  process.exit(1);
+}
+if (replaysDir && !fs.existsSync(replaysDir)) {
+  console.error(`No replay directory at ${replaysDir}`);
   process.exit(1);
 }
 
@@ -216,18 +241,103 @@ function excluded(layout) {
 /* ------------------------------------------------------------------ */
 
 // A running toolkit keeps its write-ahead log open, so read a copy of the set.
-const scratch = await fsp.mkdtemp(path.join(os.tmpdir(), 'wowsplan-caps-'));
-const dbCopy = path.join(scratch, 'wows_toolkit.db');
-let rows;
-try {
-  for (const suffix of ['', '-wal', '-shm']) {
-    if (fs.existsSync(toolkitDb + suffix)) await fsp.copyFile(toolkitDb + suffix, dbCopy + suffix);
+let rows = [];
+if (haveToolkit) {
+  const scratch = await fsp.mkdtemp(path.join(os.tmpdir(), 'wowsplan-caps-'));
+  const dbCopy = path.join(scratch, 'wows_toolkit.db');
+  try {
+    for (const suffix of ['', '-wal', '-shm']) {
+      if (fs.existsSync(toolkitDb + suffix)) await fsp.copyFile(toolkitDb + suffix, dbCopy + suffix);
+    }
+    const db = new DatabaseSync(dbCopy, { readOnly: true });
+    rows = db.prepare('select layout_data from cap_layouts').all();
+    db.close();
+  } finally {
+    await fsp.rm(scratch, { recursive: true, force: true });
   }
-  const db = new DatabaseSync(dbCopy, { readOnly: true });
-  rows = db.prepare('select layout_data from cap_layouts').all();
-  db.close();
-} finally {
-  await fsp.rm(scratch, { recursive: true, force: true });
+}
+
+const skipped = [];
+
+/*
+ * Each source layout carries a rank saying how much it is to be believed when
+ * two of them describe the same scenario on the same space. A replay beats the
+ * toolkit, and a replay from a later build beats an earlier one. Two toolkit
+ * rows can only be told apart by config id, and the higher is taken as the
+ * later — which is how 15.9 renumbered them, but is a guess, so it is reported.
+ */
+const sources = rows.map((row) => {
+  const decoded = decodeLayout(row.layout_data);
+  return { ...decoded, rank: [0, 0, decoded.scenarioId] };
+});
+
+if (replaysDir) {
+  const exe = process.platform === 'win32' ? 'wows-replay-sidecar.exe' : 'wows-replay-sidecar';
+  const sidecar = opt('--sidecar')
+    ? path.resolve(opt('--sidecar'))
+    : [
+        path.join(root, 'sidecar', 'target', 'release', exe),
+        path.join(root, 'resources', 'sidecar', exe),
+      ].find((f) => fs.existsSync(f));
+  if (!sidecar || !fs.existsSync(sidecar)) {
+    console.error('No replay sidecar found; run "npm run build:sidecar" or pass --sidecar <exe>');
+    process.exit(1);
+  }
+  let gameDir = opt('--game');
+  if (!gameDir) {
+    try {
+      gameDir = JSON.parse(await fsp.readFile(path.join(dataDir, 'settings.json'), 'utf8')).wowsGameDir;
+    } catch {
+      /* no settings yet; --game is then required */
+    }
+  }
+  if (!gameDir || !fs.existsSync(gameDir)) {
+    console.error('No game directory; pass --game <dir> or set one in the planner');
+    process.exit(1);
+  }
+
+  const files = (await fsp.readdir(replaysDir)).filter((f) => f.endsWith('.wowsreplay')).sort();
+  files.forEach((file, seq) => {
+    const res = spawnSync(sidecar, ['caps', '--game', gameDir, '--replay', path.join(replaysDir, file)], {
+      encoding: 'utf8',
+    });
+    if (res.status !== 0) {
+      let msg = (res.stderr ?? '').trim().split('\n').pop() ?? '';
+      try {
+        msg = JSON.parse(msg).msg;
+      } catch {
+        /* not one of the sidecar's own errors; show it as it came */
+      }
+      skipped.push(`${file}: ${msg || res.error?.message || 'sidecar failed'}`);
+      return;
+    }
+    const layout = JSON.parse(res.stdout);
+    // An operation, or a mode without areas to hold: nothing to record.
+    if (!layout.points.length) return;
+    const build = Number(layout.clientVersion.split(',').pop()) || 0;
+    sources.push({ ...layout, rank: [1, build, seq] });
+  });
+}
+
+const outranks = (a, b) => {
+  for (let i = 0; i < a.rank.length; i++) {
+    if (a.rank[i] !== b.rank[i]) return a.rank[i] > b.rank[i];
+  }
+  return false;
+};
+const scenarioKey = (l) => `${l.spaceName}|${l.scenario}`;
+const current = new Map();
+for (const source of sources) {
+  const held = current.get(scenarioKey(source));
+  // Most such pairs draw the very same caps, and then there is nothing to say.
+  const moved = held && JSON.stringify(held.points) !== JSON.stringify(source.points);
+  if (moved && !held.rank[0] && !source.rank[0]) {
+    console.log(
+      `guess      ${source.spaceName} ${source.scenario}: toolkit holds configs ` +
+        `${held.scenarioId} and ${source.scenarioId} — taking the higher`,
+    );
+  }
+  if (!held || outranks(source, held)) current.set(scenarioKey(source), source);
 }
 
 const maps = JSON.parse(await fsp.readFile(mapsFile, 'utf8'));
@@ -250,10 +360,24 @@ const archivedSpace = new Map(
 /** Six decimals of a map extent is under a metre — far inside a cap. */
 const round = (v) => Math.round(v * 1e6) / 1e6;
 
+const previous = fs.existsSync(layoutsFile)
+  ? (JSON.parse(await fsp.readFile(layoutsFile, 'utf8')).layouts ?? [])
+  : [];
+
+/*
+ * The first layouts were published as `cap-<space>-<scenario config id>`, on
+ * the understanding that the game's own number for a scenario would not move.
+ * 15.9 moved them — Loop's tournament layout took the number its plain
+ * domination had — so the number cannot be what identifies a layout. The
+ * scenario's name on its space is, so a layout already published keeps its id
+ * whatever it was built from, and a new one is named for the scenario.
+ */
+const publishedId = new Map(previous.map((l) => [scenarioKey(l), l.id]));
+const idFor = (l) =>
+  publishedId.get(scenarioKey(l)) ?? `cap-${l.spaceName.split('/').pop()}-${l.scenario}`;
+
 const layouts = [];
-const skipped = [];
-for (const row of rows) {
-  const decoded = decodeLayout(row.layout_data);
+for (const decoded of current.values()) {
   const map = bySpace.get(decoded.spaceName);
   if (!map) {
     const standIn = archivedSpace.get(decoded.spaceName);
@@ -281,7 +405,7 @@ for (const row of rows) {
     continue;
   }
   layouts.push({
-    id: `cap-${decoded.spaceName.split('/').pop()}-${decoded.scenarioId}`,
+    id: idFor(decoded),
     mapId: map.id,
     spaceName: decoded.spaceName,
     name,
@@ -301,10 +425,6 @@ for (const row of rows) {
 }
 
 const mapName = (l) => bySpace.get(l.spaceName).name;
-
-const previous = fs.existsSync(layoutsFile)
-  ? (JSON.parse(await fsp.readFile(layoutsFile, 'utf8')).layouts ?? [])
-  : [];
 
 /* ------------------------------------------------------------------ */
 /* Collapse aliases                                                    */
@@ -433,7 +553,7 @@ for (const s of skipped.sort()) console.log(`skipped    ${s}`);
 
 const doc = {
   schemaVersion: 1,
-  source: 'wows-toolkit cap_layouts + maps.json spaceSize',
+  source: 'wows-toolkit cap_layouts and replays + maps.json spaceSize',
   notes: {
     coords: 'nx/ny/nr are fractions of map extent; x = nx * map.widthMeters',
     teamId: '-1 = neutral, 0 and 1 = the two teams that start owning it',
