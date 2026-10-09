@@ -3,7 +3,7 @@
  * the two can never disagree about which ships a set of filters leaves.
  */
 
-import type { Ship, ShipClass, ShipRuleset } from '@/types/model';
+import type { ID, Ship, ShipClass, ShipRuleset } from '@/types/model';
 import { foldForSearch } from './util';
 
 /** A yes/no question a filter may also decline to ask. */
@@ -44,9 +44,32 @@ export function hasSmoke(ship: Ship): boolean {
  * the ruleset does not restrict that at all, which is what a new one starts as.
  */
 export function allowedBy(ruleset: ShipRuleset, ship: Ship): boolean {
+  return inScope(ruleset, ship) && !ruleset.banned.includes(ship.id);
+}
+
+/** Whether a ship is of a tier and class the ruleset deals in at all, banned or not. */
+export function inScope(ruleset: ShipRuleset, ship: Ship): boolean {
   if (ruleset.tiers.length && !ruleset.tiers.includes(ship.tier)) return false;
   if (ruleset.classes.length && !ruleset.classes.includes(ship.class)) return false;
-  return !ruleset.banned.includes(ship.id);
+  return true;
+}
+
+/**
+ * How full the tightest limit covering a ship is, given the ships one side
+ * already has on the page. Null when no limit names the ship.
+ */
+export function limitUse(
+  ruleset: ShipRuleset,
+  shipId: ID,
+  placed: (ID | null)[],
+): { used: number; max: number } | null {
+  let tightest: { used: number; max: number } | null = null;
+  for (const limit of ruleset.limits) {
+    if (!limit.ships.includes(shipId)) continue;
+    const used = placed.filter((id) => id !== null && limit.ships.includes(id)).length;
+    if (!tightest || limit.max - used < tightest.max - tightest.used) tightest = { used, max: limit.max };
+  }
+  return tightest;
 }
 
 const wants = (want: Availability, has: boolean): boolean => !want || (want === 'yes') === has;

@@ -134,6 +134,21 @@ export interface ShipRuleset {
   classes: ShipClass[];
   /** Ships ruled out by name, on top of the tier and class limits. */
   banned: ID[];
+  /** Caps on how many ships out of a named group one side may bring. */
+  limits: ShipLimit[];
+  /** How many ships one side may field in all. Zero means no limit. */
+  maxShips: number;
+}
+
+/**
+ * "At most two of these." The ships stay allowed; what is capped is how many
+ * of the group a single team fields, counted from what that team has on the
+ * page.
+ */
+export interface ShipLimit {
+  id: ID;
+  max: number;
+  ships: ID[];
 }
 
 export interface ShipIconAsset {

@@ -37,7 +37,7 @@ import { useAsset } from '@/state/assets';
 import { canvasApi } from '@/canvas/canvasBridge';
 import { ClassIcon } from './common/ClassIcon';
 import { gridRef } from '@/lib/util';
-import { filterShips, type Availability } from '@/lib/shipFilters';
+import { filterShips, limitUse, type Availability } from '@/lib/shipFilters';
 
 export function RightSidebar() {
   const open = useStore((s) => s.rightOpen);
@@ -683,6 +683,18 @@ function ShipBrowserPanel() {
   const teamId = team || project?.settings.defaultTeamId || project?.teams[0]?.id || null;
   const iconById = useMemo(() => new Map(icons.map((i) => [i.id, i])), [icons]);
 
+  // What the side being placed for already has on the page, for the ruleset's
+  // limits: "max two of these" is counted per team.
+  const page = useStore(getActivePage);
+  const placed = useMemo(
+    () =>
+      (page?.objects ?? [])
+        .filter((o): o is ShipObject => o.type === 'ship' && o.teamId === teamId)
+        .map((o) => o.shipId),
+    [page?.objects, teamId],
+  );
+  const teamFull = !!ruleset && ruleset.maxShips > 0 && placed.length >= ruleset.maxShips;
+
   return (
     <Panel
       title="Ships"
@@ -782,15 +794,32 @@ function ShipBrowserPanel() {
             </select>
           )}
 
+          {ruleset && ruleset.maxShips > 0 && (
+            <div className={`team-count${placed.length >= ruleset.maxShips ? ' full' : ''}`}>
+              <span>{project?.teams.find((t) => t.id === teamId)?.name ?? 'Team'}</span>
+              <span className="mono">
+                {placed.length}/{ruleset.maxShips} ships
+              </span>
+            </div>
+          )}
+
           <div className="ship-list">
             {filtered.map((ship) => {
               const iconAsset = ship.iconId ? iconById.get(ship.iconId) : undefined;
+              const use = ruleset ? limitUse(ruleset, ship.id, placed) : null;
+              const full = teamFull || (!!use && use.used >= use.max);
               return (
                 <div
                   key={ship.id}
-                  className="ship-item"
+                  className={`ship-item${full ? ' limit-full' : ''}`}
                   draggable
-                  title="Drag onto the map, or double-click to place at the centre"
+                  title={
+                    teamFull
+                      ? `${ruleset?.name}: this team already has its ${ruleset?.maxShips} ships`
+                      : use && full
+                        ? `${ruleset?.name}: this team already has ${use.used} of the ${use.max} allowed from this group`
+                        : 'Drag onto the map, or double-click to place at the centre'
+                  }
                   onDragStart={(e) => {
                     e.dataTransfer.setData('application/x-wows-ship', ship.id);
                     if (teamId) e.dataTransfer.setData('application/x-wows-team', teamId);
@@ -814,6 +843,11 @@ function ShipBrowserPanel() {
                   <span className="class-chip" style={{ background: `${CLASS_COLORS[ship.class]}22`, color: CLASS_COLORS[ship.class] }}>
                     {shipClassCode(ship)}
                   </span>
+                  {use && (
+                    <span className={`tier-chip limit-chip${use.used >= use.max ? ' full' : ''}`}>
+                      {use.used}/{use.max}
+                    </span>
+                  )}
                   <span className="tier-chip">{ship.tier}</span>
                 </div>
               );

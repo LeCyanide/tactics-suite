@@ -552,7 +552,7 @@ export const useStore = create<Store>((set, get) => {
       // name and the colour of the side they became; a team someone named
       // themselves is left exactly as it is.
       // Projects from before rulesets carry none.
-      doc.rulesets = doc.rulesets ?? [];
+      doc.rulesets = (doc.rulesets ?? []).map((r) => ({ ...r, limits: r.limits ?? [], maxShips: r.maxShips ?? 0 }));
       doc.teams = (doc.teams ?? []).map((t) => {
         const side = LEGACY_TEAM_NAMES[t.name];
         return side ? { ...t, name: side.name, color: side.color } : t;

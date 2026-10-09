@@ -3,11 +3,19 @@ import { Copy, Database, FileDown, FileUp, Image as ImageIcon, Plus, RefreshCw, 
 import { getActivePage, getRulesets, useStore } from '@/state/store';
 import { Check, ColorInput, Field, InlineEdit, Modal, NumInput, SectionLabel, Tip } from '../common/ui';
 import { useAsset } from '@/state/assets';
-import { SHIP_CLASSES, shipClassCode, type GameMap, type Ship, type ShipClass, type ShipRuleset } from '@/types/model';
+import {
+  SHIP_CLASSES,
+  shipClassCode,
+  type GameMap,
+  type Ship,
+  type ShipClass,
+  type ShipLimit,
+  type ShipRuleset,
+} from '@/types/model';
 import { CLASS_COLORS } from '@/canvas/shipGlyphs';
 import { ClassIcon } from '../common/ClassIcon';
 import { uid } from '@/lib/util';
-import { allowedBy, filterShips, hasRadar, hasSmoke, type Availability } from '@/lib/shipFilters';
+import { filterShips, hasRadar, hasSmoke, inScope, type Availability } from '@/lib/shipFilters';
 
 /* ================================================================== */
 /* Map manager                                                         */
@@ -118,9 +126,10 @@ export function ShipDatabaseModal() {
   const [radar, setRadar] = useState<Availability>('');
   const [smoke, setSmoke] = useState<Availability>('');
   const [rulesetId, setRulesetId] = useState('');
-  // Banning a ship takes it off the list, so undoing a ban needs a way to see
-  // what the ruleset is hiding.
-  const [showExcluded, setShowExcluded] = useState(false);
+  const [bannedOnly, setBannedOnly] = useState(false);
+  // The limit whose ships are being picked; the table's switches then set
+  // membership of that group instead of bans.
+  const [limitId, setLimitId] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const hasProject = useStore((s) => !!s.project);
@@ -133,10 +142,16 @@ export function ShipDatabaseModal() {
   const nations = useMemo(() => [...new Set(ships.map((x) => x.nation))].sort(), [ships]);
   const tiers = useMemo(() => [...new Set(ships.map((x) => x.tier))].sort((a, b) => b - a), [ships]);
 
-  const filtered = useMemo(
-    () => filterShips(ships, { query, nation, cls, tier, radar, smoke, ruleset: showExcluded ? null : ruleset }),
-    [ships, query, nation, cls, tier, radar, smoke, ruleset, showExcluded],
-  );
+  const pickingLimit = ruleset?.limits.find((l) => l.id === limitId) ?? null;
+
+  // A banned ship stays on the list here, switched off: this is where a
+  // ruleset is set up, and a ship that vanished when banned could neither be
+  // checked nor brought back. Only tiers and classes take ships off it.
+  const filtered = useMemo(() => {
+    const list = filterShips(ships, { query, nation, cls, tier, radar, smoke, ruleset: null });
+    if (!ruleset) return list;
+    return list.filter((ship) => inScope(ruleset, ship) && (!bannedOnly || ruleset.banned.includes(ship.id)));
+  }, [ships, query, nation, cls, tier, radar, smoke, ruleset, bannedOnly]);
 
   const selected = ships.find((x) => x.id === selectedId) ?? null;
   const withoutIcon = ships.filter((x) => !x.iconId).length;
@@ -246,7 +261,15 @@ export function ShipDatabaseModal() {
                 disabled={!hasProject}
                 title={hasProject ? 'Add a ruleset to this project' : 'Open a project to add a ruleset'}
                 onClick={() => {
-                  const created: ShipRuleset = { id: uid('rules-'), name: 'New ruleset', tiers: [], classes: [], banned: [] };
+                  const created: ShipRuleset = {
+                    id: uid('rules-'),
+                    name: 'New ruleset',
+                    tiers: [],
+                    classes: [],
+                    banned: [],
+                    limits: [],
+                    maxShips: 0,
+                  };
                   saveRulesets([...rulesets, created]);
                   setRulesetId(created.id);
                 }}
@@ -270,8 +293,11 @@ export function ShipDatabaseModal() {
                 key={ruleset.id}
                 ruleset={ruleset}
                 tiers={tiers}
-                showExcluded={showExcluded}
-                onShowExcluded={setShowExcluded}
+                ships={ships}
+                bannedOnly={bannedOnly}
+                onBannedOnly={setBannedOnly}
+                limitId={pickingLimit?.id ?? ''}
+                onLimitId={setLimitId}
                 onChange={(patch) => patchRuleset(ruleset.id, patch)}
                 onDelete={() => {
                   saveRulesets(rulesets.filter((r) => r.id !== ruleset.id));
@@ -301,7 +327,7 @@ export function ShipDatabaseModal() {
                     <th style={{ width: 56 }}>Hydro</th>
                     <th style={{ width: 50 }}>Smoke</th>
                     <th style={{ width: 56 }}>Range</th>
-                    {ruleset && <th style={{ width: 58 }}>Allowed</th>}
+                    {ruleset && <th style={{ width: 96 }}>{pickingLimit ? 'In limit' : 'Ruleset'}</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -309,7 +335,7 @@ export function ShipDatabaseModal() {
                     <tr
                       key={ship.id}
                       className={ship.id === selectedId ? 'selected' : ''}
-                      style={ruleset && !allowedBy(ruleset, ship) ? { opacity: 0.45 } : undefined}
+                      style={ruleset?.banned.includes(ship.id) ? { opacity: 0.55 } : undefined}
                       onClick={() => setSelectedId(ship.id)}
                     >
                       <td>
@@ -330,11 +356,26 @@ export function ShipDatabaseModal() {
                       <td className="num">{ship.mainBatteryRange_km?.toFixed(1) ?? '—'}</td>
                       {ruleset && (
                         <td onClick={(e) => e.stopPropagation()}>
-                          <BanToggle
-                            ruleset={ruleset}
-                            ship={ship}
-                            onChange={(banned) => patchRuleset(ruleset.id, { banned })}
-                          />
+                          {pickingLimit ? (
+                            <Switch
+                              on={pickingLimit.ships.includes(ship.id)}
+                              label={pickingLimit.ships.includes(ship.id) ? 'In limit' : 'Add'}
+                              onChange={() =>
+                                patchRuleset(ruleset.id, {
+                                  limits: ruleset.limits.map((l) =>
+                                    l.id === pickingLimit.id ? { ...l, ships: toggled(l.ships, ship.id) } : l,
+                                  ),
+                                })
+                              }
+                            />
+                          ) : (
+                            <Switch
+                              on={!ruleset.banned.includes(ship.id)}
+                              label={ruleset.banned.includes(ship.id) ? 'Banned' : 'Allowed'}
+                              offIsDanger
+                              onChange={() => patchRuleset(ruleset.id, { banned: toggled(ruleset.banned, ship.id) })}
+                            />
+                          )}
                         </td>
                       )}
                     </tr>
@@ -351,28 +392,93 @@ export function ShipDatabaseModal() {
   );
 }
 
+const toggled = <T,>(list: T[], value: T): T[] =>
+  list.includes(value) ? list.filter((x) => x !== value) : [...list, value];
+
 /**
- * The limits of one ruleset. Tiers and classes are allow-lists where nothing
- * picked means no limit, so "Any" is the empty list rather than a full one and
- * a ruleset does not have to be revisited when a new tier turns up.
+ * A two-state switch that says what state it is in. Used where a tick would
+ * leave "off" looking like nothing was decided: a banned ship reads "Banned".
+ */
+function Switch({
+  on,
+  label,
+  offIsDanger,
+  onChange,
+}: {
+  on: boolean;
+  label: string;
+  offIsDanger?: boolean;
+  onChange: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      className={`switch${on ? ' on' : offIsDanger ? ' danger' : ''}`}
+      onClick={onChange}
+    >
+      <span className="switch-track">
+        <span className="switch-knob" />
+      </span>
+      <span>{label}</span>
+    </button>
+  );
+}
+
+/** A name field that commits when left, so renaming is one undo step and not one per key. */
+function NameInput({ value, onCommit }: { value: string; onCommit: (v: string) => void }) {
+  const [draft, setDraft] = useState(value);
+  const commit = () => {
+    const next = draft.trim();
+    if (next && next !== value) onCommit(next);
+    else setDraft(value);
+  };
+  return (
+    <input
+      type="text"
+      value={draft}
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => {
+        e.stopPropagation();
+        if (e.key === 'Enter') e.currentTarget.blur();
+        if (e.key === 'Escape') setDraft(value);
+      }}
+    />
+  );
+}
+
+/**
+ * One ruleset. Tiers and classes are allow-lists where nothing picked means
+ * no limit, so "Any" is the empty list rather than a full one and a ruleset
+ * does not have to be revisited when a new tier turns up. Bans and the ships
+ * of a limit are set from the table underneath.
  */
 function RulesetEditor({
   ruleset,
   tiers,
-  showExcluded,
-  onShowExcluded,
+  ships,
+  bannedOnly,
+  onBannedOnly,
+  limitId,
+  onLimitId,
   onChange,
   onDelete,
 }: {
   ruleset: ShipRuleset;
   tiers: number[];
-  showExcluded: boolean;
-  onShowExcluded: (v: boolean) => void;
+  ships: Ship[];
+  bannedOnly: boolean;
+  onBannedOnly: (v: boolean) => void;
+  limitId: string;
+  onLimitId: (id: string) => void;
   onChange: (patch: Partial<ShipRuleset>) => void;
   onDelete: () => void;
 }) {
-  const toggle = <T,>(list: T[], value: T): T[] =>
-    list.includes(value) ? list.filter((x) => x !== value) : [...list, value];
+  const nameOf = useMemo(() => new Map(ships.map((x) => [x.id, x.name])), [ships]);
+  const patchLimit = (id: string, patch: Partial<ShipLimit>) =>
+    onChange({ limits: ruleset.limits.map((l) => (l.id === id ? { ...l, ...patch } : l)) });
 
   const chips = <T extends string | number>(all: T[], picked: T[], onPick: (next: T[]) => void) => (
     <div className="ruleset-chips">
@@ -383,7 +489,7 @@ function RulesetEditor({
         <button
           key={value}
           className={`variant-chip${picked.includes(value) ? ' active' : ''}`}
-          onClick={() => onPick(toggle(picked, value))}
+          onClick={() => onPick(toggled(picked, value))}
         >
           {value}
         </button>
@@ -393,55 +499,104 @@ function RulesetEditor({
 
   return (
     <div className="ruleset-editor">
-      <div className="ruleset-head">
-        <InlineEdit value={ruleset.name} onCommit={(name) => onChange({ name })} className="card-title" />
-        <span className="spacer" />
-        <Check label="Show excluded ships" checked={showExcluded} onChange={onShowExcluded} />
+      <Field label="Name">
+        <NameInput value={ruleset.name} onCommit={(name) => onChange({ name })} />
         <Tip label="Delete ruleset" side="top">
           <button className="btn sm danger" onClick={onDelete}>
             <Trash2 size={12} />
           </button>
         </Tip>
-      </div>
+      </Field>
       <Field label="Tiers">{chips([...tiers].sort((a, b) => a - b), ruleset.tiers, (next) => onChange({ tiers: next }))}</Field>
       <Field label="Classes">{chips(SHIP_CLASSES, ruleset.classes, (next) => onChange({ classes: next }))}</Field>
-      <div className="faint" style={{ fontSize: 11 }}>
-        {ruleset.banned.length
-          ? `${ruleset.banned.length} ship${ruleset.banned.length === 1 ? '' : 's'} banned by name.`
-          : 'No ships banned by name.'}{' '}
-        Untick a ship in the Allowed column to ban it.
-      </div>
-    </div>
-  );
-}
 
-/** One ship's standing under a ruleset: a ban can be lifted, a tier limit cannot. */
-function BanToggle({
-  ruleset,
-  ship,
-  onChange,
-}: {
-  ruleset: ShipRuleset;
-  ship: Ship;
-  onChange: (banned: string[]) => void;
-}) {
-  const banned = ruleset.banned.includes(ship.id);
-  // Ruled out by tier or class: nothing to tick until the ruleset itself changes.
-  if (!banned && !allowedBy(ruleset, ship)) {
-    return (
-      <span className="faint" title="Outside this ruleset's tiers or classes">
-        —
-      </span>
-    );
-  }
-  return (
-    <label className={`check${banned ? '' : ' on'}`} title={banned ? 'Banned — tick to allow' : 'Allowed — untick to ban'}>
-      <input
-        type="checkbox"
-        checked={!banned}
-        onChange={() => onChange(banned ? ruleset.banned.filter((id) => id !== ship.id) : [...ruleset.banned, ship.id])}
-      />
-    </label>
+      <Field label="Team size">
+        <div style={{ width: 52, flex: 'none' }}>
+          <NumInput
+            value={ruleset.maxShips}
+            min={0}
+            max={30}
+            step={1}
+            onChange={(v) => onChange({ maxShips: Math.max(0, Math.round(v)) })}
+          />
+        </div>
+        <span className="faint" style={{ fontSize: 11 }}>
+          {ruleset.maxShips ? 'ships per team at most' : 'no limit — set a number to cap ships per team'}
+        </span>
+      </Field>
+
+      <Field label="Bans">
+        <div className="ruleset-chips">
+          <span className="faint" style={{ fontSize: 11 }}>
+            {ruleset.banned.length} banned — switch a ship off in the table to ban it.
+          </span>
+          <button
+            className={`variant-chip${bannedOnly ? ' active' : ''}`}
+            disabled={!ruleset.banned.length && !bannedOnly}
+            onClick={() => onBannedOnly(!bannedOnly)}
+          >
+            Show only banned
+          </button>
+        </div>
+      </Field>
+
+      <Field label="Limits">
+        <div className="ruleset-limits">
+          {ruleset.limits.map((limit) => {
+            const picking = limit.id === limitId;
+            return (
+              <div key={limit.id} className={`ruleset-limit${picking ? ' active' : ''}`}>
+                <span>Max</span>
+                <div style={{ width: 52, flex: 'none' }}>
+                  <NumInput
+                    value={limit.max}
+                    min={0}
+                    max={12}
+                    step={1}
+                    onChange={(v) => patchLimit(limit.id, { max: Math.max(0, Math.round(v)) })}
+                  />
+                </div>
+                <span>of</span>
+                <div className="ruleset-chips" style={{ flex: 1 }}>
+                  {limit.ships.map((id) => (
+                    <button
+                      key={id}
+                      className="variant-chip"
+                      title="Take out of this limit"
+                      onClick={() => patchLimit(limit.id, { ships: limit.ships.filter((x) => x !== id) })}
+                    >
+                      {nameOf.get(id) ?? 'Unknown ship'} ×
+                    </button>
+                  ))}
+                  {!limit.ships.length && <span className="faint">no ships yet</span>}
+                </div>
+                <button className={`btn sm${picking ? ' primary' : ''}`} onClick={() => onLimitId(picking ? '' : limit.id)}>
+                  {picking ? 'Done' : 'Pick ships'}
+                </button>
+                <button
+                  className="btn sm danger"
+                  onClick={() => onChange({ limits: ruleset.limits.filter((l) => l.id !== limit.id) })}
+                >
+                  <Trash2 size={12} />
+                </button>
+              </div>
+            );
+          })}
+          <div>
+            <button
+              className="btn sm"
+              onClick={() => {
+                const limit: ShipLimit = { id: uid('limit-'), max: 2, ships: [] };
+                onChange({ limits: [...ruleset.limits, limit] });
+                onLimitId(limit.id);
+              }}
+            >
+              <Plus size={12} /> Limit
+            </button>
+          </div>
+        </div>
+      </Field>
+    </div>
   );
 }
 

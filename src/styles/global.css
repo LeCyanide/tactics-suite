@@ -795,14 +795,102 @@ input[type='range']::-webkit-slider-thumb {
   padding: 8px 10px;
   margin-bottom: 8px;
 }
-.ruleset-head {
+.ruleset-limits {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+.ruleset-limit {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
+  gap: 6px;
+  padding: 3px 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-size: 12px;
+  color: var(--fg-dim);
 }
-.ruleset-head .spacer {
-  flex: 1;
+.ruleset-limit.active {
+  border-color: var(--accent);
+}
+
+/* A switch that names its state, for the ruleset table */
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 11px;
+  color: var(--fg-faint);
+  cursor: default;
+}
+.switch-track {
+  width: 24px;
+  height: 13px;
+  flex: none;
+  border-radius: 7px;
+  background: var(--bg-4);
+  border: 1px solid var(--line-strong);
+  position: relative;
+}
+.switch-knob {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--fg-faint);
+  transition: left 0.12s;
+}
+.switch.on {
+  color: var(--fg);
+}
+.switch.on .switch-track {
+  background: var(--success);
+  border-color: var(--success);
+}
+.switch.on .switch-knob {
+  left: 12px;
+  background: #fff;
+}
+.switch.danger {
+  color: var(--danger);
+}
+.switch.danger .switch-track {
+  border-color: var(--danger);
+}
+.switch.danger .switch-knob {
+  background: var(--danger);
+}
+
+/* Sidebar: how much of the ruleset's team size the side being placed for has used */
+.team-count {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 6px;
+  margin-bottom: 5px;
+  border-radius: 3px;
+  background: var(--bg-2);
+  font-size: 11px;
+  color: var(--fg-dim);
+}
+.team-count.full {
+  background: var(--danger);
+  color: #fff;
+}
+
+/* Sidebar: a ship whose ruleset limit the team has already used up */
+.ship-item.limit-full {
+  opacity: 0.45;
+}
+.limit-chip.full {
+  background: var(--danger);
+  color: #fff;
 }
 .ruleset-chips {
   display: flex;

@@ -176,11 +176,26 @@ duration or a smoke consumable listed.
 A ruleset is a set of ship restrictions — a clan battle season, a tournament.
 There are no standard ones: a ruleset is added to the project it is for, saved
 in that project's file and travels with it when the project is exported.
-Create one with **+ Ruleset** in the ship database, then pick the tiers and
-classes it allows (**Any** means no limit) and untick individual ships in the
-**Allowed** column to ban them. **Show excluded ships** brings the ruled-out
-ships back, dimmed, so a ban can be lifted. A ruleset only narrows the lists;
-it never changes what is already on a page.
+Create one with **+ Ruleset** in the ship database and give it a name. Pick the
+tiers and classes it allows (**Any** means no limit); ships outside them leave
+the table. Every ship left has a switch reading **Allowed** or **Banned**. A
+banned ship stays in the table, dimmed, so a slip is one click to undo, and
+**Show only banned** lists the bans on their own for checking.
+
+A ruleset can also carry **limits** — "max 2 of these ships". Add one with
+**+ Limit**, set the number, and while **Pick ships** is on the table's
+switches put ships into that group instead of banning them. Limits are counted
+per team from what that team has on the page: in the sidebar picker each ship
+in a group shows `1/2`, and once the team has its full number the rest of the
+group is dimmed. That is a warning, not a lock — the ship can still be placed.
+
+**Team size** caps how many ships one team fields in all; zero means no cap.
+With one set, the picker shows the team's count — `5/7 ships` — and dims the
+whole list once the team is full. Like the limits, it warns and does not lock.
+
+In the sidebar picker a ruleset hides banned ships and those outside its tiers
+and classes. A ruleset only narrows the lists; it never changes what is
+already on a page.
 
 Re-importing an updated sheet merges rather than replaces: a ship already in
 the database keeps its id, its icon and every field the incoming file has
