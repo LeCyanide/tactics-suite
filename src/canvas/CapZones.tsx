@@ -36,7 +36,9 @@ export const CapZones = memo(function CapZones({ layout, map, opacity }: Props) 
   const flagW = BASE_FLAG_WIDTH * flagScale;
 
   return (
-    <Group listening={false} opacity={opacity}>
+    // Clipped to the map: a tournament layout can centre a zone on the very
+    // edge of the water, and the half beyond it is not anywhere a ship can be.
+    <Group listening={false} opacity={opacity} clipX={0} clipY={0} clipWidth={w} clipHeight={h}>
       {layout.points.map((p) => {
         const color = capColor(p.teamId);
         // A base is owned from the first second and carries the game's flag;
