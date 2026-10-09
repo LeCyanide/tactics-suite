@@ -94,8 +94,8 @@ pack('nsis', { withSidecar: true });
 clearStagedSidecar();
 pack('portable', { withSidecar: false });
 
-const setup = path.join(root, 'release', `WoWS-Tactics-Toolkit-Setup-${pkg.version}.exe`);
-const portable = path.join(root, 'release', `WoWS-Tactics-Toolkit-${pkg.version}.exe`);
+const setup = path.join(root, 'release', `WoWs-Tactics-Suite-Setup-${pkg.version}.exe`);
+const portable = path.join(root, 'release', `WoWs-Tactics-Suite-${pkg.version}.exe`);
 for (const [label, file] of [
   ['installer', setup],
   ['portable', portable],

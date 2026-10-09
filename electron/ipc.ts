@@ -365,7 +365,7 @@ export function registerIpc(getWindow: GetWindow): void {
   });
   /* ---- library ---- */
 
-  handle('replay:defaultRoot', () => path.join(app.getPath('documents'), 'WoWS Tactics', 'Replays'));
+  handle('replay:defaultRoot', () => path.join(app.getPath('documents'), 'WoWs Tactics Suite', 'Replays'));
   handle('replay:pickRoot', async () => {
     const res = await dialog.showOpenDialog(getWindow()!, {
       title: 'Choose a folder for your replays',

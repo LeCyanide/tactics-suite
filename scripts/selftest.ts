@@ -18,6 +18,7 @@ import { foldForSearch } from '../src/lib/util';
 import { allowedBy, filterShips, hasRadar, hasSmoke, inScope, limitUse, type ShipFilter } from '../src/lib/shipFilters';
 import { mergeKey, shipRangeKm } from '../src/state/store';
 import * as db from '../electron/storage/db';
+import { LEGACY_APP_FOLDERS, adoptLegacyStore } from '../electron/storage/migrate';
 import { testReplayArchive } from './selftest-archive';
 import { testSidecar } from './selftest-sidecar';
 import { testReplayTimeline } from './selftest-timeline';
@@ -182,6 +183,73 @@ async function testShipFilters(): Promise<void> {
   check('limit: the same ship twice counts twice', twoPlaced?.used === 2 && twoPlaced.max === 2, twoPlaced);
   const tight = limitUse(capped, dm, []);
   check('limit: the tightest of several limits is reported', tight?.used === 0 && tight.max === 1, tight);
+}
+
+/**
+ * The store follows the application's name, so the rename from Toolkit to
+ * Suite has to bring every user's projects with it. Each case is a tree under
+ * a temp directory standing in for %APPDATA%.
+ */
+async function testStoreMigration(): Promise<void> {
+  console.log('\nstore migration on rename');
+
+  const base = await fs.mkdtemp(path.join(os.tmpdir(), 'wowsplan-migrate-'));
+  const exists = (p: string) => fs.access(p).then(() => true, () => false);
+  let n = 0;
+  const appData = async (withOld: boolean, withNew: boolean) => {
+    const dir = path.join(base, String(n++));
+    const oldData = path.join(dir, LEGACY_APP_FOLDERS[0], 'data');
+    const newData = path.join(dir, 'WoWs Tactics Suite', 'data');
+    if (withOld) {
+      await fs.mkdir(path.join(oldData, 'projects'), { recursive: true });
+      await fs.writeFile(path.join(oldData, 'projects', 'p1.json'), '{"name":"old plan"}');
+      await fs.writeFile(path.join(oldData, 'settings.json'), '{"theme":"light"}');
+    }
+    if (withNew) {
+      await fs.mkdir(newData, { recursive: true });
+      await fs.writeFile(path.join(newData, 'settings.json'), '{"theme":"dark"}');
+    }
+    return { oldData, newData };
+  };
+
+  {
+    const { oldData, newData } = await appData(false, false);
+    const adopted = adoptLegacyStore(newData, [oldData]);
+    check('a first install starts a fresh store', adopted.outcome === 'fresh' && adopted.root === newData, adopted);
+    check('and creates nothing while deciding', !(await exists(newData)));
+  }
+
+  {
+    const { oldData, newData } = await appData(true, false);
+    const adopted = adoptLegacyStore(newData, [oldData]);
+    check('a store under the old name is moved to the new one', adopted.outcome === 'moved' && adopted.root === newData, adopted);
+    const plan = await fs.readFile(path.join(newData, 'projects', 'p1.json'), 'utf8').catch(() => '');
+    check('with its projects and settings intact', plan === '{"name":"old plan"}' && (await exists(path.join(newData, 'settings.json'))));
+    check('leaving no second copy behind', !(await exists(oldData)));
+    const again = adoptLegacyStore(newData, [oldData]);
+    check('and the next start simply uses it', again.outcome === 'current' && again.from === undefined, again);
+  }
+
+  {
+    const { oldData, newData } = await appData(true, true);
+    const adopted = adoptLegacyStore(newData, [oldData]);
+    check('a store already under the new name wins', adopted.outcome === 'current' && adopted.root === newData, adopted);
+    const settings = await fs.readFile(path.join(newData, 'settings.json'), 'utf8');
+    check('and neither folder is touched', settings === '{"theme":"dark"}' && (await exists(path.join(oldData, 'projects', 'p1.json'))));
+  }
+
+  {
+    // The new place cannot be created: its parent path is taken by a file.
+    // Both the move and the copy must fail, and the old store must survive.
+    const { oldData } = await appData(true, false);
+    const blocker = path.join(base, 'blocker');
+    await fs.writeFile(blocker, '');
+    const adopted = adoptLegacyStore(path.join(blocker, 'data'), [oldData]);
+    check('when the store cannot be brought over it is used where it is', adopted.outcome === 'left-in-place' && adopted.root === oldData, adopted);
+    check('and it is still whole', await exists(path.join(oldData, 'projects', 'p1.json')));
+  }
+
+  await fs.rm(base, { recursive: true, force: true });
 }
 
 async function testPackage(): Promise<void> {
@@ -533,6 +601,7 @@ async function testSeeding(): Promise<void> {
 async function main(): Promise<void> {
   await testShipImport();
   await testShipFilters();
+  await testStoreMigration();
   await testNameFolding();
   await testPackage();
   await testExportDestinations();

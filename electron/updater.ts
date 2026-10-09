@@ -243,7 +243,7 @@ async function downloadPortable(manifest: PortableManifest, exe: string, version
  * the launcher releases its lock, and starts whichever version is then in
  * place: the new one, or the old one if the swap never went through.
  *
- * A file named after its version (WoWS-Tactics-Toolkit-1.3.2.exe) is renamed
+ * A file named after its version (WoWs-Tactics-Suite-1.3.2.exe) is renamed
  * to the new one; a name without the running version is kept as it is. The
  * new version starts as soon as it is in place, and only then is the old file
  * removed, so a file that is slow or unable to go never holds up the restart.
@@ -258,9 +258,12 @@ async function swapPortable(exe: string, newVersion: string): Promise<void> {
 
   const name = path.basename(exe);
   const at = name.lastIndexOf(app.getVersion());
+  // A file that still carries the name from before the rename takes the new
+  // one along with the new version; a name the user chose is left alone.
+  const stem = (prefix: string) => prefix.replace(/^WoWS-Tactics-Toolkit-/, 'WoWs-Tactics-Suite-');
   const target =
     at >= 0
-      ? path.join(path.dirname(exe), name.slice(0, at) + newVersion + name.slice(at + app.getVersion().length))
+      ? path.join(path.dirname(exe), stem(name.slice(0, at)) + newVersion + name.slice(at + app.getVersion().length))
       : exe;
 
   const quote = (s: string) => `'${s.replace(/'/g, "''")}'`;
@@ -282,7 +285,7 @@ async function swapPortable(exe: string, newVersion: string): Promise<void> {
       : [`if ($start -ne ${quote(exe)}) { $deadline = (Get-Date).AddSeconds(60); ${retry(`[System.IO.File]::Delete(${quote(exe)})`, 'removed the old exe')} }`];
   // What happened is only visible after this process is gone, so the helper
   // leaves a short trail in the temp folder.
-  const log = path.join(app.getPath('temp'), 'wows-tactics-update.log');
+  const log = path.join(app.getPath('temp'), 'wows-tactics-suite-update.log');
   const script = [
     // Logging is best effort: a log another process holds open must not stop the swap.
     `function Log($m) { try { Add-Content -LiteralPath ${quote(log)} -Value ("{0:u} {1}" -f (Get-Date), $m) -ErrorAction Stop } catch {} }`,
@@ -312,7 +315,7 @@ function launchHidden(script: string): void {
   const command = `powershell.exe -NoProfile -NonInteractive -WindowStyle Hidden -EncodedCommand ${Buffer.from(script, 'utf16le').toString('base64')}`;
   const wscript = path.join(process.env.SystemRoot ?? 'C:\\Windows', 'System32', 'wscript.exe');
   if (fs.existsSync(wscript)) {
-    const vbs = path.join(app.getPath('temp'), 'wows-tactics-update.vbs');
+    const vbs = path.join(app.getPath('temp'), 'wows-tactics-suite-update.vbs');
     // Window style 0: hidden from the start, so no terminal ever claims it.
     fs.writeFileSync(vbs, `CreateObject("WScript.Shell").Run "${command}", 0, False\r\n`);
     spawn(wscript, ['//B', '//Nologo', vbs], { detached: true, stdio: 'ignore', windowsHide: true }).unref();

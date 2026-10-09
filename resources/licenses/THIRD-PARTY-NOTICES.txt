@@ -1,4 +1,4 @@
-WoWS Tactics Toolkit — third-party notices
+WoWs Tactics Suite — third-party notices
 ==========================================
 
 wows-toolkit

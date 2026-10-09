@@ -30,6 +30,7 @@
  */
 
 import { app } from 'electron';
+import { LEGACY_APP_FOLDERS, adoptLegacyStore } from './migrate';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 import path from 'node:path';
@@ -60,7 +61,18 @@ export function storageRoot(): string {
   // only the derived default is cached.
   const override = process.env.WOWSPLAN_DATA_DIR;
   if (override) return path.resolve(override);
-  if (!ROOT) ROOT = path.join(app.getPath('userData'), 'data');
+  if (!ROOT) {
+    // The folder is named after the application, so a store made under an
+    // earlier name is brought over here, before anything is read from it.
+    const adopted = adoptLegacyStore(
+      path.join(app.getPath('userData'), 'data'),
+      LEGACY_APP_FOLDERS.map((name) => path.join(app.getPath('appData'), name, 'data')),
+    );
+    ROOT = adopted.root;
+    if (adopted.from) {
+      console.log(`[storage] ${adopted.outcome}: ${adopted.from} -> ${adopted.root}${adopted.reason ? ` (${adopted.reason})` : ''}`);
+    }
+  }
   return ROOT;
 }
 

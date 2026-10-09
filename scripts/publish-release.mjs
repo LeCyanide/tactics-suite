@@ -88,8 +88,8 @@ if (has('--notes-only')) {
   process.exit(0);
 }
 
-const setup = `WoWS-Tactics-Toolkit-Setup-${version}.exe`;
-const portable = `WoWS-Tactics-Toolkit-${version}.exe`;
+const setup = `WoWs-Tactics-Suite-Setup-${version}.exe`;
+const portable = `WoWs-Tactics-Suite-${version}.exe`;
 const binaries = [setup, `${setup}.blockmap`, portable];
 for (const f of [...binaries, 'latest.yml']) {
   if (!fs.existsSync(path.join(releaseDir, f))) throw new Error(`release/${f} is missing; run npm run dist first.`);

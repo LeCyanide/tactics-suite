@@ -8,10 +8,12 @@ import semver from 'semver';
 
 /**
  * Installers, portable exes, blockmaps and zips, in both the current dashed
- * names and the spaced names older builds used. Captures the version.
+ * names and the spaced names older builds used, and under the Toolkit name the
+ * application had up to 2.1.0: those files are still on the server and in
+ * release/, and have to be recognised to be cleared out. Captures the version.
  */
 export const RELEASE_FILE =
-  /^WoWS[- ]Tactics[- ]Toolkit[- ](?:Setup[- ])?(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)(?: \([^)]*\))?\.(?:exe|zip)(?:\.blockmap)?$/;
+  /^WoW[Ss][- ]Tactics[- ](?:Toolkit|Suite)[- ](?:Setup[- ])?(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)(?: \([^)]*\))?\.(?:exe|zip)(?:\.blockmap)?$/;
 
 /** Splits a folder listing into what the rule keeps and what it removes. Other files are never touched. */
 export function staleReleases(files, version) {

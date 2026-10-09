@@ -1,4 +1,4 @@
-# WoWS tactics toolkit
+# WoWs Tactics Suite
 
 Awooga I don't know what I am doing. 
 
@@ -91,7 +91,7 @@ npm run release
 under it a list for each `###` heading, such as `### Changelog` and
 `### In testing`. `release` refuses to run without a section for the version
 being released, and publishes that section as `patch-notes.json` beside the
-manifests. That file is all the toolkit does about announcements — it never
+manifests. That file is all the suite does about announcements — it never
 posts anywhere. The clan bot's `/release` command reads it and posts the notes
 in whichever channel the command is used. To correct the notes after a release
 without rebuilding:
@@ -112,10 +112,17 @@ can no longer update once it changes.
 
 ## data storage
 
-Everything is stored locally under the OS application-data directory:
+Everything is stored locally under the OS application-data directory, in a
+folder named after the application. Up to 2.1.0 that name was "WoWS Tactics
+Toolkit". The first start of a later version moves the old `data` folder to
+the new name before reading anything, so projects, maps and settings carry
+over; if the move is refused it copies instead, and if that fails too it goes
+on using the old folder rather than start empty. The installer's identity
+(`appId`) deliberately still says toolkit: changing it would make an update
+install a second copy beside the first instead of replacing it.
 
 ```
-%APPDATA%\WoWS Tactics Toolkit\data\
+%APPDATA%\WoWs Tactics Suite\data\
   settings.json               application settings
   projects/<id>.json          one document per project
   maps/maps.json              map database index
