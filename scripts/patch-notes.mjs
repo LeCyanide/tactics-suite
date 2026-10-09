@@ -7,6 +7,9 @@
  *   ## 2.1.0
  *   - Ships no longer land on top of each other when moved as a group
  *
+ * A blank line between two items starts a new paragraph in the post, which is
+ * how a group of notes is set apart from the rest.
+ *
  * `npm run release` publishes the section for the version being released as
  * patch-notes.json beside the update manifests, and the bot's /release command
  * reads it from there. Nothing here knows about Discord.
@@ -26,7 +29,8 @@ export const PUBLISHED_NAME = 'patch-notes.json';
 /**
  * The notes under one version's heading, one per list item, or null when the
  * file has no heading for it. A leading "v" on the heading is allowed; text
- * that is not a list item — an intro line, a blank — is not a note.
+ * that is not a list item is not a note. A blank line between two items comes
+ * through as an empty note, which is the paragraph break.
  */
 export function notesFor(text, version) {
   const lines = text.split(/\r?\n/);
@@ -37,10 +41,18 @@ export function notesFor(text, version) {
   if (start < 0) return null;
 
   const notes = [];
+  let gap = false;
   for (const line of lines.slice(start + 1)) {
     if (/^##?\s/.test(line)) break;
+    if (line.trim() === '') {
+      gap = true;
+      continue;
+    }
     const item = /^\s*[-*]\s+(.*\S)\s*$/.exec(line);
-    if (item) notes.push(item[1]);
+    if (!item) continue;
+    if (gap && notes.length > 0) notes.push('');
+    gap = false;
+    notes.push(item[1]);
   }
   return notes;
 }
@@ -52,6 +64,6 @@ export function patchNotes(version) {
   if (notes === null) {
     throw new Error(`PATCHNOTES.md has no "## ${version}" section; rename "## Unreleased" or add one.`);
   }
-  if (notes.length === 0) throw new Error(`The "## ${version}" section of PATCHNOTES.md has no notes in it.`);
+  if (!notes.some((note) => note !== '')) throw new Error(`The "## ${version}" section of PATCHNOTES.md has no notes in it.`);
   return { version, notes };
 }

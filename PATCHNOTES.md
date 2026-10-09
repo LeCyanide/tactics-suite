@@ -5,18 +5,20 @@ release` publishes the section for the version in `package.json`, and `/release`
 in Discord posts it. Write for the people using the app: what changed for them,
 not what changed in the code.
 
+A blank line between two items starts a new paragraph in the post.
+
 Collect notes under `## Unreleased` as work lands, and rename that heading to
 the version number when it is bumped.
 
 ## Unreleased
 
-- Moving several ships at once no longer throws them on top of each other
-- Select now works on one object at a time; Multi-select (Shift+V) builds a group by box or by click and moves it together
-- Ship names and range rings follow a ship while it is being dragged
-- Ships can be filtered by radar and by smoke, in the ship database and in the sidebar
-- Smoke data for every destroyer from tier V up
-- Rulesets: per project, limit ships by tier and class, ban individual ships, cap groups ("max 2 of these") and set a team size
-- Share a page straight to Discord from the export dialog
-- 15.9 tournament cap layouts added
-- Players show up again in replays from 15.9
-- Switching pages no longer marks a saved project as unsaved
+- New: rulesets. Add one to a project to limit ships by tier and class, ban individual ships, cap a group ("max 2 of these") and set a team size
+- New: ship filter for radar and smoke
+- KotS tournament cap layouts added
+- Fixed: Standard select and Multi-select are now properly split
+- Fixed: ships moved as a group no longer jump on top of each other
+- Fixed: a ship's name and range rings now follow it while it is being dragged
+- Fixed: replay render display issues in 15.9
+- Fixed: switching pages no longer marks a saved project as unsaved
+
+- *In testing:* share a page straight to Discord from the export dialog
