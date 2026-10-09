@@ -23,7 +23,7 @@ import { MapBackground } from './MapBackground';
 import { ReplayLayer } from './ReplayLayer';
 import { CapZones } from './CapZones';
 import { ObjectNode, flatten } from './ObjectNode';
-import { ShipLabel, ShipNode, ShipRanges } from './ShipNode';
+import { ShipLabel, ShipNode, ShipRanges, attachmentName } from './ShipNode';
 import { DEFAULT_EXPORT, setCanvasApi, type ExportOptions } from './canvasBridge';
 import { clamp, dist, simplifyPath, uid, gridRef } from '@/lib/util';
 import { createMarker, createNumber, createPath, createShape, createText } from '@/lib/factory';
@@ -105,7 +105,15 @@ export default function MapCanvas() {
   const [exportOpts, setExportOpts] = useState<ExportOptions | null>(null);
   const [pings, setPings] = useState<Ping[]>([]);
 
-  const dragRef = useRef<{ last: Vec2; ids: ID[] } | null>(null);
+  /**
+   * The move in progress: the node under the pointer, and everything that
+   * travels with it. Each follower is held with the position it started from,
+   * so a frame places it at start + delta rather than nudging it by whatever
+   * the last frame left behind.
+   */
+  const dragRef = useRef<{ lead: Konva.Node; origin: Vec2; followers: { node: Konva.Node; start: Vec2 }[] } | null>(
+    null,
+  );
   const fitScaleRef = useRef(0.02);
 
   const plannedMap: GameMap | null = useMemo(
@@ -324,7 +332,16 @@ export default function MapCanvas() {
 
     if (e.evt.button !== 0) return;
 
-    if (tool === 'select' || tool === 'marquee') {
+    // Select works on one object at a time: empty water has nothing to offer
+    // it but a way to let go of that object.
+    if (tool === 'select') {
+      if (onEmpty) {
+        useStore.getState().clearSelection();
+        ping(toWorld(pos));
+      }
+      return;
+    }
+    if (tool === 'marquee') {
       if (onEmpty) {
         if (!e.evt.shiftKey) useStore.getState().clearSelection();
         setMarquee({ x: pos.x, y: pos.y, w: 0, h: 0 });
@@ -451,7 +468,7 @@ export default function MapCanvas() {
     setPings((prev) => [...prev.slice(-4), { id, x: world.x, y: world.y, colour: toolOptions.stroke.color }]);
   };
 
-  const finishMarquee = () => {
+  const finishMarquee = (additive: boolean) => {
     if (!marquee || !page) return setMarquee(null);
     const box = {
       x: Math.min(marquee.x, marquee.x + marquee.w),
@@ -476,7 +493,7 @@ export default function MapCanvas() {
         r.x < box.x + box.width && r.x + r.width > box.x && r.y < box.y + box.height && r.y + r.height > box.y;
       if (intersects) hits.push(id);
     }
-    useStore.getState().select(hits);
+    useStore.getState().select(hits, additive);
   };
 
   const commitDraft = () => {
@@ -514,9 +531,9 @@ export default function MapCanvas() {
       .addObjects([{ ...(current.obj as PathObject), x: origin.x, y: origin.y, points: rel } as TacticalObject]);
   };
 
-  const onMouseUp = () => {
+  const onMouseUp = (e: KonvaEventObject<MouseEvent>) => {
     if (marquee) {
-      finishMarquee();
+      finishMarquee(e.evt.shiftKey);
       return;
     }
     if (draft?.kind === 'shape') commitDraft();
@@ -544,66 +561,95 @@ export default function MapCanvas() {
     const id = node.id();
     if (!id) return;
     e.cancelBubble = true;
-    if (e.evt.shiftKey || e.evt.ctrlKey) useStore.getState().toggleSelect(id);
+    // In Multi-select a click adds to the group or takes away from it; in
+    // Select it replaces whatever was held.
+    if (tool === 'marquee') useStore.getState().toggleSelect(id);
     else useStore.getState().select([id]);
   };
 
+  /**
+   * Whether the pointer may move an object. Asked again of every member of a
+   * group before it is carried along, so a marquee that swept up a locked
+   * object does not drag it off with the rest.
+   */
+  const isDraggable = (o: TacticalObject): boolean => {
+    if (tool !== 'select' && tool !== 'marquee') return false;
+    if (o.locked || exportOpts) return false;
+    const layer = page?.layers.find((l) => l.id === o.layerId);
+    if (layer?.locked) return false;
+    if (o.type === 'ship' && o.teamId && teamById.get(o.teamId)?.locked) return false;
+    return true;
+  };
+
+  /**
+   * Starts a move. In Select that is the one object under the pointer; in
+   * Multi-select it is the whole group, which the object joins if it was not
+   * already part of it.
+   *
+   * Nothing but this handler ever moves a group. The transformer would do it
+   * too if it were handed more than one node, by starting a drag of its own on
+   * every other member, and two movers on the same nodes is what threw ships
+   * on top of each other.
+   */
   const onDragStart = (e: KonvaEventObject<DragEvent>) => {
-    const node = e.target;
-    const id = node.id();
-    if (!id) return;
-    if (!selection.includes(id)) useStore.getState().select([id]);
-    useStore.getState().pushHistory();
-    dragRef.current = {
-      last: { x: node.x(), y: node.y() },
-      ids: (selection.includes(id) ? selection : [id]).filter((x) => x !== id),
-    };
+    const lead = e.target;
+    const id = lead.id();
+    const layer = contentRef.current;
+    if (!id || !layer || !page || dragRef.current) return;
+
+    const store = useStore.getState();
+    let group: ID[] = [id];
+    if (tool === 'marquee') {
+      if (!selection.includes(id)) store.select([id], true);
+      group = [...new Set([...selection, id])];
+    } else if (selection.length !== 1 || selection[0] !== id) {
+      store.select([id]);
+    }
+    store.pushHistory();
+
+    const followers: { node: Konva.Node; start: Vec2 }[] = [];
+    const follow = (node: Konva.Node) => followers.push({ node, start: node.position() });
+    for (const memberId of group) {
+      if (memberId !== id) {
+        const obj = page.objects.find((o) => o.id === memberId);
+        const node = layer.findOne(`#${memberId}`);
+        if (!obj || !node || !isDraggable(obj)) continue;
+        follow(node);
+      }
+      // A ship's name and range rings are drawn beside its marker, not inside it.
+      layer.find(`.${attachmentName(memberId)}`).forEach(follow);
+    }
+    dragRef.current = { lead, origin: lead.position(), followers };
   };
 
   const onDragMove = (e: KonvaEventObject<DragEvent>) => {
-    const node = e.target;
-    if (snapOn) {
-      node.x(Math.round(node.x() / snapStep) * snapStep);
-      node.y(Math.round(node.y() / snapStep) * snapStep);
-    }
     const state = dragRef.current;
-    if (!state) return;
-    // Move the rest of the selection by the same delta, imperatively, so a
-    // multi-object drag stays smooth without a store write per frame.
-    const dx = node.x() - state.last.x;
-    const dy = node.y() - state.last.y;
-    if (!dx && !dy) return;
-    const layer = contentRef.current;
-    if (layer) {
-      for (const id of state.ids) {
-        const other = layer.findOne(`#${id}`);
-        if (other) other.position({ x: other.x() + dx, y: other.y() + dy });
-      }
+    if (!state || e.target !== state.lead) return;
+    const { lead, origin, followers } = state;
+    if (snapOn) {
+      lead.x(Math.round(lead.x() / snapStep) * snapStep);
+      lead.y(Math.round(lead.y() / snapStep) * snapStep);
     }
-    state.last = { x: node.x(), y: node.y() };
+    // Imperative, so a group drag stays smooth without a store write per frame.
+    const dx = lead.x() - origin.x;
+    const dy = lead.y() - origin.y;
+    for (const { node, start } of followers) node.position({ x: start.x + dx, y: start.y + dy });
   };
 
   const onDragEnd = (e: KonvaEventObject<DragEvent>) => {
-    const node = e.target;
-    const store = useStore.getState();
-    const id = node.id();
     const state = dragRef.current;
+    if (!state || e.target !== state.lead) return;
     dragRef.current = null;
-    if (!id || !page) return;
+    const { lead, followers } = state;
 
-    const moved = page.objects.find((o) => o.id === id);
-    if (!moved) return;
-    const dx = node.x() - moved.x;
-    const dy = node.y() - moved.y;
-
-    const patches: { id: ID; x: number; y: number }[] = [{ id, x: node.x(), y: node.y() }];
-    for (const otherId of state?.ids ?? []) {
-      const other = page.objects.find((o) => o.id === otherId);
-      if (other) patches.push({ id: otherId, x: other.x + dx, y: other.y + dy });
-    }
+    // Attachments are not objects: they take their place from the ship they
+    // belong to, so only nodes that carry an object's id are written back.
+    const patches = [{ node: lead }, ...followers]
+      .filter(({ node }) => node.hasName('object'))
+      .map(({ node }) => ({ id: node.id(), x: node.x(), y: node.y() }));
 
     // Single commit for the whole gesture; history was pushed on drag start.
-    store.moveObjectsTo(patches);
+    useStore.getState().moveObjectsTo(patches);
   };
 
   /* ------------------------------------------------------------------ */
@@ -616,14 +662,10 @@ export default function MapCanvas() {
     const tr = trRef.current;
     const layer = contentRef.current;
     if (!tr || !layer) return;
-    if (tool !== 'select' || !selection.length || editingText) {
-      tr.nodes([]);
-      return;
-    }
-    const nodes = selection
-      .map((id) => layer.findOne(`#${id}`))
-      .filter((n): n is Konva.Node => !!n && n.isVisible());
-    tr.nodes(nodes);
+    // One object or none. A group is moved by the drag handlers alone, and
+    // has no handles to turn or resize it by.
+    const node = tool === 'select' && selection.length === 1 && !editingText ? layer.findOne(`#${selection[0]}`) : null;
+    tr.nodes(node?.isVisible() ? [node] : []);
     tr.getLayer()?.batchDraw();
   }, [selection, tool, editingText, page?.objects]);
 
@@ -738,18 +780,6 @@ export default function MapCanvas() {
     if (o.type === 'ship') {
       const team = (o as ShipObject).teamId ? teamById.get((o as ShipObject).teamId as string) : undefined;
       if (team && !team.visible) return false;
-    }
-    return true;
-  };
-
-  const isDraggable = (o: TacticalObject): boolean => {
-    if (tool !== 'select') return false;
-    if (o.locked || exportOpts) return false;
-    const layer = layerById.get(o.layerId);
-    if (layer?.locked) return false;
-    if (o.type === 'ship') {
-      const team = (o as ShipObject).teamId ? teamById.get((o as ShipObject).teamId as string) : undefined;
-      if (team?.locked) return false;
     }
     return true;
   };
@@ -963,7 +993,6 @@ export default function MapCanvas() {
             rotateAnchorOffset={18}
             anchorStyleFunc={styleAnchor}
             onTransformEnd={onTransformEnd}
-            onDragEnd={onTransformEnd}
           />
         </Layer>
 

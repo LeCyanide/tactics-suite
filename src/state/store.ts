@@ -288,6 +288,15 @@ export function getActivePage(state: State): Page | null {
   return activePageOf(state.project);
 }
 
+/**
+ * A selection of more than one object belongs to Multi-select. Whatever
+ * produced it — a paste, a duplicate, select-all — the tool follows, so Select
+ * never finds itself holding a group.
+ */
+function groupSelection(tool: ToolId, selection: ID[]): { selection: ID[]; tool: ToolId } {
+  return { selection, tool: tool === 'select' && selection.length > 1 ? 'marquee' : tool };
+}
+
 export const useStore = create<Store>((set, get) => {
   /** Persists the current project; debounced for autosave. */
   const persist = async (opts: { backup?: boolean } = {}) => {
@@ -786,7 +795,7 @@ export const useStore = create<Store>((set, get) => {
       commitPage((page) => {
         page.objects.push(...objects);
       }, { history: opts.history !== false });
-      if (opts.select !== false) set({ selection: objects.map((o) => o.id) });
+      if (opts.select !== false) get().select(objects.map((o) => o.id));
     },
 
     updateObject(id, patch, opts = {}) {
@@ -1272,9 +1281,14 @@ export const useStore = create<Store>((set, get) => {
 
     /* -------------------------------- ui ------------------------------- */
 
+    /**
+     * Select holds one object and Multi-select holds a group, and the two never
+     * share a selection: a group carried into Select would be handed to the
+     * transformer, which moves its nodes itself and fights the group drag.
+     */
     setTool(tool) {
-      set({ tool });
-      if (tool !== 'select' && tool !== 'marquee') set({ selection: [] });
+      const keep = tool === 'marquee' || (tool === 'select' && get().selection.length <= 1);
+      set(keep ? { tool } : { tool, selection: [] });
     },
 
     patchToolOptions(patch) {
@@ -1282,13 +1296,16 @@ export const useStore = create<Store>((set, get) => {
     },
 
     select(ids, additive) {
-      set((s) => ({ selection: additive ? [...new Set([...s.selection, ...ids])] : ids }));
+      set((s) => groupSelection(s.tool, additive ? [...new Set([...s.selection, ...ids])] : ids));
     },
 
     toggleSelect(id) {
-      set((s) => ({
-        selection: s.selection.includes(id) ? s.selection.filter((x) => x !== id) : [...s.selection, id],
-      }));
+      set((s) =>
+        groupSelection(
+          s.tool,
+          s.selection.includes(id) ? s.selection.filter((x) => x !== id) : [...s.selection, id],
+        ),
+      );
     },
 
     clearSelection() {

@@ -9,7 +9,7 @@ import { withAlpha } from '@/lib/util';
 
 /**
  * Drag is handled by delegation on the content Layer (see MapCanvas), which
- * keeps one code path for single and multi-object drags. react-konva warns
+ * keeps one code path for single and group drags. react-konva warns
  * when a draggable node has no local handler, so nodes carry this no-op; the
  * real work still happens when the event bubbles up.
  */
@@ -24,6 +24,13 @@ const RANGE_LABEL: Record<string, string> = {
   torpedo: 'Torpedo',
   airstrike: 'Airstrike',
 };
+
+/**
+ * Konva name shared by everything drawn for a ship outside its marker node —
+ * the name and the range rings. They are siblings of the marker, so a drag has
+ * to find them by this to take them along.
+ */
+export const attachmentName = (id: string) => `with-${id}`;
 
 /** Width of the name plate, in screen px, used to centre it under the hull. */
 const NAME_FONT = 10.5;
@@ -147,7 +154,7 @@ export const ShipLabel = memo(function ShipLabel({
   const name = obj.label || obj.shipName;
 
   return (
-    <Group x={obj.x} y={obj.y} opacity={obj.opacity} listening={false}>
+    <Group name={attachmentName(obj.id)} x={obj.x} y={obj.y} opacity={obj.opacity} listening={false}>
       <Group scaleX={inv} scaleY={inv}>
         <Text
           text={name}
@@ -222,7 +229,7 @@ export const ShipRanges = memo(function ShipRanges({ obj, ship, flags, inv, them
   });
 
   return (
-    <Group x={obj.x} y={obj.y} listening={false} opacity={obj.opacity}>
+    <Group name={attachmentName(obj.id)} x={obj.x} y={obj.y} listening={false} opacity={obj.opacity}>
       {rings.map((ring) => {
         if (!ring) return null;
         const { key, km, radius, style } = ring;

@@ -249,6 +249,21 @@ leaving the ships in place.
 
 ---
 
+## Selecting and moving
+
+**Select** (`V`) holds one object at a time: click to pick it, drag to move
+it, and use its handles to turn or resize it. **Multi-select** (`Shift+V`)
+holds a group: drag a box over open water or click objects to add and remove
+them, then drag any member to move the whole group together. `Shift` while
+boxing adds to the group instead of replacing it.
+
+The two never share a selection. Anything that selects several objects at once
+— select all, a paste, a duplicate — switches to Multi-select, and going back
+to Select with a group still held lets go of it. A group has no rotate or
+resize handles; locked objects caught in a box stay where they are.
+
+---
+
 ## Keyboard
 
 | | |
