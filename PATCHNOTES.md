@@ -12,6 +12,8 @@ the version number when it is bumped.
 
 ## Unreleased
 
+## 2.1.0
+
 - New: rulesets. Add one to a project to limit ships by tier and class, ban individual ships, cap a group ("max 2 of these") and set a team size
 - New: ship filter for radar and smoke
 - KotS tournament cap layouts added
