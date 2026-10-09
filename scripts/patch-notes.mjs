@@ -2,13 +2,18 @@
  * Reads PATCHNOTES.md.
  *
  * The file is the one place release notes are written. It is a heading per
- * version with a list under it:
+ * version, and under it one or more headed lists:
  *
  *   ## 2.1.0
+ *
+ *   ### Changelog
  *   - Ships no longer land on top of each other when moved as a group
  *
- * A blank line between two items starts a new paragraph in the post, which is
- * how a group of notes is set apart from the rest.
+ *   ### In testing
+ *   - Share a page straight to Discord
+ *
+ * Each `###` heading becomes a header in the post. Notes written before any
+ * heading are the changelog.
  *
  * `npm run release` publishes the section for the version being released as
  * patch-notes.json beside the update manifests, and the bot's /release command
@@ -26,13 +31,16 @@ export const PATCH_NOTES_FILE = path.join(root, 'PATCHNOTES.md');
 /** The name the notes are served under on the update server. */
 export const PUBLISHED_NAME = 'patch-notes.json';
 
+/** What notes with no heading of their own are filed under. */
+const DEFAULT_TITLE = 'Changelog';
+
 /**
- * The notes under one version's heading, one per list item, or null when the
- * file has no heading for it. A leading "v" on the heading is allowed; text
- * that is not a list item is not a note. A blank line between two items comes
- * through as an empty note, which is the paragraph break.
+ * The headed lists under one version's heading, or null when the file has no
+ * heading for it. A leading "v" on the version heading is allowed. Text that
+ * is neither a `###` heading nor a list item is not a note, and a heading with
+ * nothing under it is dropped.
  */
-export function notesFor(text, version) {
+export function sectionsFor(text, version) {
   const lines = text.split(/\r?\n/);
   const start = lines.findIndex((line) => {
     const m = /^##\s+v?(\S+)\s*$/.exec(line);
@@ -40,30 +48,36 @@ export function notesFor(text, version) {
   });
   if (start < 0) return null;
 
-  const notes = [];
-  let gap = false;
+  const sections = [];
+  let current = null;
   for (const line of lines.slice(start + 1)) {
     if (/^##?\s/.test(line)) break;
-    if (line.trim() === '') {
-      gap = true;
+
+    const heading = /^###\s+(.*\S)\s*$/.exec(line);
+    if (heading) {
+      current = { title: heading[1].replace(/:$/, ''), notes: [] };
+      sections.push(current);
       continue;
     }
+
     const item = /^\s*[-*]\s+(.*\S)\s*$/.exec(line);
     if (!item) continue;
-    if (gap && notes.length > 0) notes.push('');
-    gap = false;
-    notes.push(item[1]);
+    if (current === null) {
+      current = { title: DEFAULT_TITLE, notes: [] };
+      sections.push(current);
+    }
+    current.notes.push(item[1]);
   }
-  return notes;
+  return sections.filter((section) => section.notes.length > 0);
 }
 
 /** What gets published for a version. Throws with what to do when there is nothing to publish. */
 export function patchNotes(version) {
   if (!fs.existsSync(PATCH_NOTES_FILE)) throw new Error('PATCHNOTES.md is missing.');
-  const notes = notesFor(fs.readFileSync(PATCH_NOTES_FILE, 'utf8'), version);
-  if (notes === null) {
+  const sections = sectionsFor(fs.readFileSync(PATCH_NOTES_FILE, 'utf8'), version);
+  if (sections === null) {
     throw new Error(`PATCHNOTES.md has no "## ${version}" section; rename "## Unreleased" or add one.`);
   }
-  if (!notes.some((note) => note !== '')) throw new Error(`The "## ${version}" section of PATCHNOTES.md has no notes in it.`);
-  return { version, notes };
+  if (sections.length === 0) throw new Error(`The "## ${version}" section of PATCHNOTES.md has no notes in it.`);
+  return { version, sections };
 }

@@ -87,8 +87,9 @@ npm run dist
 npm run release
 ```
 
-`PATCHNOTES.md` is where release notes are written: a heading per version with
-a list under it. `release` refuses to run without a section for the version
+`PATCHNOTES.md` is where release notes are written: a heading per version, and
+under it a list for each `###` heading, such as `### Changelog` and
+`### In testing`. `release` refuses to run without a section for the version
 being released, and publishes that section as `patch-notes.json` beside the
 manifests. That file is all the toolkit does about announcements — it never
 posts anywhere. The clan bot's `/release` command reads it and posts the notes
