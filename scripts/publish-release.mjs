@@ -3,13 +3,12 @@
  *
  *   npm run dist && npm run release
  *
- * Once the manifests are live it announces the release in Discord, if
- * BOT_URL, BOT_TOKEN and BOT_CHANNEL are set. The notes come from the commit
- * subjects since the previous tag, which already read as release notes.
+ * The version's section of PATCHNOTES.md goes up with it as patch-notes.json,
+ * which is what the bot's /release command posts. This script never talks to
+ * Discord: where and when the notes are posted is decided there, by whoever
+ * runs the command.
  *
- *   --no-announce          upload without posting
- *   --announce-only        post without uploading, for a retry
- *   --notes-file <path>    one note per line, instead of the commit log
+ *   --notes-only           re-publish the notes alone, to fix them after a release
  *
  * Installers go up first and the manifests last, each manifest under a temp
  * name and then renamed, so a client checking mid-upload never sees a version
@@ -25,6 +24,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { PUBLISHED_NAME, patchNotes } from './patch-notes.mjs';
 import { pruneLocalReleases } from './prune-local-releases.mjs';
 import { staleReleases } from './release-files.mjs';
 
@@ -54,10 +54,6 @@ function capture(cmd, args) {
 
 const args = process.argv.slice(2);
 const has = (flag) => args.includes(flag);
-const arg = (flag) => {
-  const at = args.indexOf(flag);
-  return at >= 0 ? args[at + 1] : undefined;
-};
 
 const env = { ...readEnv(path.join(root, '.env.release')), ...process.env };
 for (const key of ['VPS_SSH', 'VPS_DIR', 'UPDATE_URL', 'UPDATE_TOKEN']) {
@@ -65,60 +61,32 @@ for (const key of ['VPS_SSH', 'VPS_DIR', 'UPDATE_URL', 'UPDATE_TOKEN']) {
 }
 
 
-/* ------------------------------------------------------------------ */
-/* Announcing                                                          */
-/* ------------------------------------------------------------------ */
-
-/**
- * Commit subjects since the previous tag. They are written as release notes
- * already ("Name the replay in the title bar"), so there is no changelog file
- * to keep in step with the code.
- */
-function notesFromGit(version) {
-  const tags = capture('git', ['tag', '--sort=-creatordate']).split(/\r?\n/).filter(Boolean);
-  const previous = tags.find((tag) => tag !== `v${version}`);
-  const range = previous ? `${previous}..HEAD` : 'HEAD';
-
-  return capture('git', ['log', '--no-merges', '--format=%s', range])
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .filter((line) => !/^release\b/i.test(line));
-}
-
-async function announce(version) {
-  for (const key of ['BOT_URL', 'BOT_TOKEN', 'BOT_CHANNEL']) {
-    if (!env[key]) {
-      console.log(`Not announcing: ${key} is not set in .env.release.`);
-      return;
-    }
-  }
-
-  const notesFile = arg('--notes-file');
-  const notes = notesFile
-    ? fs.readFileSync(notesFile, 'utf8').split(/\r?\n/).map((l) => l.trim()).filter(Boolean)
-    : notesFromGit(version);
-
-  const base = env.BOT_URL.trim().replace(/\/+$/, '');
-
-  const response = await fetch(`${base}/release`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', authorization: `Bearer ${env.BOT_TOKEN}` },
-    body: JSON.stringify({ channelId: env.BOT_CHANNEL, version, notes, url: env.UPDATE_URL }),
-    signal: AbortSignal.timeout(30_000),
-  });
-
-  const body = await response.json().catch(() => ({}));
-
-  if (!response.ok) {
-    throw new Error(body.error ?? `the bot answered ${response.status}`);
-  }
-
-  if (body.skipped) console.log(`${version} had already been announced.`);
-  else console.log(`Announced ${version} with ${notes.length} note(s): ${body.url ?? ''}`);
-}
-
 const { version } = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+
+// Read before anything is uploaded: a release with no notes written for it is
+// refused here rather than discovered when someone asks the bot for them.
+const notes = patchNotes(version);
+const notesFile = path.join(releaseDir, PUBLISHED_NAME);
+const remote = (f) => `${env.VPS_SSH}:${env.VPS_DIR}/${f}`;
+
+/** Under a temp name and then renamed, like the manifests, so a reader never sees half a file. */
+function publishNotes() {
+  fs.mkdirSync(releaseDir, { recursive: true });
+  fs.writeFileSync(notesFile, JSON.stringify(notes, null, 2) + '\n');
+  run('scp', [notesFile, remote(`${PUBLISHED_NAME}.tmp`)]);
+  run('ssh', [
+    env.VPS_SSH,
+    `cd '${env.VPS_DIR}' && chmod g+r,o-rwx ${PUBLISHED_NAME}.tmp && mv -f ${PUBLISHED_NAME}.tmp ${PUBLISHED_NAME}`,
+  ]);
+  console.log(`Published ${notes.notes.length} patch note(s) for ${version}.`);
+}
+
+// The notes alone, for a typo found after the installers went out.
+if (has('--notes-only')) {
+  publishNotes();
+  process.exit(0);
+}
+
 const setup = `WoWS-Tactics-Toolkit-Setup-${version}.exe`;
 const portable = `WoWS-Tactics-Toolkit-${version}.exe`;
 const binaries = [setup, `${setup}.blockmap`, portable];
@@ -136,13 +104,6 @@ if (!mainJs.includes(env.UPDATE_TOKEN) || !mainJs.includes(env.UPDATE_URL)) {
   throw new Error('dist-electron/main.js was built without the update URL/token from .env.release; rebuild.');
 }
 
-// Posting without uploading, for when the upload worked and the announcement
-// did not.
-if (has('--announce-only')) {
-  await announce(version);
-  process.exit(0);
-}
-
 const portableBytes = fs.readFileSync(path.join(releaseDir, portable));
 const manifest = {
   version,
@@ -152,7 +113,6 @@ const manifest = {
 };
 fs.writeFileSync(path.join(releaseDir, 'portable.json'), JSON.stringify(manifest, null, 2) + '\n');
 
-const remote = (f) => `${env.VPS_SSH}:${env.VPS_DIR}/${f}`;
 console.log(`Uploading ${version} to ${env.VPS_SSH}:${env.VPS_DIR}`);
 run('scp', [...binaries.map((f) => path.join(releaseDir, f)), `${env.VPS_SSH}:${env.VPS_DIR}/`]);
 run('scp', [path.join(releaseDir, 'latest.yml'), remote('latest.yml.tmp')]);
@@ -162,6 +122,10 @@ run('ssh', [
   `cd '${env.VPS_DIR}' && chmod g+r,o-rwx * && mv -f latest.yml.tmp latest.yml && mv -f portable.json.tmp portable.json`,
 ]);
 console.log(`Published ${version}.`);
+
+// After the manifests: the notes describe a version, so they must not be
+// readable before that version can be downloaded.
+publishNotes();
 
 // Keep this release and the newest one before it; delete everything else.
 const remoteFiles = capture('ssh', [env.VPS_SSH, `ls -1 '${env.VPS_DIR}'`]).split(/\r?\n/).filter(Boolean);
@@ -173,15 +137,3 @@ if (stale.length) {
 console.log(`Server keeps ${previous ? `${version} and ${previous}` : version}.`);
 
 pruneLocalReleases(version);
-
-// Last, and never fatal: the download already works from the moment the
-// manifests landed, so a Discord outage must not fail a good release or stop
-// the server being tidied.
-if (!has('--no-announce')) {
-  try {
-    await announce(version);
-  } catch (err) {
-    console.error(`Release published, but announcing it failed: ${err.message}`);
-    console.error('Retry with:  npm run release -- --announce-only');
-  }
-}

@@ -79,11 +79,24 @@ It installs Caddy (automatic HTTPS), creates `/srv/wows-updates`, generates the
 token and prints the values for `.env.release`. Copy `.env.release.example` to
 `.env.release` (untracked) and fill them in.
 
-**Releasing:** bump the version, then
+**Releasing:** bump the version, rename `## Unreleased` in `PATCHNOTES.md` to
+it, then
 
 ```bash
 npm run dist
 npm run release
+```
+
+`PATCHNOTES.md` is where release notes are written: a heading per version with
+a list under it. `release` refuses to run without a section for the version
+being released, and publishes that section as `patch-notes.json` beside the
+manifests. That file is all the toolkit does about announcements — it never
+posts anywhere. The clan bot's `/release` command reads it and posts the notes
+in whichever channel the command is used. To correct the notes after a release
+without rebuilding:
+
+```bash
+npm run release -- --notes-only
 ```
 
 `release` refuses to upload a build that was compiled without the token, then
