@@ -683,11 +683,22 @@ export const useStore = create<Store>((set, get) => {
 
     /* ------------------------------ pages ------------------------------ */
 
+    /**
+     * Which page is showing is where the user is looking, not something they
+     * changed. Going through commit made every tab click an edit: the project
+     * read "unsaved" with nothing to save, the page was stamped as modified,
+     * and undo gained a step that only flipped back a tab.
+     *
+     * The page is still remembered for the next open. With nothing else
+     * waiting it is written straight away, without touching the saved state;
+     * otherwise it goes out with the save that is already owed.
+     */
     setActivePage(id) {
-      commit((draft) => {
-        draft.activePageId = id;
-      });
-      set({ selection: [] });
+      const { project, dirty } = get();
+      if (!project || project.activePageId === id || !project.pages.some((p) => p.id === id)) return;
+      const next: Project = { ...project, activePageId: id };
+      set({ project: next, selection: [] });
+      if (!dirty) void window.api.projects.save(next).catch(() => undefined);
       get().requestFit();
     },
 
