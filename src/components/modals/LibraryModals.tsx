@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react';
 import { Copy, Database, FileDown, FileUp, Image as ImageIcon, Plus, RefreshCw, Search, Trash2 } from 'lucide-react';
-import { getActivePage, useStore } from '@/state/store';
+import { getActivePage, getRulesets, useStore } from '@/state/store';
 import { Check, ColorInput, Field, InlineEdit, Modal, NumInput, SectionLabel, Tip } from '../common/ui';
 import { useAsset } from '@/state/assets';
-import { SHIP_CLASSES, shipClassCode, type GameMap, type Ship, type ShipClass } from '@/types/model';
+import { SHIP_CLASSES, shipClassCode, type GameMap, type Ship, type ShipClass, type ShipRuleset } from '@/types/model';
 import { CLASS_COLORS } from '@/canvas/shipGlyphs';
 import { ClassIcon } from '../common/ClassIcon';
-import { foldForSearch, uid } from '@/lib/util';
+import { uid } from '@/lib/util';
+import { allowedBy, filterShips, hasRadar, hasSmoke, type Availability } from '@/lib/shipFilters';
 
 /* ================================================================== */
 /* Map manager                                                         */
@@ -114,21 +115,28 @@ export function ShipDatabaseModal() {
   const [nation, setNation] = useState('');
   const [cls, setCls] = useState<'' | ShipClass>('');
   const [tier, setTier] = useState('');
+  const [radar, setRadar] = useState<Availability>('');
+  const [smoke, setSmoke] = useState<Availability>('');
+  const [rulesetId, setRulesetId] = useState('');
+  // Banning a ship takes it off the list, so undoing a ban needs a way to see
+  // what the ruleset is hiding.
+  const [showExcluded, setShowExcluded] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const hasProject = useStore((s) => !!s.project);
+  const rulesets = useStore(getRulesets);
+  const ruleset = rulesets.find((r) => r.id === rulesetId) ?? null;
+  const saveRulesets = (next: ShipRuleset[]) => s().setRulesets(next);
+  const patchRuleset = (id: string, patch: Partial<ShipRuleset>) =>
+    saveRulesets(rulesets.map((r) => (r.id === id ? { ...r, ...patch } : r)));
 
   const nations = useMemo(() => [...new Set(ships.map((x) => x.nation))].sort(), [ships]);
   const tiers = useMemo(() => [...new Set(ships.map((x) => x.tier))].sort((a, b) => b - a), [ships]);
 
-  const filtered = useMemo(() => {
-    const q = foldForSearch(query.trim());
-    return ships.filter(
-      (ship) =>
-        (!q || foldForSearch(ship.name).includes(q)) &&
-        (!nation || ship.nation === nation) &&
-        (!cls || ship.class === cls) &&
-        (!tier || String(ship.tier) === tier),
-    );
-  }, [ships, query, nation, cls, tier]);
+  const filtered = useMemo(
+    () => filterShips(ships, { query, nation, cls, tier, radar, smoke, ruleset: showExcluded ? null : ruleset }),
+    [ships, query, nation, cls, tier, radar, smoke, ruleset, showExcluded],
+  );
 
   const selected = ships.find((x) => x.id === selectedId) ?? null;
   const withoutIcon = ships.filter((x) => !x.iconId).length;
@@ -219,6 +227,58 @@ export function ShipDatabaseModal() {
                 ))}
               </select>
             </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 100px 90px', gap: 6, marginBottom: 8 }}>
+              <select
+                value={ruleset?.id ?? ''}
+                disabled={!rulesets.length}
+                title="Ship restrictions belonging to this project"
+                onChange={(e) => setRulesetId(e.target.value)}
+              >
+                <option value="">No ruleset</option>
+                {rulesets.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                className="btn sm"
+                disabled={!hasProject}
+                title={hasProject ? 'Add a ruleset to this project' : 'Open a project to add a ruleset'}
+                onClick={() => {
+                  const created: ShipRuleset = { id: uid('rules-'), name: 'New ruleset', tiers: [], classes: [], banned: [] };
+                  saveRulesets([...rulesets, created]);
+                  setRulesetId(created.id);
+                }}
+              >
+                <Plus size={12} /> Ruleset
+              </button>
+              <select value={radar} onChange={(e) => setRadar(e.target.value as Availability)}>
+                <option value="">Radar: any</option>
+                <option value="yes">Has radar</option>
+                <option value="no">No radar</option>
+              </select>
+              <select value={smoke} onChange={(e) => setSmoke(e.target.value as Availability)}>
+                <option value="">Smoke: any</option>
+                <option value="yes">Has smoke</option>
+                <option value="no">No smoke</option>
+              </select>
+            </div>
+
+            {ruleset && (
+              <RulesetEditor
+                key={ruleset.id}
+                ruleset={ruleset}
+                tiers={tiers}
+                showExcluded={showExcluded}
+                onShowExcluded={setShowExcluded}
+                onChange={(patch) => patchRuleset(ruleset.id, patch)}
+                onDelete={() => {
+                  saveRulesets(rulesets.filter((r) => r.id !== ruleset.id));
+                  setRulesetId('');
+                }}
+              />
+            )}
 
             {withoutIcon > 0 && (
               <div className="faint" style={{ fontSize: 11, marginBottom: 6 }}>
@@ -239,7 +299,9 @@ export function ShipDatabaseModal() {
                     <th style={{ width: 62 }}>Conceal</th>
                     <th style={{ width: 56 }}>Radar</th>
                     <th style={{ width: 56 }}>Hydro</th>
+                    <th style={{ width: 50 }}>Smoke</th>
                     <th style={{ width: 56 }}>Range</th>
+                    {ruleset && <th style={{ width: 58 }}>Allowed</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -247,6 +309,7 @@ export function ShipDatabaseModal() {
                     <tr
                       key={ship.id}
                       className={ship.id === selectedId ? 'selected' : ''}
+                      style={ruleset && !allowedBy(ruleset, ship) ? { opacity: 0.45 } : undefined}
                       onClick={() => setSelectedId(ship.id)}
                     >
                       <td>
@@ -261,9 +324,19 @@ export function ShipDatabaseModal() {
                       </td>
                       <td className="num">{ship.tier}</td>
                       <td className="num">{ship.concealment_km?.toFixed(1) ?? '—'}</td>
-                      <td className="num">{ship.radar_km?.toFixed(1) ?? '—'}</td>
+                      <td className="num">{ship.radar_km?.toFixed(1) ?? (hasRadar(ship) ? 'yes' : '—')}</td>
                       <td className="num">{ship.hydro_km?.toFixed(1) ?? '—'}</td>
+                      <td className="num">{hasSmoke(ship) ? 'yes' : '—'}</td>
                       <td className="num">{ship.mainBatteryRange_km?.toFixed(1) ?? '—'}</td>
+                      {ruleset && (
+                        <td onClick={(e) => e.stopPropagation()}>
+                          <BanToggle
+                            ruleset={ruleset}
+                            ship={ship}
+                            onChange={(banned) => patchRuleset(ruleset.id, { banned })}
+                          />
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
@@ -275,6 +348,100 @@ export function ShipDatabaseModal() {
         </div>
       )}
     </Modal>
+  );
+}
+
+/**
+ * The limits of one ruleset. Tiers and classes are allow-lists where nothing
+ * picked means no limit, so "Any" is the empty list rather than a full one and
+ * a ruleset does not have to be revisited when a new tier turns up.
+ */
+function RulesetEditor({
+  ruleset,
+  tiers,
+  showExcluded,
+  onShowExcluded,
+  onChange,
+  onDelete,
+}: {
+  ruleset: ShipRuleset;
+  tiers: number[];
+  showExcluded: boolean;
+  onShowExcluded: (v: boolean) => void;
+  onChange: (patch: Partial<ShipRuleset>) => void;
+  onDelete: () => void;
+}) {
+  const toggle = <T,>(list: T[], value: T): T[] =>
+    list.includes(value) ? list.filter((x) => x !== value) : [...list, value];
+
+  const chips = <T extends string | number>(all: T[], picked: T[], onPick: (next: T[]) => void) => (
+    <div className="ruleset-chips">
+      <button className={`variant-chip${picked.length ? '' : ' active'}`} onClick={() => onPick([])}>
+        Any
+      </button>
+      {all.map((value) => (
+        <button
+          key={value}
+          className={`variant-chip${picked.includes(value) ? ' active' : ''}`}
+          onClick={() => onPick(toggle(picked, value))}
+        >
+          {value}
+        </button>
+      ))}
+    </div>
+  );
+
+  return (
+    <div className="ruleset-editor">
+      <div className="ruleset-head">
+        <InlineEdit value={ruleset.name} onCommit={(name) => onChange({ name })} className="card-title" />
+        <span className="spacer" />
+        <Check label="Show excluded ships" checked={showExcluded} onChange={onShowExcluded} />
+        <Tip label="Delete ruleset" side="top">
+          <button className="btn sm danger" onClick={onDelete}>
+            <Trash2 size={12} />
+          </button>
+        </Tip>
+      </div>
+      <Field label="Tiers">{chips([...tiers].sort((a, b) => a - b), ruleset.tiers, (next) => onChange({ tiers: next }))}</Field>
+      <Field label="Classes">{chips(SHIP_CLASSES, ruleset.classes, (next) => onChange({ classes: next }))}</Field>
+      <div className="faint" style={{ fontSize: 11 }}>
+        {ruleset.banned.length
+          ? `${ruleset.banned.length} ship${ruleset.banned.length === 1 ? '' : 's'} banned by name.`
+          : 'No ships banned by name.'}{' '}
+        Untick a ship in the Allowed column to ban it.
+      </div>
+    </div>
+  );
+}
+
+/** One ship's standing under a ruleset: a ban can be lifted, a tier limit cannot. */
+function BanToggle({
+  ruleset,
+  ship,
+  onChange,
+}: {
+  ruleset: ShipRuleset;
+  ship: Ship;
+  onChange: (banned: string[]) => void;
+}) {
+  const banned = ruleset.banned.includes(ship.id);
+  // Ruled out by tier or class: nothing to tick until the ruleset itself changes.
+  if (!banned && !allowedBy(ruleset, ship)) {
+    return (
+      <span className="faint" title="Outside this ruleset's tiers or classes">
+        —
+      </span>
+    );
+  }
+  return (
+    <label className={`check${banned ? '' : ' on'}`} title={banned ? 'Banned — tick to allow' : 'Allowed — untick to ban'}>
+      <input
+        type="checkbox"
+        checked={!banned}
+        onChange={() => onChange(banned ? ruleset.banned.filter((id) => id !== ship.id) : [...ruleset.banned, ship.id])}
+      />
+    </label>
   );
 }
 
@@ -381,6 +548,7 @@ function ShipEditor({ ship, onDeleted }: { ship: Ship; onDeleted: () => void }) 
       {numField('Radar time', 'radarDuration_s', 's', 5)}
       {numField('Hydro', 'hydro_km', 'km')}
       {numField('Hydro time', 'hydroDuration_s', 's', 5)}
+      <Check label="Smoke generator" checked={hasSmoke(ship)} onChange={(v) => set({ smoke: v })} />
       {numField('Smoke radius', 'smokeRadius_km', 'km', 0.05)}
       {numField('Smoke time', 'smokeDuration_s', 's', 5)}
       <Check label="Fighter" checked={!!ship.fighter} onChange={(v) => set({ fighter: v })} />

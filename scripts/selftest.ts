@@ -15,6 +15,7 @@ import { fileURLToPath } from 'node:url';
 
 import { parseShipData, serializeShips } from '../src/lib/shipImport';
 import { foldForSearch } from '../src/lib/util';
+import { allowedBy, filterShips, hasRadar, hasSmoke, type ShipFilter } from '../src/lib/shipFilters';
 import { mergeKey, shipRangeKm } from '../src/state/store';
 import * as db from '../electron/storage/db';
 import { testReplayArchive } from './selftest-archive';
@@ -122,6 +123,50 @@ async function testShipImport(): Promise<void> {
   const csvText = serializeShips(fromCsv.ships, 'csv');
   const back = parseShipData(csvText, '.csv');
   check('csv: round-trip preserves ids', back.ships[0]?.id === fromCsv.ships[0]?.id, back.ships[0]?.id);
+}
+
+async function testShipFilters(): Promise<void> {
+  console.log('\nship filters');
+
+  // "Smoke" is one column that sources fill with either a yes/no or a radius.
+  const csv = [
+    'Ship,Class,Tier,Radar,Smoke,Smoke Radius (km)',
+    'Minotaur,Cruiser,10,10,yes,0.45',
+    'Des Moines,Cruiser,10,10,no,',
+    'Shimakaze,Destroyer,10,0,0.45,',
+    'Yamato,Battleship,10,,,',
+    'Kagero,Destroyer,8,,x,',
+  ].join('\n');
+  const { ships } = parseShipData(csv, '.csv');
+  const named = (name: string) => ships.find((s) => s.name === name)!;
+
+  check('smoke: "yes" sets the flag', named('Minotaur').smoke === true, named('Minotaur'));
+  check('smoke: a yes/no does not swallow the radius column', named('Minotaur').smokeRadius_km === 0.45);
+  check('smoke: "no" is kept, not dropped', named('Des Moines').smoke === false && !hasSmoke(named('Des Moines')));
+  check('smoke: a number in the column is a radius', named('Shimakaze').smokeRadius_km === 0.45 && named('Shimakaze').smoke === undefined);
+  check('smoke: a radius alone counts as smoke', hasSmoke(named('Shimakaze')));
+  check('smoke: nothing said means none', !hasSmoke(named('Yamato')));
+  check('smoke: listed consumable counts', hasSmoke({ ...named('Yamato'), consumables: [{ name: 'Smoke Generator' }] }));
+  check('smoke: the flag overrides a stray radius', !hasSmoke({ ...named('Shimakaze'), smoke: false }));
+  check('radar: a range counts, a zero does not', hasRadar(named('Minotaur')) && !hasRadar(named('Shimakaze')));
+
+  const back = parseShipData(serializeShips(ships, 'csv'), '.csv').ships;
+  check(
+    'smoke: flag and radius survive a CSV round trip',
+    back.every((s) => s.smoke === named(s.name).smoke && s.smokeRadius_km === named(s.name).smokeRadius_km),
+    back.map((s) => [s.name, s.smoke, s.smokeRadius_km]),
+  );
+
+  const base: ShipFilter = { query: '', nation: '', cls: '', tier: '', radar: '', smoke: '', ruleset: null };
+  const names = (f: Partial<ShipFilter>) => filterShips(ships, { ...base, ...f }).map((s) => s.name).sort().join(',');
+  check('filter: has radar', names({ radar: 'yes' }) === 'Des Moines,Minotaur', names({ radar: 'yes' }));
+  check('filter: no smoke', names({ smoke: 'no' }) === 'Des Moines,Yamato', names({ smoke: 'no' }));
+  check('filter: radar and smoke together', names({ radar: 'yes', smoke: 'yes' }) === 'Minotaur');
+
+  const open = { id: 'r', name: 'Open', tiers: [], classes: [], banned: [] };
+  check('ruleset: an empty one allows everything', ships.every((s) => allowedBy(open, s)));
+  const season = { ...open, tiers: [10], classes: ['CA' as const, 'DD' as const], banned: [named('Minotaur').id] };
+  check('ruleset: tier, class and ban all apply', names({ ruleset: season }) === 'Des Moines,Shimakaze', names({ ruleset: season }));
 }
 
 async function testPackage(): Promise<void> {
@@ -472,6 +517,7 @@ async function testSeeding(): Promise<void> {
 
 async function main(): Promise<void> {
   await testShipImport();
+  await testShipFilters();
   await testNameFolding();
   await testPackage();
   await testExportDestinations();

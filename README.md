@@ -158,10 +158,29 @@ CSV or YAML; the parser is deliberately forgiving:
   routinely write `0` where the cell was meant to be blank, and a ship with
   "radar 0" has no radar — so this is what keeps zero-radius rings and `0.0 km`
   labels off the canvas.
+- A `Smoke` column may hold a yes/no or a radius; a yes/no sets whether the
+  ship has smoke at all, a number is read as the radius.
 - Tiers may be Arabic or Roman (`10`, `X`).
 - A range given in metres (any value > 100 in a km field) is converted.
 - Accepts an array, a `{ "ships": [...] }` wrapper, or a name-keyed object.
 - Anything it cannot map is preserved in the ship's notes rather than dropped.
+
+### Filters and rulesets
+
+The ship database and the sidebar picker filter on the same things: name,
+nation, class, tier, whether the ship has **radar**, whether it has **smoke**,
+and a **ruleset**. A ship has radar when it has a radar range, and smoke when
+its smoke flag says so or, failing that, when it has a smoke radius, a smoke
+duration or a smoke consumable listed.
+
+A ruleset is a set of ship restrictions — a clan battle season, a tournament.
+There are no standard ones: a ruleset is added to the project it is for, saved
+in that project's file and travels with it when the project is exported.
+Create one with **+ Ruleset** in the ship database, then pick the tiers and
+classes it allows (**Any** means no limit) and untick individual ships in the
+**Allowed** column to ban them. **Show excluded ships** brings the ruled-out
+ships back, dimmed, so a ban can be lifted. A ruleset only narrows the lists;
+it never changes what is already on a page.
 
 Re-importing an updated sheet merges rather than replaces: a ship already in
 the database keeps its id, its icon and every field the incoming file has
