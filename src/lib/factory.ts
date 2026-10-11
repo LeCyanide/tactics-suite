@@ -44,6 +44,7 @@ export function createPage(name: string, mapId: ID | null = null): Page {
   return {
     id: uid('page-'),
     name,
+    folderId: null,
     mapId,
     mapView: clone(DEFAULT_MAP_VIEW),
     capLayoutId: null,
@@ -67,6 +68,8 @@ export function createProject(name = 'Untitled Project', pageNames?: string[]): 
     createdAt: now,
     updatedAt: now,
     pages,
+    pageFolders: [],
+    pageLayout: pages.map((p) => p.id),
     activePageId: pages[0]?.id ?? null,
     teams,
     rulesets: [],
