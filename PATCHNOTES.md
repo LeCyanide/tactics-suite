@@ -14,6 +14,17 @@ the version number when it is bumped.
 
 ## Unreleased
 
+## 2.2.0
+
+### Changelog
+
+- Renamed: the app is now WoWs Tactics Suite. Your projects, maps and replays move over by themselves the first time it starts
+- New: folders for tactical pages. Sort a project's pages into folders in the sidebar, or leave a page on its own. Pages and folders can be dragged into any order, and a right-click on a page moves it to a folder. Existing projects open as before, with all pages unsorted
+
+### In testing
+
+- Share a page straight to Discord from the export dialog
+
 ## 2.1.0
 
 ### Changelog

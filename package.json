@@ -1,7 +1,7 @@
 {
   "name": "wows-tactics-suite",
   "productName": "WoWs Tactics Suite",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Offline tactical planning suite for World of Warships",
   "private": true,
   "main": "dist-electron/main.js",
