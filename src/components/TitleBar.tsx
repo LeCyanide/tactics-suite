@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Clapperboard, Crosshair, Map as MapIcon, Minus, Square, X, Copy as CopyIcon } from 'lucide-react';
+import { Clapperboard, Map as MapIcon, Minus, Square, X, Copy as CopyIcon } from 'lucide-react';
 import { TEST_BUILD_LABEL } from '@/lib/testBuild';
 import { getActivePage, useStore } from '@/state/store';
 import { useReplayStore } from '@/state/replay';
@@ -117,8 +117,7 @@ export function TitleBar() {
   return (
     <div className="titlebar" ref={barRef}>
       <div className="brand">
-        <Crosshair className="mark" size={15} />
-        <span>WoWs Tactics Suite</span>
+        <span>Tactics Suite</span>
         {TEST_BUILD_LABEL && <span className="test-build">{TEST_BUILD_LABEL}</span>}
       </div>
 

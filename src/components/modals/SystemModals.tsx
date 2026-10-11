@@ -6,6 +6,7 @@ import { canvasApi, DEFAULT_EXPORT, type ExportOptions } from '@/canvas/canvasBr
 import { SHORTCUT_REFERENCE } from '@/state/shortcuts';
 import { formatBytes } from '@/lib/util';
 import { TEST_BUILD_LABEL } from '@/lib/testBuild';
+import { DEVELOPER_CREDIT } from '@/lib/credit';
 import { restartToUpdate, useUpdateState, type UpdateState } from '@/state/updates';
 import type { ThemeName } from '@/types/model';
 
@@ -328,6 +329,7 @@ export function SettingsModal() {
         <div className="mono" style={{ marginTop: 6, fontSize: 10.5 }}>
           Electron {info?.electron} · Chromium {info?.chrome} · Node {info?.node}
         </div>
+        <div style={{ marginTop: 6 }}>{DEVELOPER_CREDIT}</div>
       </div>
 
       <SectionLabel>Credits</SectionLabel>
