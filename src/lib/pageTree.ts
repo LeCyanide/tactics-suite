@@ -30,6 +30,15 @@ export function pageTree(project: Project): PageTreeItem[] {
 }
 
 /**
+ * What a page is called outside the app, outermost first: the project, the
+ * folder it is sorted into if any, and the page itself.
+ */
+export function pagePath(project: Project, page: Page): string[] {
+  const folder = project.pageFolders?.find((f) => f.id === page.folderId);
+  return [project.name, ...(folder ? [folder.name] : []), page.name];
+}
+
+/**
  * Makes the three parts agree: every page is in a folder that exists or in
  * none, the layout names each folder and each loose page exactly once, and
  * `pages` follows the layout.
