@@ -600,9 +600,20 @@ export type TacticalObject = ShipObject | PathObject | ShapeObject | TextObject 
 /* Pages & projects                                                    */
 /* ------------------------------------------------------------------ */
 
+/**
+ * A folder in the page list. It only sorts the list: the pages themselves stay
+ * one flat array, which is what the tabs, the shortcuts and export read.
+ */
+export interface PageFolder {
+  id: ID;
+  name: string;
+}
+
 export interface Page {
   id: ID;
   name: string;
+  /** The folder it is sorted into, or null when it sits in the list on its own. */
+  folderId: ID | null;
   mapId: ID | null;
   mapView: MapViewConfig;
   /** Selected capture point layout, or null for none. */
@@ -626,7 +637,15 @@ export interface Project {
   schemaVersion: number;
   createdAt: number;
   updatedAt: number;
+  /**
+   * In list order: a folder's pages are adjacent, and follow `pageLayout`.
+   * Kept that way by `settlePages`, so the flat order never disagrees with
+   * the sorted one.
+   */
   pages: Page[];
+  pageFolders: PageFolder[];
+  /** The top of the page list: folder ids and the ids of pages in no folder, in order. */
+  pageLayout: ID[];
   activePageId: ID | null;
   teams: Team[];
   /** Ship restrictions for this project, offered as a filter wherever ships are listed. */

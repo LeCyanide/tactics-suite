@@ -33,6 +33,7 @@ import {
   type Vec2,
 } from '@/types/model';
 import { clamp, clone, debounce, foldForSearch, uid } from '@/lib/util';
+import { beforeIdFor, dissolveFolder, placeFolder, placePage, settlePages, stepFolder, stepPage } from '@/lib/pageTree';
 import { applyTheme } from './theme';
 import {
   createPage,
@@ -182,13 +183,24 @@ interface Actions {
 
   /* pages */
   setActivePage(id: ID): void;
-  addPage(name?: string): void;
+  /** Adds a page to `folderId`, or next to the current page when none is given. */
+  addPage(name?: string, folderId?: ID | null): void;
   duplicatePage(id: ID): void;
   renamePage(id: ID, name: string): void;
   deletePage(id: ID): void;
+  /** Steps a page among its own folder's pages, or along the top of the list. */
   reorderPage(id: ID, delta: number): void;
   /** Absolute reorder, used by drag and drop on the board tabs. */
   movePageTo(id: ID, index: number): void;
+  /** Puts a page into a folder (null for none), in front of `beforeId` or at the end. */
+  placePage(id: ID, folderId: ID | null, beforeId?: ID | null): void;
+  /** Returns the new folder's id, so the list can open it for naming. */
+  addPageFolder(): ID | null;
+  renamePageFolder(id: ID, name: string): void;
+  /** The folder goes; its pages stay where it was. */
+  deletePageFolder(id: ID): void;
+  reorderPageFolder(id: ID, delta: number): void;
+  placePageFolder(id: ID, beforeId?: ID | null): void;
   setPageMap(mapId: ID | null): void;
   setPageCapLayout(capLayoutId: ID | null): void;
   patchMapView(patch: Partial<MapViewConfig>): void;
@@ -547,6 +559,8 @@ export const useStore = create<Store>((set, get) => {
       if (!doc.activePageId || !doc.pages.some((p) => p.id === doc.activePageId)) {
         doc.activePageId = doc.pages[0].id;
       }
+      // Projects from before folders carry neither folders nor a layout.
+      settlePages(doc);
       // Projects made before the sides were named for the competitive format
       // carry "Team North"/"Team South". Those untouched defaults take both the
       // name and the colour of the side they became; a team someone named
@@ -702,17 +716,21 @@ export const useStore = create<Store>((set, get) => {
       get().requestFit();
     },
 
-    addPage(name) {
+    addPage(name, folderId) {
       const { project } = get();
       if (!project) return;
       const index = project.pages.length + 1;
       const page = createPage(name ?? `${String(index).padStart(2, '0')} - New Page`);
       // A new page inherits the map of the current one: pages are usually
-      // successive phases of the same battle.
-      page.mapId = activePageOf(project)?.mapId ?? null;
+      // successive phases of the same battle. For the same reason it joins
+      // that page's folder unless told where to go.
+      const current = activePageOf(project);
+      page.mapId = current?.mapId ?? null;
+      page.folderId = folderId === undefined ? (current?.folderId ?? null) : folderId;
       commit((draft) => {
         draft.pages.push(page);
         draft.activePageId = page.id;
+        settlePages(draft);
       });
       set({ selection: [] });
     },
@@ -729,7 +747,11 @@ export const useStore = create<Store>((set, get) => {
         copy.objects = copy.objects.map((o) => ({ ...o, id: uid('obj-') })) as TacticalObject[];
         const at = draft.pages.findIndex((p) => p.id === id);
         draft.pages.splice(at + 1, 0, copy);
+        // A loose page has a place in the layout too; one in a folder follows `pages`.
+        const slot = draft.pageLayout.indexOf(id);
+        if (slot >= 0) draft.pageLayout.splice(slot + 1, 0, copy.id);
         draft.activePageId = copy.id;
+        settlePages(draft);
       });
       set({ selection: [] });
     },
@@ -753,29 +775,63 @@ export const useStore = create<Store>((set, get) => {
         if (draft.activePageId === id) {
           draft.activePageId = draft.pages[clamp(at, 0, draft.pages.length - 1)].id;
         }
+        settlePages(draft);
       });
       set({ selection: [] });
     },
 
     reorderPage(id, delta) {
-      commit((draft) => {
-        const at = draft.pages.findIndex((p) => p.id === id);
-        const to = clamp(at + delta, 0, draft.pages.length - 1);
-        if (at < 0 || at === to) return;
-        const [page] = draft.pages.splice(at, 1);
-        draft.pages.splice(to, 0, page);
-      });
+      commit((draft) => stepPage(draft, id, delta));
     },
 
+    /**
+     * The tabs are the flat list, so a tab dropped on another lands beside it
+     * in the sidebar as well — in that page's folder, if it has one. Anything
+     * else would leave a folder's pages scattered along the tab bar.
+     */
     movePageTo(id, index) {
       commit((draft) => {
         const at = draft.pages.findIndex((p) => p.id === id);
         if (at < 0) return;
         const to = clamp(index, 0, draft.pages.length - 1);
         if (at === to) return;
-        const [page] = draft.pages.splice(at, 1);
-        draft.pages.splice(to, 0, page);
+        const target = draft.pages[to];
+        const before = beforeIdFor(draft, id, target.id, target.folderId, at < to ? 'after' : 'before');
+        placePage(draft, id, target.folderId, before);
       });
+    },
+
+    placePage(id, folderId, beforeId = null) {
+      commit((draft) => placePage(draft, id, folderId, beforeId));
+    },
+
+    addPageFolder() {
+      if (!get().project) return null;
+      const id = uid('folder-');
+      commit((draft) => {
+        draft.pageFolders.push({ id, name: 'New folder' });
+        draft.pageLayout.push(id);
+      });
+      return id;
+    },
+
+    renamePageFolder(id, name) {
+      commit((draft) => {
+        const folder = draft.pageFolders.find((f) => f.id === id);
+        if (folder) folder.name = name;
+      });
+    },
+
+    deletePageFolder(id) {
+      commit((draft) => dissolveFolder(draft, id));
+    },
+
+    reorderPageFolder(id, delta) {
+      commit((draft) => stepFolder(draft, id, delta));
+    },
+
+    placePageFolder(id, beforeId = null) {
+      commit((draft) => placeFolder(draft, id, beforeId));
     },
 
     setPageMap(mapId) {

@@ -1112,7 +1112,6 @@ input[type='range']::-webkit-slider-thumb {
   pointer-events: none;
   backdrop-filter: blur(6px);
 }
-
 /* Context menu ----------------------------------------------------- */
 
 .ctx-menu {
@@ -1678,10 +1677,12 @@ input[type='range']::-webkit-slider-thumb {
   overflow-y: auto;
   border-radius: 3px;
 }
-.replay-folder {
+.replay-folder,
+.page-folder {
   cursor: pointer;
 }
-.replay-folder-children {
+.replay-folder-children,
+.page-folder-children {
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -1690,8 +1691,31 @@ input[type='range']::-webkit-slider-thumb {
   border-left: 1px solid var(--line-strong);
 }
 .replay-tree.drop-target,
-.replay-folder.drop-target {
+.replay-folder.drop-target,
+.page-tree.drop-target,
+.page-folder.drop-target {
   box-shadow: inset 0 0 0 1px var(--accent);
+}
+/*
+ * The page list is the same tree, with one difference: its order is the
+ * user's, so a drag also shows the gap it will land in, not just the folder.
+ */
+.page-tree {
+  border-radius: 3px;
+  /* Room under the last row to drop a page out of every folder. */
+  padding: 2px 4px 10px;
+}
+.page-folder-children {
+  gap: 0;
+}
+.page-tree .dragging {
+  opacity: 0.45;
+}
+.page-tree .drop-before {
+  box-shadow: inset 0 2px 0 var(--accent);
+}
+.page-tree .drop-after {
+  box-shadow: inset 0 -2px 0 var(--accent);
 }
 /* Listed so the user knows it is there, but dimmed: it cannot be watched. */
 .row.stacked.unplayable .stacked-title,
