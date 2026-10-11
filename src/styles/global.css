@@ -491,6 +491,16 @@ button {
 .btn.primary:hover:not(:disabled) {
   background: #3480c9;
 }
+/* Discord's own blurple, so the button reads as theirs at a glance. */
+.btn.discord {
+  background: #5865f2;
+  border-color: #5865f2;
+  color: #fff;
+}
+.btn.discord:hover:not(:disabled) {
+  background: #4752c4;
+  border-color: #4752c4;
+}
 .btn.danger {
   color: var(--danger);
   border-color: #46201d;

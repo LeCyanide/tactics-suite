@@ -135,6 +135,9 @@ const listing = () => ({
   duplicates: [],
 });
 
+let discordLink: unknown = { status: 'unlinked' };
+let cancelDiscordLink = () => {};
+
 const api = {
   window: {
     minimize: () => {},
@@ -194,6 +197,39 @@ const api = {
     create: async () => null,
     remove: async () => [],
     dataUrl: async (file: string, mime: string) => ({ dataUrl: await dataUrl(`/seed/ships/icons/${file}`, mime) }),
+  },
+  // A bot that links whoever asks after a pause long enough to see the
+  // waiting state, with one channel list for everybody.
+  discord: {
+    status: async () => discordLink,
+    link: async () => {
+      await new Promise<void>((resolve, reject) => {
+        const timer = setTimeout(resolve, 2500);
+        cancelDiscordLink = () => {
+          clearTimeout(timer);
+          reject(new Error('The Discord sign-in was cancelled.'));
+        };
+      });
+      discordLink = {
+        status: 'linked',
+        user: { id: '1', name: 'Preview' },
+        guilds: [
+          {
+            id: '10',
+            name: 'Test Haven',
+            channels: [
+              { id: '100', name: 'general', category: null },
+              { id: '101', name: 'tactics', category: 'Clan battles' },
+            ],
+          },
+          { id: '11', name: 'Empty server', channels: [] },
+        ],
+      };
+      return discordLink;
+    },
+    cancelLink: async () => cancelDiscordLink(),
+    unlink: async () => (discordLink = { status: 'unlinked' }),
+    share: async () => 'https://discord.com/channels/10/101/1',
   },
   exporter: { image: async () => null, text: async () => null, toClipboard: async () => true },
   dialog: { confirm: async (o: { message: string }) => window.confirm(o.message) },

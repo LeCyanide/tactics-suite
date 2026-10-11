@@ -453,6 +453,11 @@ export const useStore = create<Store>((set, get) => {
       const settings: AppSettings = { ...clone(DEFAULT_APP_SETTINGS), ...stored };
       // Ping presets were dropped in schema 2; discard any that were persisted.
       delete (settings as unknown as Record<string, unknown>).pings;
+      // The bot's address and shared token were typed in by hand until 2.2.0.
+      // Connect Discord replaced both, and a shared token has no business
+      // staying in a settings file.
+      delete (settings as unknown as Record<string, unknown>).discordUrl;
+      delete (settings as unknown as Record<string, unknown>).discordToken;
       applyTheme(settings.theme);
 
       set({

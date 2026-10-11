@@ -9,9 +9,13 @@ import type {
 } from './replay/archive';
 import type { GameDirCheck, LibraryEvent, ReplayProbe, SidecarEvent, SidecarStatus } from './replay/sidecar';
 import type { UpdateState } from './updater';
+import type { DiscordChannel, DiscordGuild, DiscordStatus } from './discord';
 
 export type {
   ConfigureResult,
+  DiscordChannel,
+  DiscordGuild,
+  DiscordStatus,
   FoundReplay,
   GameDirCheck,
   ImportOutcome,
@@ -118,7 +122,12 @@ const api = {
     dataUrl: (file: string, mime: string) => call<AssetResult>('icon:dataUrl', file, mime),
   },
   discord: {
-    share: (opts: { url: string; token: string; channelId: string; title: string; note?: string; image: string }) =>
+    status: () => call<DiscordStatus>('discord:status'),
+    /** Opens the browser to sign in; settles once it comes back, or is given up on. */
+    link: () => call<DiscordStatus>('discord:link'),
+    cancelLink: () => call<void>('discord:cancelLink'),
+    unlink: () => call<DiscordStatus>('discord:unlink'),
+    share: (opts: { channelId: string; title: string; note?: string; image: string }) =>
       call<string | null>('discord:share', opts),
   },
   exporter: {

@@ -14,6 +14,10 @@ the version number when it is bumped.
 
 ## Unreleased
 
+### In testing
+
+- New: Connect Discord. Settings has a button that signs you in with Discord in your browser, instead of a bot address, token and channel id to type in. Pick the channel from a list of the ones you can post in. If you had Share to Discord set up by hand, connect once and choose the channel again
+
 ## 2.2.0
 
 ### Changelog

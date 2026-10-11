@@ -30,9 +30,9 @@ const shared = {
   platform: 'node',
   target: 'node20',
   alias: { '@': path.join(root, 'src') },
-  // Supplied to the main process at build time by vite; the updater is not
-  // under test and must not reach for a server.
-  define: { __UPDATE_URL__: '""', __UPDATE_TOKEN__: '""' },
+  // Supplied to the main process at build time by vite; neither the updater
+  // nor the Discord link is under test, and neither must reach for a server.
+  define: { __UPDATE_URL__: '""', __UPDATE_TOKEN__: '""', __BOT_URL__: '""' },
   // electron-updater reaches this bundle through ipc.ts and its dependencies
   // are CommonJS. esbuild's ESM output shims `require` with a stub that throws
   // ("Dynamic require of \"events\" is not supported"), so the main process is

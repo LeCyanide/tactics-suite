@@ -3,10 +3,11 @@ import react from '@vitejs/plugin-react';
 import electron from 'vite-plugin-electron/simple';
 import path from 'node:path';
 
-// Update server and token, baked into the main process at build time. They
-// come from the untracked .env.release (see .env.release.example); without
-// it the build simply has no updater.
-const release = loadEnv('release', __dirname, 'UPDATE_');
+// Update server and token, and the clan bot's address, baked into the main
+// process at build time. They come from the untracked .env.release (see
+// .env.release.example); without it the build simply has no updater and no
+// Connect Discord.
+const release = loadEnv('release', __dirname, ['UPDATE_', 'BOT_']);
 
 export default defineConfig({
   // Relative base so the production build loads from file:// inside Electron.
@@ -25,6 +26,7 @@ export default defineConfig({
           define: {
             __UPDATE_URL__: JSON.stringify(release.UPDATE_URL ?? ''),
             __UPDATE_TOKEN__: JSON.stringify(release.UPDATE_TOKEN ?? ''),
+            __BOT_URL__: JSON.stringify(release.BOT_URL ?? ''),
           },
         },
       },
