@@ -9,14 +9,14 @@ Under a version, each `###` heading becomes a header in the post and each list
 item under it one note. Use `### Changelog` for what is finished and
 `### In testing` for what is shipped but not settled.
 
-Collect notes under `## Unreleased` as work lands, and rename that heading to
-the version number when it is bumped.
+Collect notes under `## Unreleased
 
-## Unreleased
+## 2.3.0
 
-### In testing
+### Changelog
 
-- New: Connect Discord. Settings has a button that signs you in with Discord in your browser, instead of a bot address, token and channel id to type in. Pick the channel from a list of the ones you can post in. If you had Share to Discord set up by hand, connect once and choose the channel again
+- New (beta): Share to Discord. Connect your Discord account in Settings, then post a page straight from the export dialog
+- Exported images of a page in a folder now carry the folder in their name
 
 ## 2.2.0
 
