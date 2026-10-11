@@ -711,14 +711,9 @@ export interface AppSettings {
    */
   replayDir: string;
   /**
-   * Sharing a page straight to Discord. The bot cannot read projects from
-   * here, so the app pushes the rendered image to it.
-   *
-   * The token is the one from the bot's own .env. It is stored with the rest
-   * of the settings, in the application-data folder, like the game directory.
+   * The channel Share to Discord posts in, by id. Which account is connected
+   * is not a setting: the main process keeps that, encrypted, on its own.
    */
-  discordUrl: string;
-  discordToken: string;
   discordChannel: string;
 }
 
@@ -736,7 +731,5 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   rightSidebarWidth: 300,
   wowsGameDir: '',
   replayDir: '',
-  discordUrl: '',
-  discordToken: '',
   discordChannel: '',
 };

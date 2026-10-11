@@ -2,14 +2,16 @@
  * The complete surface the renderer is allowed to touch.
  *
  * Every handler is local: file dialogs, disk reads/writes and the project
- * database. The update handlers delegate to updater.ts, the only module that
- * touches the network; nothing in this file opens a socket itself.
+ * database. The update handlers delegate to updater.ts and the Discord ones to
+ * discord.ts, the only modules that touch the network; nothing in this file
+ * opens a socket itself.
  */
 
 import { BrowserWindow, ClipboardItem, dialog, ipcMain, shell, app, clipboard } from 'electron';
 import fsp from 'node:fs/promises';
 import path from 'node:path';
 import * as db from './storage/db';
+import * as discord from './discord';
 import * as archive from './replay/archive';
 import * as replay from './replay/sidecar';
 import * as updater from './updater';
@@ -70,45 +72,19 @@ export function registerIpc(getWindow: GetWindow): void {
 
   /* ---------------- discord ---------------- */
 
-  /**
-   * Push a rendered page to the bot's plan endpoint.
-   *
-   * The bot runs on a server and cannot reach the project store on this
-   * machine, so sharing is a push from here rather than a fetch from there.
-   */
-  handle(
-    'discord:share',
-    async (opts: {
-      url: string;
-      token: string;
-      channelId: string;
-      title: string;
-      note?: string;
-      image: string;
-    }) => {
-      const base = opts.url.trim().replace(/\/+$/, '');
-      if (!/^https?:\/\//.test(base)) throw new Error('The bot URL must start with http:// or https://');
-
-      const response = await fetch(`${base}/plan`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', authorization: `Bearer ${opts.token}` },
-        body: JSON.stringify({
-          channelId: opts.channelId,
-          title: opts.title,
-          note: opts.note,
-          image: opts.image,
-        }),
-        signal: AbortSignal.timeout(30_000),
-      });
-
-      const body = (await response.json().catch(() => ({}))) as { url?: string; error?: string };
-
-      if (!response.ok) {
-        throw new Error(body.error ?? `the bot answered ${response.status}`);
-      }
-
-      return body.url ?? null;
-    },
+  handle('discord:status', () => discord.status());
+  handle('discord:link', async () => {
+    const linked = await discord.link();
+    // The sign-in happened in the browser; come back to where it was asked for.
+    const w = getWindow();
+    if (w?.isMinimized()) w.restore();
+    w?.focus();
+    return linked;
+  });
+  handle('discord:cancelLink', () => discord.cancelLink());
+  handle('discord:unlink', () => discord.unlink());
+  handle('discord:share', (opts: { channelId: string; title: string; note?: string; image: string }) =>
+    discord.share(opts),
   );
 
   /* ---------------- window ---------------- */
