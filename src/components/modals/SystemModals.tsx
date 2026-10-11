@@ -5,6 +5,7 @@ import { Check, Field, Modal, NumInput, SectionLabel, Slider, Tip } from '../com
 import { canvasApi, DEFAULT_EXPORT, type ExportOptions } from '@/canvas/canvasBridge';
 import { SHORTCUT_REFERENCE } from '@/state/shortcuts';
 import { formatBytes } from '@/lib/util';
+import { pagePath } from '@/lib/pageTree';
 import { TEST_BUILD_LABEL } from '@/lib/testBuild';
 import { DEVELOPER_CREDIT } from '@/lib/credit';
 import { restartToUpdate, useUpdateState, type UpdateState } from '@/state/updates';
@@ -34,6 +35,7 @@ export function ExportModal() {
   const [busy, setBusy] = useState(false);
 
   if (!page || !project) return null;
+  const path = pagePath(project, page);
   const patch = (p: Partial<ExportOptions>) => setOpts((o) => ({ ...o, ...p }));
   const channel = findChannel(discord, channelId);
   const shareTip = channel
@@ -56,7 +58,7 @@ export function ExportModal() {
         await window.api.exporter.toClipboard(url);
         s().toast('Image copied to clipboard', 'success');
       } else {
-        const name = `${project.name} - ${page.name}`.replace(/[\\/:*?"<>|]/g, '_');
+        const name = path.join(' - ').replace(/[\\/:*?"<>|]/g, '_');
         const file = await window.api.exporter.image(url, name, opts.format === 'jpg' ? '.jpg' : '.png');
         if (file) s().toast('Image exported', 'success');
       }
@@ -84,7 +86,7 @@ export function ExportModal() {
 
       const url = await window.api.discord.share({
         channelId,
-        title: `${project.name} — ${page.name}`,
+        title: path.join(' — '),
         note: page.notes.trim() || undefined,
         image,
       });
@@ -106,7 +108,7 @@ export function ExportModal() {
   return (
     <Modal
       title="Export Image"
-      subtitle={`${project.name} — ${page.name}`}
+      subtitle={path.join(' — ')}
       onClose={() => s().closeModal()}
       footer={
         <>
