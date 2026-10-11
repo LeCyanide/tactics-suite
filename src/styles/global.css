@@ -200,13 +200,6 @@ body {
   text-transform: uppercase;
 }
 
-.titlebar .brand .mark {
-  width: 15px;
-  height: 15px;
-  color: var(--accent);
-  flex: none;
-}
-
 .titlebar .menus {
   display: flex;
   -webkit-app-region: no-drag;
@@ -1112,6 +1105,17 @@ input[type='range']::-webkit-slider-thumb {
   pointer-events: none;
   backdrop-filter: blur(6px);
 }
+/* The credit, in the opposite corner: plain dim text on the empty ground beside the map. */
+.canvas-credit {
+  position: absolute;
+  font-size: 11px;
+  line-height: 14px;
+  white-space: nowrap;
+  color: var(--fg-faint);
+  pointer-events: none;
+  user-select: none;
+}
+
 /* Context menu ----------------------------------------------------- */
 
 .ctx-menu {

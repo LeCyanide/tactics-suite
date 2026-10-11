@@ -26,6 +26,7 @@ import { ObjectNode, flatten } from './ObjectNode';
 import { ShipLabel, ShipNode, ShipRanges, attachmentName } from './ShipNode';
 import { DEFAULT_EXPORT, setCanvasApi, type ExportOptions } from './canvasBridge';
 import { clamp, dist, simplifyPath, uid, gridRef } from '@/lib/util';
+import { DEVELOPER_CREDIT } from '@/lib/credit';
 import { createMarker, createNumber, createPath, createShape, createText } from '@/lib/factory';
 import { canvasThemeFor, type CanvasTheme } from '@/state/theme';
 
@@ -39,6 +40,9 @@ const FALLBACK_H = 30000;
  * camera state the canvas ever has.
  */
 const FIT_MARGIN = 0.94;
+
+/** Room the credit line takes, in pixels. The height is its line height in the stylesheet. */
+const CREDIT_SIZE = { width: 96, height: 14 };
 
 /** How long a click ping takes to spread and fade, in milliseconds. */
 const PING_MS = 620;
@@ -161,6 +165,18 @@ export default function MapCanvas() {
    * gesture at the spot rather than as something drawn on the plan.
    */
   const pingRadius = Math.min(worldW / gridCols, worldH / gridRows) / 4;
+  // The credit goes on the empty ground around the map, never on it: in the
+  // corner when the band beside the map is wide enough to hold it, and
+  // otherwise in the band below, in line with the map's edge. Only a pane too
+  // small to leave even that strip goes without.
+  const bandRight = size.width - (camera.x + worldW * camera.scale);
+  const bandBelow = size.height - (camera.y + worldH * camera.scale);
+  const creditStyle =
+    bandRight >= CREDIT_SIZE.width + 20
+      ? { right: 10, bottom: 8 }
+      : bandBelow >= CREDIT_SIZE.height
+        ? { right: Math.max(bandRight, 4), bottom: (bandBelow - CREDIT_SIZE.height) / 2 }
+        : null;
   const snapStep = project?.settings.snapStep ?? 500;
   const snapOn = !!project?.settings.snapToGrid;
   const iconSize = project?.settings.shipIconSize ?? 30;
@@ -1059,6 +1075,11 @@ export default function MapCanvas() {
           {(cursorWorld.x / 1000).toFixed(2)} , {(cursorWorld.y / 1000).toFixed(2)} km
         </span>
       </div>
+      {creditStyle && (
+        <div className="canvas-credit" style={creditStyle}>
+          {DEVELOPER_CREDIT}
+        </div>
+      )}
     </div>
   );
 }
