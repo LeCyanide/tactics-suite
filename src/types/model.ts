@@ -647,6 +647,12 @@ export interface Project {
   /** The top of the page list: folder ids and the ids of pages in no folder, in order. */
   pageLayout: ID[];
   activePageId: ID | null;
+  /**
+   * The pages open as tabs above the board, in tab order. A view of `pages`,
+   * not a part of it: closing a tab leaves the page where it is. Always holds
+   * the active page; kept that way by `settleTabs`.
+   */
+  openPageIds: ID[];
   teams: Team[];
   /** Ship restrictions for this project, offered as a filter wherever ships are listed. */
   rulesets: ShipRuleset[];

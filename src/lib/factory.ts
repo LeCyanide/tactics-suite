@@ -60,7 +60,7 @@ export function createPage(name: string, mapId: ID | null = null): Page {
 export function createProject(name = 'Untitled Project', pageNames?: string[]): Project {
   const now = Date.now();
   const teams = createTeams();
-  const pages = (pageNames?.length ? pageNames : ['01 - Opening']).map((n) => createPage(n));
+  const pages = (pageNames?.length ? pageNames : ['Default']).map((n) => createPage(n));
   return {
     id: uid('prj-'),
     name,
@@ -71,6 +71,7 @@ export function createProject(name = 'Untitled Project', pageNames?: string[]): 
     pageFolders: [],
     pageLayout: pages.map((p) => p.id),
     activePageId: pages[0]?.id ?? null,
+    openPageIds: pages[0] ? [pages[0].id] : [],
     teams,
     rulesets: [],
     settings: { ...clone(DEFAULT_PROJECT_SETTINGS), defaultTeamId: teams[0].id },

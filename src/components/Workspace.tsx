@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Copy, Eye, Grid3x3, HardDrive, Plus, Save, X } from 'lucide-react';
 import { getActivePage, useStore } from '@/state/store';
+import { loadAsset } from '@/state/assets';
+import { folderNameOf } from '@/lib/pageTree';
 import { InlineEdit, Tip } from './common/ui';
 import { renderMarkdown } from '@/lib/markdown';
 import { formatRelative } from '@/lib/util';
@@ -11,10 +13,26 @@ import { formatRelative } from '@/lib/util';
 
 export function PageTabs() {
   const project = useStore((s) => s.project);
+  const maps = useStore((s) => s.maps);
   const s = () => useStore.getState();
   // Index the drag is currently hovering, so the gap shows where it will land.
   const [dragId, setDragId] = useState<string | null>(null);
   const [overIndex, setOverIndex] = useState<number | null>(null);
+
+  const tabs = useMemo(() => {
+    if (!project) return [];
+    const byId = new Map(project.pages.map((p) => [p.id, p]));
+    return project.openPageIds.flatMap((id) => byId.get(id) ?? []);
+  }, [project]);
+
+  // Tabs are for switching quickly, so the boards behind them are decoded
+  // before they are asked for. The cache keeps them for the session.
+  // Keyed on the files as a string, since the list is rebuilt on every render.
+  const mapFiles = tabs.flatMap((p) => maps.find((m) => m.id === p.mapId && m.file) ?? []);
+  const mapKey = mapFiles.map((m) => `${m.file}\n${m.mime}`).join('\n');
+  useEffect(() => {
+    for (const map of mapFiles) void loadAsset('map', map.file, map.mime);
+  }, [mapKey]);
 
   if (!project) return null;
 
@@ -25,56 +43,59 @@ export function PageTabs() {
 
   return (
     <div className="page-tabs" onDragLeave={() => setOverIndex(null)}>
-      {project.pages.map((page, i) => (
-        <div
-          key={page.id}
-          className={
-            `page-tab${page.id === project.activePageId ? ' active' : ''}` +
-            `${dragId === page.id ? ' dragging' : ''}` +
-            `${overIndex === i && dragId && dragId !== page.id ? ' drop-target' : ''}`
-          }
-          draggable
-          onDragStart={(e) => {
-            setDragId(page.id);
-            e.dataTransfer.effectAllowed = 'move';
-            // Firefox refuses to start a drag without payload.
-            e.dataTransfer.setData('text/plain', page.id);
-          }}
-          onDragEnd={endDrag}
-          onDragOver={(e) => {
-            if (!dragId) return;
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-            setOverIndex(i);
-          }}
-          onDrop={(e) => {
-            e.preventDefault();
-            if (dragId && dragId !== page.id) s().movePageTo(dragId, i);
-            endDrag();
-          }}
-          onMouseDown={(e) => e.button === 0 && s().setActivePage(page.id)}
-          onAuxClick={(e) => {
-            if (e.button === 1 && project.pages.length > 1) s().deletePage(page.id);
-          }}
-        >
-          <span className="mono faint" style={{ fontSize: 10 }}>
-            {String(i + 1).padStart(2, '0')}
-          </span>
-          <InlineEdit value={page.name} onCommit={(v) => s().renamePage(page.id, v)} />
-          {project.pages.length > 1 && (
-            <span
-              className="tab-close"
-              onClick={(e) => {
-                e.stopPropagation();
-                s().deletePage(page.id);
-              }}
-              title="Delete page"
-            >
-              <X size={10} />
-            </span>
-          )}
-        </div>
-      ))}
+      {tabs.map((page, i) => {
+        const folder = folderNameOf(project, page);
+        return (
+          <div
+            key={page.id}
+            className={
+              `page-tab${page.id === project.activePageId ? ' active' : ''}` +
+              `${dragId === page.id ? ' dragging' : ''}` +
+              `${overIndex === i && dragId && dragId !== page.id ? ' drop-target' : ''}`
+            }
+            title={folder !== null ? `${folder} – ${page.name}` : page.name}
+            draggable
+            onDragStart={(e) => {
+              setDragId(page.id);
+              e.dataTransfer.effectAllowed = 'move';
+              // Firefox refuses to start a drag without payload.
+              e.dataTransfer.setData('text/plain', page.id);
+            }}
+            onDragEnd={endDrag}
+            onDragOver={(e) => {
+              if (!dragId) return;
+              e.preventDefault();
+              e.dataTransfer.dropEffect = 'move';
+              setOverIndex(i);
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              if (dragId && dragId !== page.id) s().moveTab(dragId, i);
+              endDrag();
+            }}
+            onMouseDown={(e) => e.button === 0 && s().setActivePage(page.id)}
+            onAuxClick={(e) => {
+              if (e.button === 1) s().closeTab(page.id);
+            }}
+          >
+            {folder !== null && <span className="tab-folder">{folder} –</span>}
+            <InlineEdit value={page.name} onCommit={(v) => s().renamePage(page.id, v)} />
+            {tabs.length > 1 && (
+              <span
+                className="tab-close"
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  s().closeTab(page.id);
+                }}
+                title="Close tab (the page stays in the project)"
+              >
+                <X size={10} />
+              </span>
+            )}
+          </div>
+        );
+      })}
       <Tip label="Duplicate current page" side="bottom">
         <button
           className="page-tab-add"

@@ -9,7 +9,16 @@ Under a version, each `###` heading becomes a header in the post and each list
 item under it one note. Use `### Changelog` for what is finished and
 `### In testing` for what is shipped but not settled.
 
-Collect notes under `## Unreleased
+Collect notes under `## Unreleased` as work lands, and rename that heading to
+the version number when it is bumped.
+
+## Unreleased
+
+### Changelog
+
+- Page tabs now show the folder a page is in, so "TEST – Okinawa" and "FINAL – Okinawa" can be told apart
+- Closing a tab no longer deletes the page. Tabs are now a set of open pages for quick switching: click a page in the sidebar to open it as a tab, close tabs you are done with, and drag tabs into any order without changing the page list. Ctrl+Tab cycles through the open tabs. The maps of open tabs are loaded ahead so switching is instant. Delete a page from the sidebar
+- New pages are no longer numbered: the first page of a new project is called "Default" instead of "01 - Opening", and added pages "New Page" instead of "02 - New Page"
 
 ## 2.3.0
 
