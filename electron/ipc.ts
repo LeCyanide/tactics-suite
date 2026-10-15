@@ -21,7 +21,7 @@ type GetWindow = () => BrowserWindow | null;
 const IMAGE_FILTERS = [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'webp'] }];
 const ICON_FILTERS = [{ name: 'Icons', extensions: ['png', 'svg', 'webp'] }];
 const SHIP_DATA_FILTERS = [{ name: 'Ship data', extensions: ['json', 'csv', 'yaml', 'yml'] }];
-const PLAN_FILTERS = [{ name: 'WoWS Plan', extensions: ['wowsplan'] }];
+const PLAN_FILTERS = [{ name: 'WoWs Tactics project', extensions: ['wowsplan'] }];
 const NOTICES = 'THIRD-PARTY-NOTICES.txt';
 const REPLAY_FILTERS = [{ name: 'World of Warships replay', extensions: ['wowsreplay'] }];
 

@@ -287,13 +287,13 @@ Commit the result: `seed/` is the only copy of that data in the repository.
 
 ## Layers
 
-Each page carries five layers, drawn back to front: **Grid**, **Cap Zones**,
-**Ship Ranges**, **Annotations** and **Ships**. There is also **Replay Notes**,
+Each page carries five layers, drawn back to front: **Grid**, **Cap zones**,
+**Ship ranges**, **Annotations** and **Ships**. There is also **Replay notes**,
 which only shows in replay mode, and any custom layers you add.
 Shapes, arrows, text and markers all share Annotations, because they are drawn
 the same way and are almost always shown or hidden together. Every layer has
 visibility, lock, opacity, rename, reorder and delete; objects can be moved
-between layers. Grid and Cap Zones start locked: nothing on them is yours to
+between layers. Grid and Cap zones start locked: nothing on them is yours to
 drag, so the lock keeps a stray click on the canvas from picking one up.
 
 Ship ranges render on their own layer even though they belong to ship objects,

@@ -207,7 +207,7 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
     if (res.migrated) {
       useStore
         .getState()
-        .toast(`Moved ${res.migrated} replay${res.migrated === 1 ? '' : 's'} from the old archive into ${picked}.`);
+        .toast(`Moved ${res.migrated} replay${res.migrated === 1 ? '' : 's'} from the old replay store into ${picked}.`);
     }
     await get().refreshArchive();
   },
@@ -522,7 +522,7 @@ function reportImport(outcome: {
   const s = useStore.getState();
   const parts: string[] = [];
   if (outcome.added.length) parts.push(`${outcome.added.length} added`);
-  if (outcome.duplicates.length) parts.push(`${outcome.duplicates.length} already in the archive`);
+  if (outcome.duplicates.length) parts.push(`${outcome.duplicates.length} already in your library`);
   if (outcome.failed.length) parts.push(`${outcome.failed.length} skipped`);
   s.toast(parts.join(', ') || 'Nothing to import', outcome.failed.length && !outcome.added.length ? 'error' : 'info');
   // The reasons matter more than the count when something was skipped, and a

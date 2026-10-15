@@ -497,7 +497,7 @@ export const useStore = create<Store>((set, get) => {
     },
 
     async newProject(name) {
-      const project = createProject(name || 'Untitled Project');
+      const project = createProject(name || 'Untitled project');
       await window.api.projects.save(project);
       set({
         project,
@@ -709,7 +709,7 @@ export const useStore = create<Store>((set, get) => {
       const { project } = get();
       if (!project) return;
       const index = project.pages.length + 1;
-      const page = createPage(name ?? `${String(index).padStart(2, '0')} - New Page`);
+      const page = createPage(name ?? `${String(index).padStart(2, '0')} - New page`);
       // A new page inherits the map of the current one: pages are usually
       // successive phases of the same battle. For the same reason it joins
       // that page's folder unless told where to go.

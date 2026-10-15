@@ -254,7 +254,7 @@ function isKnownKey(key: string): boolean {
 }
 
 export function normalizeShip(raw: Raw, existing?: Ship): Ship {
-  const name = String(pick(raw, 'name') ?? existing?.name ?? 'Unnamed Ship').trim();
+  const name = String(pick(raw, 'name') ?? existing?.name ?? 'Unnamed ship').trim();
 
   // Anything we did not recognise is folded into the notes rather than lost.
   const leftovers = Object.entries(raw)
@@ -348,7 +348,7 @@ export function parseShipData(text: string, ext: string): ParseResult {
   const ships = rows
     .filter((r) => r && typeof r === 'object')
     .map((r) => normalizeShip(r))
-    .filter((s) => s.name && s.name !== 'Unnamed Ship');
+    .filter((s) => s.name && s.name !== 'Unnamed ship');
 
   if (!ships.length) warnings.push('No ship rows were recognised in this file.');
   return { ships, format, warnings };

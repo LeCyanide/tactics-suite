@@ -133,15 +133,14 @@ export function ExportModal() {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
         <div>
           <SectionLabel>Include</SectionLabel>
-          {cat('background', 'Background Map')}
-          {cat('grid', 'Grid & Coordinates')}
-          {cat('caps', 'Capture Zones')}
+          {cat('background', 'Background map')}
+          {cat('grid', 'Grid & coordinates')}
+          {cat('caps', 'Capture zones')}
           {cat('ships', 'Ships')}
-          {cat('ranges', 'Ship Ranges')}
+          {cat('ranges', 'Ship ranges')}
           {cat('annotations', 'Annotations')}
           <div className="faint" style={{ fontSize: 11, marginTop: 8, lineHeight: 1.5 }}>
-            Hidden layers, hidden teams and switched-off ship characteristics are never drawn — if Radar is off on the
-            map, it is absent from the file too.
+            Hidden layers, hidden teams and switched-off ranges are left out, as on the map.
           </div>
         </div>
 
@@ -307,7 +306,7 @@ export function SettingsModal() {
       <SectionLabel>About</SectionLabel>
       <div className="faint" style={{ fontSize: 11.5, lineHeight: 1.7 }}>
         WoWs Tactics Suite {info?.version ?? ''}
-        {TEST_BUILD_LABEL && <strong style={{ color: 'var(--warn)' }}> ({TEST_BUILD_LABEL})</strong>} — Awooga I don't know what I am doing. language versions below:
+        {TEST_BUILD_LABEL && <strong style={{ color: 'var(--warn)' }}> ({TEST_BUILD_LABEL})</strong>}
         <div className="mono" style={{ marginTop: 6, fontSize: 10.5 }}>
           Electron {info?.electron} · Chromium {info?.chrome} · Node {info?.node}
         </div>
@@ -355,7 +354,7 @@ function DiscordSection() {
   if (discord.status === 'unavailable') {
     return (
       <div className="faint" style={note}>
-        This build was made without a clan bot, so there is nowhere to share to.
+        This build has no clan bot to share to.
       </div>
     );
   }
@@ -376,7 +375,7 @@ function DiscordSection() {
         <div className="faint" style={note}>
           {linking
             ? 'Approve the request in the browser window that just opened, then come back here.'
-            : 'Opens Discord in your browser to sign in. The app learns who you are and nothing else, and can then post pages to the channels you can post in yourself.'}
+            : 'Sign in with Discord in your browser. The app learns only who you are, and can post pages wherever you can post yourself.'}
         </div>
       </>
     );
@@ -420,10 +419,10 @@ function DiscordSection() {
       </Field>
       <div className="faint" style={{ ...note, color: discord.error ? 'var(--danger)' : undefined }}>
         {discord.error
-          ? `${discord.error} The channel list will come back when it can be.`
+          ? `${discord.error} The channel list returns once the bot can be reached.`
           : servers.length === 0
             ? 'There is no channel where both you and the bot can send messages and attach files.'
-            : 'Fills in the Share to Discord button on the export dialog. Listed are the channels where you can send messages and attach files, and the bot can too. The bot never reads anything from this machine — the app sends it the rendered image.'}
+            : 'Where Share to Discord in the export dialog posts. Only channels where both you and the bot can send messages and attach files are listed.'}
       </div>
     </>
   );

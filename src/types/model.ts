@@ -30,7 +30,7 @@ export const SHIP_CLASS_LABEL: Record<ShipClass, string> = {
   DD: 'Destroyer',
   CA: 'Cruiser',
   BB: 'Battleship',
-  CV: 'Aircraft Carrier',
+  CV: 'Aircraft carrier',
   SS: 'Submarine',
 };
 
@@ -317,12 +317,12 @@ export type CharacteristicKey =
   | 'airstrike';
 
 export const CHARACTERISTICS: { key: CharacteristicKey; label: string; group: 'range' | 'other' }[] = [
-  { key: 'detection', label: 'Detection Range', group: 'range' },
+  { key: 'detection', label: 'Detection range', group: 'range' },
   { key: 'radar', label: 'Radar', group: 'range' },
   { key: 'hydro', label: 'Hydro', group: 'range' },
-  { key: 'mainBattery', label: 'Main Battery Range', group: 'range' },
-  { key: 'secondary', label: 'Secondary Battery Range', group: 'range' },
-  { key: 'torpedo', label: 'Torpedo Range', group: 'range' },
+  { key: 'mainBattery', label: 'Main battery range', group: 'range' },
+  { key: 'secondary', label: 'Secondary battery range', group: 'range' },
+  { key: 'torpedo', label: 'Torpedo range', group: 'range' },
   { key: 'airstrike', label: 'Airstrike', group: 'range' },
 ];
 
@@ -416,12 +416,12 @@ export const LAYER_IDS = {
 } as const;
 
 /**
- * Five planning layers plus Replay Notes. Shapes, arrows, text and markers all live on
+ * Five planning layers plus Replay notes. Shapes, arrows, text and markers all live on
  * "Annotations" — they are drawn the same way and are almost always shown or
  * hidden together — while ranges keep their own layer so every circle on the
  * page can be switched off in one click.
  *
- * Grid and Cap Zones are background pseudo-layers: they hold no objects and
+ * Grid and Cap zones are background pseudo-layers: they hold no objects and
  * exist only so the two can be toggled and faded like anything else. Both are
  * locked, which is what keeps them out of every "which layer does this object
  * go on" decision.
@@ -430,14 +430,14 @@ export function createDefaultLayers(): Layer[] {
   // Rendered back-to-front in array order.
   return [
     { id: LAYER_IDS.grid, name: 'Grid', visible: true, locked: true, opacity: 1, system: true },
-    { id: LAYER_IDS.caps, name: 'Cap Zones', visible: true, locked: true, opacity: 1, system: true },
-    { id: LAYER_IDS.ranges, name: 'Ship Ranges', visible: true, locked: false, opacity: 1, system: true },
+    { id: LAYER_IDS.caps, name: 'Cap zones', visible: true, locked: true, opacity: 1, system: true },
+    { id: LAYER_IDS.ranges, name: 'Ship ranges', visible: true, locked: false, opacity: 1, system: true },
     { id: LAYER_IDS.annotations, name: 'Annotations', visible: true, locked: false, opacity: 1, system: true },
     { id: LAYER_IDS.ships, name: 'Ships', visible: true, locked: false, opacity: 1, system: true },
     // Replay notes are a plan for a battle that already happened, on ground the
     // page may not even be planning against, so they are kept apart from the
     // plan and drawn only in replay mode.
-    { id: LAYER_IDS.replay, name: 'Replay Notes', visible: true, locked: false, opacity: 1, system: true },
+    { id: LAYER_IDS.replay, name: 'Replay notes', visible: true, locked: false, opacity: 1, system: true },
   ];
 }
 
@@ -556,7 +556,7 @@ export interface TextObject extends BaseObject {
   color: string;
   background: string | null;
   align: 'left' | 'center' | 'right';
-  /** Number badges only. */
+  /** Number objects only. */
   value?: number;
 }
 

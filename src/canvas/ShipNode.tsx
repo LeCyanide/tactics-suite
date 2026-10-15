@@ -19,7 +19,7 @@ const RANGE_LABEL: Record<string, string> = {
   detection: 'Detection',
   radar: 'Radar',
   hydro: 'Hydro',
-  mainBattery: 'Main Battery',
+  mainBattery: 'Main battery',
   secondary: 'Secondary',
   torpedo: 'Torpedo',
   airstrike: 'Airstrike',

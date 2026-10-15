@@ -29,11 +29,11 @@ const GROUPS: ToolDef[][] = [
   [{ id: 'freehand', icon: Pencil, label: 'Freehand', shortcut: 'F' }],
   [
     { id: 'text', icon: Type, label: 'Text', shortcut: 'T' },
-    { id: 'number', icon: Hash, label: 'Number badge' },
+    { id: 'number', icon: Hash, label: 'Number' },
     { id: 'marker', icon: Pin, label: 'Marker' },
   ],
   [
-    { id: 'ruler', icon: Ruler, label: 'Ruler / distance', shortcut: 'M' },
+    { id: 'ruler', icon: Ruler, label: 'Ruler', shortcut: 'M' },
     { id: 'area', icon: Scan, label: 'Area — click points, double-click to close' },
   ],
 ];

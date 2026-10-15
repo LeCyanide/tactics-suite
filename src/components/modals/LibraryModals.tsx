@@ -49,8 +49,7 @@ export function MapManagerModal() {
     >
       {maps.length === 0 ? (
         <div className="empty-note" style={{ padding: 40 }}>
-          No maps yet. Import a minimap screenshot or map render, then set its real-world size so ranges measure
-          correctly.
+          No maps yet. Import a minimap image, then set its real size so ranges measure correctly.
         </div>
       ) : (
         <div className="card-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(268px, 1fr))' }}>
@@ -165,7 +164,7 @@ export function ShipDatabaseModal() {
       footer={
         <>
           <button className="btn primary" onClick={() => void s().importShipData()}>
-            <FileUp size={13} /> Import data…
+            <FileUp size={13} /> Import ship data…
           </button>
           <button className="btn" onClick={() => void s().importIcons()}>
             <ImageIcon size={13} /> Import icons…
@@ -185,7 +184,7 @@ export function ShipDatabaseModal() {
           <button
             className="btn"
             onClick={() => {
-              const ship: Ship = { id: uid('ship-'), name: 'New Ship', nation: 'Unknown', class: 'CA', tier: 10, iconId: null };
+              const ship: Ship = { id: uid('ship-'), name: 'New ship', nation: 'Unknown', class: 'CA', tier: 10, iconId: null };
               void s().upsertShip(ship);
               setSelectedId(ship.id);
             }}
@@ -203,15 +202,15 @@ export function ShipDatabaseModal() {
           <Database size={26} style={{ opacity: 0.4, marginBottom: 10 }} />
           <div>The ship database is empty.</div>
           <div style={{ marginTop: 6, maxWidth: 420, margin: '6px auto 0' }}>
-            Import your own ship data as JSON, CSV or YAML — column names are matched loosely, so an export from a
-            spreadsheet usually works as-is.
+            Import ship data as JSON, CSV or YAML. Column names are matched loosely, so most spreadsheet exports work
+            as-is.
           </div>
           <div style={{ marginTop: 14, display: 'flex', gap: 8, justifyContent: 'center' }}>
             <button className="btn primary" onClick={() => void s().importShipData()}>
               Import ship data…
             </button>
             <button className="btn" onClick={() => void s().loadSampleShips()}>
-              Load sample set
+              Load sample ships
             </button>
           </div>
         </div>
@@ -308,8 +307,8 @@ export function ShipDatabaseModal() {
 
             {withoutIcon > 0 && (
               <div className="faint" style={{ fontSize: 11, marginBottom: 6 }}>
-                {withoutIcon} ship{withoutIcon === 1 ? '' : 's'} without an icon — those fall back to a class glyph on
-                the map. Imported icon files are matched to ships by file name automatically.
+                {withoutIcon} ship{withoutIcon === 1 ? '' : 's'} without an icon use a class glyph. Icon files are
+                matched to ships by file name.
               </div>
             )}
 
@@ -651,8 +650,8 @@ function ShipEditor({ ship, onDeleted }: { ship: Ship; onDeleted: () => void }) 
             value={ship.cruiserType ?? 'CA'}
             onChange={(e) => set({ cruiserType: e.target.value as 'CA' | 'CL' })}
           >
-            <option value="CA">CA — Heavy Cruiser</option>
-            <option value="CL">CL — Light Cruiser</option>
+            <option value="CA">CA — Heavy cruiser</option>
+            <option value="CL">CL — Light cruiser</option>
           </select>
         </Field>
       )}
@@ -684,7 +683,7 @@ function ShipEditor({ ship, onDeleted }: { ship: Ship; onDeleted: () => void }) 
 
       <SectionLabel>Detection</SectionLabel>
       {numField('Concealment', 'concealment_km', 'km')}
-      {numField('Air detect', 'concealmentAir_km', 'km')}
+      {numField('Air detection', 'concealmentAir_km', 'km')}
 
       <SectionLabel>Armament</SectionLabel>
       {numField('Main range', 'mainBatteryRange_km', 'km')}
@@ -692,8 +691,8 @@ function ShipEditor({ ship, onDeleted }: { ship: Ship; onDeleted: () => void }) 
         <input type="text" value={ship.mainBattery ?? ''} onChange={(e) => set({ mainBattery: e.target.value })} />
       </Field>
       {numField('Secondary', 'secondaryRange_km', 'km')}
-      {numField('Torp range', 'torpedoRange_km', 'km')}
-      {numField('Torp arc', 'torpedoArc_deg', '°', 5)}
+      {numField('Torpedo range', 'torpedoRange_km', 'km')}
+      {numField('Torpedo arc', 'torpedoArc_deg', '°', 5)}
       {numField('Airstrike min', 'airstrikeMinRange_km', 'km')}
       {numField('Airstrike max', 'airstrikeMaxRange_km', 'km')}
       {numField('AA range', 'aaRange_km', 'km')}

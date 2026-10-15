@@ -106,23 +106,23 @@ function WelcomeScreen({ booted }: { booted: boolean }) {
     >
       <div style={{ textAlign: 'center', maxWidth: 460 }}>
         <div style={{ fontSize: 17, fontWeight: 650, letterSpacing: '0.02em', marginBottom: 6 }}>
-          Tactics Planner
+          WoWs Tactics Suite
         </div>
         <div className="faint" style={{ fontSize: 12.5, lineHeight: 1.7, marginBottom: 18 }}>
           {booted
-            ? 'Offline tactical planning for World of Warships. Create a project, import your map images and ship data, and start laying out the battle.'
+            ? 'Plan tactics on the real maps. Create a project to start, or open one you already have.'
             : 'Loading local storage…'}
         </div>
         {booted && (
           <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
             <button className="btn primary" onClick={() => s().openModal('newProject')}>
-              New Project
+              New project
             </button>
             <button className="btn" onClick={() => s().openModal('projects')}>
-              Open Project
+              Open project
             </button>
             <button className="btn" onClick={() => void s().importProject()}>
-              Import .wowsplan
+              Import project…
             </button>
           </div>
         )}

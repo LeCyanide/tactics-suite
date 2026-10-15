@@ -1,7 +1,7 @@
 import type { Ship } from '@/types/model';
 
 /**
- * Optional Tier X starter set, loaded only by "Load sample set". Values are
+ * Optional Tier X starter set, loaded only by "Load sample ships". Values are
  * approximations for planning geometry, not an authoritative stat sheet.
  */
 export const SAMPLE_SHIPS: Omit<Ship, 'id'>[] = [

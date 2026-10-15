@@ -55,7 +55,7 @@ export function TitleBar() {
       { label: 'Save', shortcut: 'Ctrl+S', action: () => void s().saveProject(), enabled: hasProject },
       { label: 'Save As…', action: () => s().openModal('newProject', { saveAs: true }), enabled: hasProject },
       { separator: true },
-      { label: 'Import Project (.wowsplan)…', action: () => void s().importProject() },
+      { label: 'Import Project…', action: () => void s().importProject() },
       { label: 'Export Project (.wowsplan)…', action: () => void s().exportProject(), enabled: hasProject },
       { label: 'Export Image…', shortcut: 'Ctrl+E', action: () => s().openModal('export'), enabled: hasProject },
       { separator: true },
@@ -101,16 +101,14 @@ export function TitleBar() {
         enabled: !!page,
       },
     ],
-    // Library and Help both collapsed into here: one place for everything that
-    // is not about the document currently open.
+    // Everything not about the open document.
     Settings: [
-      { label: 'Preferences…', action: () => s().openModal('settings') },
+      { label: 'Settings…', action: () => s().openModal('settings') },
       { separator: true },
       { label: 'Map Manager…', action: () => s().openModal('maps') },
       { label: 'Ship Database…', action: () => s().openModal('shipDb') },
       { separator: true },
       { label: 'Keyboard Shortcuts', shortcut: 'F1', action: () => s().openModal('shortcuts') },
-      { label: 'Storage & About', action: () => s().openModal('settings') },
     ],
   };
 

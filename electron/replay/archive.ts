@@ -869,7 +869,7 @@ export async function loadTimeline(id: string, opts: { rebake?: boolean } = {}):
 function unplayableReason(r: LibraryReplay): string {
   if (!gameDir) return 'Choose your World of Warships folder to watch this replay.';
   if (r.build === null) return 'This replay does not say which game version recorded it, so it cannot be played.';
-  return `This replay was recorded on game build ${r.build}, which is no longer installed, and it was never baked while it was. It cannot be played.`;
+  return `Recorded on game build ${r.build}, which is no longer installed, and never baked while it was. It cannot be played.`;
 }
 
 /* ------------------------------------------------------------------ */
