@@ -71,6 +71,7 @@ export function createProject(name = 'Untitled Project', pageNames?: string[]): 
     pageFolders: [],
     pageLayout: pages.map((p) => p.id),
     activePageId: pages[0]?.id ?? null,
+    openPageIds: pages[0] ? [pages[0].id] : [],
     teams,
     rulesets: [],
     settings: { ...clone(DEFAULT_PROJECT_SETTINGS), defaultTeamId: teams[0].id },

@@ -33,7 +33,7 @@ import {
   type Vec2,
 } from '@/types/model';
 import { clamp, clone, debounce, foldForSearch, uid } from '@/lib/util';
-import { beforeIdFor, dissolveFolder, placeFolder, placePage, settlePages, stepFolder, stepPage } from '@/lib/pageTree';
+import { dissolveFolder, openTab, placeFolder, placePage, settlePages, settleTabs, stepFolder, stepPage } from '@/lib/pageTree';
 import { applyTheme } from './theme';
 import {
   createPage,
@@ -182,7 +182,12 @@ interface Actions {
   closeProject(): Promise<void>;
 
   /* pages */
+  /** Shows a page, opening it as a tab if it is not one already. */
   setActivePage(id: ID): void;
+  /** Closes a page's tab. The page itself stays in the project. */
+  closeTab(id: ID): void;
+  /** Moves a tab to `index` along the tab bar; the page list is left alone. */
+  moveTab(id: ID, index: number): void;
   /** Adds a page to `folderId`, or next to the current page when none is given. */
   addPage(name?: string, folderId?: ID | null): void;
   duplicatePage(id: ID): void;
@@ -190,8 +195,6 @@ interface Actions {
   deletePage(id: ID): void;
   /** Steps a page among its own folder's pages, or along the top of the list. */
   reorderPage(id: ID, delta: number): void;
-  /** Absolute reorder, used by drag and drop on the board tabs. */
-  movePageTo(id: ID, index: number): void;
   /** Puts a page into a folder (null for none), in front of `beforeId` or at the end. */
   placePage(id: ID, folderId: ID | null, beforeId?: ID | null): void;
   /** Returns the new folder's id, so the list can open it for naming. */
@@ -408,6 +411,25 @@ export const useStore = create<Store>((set, get) => {
     publish(next, current, opts);
   };
 
+  /**
+   * Publishes a change to the view alone — the active page, the open tabs.
+   * Not an edit: no history, no "unsaved". See setActivePage.
+   */
+  const setView = (next: Project) => {
+    set({ project: next });
+    if (!get().dirty) void window.api.projects.save(next).catch(() => undefined);
+  };
+
+  /**
+   * Undo and redo step through edits, not through tabs: the version they
+   * bring back keeps the tabs open now, less any page it does not have.
+   */
+  const keepTabs = (version: Project, current: Project): Project => {
+    const next = { ...version, openPageIds: [...current.openPageIds] };
+    settleTabs(next);
+    return next;
+  };
+
   return {
     /* ------------------------------ state ------------------------------ */
     ships: [],
@@ -566,6 +588,7 @@ export const useStore = create<Store>((set, get) => {
       }
       // Projects from before folders carry neither folders nor a layout.
       settlePages(doc);
+      settleTabs(doc);
       // Projects made before the sides were named for the competitive format
       // carry "Team North"/"Team South". Those untouched defaults take both the
       // name and the colour of the side they became; a team someone named
@@ -703,22 +726,54 @@ export const useStore = create<Store>((set, get) => {
     /* ------------------------------ pages ------------------------------ */
 
     /**
-     * Which page is showing is where the user is looking, not something they
-     * changed. Going through commit made every tab click an edit: the project
-     * read "unsaved" with nothing to save, the page was stamped as modified,
-     * and undo gained a step that only flipped back a tab.
+     * Which page is showing, and which pages are open as tabs, is where the
+     * user is looking, not something they changed. Going through commit made
+     * every tab click an edit: the project read "unsaved" with nothing to
+     * save, the page was stamped as modified, and undo gained a step that only
+     * flipped back a tab.
      *
-     * The page is still remembered for the next open. With nothing else
+     * The view is still remembered for the next open. With nothing else
      * waiting it is written straight away, without touching the saved state;
      * otherwise it goes out with the save that is already owed.
      */
     setActivePage(id) {
-      const { project, dirty } = get();
+      const { project } = get();
       if (!project || project.activePageId === id || !project.pages.some((p) => p.id === id)) return;
-      const next: Project = { ...project, activePageId: id };
-      set({ project: next, selection: [] });
-      if (!dirty) void window.api.projects.save(next).catch(() => undefined);
+      const next: Project = { ...project, openPageIds: [...project.openPageIds] };
+      openTab(next, id);
+      next.activePageId = id;
+      setView(next);
+      set({ selection: [] });
       get().requestFit();
+    },
+
+    closeTab(id) {
+      const { project } = get();
+      if (!project) return;
+      const at = project.openPageIds.indexOf(id);
+      // The board always shows a page, so the last tab stays.
+      if (at < 0 || project.openPageIds.length <= 1) return;
+      const openPageIds = project.openPageIds.filter((x) => x !== id);
+      if (project.activePageId !== id) {
+        setView({ ...project, openPageIds });
+        return;
+      }
+      // Like a browser: the tab that slides into its place, or the one before.
+      const activePageId = openPageIds[clamp(at, 0, openPageIds.length - 1)];
+      setView({ ...project, openPageIds, activePageId });
+      set({ selection: [] });
+      get().requestFit();
+    },
+
+    moveTab(id, index) {
+      const { project } = get();
+      if (!project) return;
+      const at = project.openPageIds.indexOf(id);
+      const to = clamp(index, 0, project.openPageIds.length - 1);
+      if (at < 0 || at === to) return;
+      const openPageIds = project.openPageIds.filter((x) => x !== id);
+      openPageIds.splice(to, 0, id);
+      setView({ ...project, openPageIds });
     },
 
     addPage(name, folderId) {
@@ -734,6 +789,7 @@ export const useStore = create<Store>((set, get) => {
       page.folderId = folderId === undefined ? (current?.folderId ?? null) : folderId;
       commit((draft) => {
         draft.pages.push(page);
+        openTab(draft, page.id);
         draft.activePageId = page.id;
         settlePages(draft);
       });
@@ -755,6 +811,7 @@ export const useStore = create<Store>((set, get) => {
         // A loose page has a place in the layout too; one in a folder follows `pages`.
         const slot = draft.pageLayout.indexOf(id);
         if (slot >= 0) draft.pageLayout.splice(slot + 1, 0, copy.id);
+        openTab(draft, copy.id);
         draft.activePageId = copy.id;
         settlePages(draft);
       });
@@ -776,34 +833,23 @@ export const useStore = create<Store>((set, get) => {
       }
       commit((draft) => {
         const at = draft.pages.findIndex((p) => p.id === id);
+        const tab = draft.openPageIds.indexOf(id);
         draft.pages = draft.pages.filter((p) => p.id !== id);
+        draft.openPageIds = draft.openPageIds.filter((x) => x !== id);
         if (draft.activePageId === id) {
-          draft.activePageId = draft.pages[clamp(at, 0, draft.pages.length - 1)].id;
+          // Prefer a neighbouring tab; with no other tab open, the next page in the list.
+          draft.activePageId =
+            draft.openPageIds[clamp(tab, 0, draft.openPageIds.length - 1)] ??
+            draft.pages[clamp(at, 0, draft.pages.length - 1)].id;
         }
         settlePages(draft);
+        settleTabs(draft);
       });
       set({ selection: [] });
     },
 
     reorderPage(id, delta) {
       commit((draft) => stepPage(draft, id, delta));
-    },
-
-    /**
-     * The tabs are the flat list, so a tab dropped on another lands beside it
-     * in the sidebar as well — in that page's folder, if it has one. Anything
-     * else would leave a folder's pages scattered along the tab bar.
-     */
-    movePageTo(id, index) {
-      commit((draft) => {
-        const at = draft.pages.findIndex((p) => p.id === id);
-        if (at < 0) return;
-        const to = clamp(index, 0, draft.pages.length - 1);
-        if (at === to) return;
-        const target = draft.pages[to];
-        const before = beforeIdFor(draft, id, target.id, target.folderId, at < to ? 'after' : 'before');
-        placePage(draft, id, target.folderId, before);
-      });
     },
 
     placePage(id, folderId, beforeId = null) {
@@ -1125,7 +1171,7 @@ export const useStore = create<Store>((set, get) => {
     undo() {
       const { past, future, project } = get();
       if (!past.length || !project) return;
-      const prev = past[past.length - 1];
+      const prev = keepTabs(past[past.length - 1], project);
       const page = activePageOf(prev);
       const alive = new Set(page?.objects.map((o) => o.id) ?? []);
       set({
@@ -1141,7 +1187,7 @@ export const useStore = create<Store>((set, get) => {
     redo() {
       const { past, future, project } = get();
       if (!future.length || !project) return;
-      const next = future[future.length - 1];
+      const next = keepTabs(future[future.length - 1], project);
       const page = activePageOf(next);
       const alive = new Set(page?.objects.map((o) => o.id) ?? []);
       set({

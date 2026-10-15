@@ -162,9 +162,10 @@ export function useShortcuts(): void {
             handled();
             const project = s().project;
             if (!project) return;
-            const i = project.pages.findIndex((p) => p.id === project.activePageId);
-            const next = project.pages[(i + 1) % project.pages.length];
-            if (next) s().setActivePage(next.id);
+            const tabs = project.openPageIds;
+            const i = project.activePageId ? tabs.indexOf(project.activePageId) : -1;
+            const next = tabs[(i + 1) % tabs.length];
+            if (next) s().setActivePage(next);
             return;
           }
           default:

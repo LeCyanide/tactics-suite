@@ -1012,6 +1012,10 @@ input[type='range']::-webkit-slider-thumb {
   color: var(--fg);
   box-shadow: inset 0 -2px 0 var(--accent);
 }
+.page-tab .tab-folder {
+  color: var(--fg-faint);
+  font-size: 11px;
+}
 .page-tab .tab-close {
   opacity: 0;
   width: 14px;

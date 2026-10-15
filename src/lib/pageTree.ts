@@ -3,7 +3,7 @@
  * with each folder's pages under it.
  *
  * Folders are sorting and nothing more. `project.pages` stays the one flat
- * list everything else reads — the tabs, the next-page shortcut, export — and
+ * list everything else reads — the page shortcuts, export — and
  * every function here leaves it in the order the sidebar shows, so the two
  * never disagree about which page comes next.
  */
@@ -34,8 +34,34 @@ export function pageTree(project: Project): PageTreeItem[] {
  * folder it is sorted into if any, and the page itself.
  */
 export function pagePath(project: Project, page: Page): string[] {
-  const folder = project.pageFolders?.find((f) => f.id === page.folderId);
-  return [project.name, ...(folder ? [folder.name] : []), page.name];
+  const folder = folderNameOf(project, page);
+  return [project.name, ...(folder !== null ? [folder] : []), page.name];
+}
+
+/** The name of the folder a page is sorted into, or null for a loose page. */
+export function folderNameOf(project: Project, page: Page): string | null {
+  return project.pageFolders?.find((f) => f.id === page.folderId)?.name ?? null;
+}
+
+/**
+ * Makes the tabs agree with the pages: each names a page that exists, once,
+ * and the active page is among them. A project from before tabs were their
+ * own list opens with just the page it was left on.
+ */
+export function settleTabs(project: Project): void {
+  const exists = new Set(project.pages.map((p) => p.id));
+  const open = [...new Set(project.openPageIds ?? [])].filter((id) => exists.has(id));
+  if (project.activePageId && exists.has(project.activePageId) && !open.includes(project.activePageId)) {
+    open.push(project.activePageId);
+  }
+  project.openPageIds = open;
+}
+
+/** Opens a page as a tab just after the active one, unless it is open already. */
+export function openTab(project: Project, id: ID): void {
+  if (project.openPageIds.includes(id)) return;
+  const at = project.activePageId ? project.openPageIds.indexOf(project.activePageId) : -1;
+  project.openPageIds.splice(at < 0 ? project.openPageIds.length : at + 1, 0, id);
 }
 
 /**
