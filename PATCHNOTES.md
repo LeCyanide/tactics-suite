@@ -16,7 +16,7 @@ the version number when it is bumped.
 
 ### Changelog
 
-- Page tabs now show the folder a page is in, so "TEST / Okinawa" and "FINAL / Okinawa" can be told apart
+- Page tabs now show the folder a page is in, so "TEST – Okinawa" and "FINAL – Okinawa" can be told apart
 - Closing a tab no longer deletes the page. Tabs are now a set of open pages for quick switching: click a page in the sidebar to open it as a tab, close tabs you are done with, and drag tabs into any order without changing the page list. Ctrl+Tab cycles through the open tabs. The maps of open tabs are loaded ahead so switching is instant. Delete a page from the sidebar
 
 ## 2.3.0

@@ -53,7 +53,7 @@ export function PageTabs() {
               `${dragId === page.id ? ' dragging' : ''}` +
               `${overIndex === i && dragId && dragId !== page.id ? ' drop-target' : ''}`
             }
-            title={folder !== null ? `${folder} / ${page.name}` : page.name}
+            title={folder !== null ? `${folder} – ${page.name}` : page.name}
             draggable
             onDragStart={(e) => {
               setDragId(page.id);
@@ -78,7 +78,7 @@ export function PageTabs() {
               if (e.button === 1) s().closeTab(page.id);
             }}
           >
-            {folder !== null && <span className="tab-folder">{folder} /</span>}
+            {folder !== null && <span className="tab-folder">{folder} –</span>}
             <InlineEdit value={page.name} onCommit={(v) => s().renamePage(page.id, v)} />
             {tabs.length > 1 && (
               <span
