@@ -2,7 +2,8 @@
  * This copy of the app's link to a Discord account, for Share to Discord.
  *
  * Besides the updater this is the only module that talks to the network, and
- * only to the clan bot baked in at build time (BOT_URL in .env.release).
+ * only to one bot: the clan bot baked in at build time (BOT_URL in
+ * .env.release), or one the person runs themselves and entered in Settings.
  *
  * Linking is the sign-in people know from other apps: Connect Discord opens
  * the browser on Discord's own consent page, and nothing is typed in here.
@@ -55,29 +56,79 @@ interface StoredLink {
   /** False only where the system has no store to encrypt with. */
   encrypted: boolean;
   user: DiscordUser;
+  /**
+   * The bot that issued the token. A token means nothing to any other bot.
+   * Absent on links made before the address could be changed: those came
+   * from the built-in one.
+   */
+  bot?: string;
+}
+
+/** Which bot this copy talks to, as Settings shows it. */
+export interface DiscordBot {
+  /** Empty when there is none: no built-in bot and none entered. */
+  url: string;
+  /** The address baked into this build, or empty. */
+  builtIn: string;
+  /** True when the address was entered in Settings. */
+  custom: boolean;
 }
 
 /** Long enough to sign in to Discord in the browser first, if need be. */
 const LINK_TIMEOUT_MS = 5 * 60_000;
 const REQUEST_TIMEOUT_MS = 15_000;
-const UNREACHABLE = 'The clan bot could not be reached.';
+const UNREACHABLE = 'The bot could not be reached.';
 const LINK_GONE = 'Discord is no longer connected. Connect it again in Settings.';
 
 const FAILURES: Record<string, string> = {
   denied: 'The Discord sign-in was cancelled.',
-  not_member: 'That Discord account is not in a server the clan bot is in.',
+  not_member: 'That Discord account is not in a server the bot is in.',
   discord: 'Discord did not complete the sign-in. Try again.',
 };
 
-const botUrl = __BOT_URL__.replace(/\/+$/, '');
+const builtInBot = __BOT_URL__.replace(/\/+$/, '');
 const linkFile = () => path.join(storageRoot(), 'discord-link.json');
+const botFile = () => path.join(storageRoot(), 'discord-bot.json');
+
+/** The address entered in Settings, once read; undefined until then. */
+let customBot: string | null | undefined;
+
+async function currentBot(): Promise<string> {
+  if (customBot === undefined) {
+    const stored = await readJson<{ url?: unknown } | null>(botFile(), null);
+    customBot = typeof stored?.url === 'string' ? normaliseBotUrl(stored.url) : null;
+  }
+  return customBot ?? builtInBot;
+}
+
+/**
+ * The origin of a bot address, or an error fit to show. HTTPS only, because
+ * the link token travels to it; plain http is allowed for a bot on this
+ * machine, for testing one.
+ */
+function normaliseBotUrl(raw: string): string {
+  const text = raw.trim();
+  let url: URL;
+  try {
+    url = new URL(/^[a-z][a-z0-9+.-]*:\/\//i.test(text) ? text : `https://${text}`);
+  } catch {
+    throw new Error('That is not a web address.');
+  }
+  const local = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+  if (url.protocol !== 'https:' && !(url.protocol === 'http:' && local)) {
+    throw new Error('The bot address must start with https://');
+  }
+  if (url.username || url.password) throw new Error('The bot address cannot hold a name or password.');
+  return url.origin;
+}
 
 /** Ends the sign-in that is waiting on the browser, if one is. */
 let abandon: ((reason: Error) => void) | null = null;
 
-async function readLink(): Promise<{ token: string; user: DiscordUser } | null> {
+async function readLink(bot: string): Promise<{ token: string; user: DiscordUser } | null> {
   const stored = await readJson<StoredLink | null>(linkFile(), null);
   if (!stored?.token || !stored.user) return null;
+  if ((stored.bot ?? builtInBot) !== bot) return null;
   if (!stored.encrypted) return { token: stored.token, user: stored.user };
   try {
     return { token: safeStorage.decryptString(Buffer.from(stored.token, 'base64')), user: stored.user };
@@ -88,12 +139,13 @@ async function readLink(): Promise<{ token: string; user: DiscordUser } | null> 
   }
 }
 
-async function writeLink(token: string, user: DiscordUser): Promise<void> {
+async function writeLink(token: string, user: DiscordUser, bot: string): Promise<void> {
   const encrypted = safeStorage.isEncryptionAvailable();
   const stored: StoredLink = {
     token: encrypted ? safeStorage.encryptString(token).toString('base64') : token,
     encrypted,
     user,
+    bot,
   };
   await writeJson(linkFile(), stored);
 }
@@ -103,23 +155,24 @@ async function forgetLink(): Promise<void> {
 }
 
 /** A request to the bot. A failure to get any answer reads the same every time. */
-async function ask(route: string, init: RequestInit & { timeout?: number } = {}): Promise<Response> {
+async function ask(bot: string, route: string, init: RequestInit & { timeout?: number } = {}): Promise<Response> {
   try {
-    return await fetch(`${botUrl}${route}`, { ...init, signal: AbortSignal.timeout(init.timeout ?? REQUEST_TIMEOUT_MS) });
+    return await fetch(`${bot}${route}`, { ...init, signal: AbortSignal.timeout(init.timeout ?? REQUEST_TIMEOUT_MS) });
   } catch {
     throw new Error(UNREACHABLE);
   }
 }
 
 export async function status(): Promise<DiscordStatus> {
+  const botUrl = await currentBot();
   if (!botUrl) return { status: 'unavailable' };
 
-  const link = await readLink();
+  const link = await readLink(botUrl);
   if (!link) return { status: 'unlinked' };
 
   let response: Response;
   try {
-    response = await ask('/link/me', { headers: { authorization: `Bearer ${link.token}` } });
+    response = await ask(botUrl, '/link/me', { headers: { authorization: `Bearer ${link.token}` } });
   } catch (err) {
     return { status: 'linked', user: link.user, guilds: [], error: (err as Error).message };
   }
@@ -150,7 +203,8 @@ function page(heading: string, text: string): string {
  * the token. Rejects with a sentence fit to show if it does not end in a link.
  */
 export async function link(): Promise<DiscordStatus> {
-  if (!botUrl) throw new Error('This build has no clan bot to connect to.');
+  const botUrl = await currentBot();
+  if (!botUrl) throw new Error('There is no bot to connect to. Enter its address in Settings.');
   abandon?.(new Error('Another sign-in was started.'));
 
   const verifier = crypto.randomBytes(32).toString('base64url');
@@ -186,7 +240,7 @@ export async function link(): Promise<DiscordStatus> {
           const grant = url.searchParams.get('grant');
           if (error || !grant) throw new Error(FAILURES[error ?? ''] ?? FAILURES.discord);
 
-          const finish = await ask('/link/finish', {
+          const finish = await ask(botUrl, '/link/finish', {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify({ grant, verifier }),
@@ -194,7 +248,7 @@ export async function link(): Promise<DiscordStatus> {
           if (!finish.ok) throw new Error(FAILURES.discord);
 
           const body = (await finish.json()) as { token: string; user: DiscordUser };
-          await writeLink(body.token, body.user);
+          await writeLink(body.token, body.user, botUrl);
         })().then(
           () => {
             answer('Discord is connected', 'You can close this tab and go back to WoWs Tactics Suite.');
@@ -227,16 +281,66 @@ export function cancelLink(): void {
 }
 
 export async function unlink(): Promise<DiscordStatus> {
-  const stored = await readLink();
-  if (stored && botUrl) {
-    // Best effort: if the bot cannot be told, the token is forgotten here
-    // anyway and nothing else holds a copy.
-    await ask('/link/revoke', { method: 'POST', headers: { authorization: `Bearer ${stored.token}` } }).catch(
+  const botUrl = await currentBot();
+  await revokeAt(botUrl);
+  await forgetLink();
+  return botUrl ? { status: 'unlinked' } : { status: 'unavailable' };
+}
+
+/**
+ * Tells a bot to forget this copy's token. Best effort: if the bot cannot be
+ * told, the token is forgotten here anyway and nothing else holds a copy.
+ */
+async function revokeAt(botUrl: string): Promise<void> {
+  const stored = botUrl ? await readLink(botUrl) : null;
+  if (stored) {
+    await ask(botUrl, '/link/revoke', { method: 'POST', headers: { authorization: `Bearer ${stored.token}` } }).catch(
       () => undefined,
     );
   }
-  await forgetLink();
-  return botUrl ? { status: 'unlinked' } : { status: 'unavailable' };
+}
+
+export async function bot(): Promise<DiscordBot> {
+  const url = await currentBot();
+  return { url, builtIn: builtInBot, custom: customBot !== null && customBot !== undefined };
+}
+
+/**
+ * Points this copy at another bot, or back at the built-in one with null.
+ *
+ * The new address is asked whether it is a bot of this kind before anything
+ * changes. A link belongs to the bot that made it, so switching disconnects:
+ * the old bot is told, and the person connects again with the new one.
+ */
+export async function setBot(raw: string | null): Promise<DiscordBot> {
+  const next = raw === null || raw.trim() === '' ? null : normaliseBotUrl(raw);
+  const target = next ?? builtInBot;
+  const before = await currentBot();
+
+  if (next !== null) {
+    let health: { linking?: unknown } | null = null;
+    try {
+      const response = await ask(next, '/health');
+      if (response.ok) health = (await response.json().catch(() => null)) as { linking?: unknown } | null;
+    } catch {
+      throw new Error(`Nothing answered at ${next}.`);
+    }
+    if (health?.linking !== true) {
+      throw new Error(`${next} answered, but not as a Tactics Suite bot that can connect accounts.`);
+    }
+  }
+
+  if (target !== before) {
+    abandon?.(new Error('The bot address changed.'));
+    await revokeAt(before);
+    await forgetLink();
+  }
+
+  if (next === null) await fsp.rm(botFile(), { force: true });
+  else await writeJson(botFile(), { url: next });
+  customBot = next;
+
+  return bot();
 }
 
 /**
@@ -246,10 +350,11 @@ export async function unlink(): Promise<DiscordStatus> {
  * machine, so sharing is a push from here rather than a fetch from there.
  */
 export async function share(opts: { channelId: string; title: string; note?: string; image: string }): Promise<string | null> {
-  const stored = botUrl ? await readLink() : null;
+  const botUrl = await currentBot();
+  const stored = botUrl ? await readLink(botUrl) : null;
   if (!stored) throw new Error(LINK_GONE);
 
-  const response = await ask('/plan', {
+  const response = await ask(botUrl, '/plan', {
     method: 'POST',
     headers: { 'content-type': 'application/json', authorization: `Bearer ${stored.token}` },
     body: JSON.stringify({ channelId: opts.channelId, title: opts.title, note: opts.note, image: opts.image }),

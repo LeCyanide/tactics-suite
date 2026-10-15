@@ -9,13 +9,14 @@ import type {
 } from './replay/archive';
 import type { GameDirCheck, LibraryEvent, ReplayProbe, SidecarEvent, SidecarStatus } from './replay/sidecar';
 import type { UpdateState } from './updater';
-import type { DiscordChannel, DiscordGuild, DiscordStatus } from './discord';
+import type { DiscordBot, DiscordChannel, DiscordGuild, DiscordStatus } from './discord';
 
 export type {
   ConfigureResult,
   DiscordChannel,
   DiscordGuild,
   DiscordStatus,
+  DiscordBot,
   FoundReplay,
   GameDirCheck,
   ImportOutcome,
@@ -127,6 +128,10 @@ const api = {
     link: () => call<DiscordStatus>('discord:link'),
     cancelLink: () => call<void>('discord:cancelLink'),
     unlink: () => call<DiscordStatus>('discord:unlink'),
+    /** Which bot this copy talks to. */
+    bot: () => call<DiscordBot>('discord:bot'),
+    /** Another bot's address, or null for the built-in one. Switching disconnects. */
+    setBot: (url: string | null) => call<DiscordBot>('discord:setBot', url),
     share: (opts: { channelId: string; title: string; note?: string; image: string }) =>
       call<string | null>('discord:share', opts),
   },

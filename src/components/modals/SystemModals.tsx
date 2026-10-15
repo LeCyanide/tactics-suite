@@ -15,7 +15,9 @@ import {
   disconnectDiscord,
   findChannel,
   refreshDiscord,
+  setDiscordBot,
   useDiscord,
+  type DiscordBot,
 } from '@/state/discord';
 import type { ThemeName } from '@/types/model';
 
@@ -213,6 +215,7 @@ export function SettingsModal() {
       </Field>
 
       <SectionLabel>Share to Discord</SectionLabel>
+      <BotAddress />
       <DiscordSection />
 
       <SectionLabel>Editor</SectionLabel>
@@ -334,6 +337,84 @@ function DiscordMark({ size = 14 }: { size?: number }) {
 }
 
 /**
+ * Which bot shared pages go through: the one this build came with, or one a
+ * community runs itself (github.com/LeCyanide/tactics-suite-discord-bot).
+ *
+ * Saved only once the address answers as such a bot. A link belongs to the
+ * bot that made it, so changing the address disconnects.
+ */
+function BotAddress() {
+  const [bot, setBot] = useState<DiscordBot | null>(null);
+  const [draft, setDraft] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    void window.api.discord.bot().then((b) => {
+      setBot(b);
+      setDraft(b.custom ? b.url : '');
+    });
+  }, []);
+
+  if (bot === null) return null;
+
+  const save = async (value: string) => {
+    setBusy(true);
+    setError(null);
+    try {
+      const next = await setDiscordBot(value);
+      setBot(next);
+      setDraft(next.custom ? next.url : '');
+      useStore.getState().toast(next.custom ? `Sharing through ${next.url}` : 'Sharing through the built-in bot', 'success');
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const changed = draft.trim() !== (bot.custom ? bot.url : '');
+
+  return (
+    <>
+      <Field label="Bot">
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <input
+            type="text"
+            value={draft}
+            placeholder={bot.builtIn || 'https://bot.example.com'}
+            spellCheck={false}
+            disabled={busy}
+            style={{ flex: 1, minWidth: 0 }}
+            onChange={(e) => {
+              setDraft(e.target.value);
+              setError(null);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && changed) void save(draft);
+            }}
+          />
+          {changed && (
+            <button className="btn sm" disabled={busy} onClick={() => void save(draft)}>
+              {busy ? 'Checking…' : 'Save'}
+            </button>
+          )}
+        </div>
+      </Field>
+      <div
+        className="faint"
+        style={{ fontSize: 11, marginTop: 4, marginBottom: 8, lineHeight: 1.5, color: error ? 'var(--danger)' : undefined }}
+      >
+        {error ??
+          (bot.builtIn
+            ? 'Leave empty for the built-in bot, or enter the address of one your community runs. Changing it disconnects Discord.'
+            : 'The address of the bot your community runs. Changing it disconnects Discord.')}
+      </div>
+    </>
+  );
+}
+
+/**
  * Connecting a Discord account, and choosing where shared pages go.
  *
  * Nothing is typed in: the button opens Discord's own sign-in in the browser,
@@ -355,7 +436,7 @@ function DiscordSection() {
   if (discord.status === 'unavailable') {
     return (
       <div className="faint" style={note}>
-        This build was made without a clan bot, so there is nowhere to share to.
+        There is no bot to share through. Enter the address of one above.
       </div>
     );
   }
