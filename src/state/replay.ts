@@ -4,7 +4,7 @@
  * Kept out of the main store on purpose. A loaded timeline is tens of megabytes
  * and the playback frame changes ten times a second; neither belongs in the
  * store that holds the project and drives undo. Nothing here is ever persisted
- * — a timeline is rebuilt from the archive in a few seconds, so there is no
+ * — a timeline is rebuilt from the library in a few seconds, so there is no
  * reason to keep one around.
  */
 
@@ -74,7 +74,7 @@ interface SidecarStatus {
   reason?: string;
 }
 
-/** Background baking, for the status line under the archive header. */
+/** Background baking, for the status line under the library header. */
 export interface BakeQueue {
   done: number;
   total: number;

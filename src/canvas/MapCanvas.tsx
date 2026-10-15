@@ -309,10 +309,6 @@ export default function MapCanvas() {
   };
 
   /* ------------------------------------------------------------------ */
-  /* Wheel zoom                                                          */
-  /* ------------------------------------------------------------------ */
-
-  /* ------------------------------------------------------------------ */
   /* Tool interactions                                                   */
   /* ------------------------------------------------------------------ */
 
@@ -330,8 +326,8 @@ export default function MapCanvas() {
     if (inReplay) return LAYER_IDS.replay;
     const usable = (id: string) => layers.some((l) => l.id === id && !l.locked && l.id !== LAYER_IDS.grid);
 
-    // The planner's selected layer, if it can actually hold objects; every
-    // drawn object now lands on Annotations unless a custom layer is active.
+    // The selected layer, if it can hold objects; otherwise drawn objects
+    // land on Annotations.
     if (usable(activeLayerId)) return activeLayerId;
     if (usable(LAYER_IDS.annotations)) return LAYER_IDS.annotations;
     return layers.find((l) => !l.locked && l.id !== LAYER_IDS.grid)?.id ?? LAYER_IDS.annotations;
@@ -1030,7 +1026,7 @@ export default function MapCanvas() {
         )}
       </Stage>
 
-      {/* Marquee is drawn in the DOM so it stays crisp regardless of zoom */}
+      {/* Marquee is drawn in the DOM so it stays crisp at any canvas scale */}
       {marquee && (
         <div
           className="marquee"
@@ -1088,7 +1084,6 @@ export default function MapCanvas() {
 /* Small helpers                                                       */
 /* ------------------------------------------------------------------ */
 
-/** Resolves the ship's icon asset before handing it to the Konva node. */
 /**
  * Konva draws every transformer anchor as a plain rect. The rotate handle is
  * the one that means something other than "resize", so it is given a round

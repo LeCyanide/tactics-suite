@@ -2,7 +2,7 @@
   "name": "wows-tactics-suite",
   "productName": "WoWs Tactics Suite",
   "version": "2.3.0",
-  "description": "Offline tactical planning suite for World of Warships",
+  "description": "Tactics planner and replay viewer for World of Warships",
   "private": true,
   "main": "dist-electron/main.js",
   "scripts": {

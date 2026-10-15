@@ -63,8 +63,8 @@ stdout stays a clean byte stream:
 ```
 
 Loading game data costs ~3.4 s per process (GameParams dominates), against
-0.3–5 s for the bake itself. A long-lived sidecar should hold that open across
-bakes rather than paying it per replay.
+0.3–5 s for the bake itself. TODO: a long-lived sidecar
+should hold that open across bakes rather than paying it per replay.
 
 ### Cadence
 
@@ -178,8 +178,8 @@ worth adding) and `BattleResultOverlay`.
 the binary. To move to a newer upstream commit, change `TOOLKIT_REV` in
 `scripts/build-sidecar.mjs` and run it again.
 
-A bare cargo build works once that checkout exists. It requires a linker; this
-machine has no MSVC, so use the GNU toolchain:
+A bare cargo build works once that checkout exists. It needs a linker. Without
+MSVC, use the GNU toolchain:
 
 ```sh
 rustup run stable-x86_64-pc-windows-gnu cargo build --release

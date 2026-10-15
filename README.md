@@ -1,9 +1,6 @@
 # WoWs Tactics Suite
 
-Awooga I don't know what I am doing. 
-
-locally run wows-tactics alternative
-
+Windows desktop app for planning World of Warships, with an integrated replay viewer.
 
 ## Running it
 
@@ -62,11 +59,11 @@ npm run dev:replay -- dev/fixtures/<file>.wtreply
 
 ## Updates
 
-Installed copies check a private update server on the VPS at startup and ask
-before downloading anything. The GitHub repo is never involved: builds carry
-their own update token, which only unlocks the release folder on the server.
-The NSIS install updates through `electron-updater`; the portable exe downloads
-its replacement beside itself, swaps the files and relaunches.
+A build made with `UPDATE_URL` and `UPDATE_TOKEN` set (see
+`.env.release.example`) checks that server at startup and asks before
+downloading. The token only unlocks the release folder. Without them the build
+has no updater. The NSIS install updates through `electron-updater`; the
+portable exe downloads its replacement, swaps the files and relaunches.
 
 **One-time server setup** (Debian/Ubuntu VPS, DNS for the domain pointed at it):
 
@@ -110,7 +107,7 @@ can no longer update once it changes.
 
 ---
 
-## data storage
+## Data storage
 
 Everything is stored locally under the OS application-data directory, in a
 folder named after the application. Up to 2.1.0 that name was "WoWS Tactics
@@ -291,7 +288,8 @@ Commit the result: `seed/` is the only copy of that data in the repository.
 ## Layers
 
 Each page carries five layers, drawn back to front: **Grid**, **Cap Zones**,
-**Ship Ranges**, **Annotations** and **Ships**, plus any custom layers you add.
+**Ship Ranges**, **Annotations** and **Ships**. There is also **Replay Notes**,
+which only shows in replay mode, and any custom layers you add.
 Shapes, arrows, text and markers all share Annotations, because they are drawn
 the same way and are almost always shown or hidden together. Every layer has
 visibility, lock, opacity, rename, reorder and delete; objects can be moved
@@ -343,6 +341,11 @@ electron/
   preload.ts               the only bridge into the renderer (contextIsolation)
   ipc.ts                   complete IPC surface: dialogs, disk, export
   storage/db.ts            local database: atomic writes, assets, .wowsplan
+  storage/migrate.ts       moves the store after the app rename
+  updater.ts               update check and install
+  discord.ts               Connect Discord / Share to Discord
+  replay/archive.ts        replay library: folder, hashes, background baking
+  replay/sidecar.ts        runs the replay sidecar
 src/
   types/model.ts           the data model, in one place
   state/store.ts           zustand store: project, libraries, history, UI
@@ -352,9 +355,12 @@ src/
   canvas/ShipNode.tsx      ship icon, labels, ranges
   canvas/ObjectNode.tsx    shapes, paths, text, markers
   canvas/MapBackground.tsx map image, grid, coordinates
+  canvas/ReplayLayer.tsx   replay playback on the canvas
+  replay/timeline.ts       .wtreply reader
   components/              title bar, sidebars, tool rail, modals
   lib/shipImport.ts        JSON/CSV/YAML ship parsing and export
   lib/markdown.tsx         notes renderer (returns React nodes, no raw HTML)
+sidecar/                   Rust: .wowsreplay -> .wtreply (see sidecar/README.md)
 ```
 
 

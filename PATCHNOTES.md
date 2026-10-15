@@ -9,7 +9,9 @@ Under a version, each `###` heading becomes a header in the post and each list
 item under it one note. Use `### Changelog` for what is finished and
 `### In testing` for what is shipped but not settled.
 
-Collect notes under `## Unreleased
+Collect notes under `## Unreleased` and rename it to the version when releasing.
+
+## Unreleased
 
 ## 2.3.0
 

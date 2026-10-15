@@ -9,7 +9,7 @@
  * object position, radius and length is expressed in metres. Ship ranges come
  * out of the ship database in kilometres and are multiplied by 1000 on render.
  *
- * This keeps range circles physically correct at any zoom level and makes the
+ * This keeps range circles physically correct at any canvas size and makes the
  * model independent of the pixel dimensions of whatever image the user
  * imported.
  */
@@ -81,7 +81,7 @@ export interface Ship {
 
   torpedoRange_km?: number;
   torpedoSpeed_kn?: number;
-  /** Half-angle of the torpedo firing sector drawn on the map, in degrees. */
+  /** Half-angle of the torpedo firing sector, in degrees. Stored only; the torpedo ring is a full circle. */
   torpedoArc_deg?: number;
   torpedoes?: string;
 
@@ -326,7 +326,7 @@ export const CHARACTERISTICS: { key: CharacteristicKey; label: string; group: 'r
   { key: 'airstrike', label: 'Airstrike', group: 'range' },
 ];
 
-/** Characteristics that render as a circle / sector on the map. */
+/** Characteristics that render as a circle on the map. */
 export const RANGE_KEYS: CharacteristicKey[] = [
   'detection',
   'radar',
@@ -416,7 +416,7 @@ export const LAYER_IDS = {
 } as const;
 
 /**
- * Five layers, and no more. Shapes, arrows, text and markers all live on
+ * Five planning layers plus Replay Notes. Shapes, arrows, text and markers all live on
  * "Annotations" — they are drawn the same way and are almost always shown or
  * hidden together — while ranges keep their own layer so every circle on the
  * page can be switched off in one click.

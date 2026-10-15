@@ -2,8 +2,9 @@
  * Headless checks for the paths that are pure logic and would otherwise only
  * be exercised by hand: messy ship-data import, the .wowsplan
  * pack/read/import round-trip, the destinations an export can be written to,
- * the accent folding every name lookup goes through, and the startup sweep
- * of orphaned temp files.
+ * the accent folding every name lookup goes through, the startup sweep of
+ * orphaned temp files, the store migration after the rename, and seeding
+ * across releases.
  *
  *   npm run selftest
  */

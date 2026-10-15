@@ -15,7 +15,7 @@
 //!   probe --replay <file>
 //!       Battle metadata only, as JSON on stdout. Fast — it reads the replay
 //!       header and never touches the game install. This is what the replay
-//!       archive list is built from.
+//!       library list is built from.
 //!
 //!   bake --game <dir> --replay <file> [--fps 10] [--out <file>]
 //!       The full timeline. Writes the blob to `--out`, or stdout if omitted.
@@ -201,9 +201,8 @@ fn bake(args: &[String]) -> Result<(), String> {
 
     let started = Instant::now();
 
-    // ---- game data. The expensive part (GameParams) is ~3.4 s, so a
-    // long-lived sidecar process should eventually cache this across bakes
-    // rather than paying it per replay.
+    // ---- game data. The expensive part (GameParams) is ~3.4 s.
+    // TODO: cache it across bakes in a long-lived sidecar process.
     emit(&serde_json::json!({ "t": "stage", "stage": "loading-game-data" }));
     let replay = ReplayFile::from_file(&replay_path).map_err(|e| format!("could not read replay: {e:?}"))?;
     let version = Version::from_client_exe(&replay.meta.clientVersionFromExe);

@@ -1,9 +1,6 @@
 /**
- * Glyphs for the marker object.
- *
- * 24x24 SVG path data, drawn with Konva's Path shape so markers stay crisp at
- * every zoom level. These outlived the ping presets they were originally
- * shared with: markers are the one remaining stamp-a-symbol tool.
+ * Glyphs for the marker object: 24x24 SVG path data, drawn with Konva's Path
+ * so they stay crisp at any size.
  */
 
 export const MARKER_ICONS = {

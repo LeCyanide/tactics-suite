@@ -8,9 +8,8 @@
  * Windows 10 and later — so there is no redistributable to ship and nothing for
  * the user to download separately.
  *
- * Toolchain: this builds with the GNU target by default because the build
- * machine has no MSVC linker. Override with SIDECAR_TOOLCHAIN, or set it empty
- * to use whatever rustup has as default:
+ * Toolchain: GNU target by default, so no MSVC is needed. Override with
+ * SIDECAR_TOOLCHAIN, or set it empty to use rustup's default:
  *
  *   SIDECAR_TOOLCHAIN= node scripts/build-sidecar.mjs
  */

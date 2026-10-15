@@ -85,9 +85,8 @@ async function run(): Promise<void> {
   const elapsed = Math.round(performance.now() - started);
   off();
 
-  // The whole reason for this test. Structured clone is specified to preserve
-  // typed arrays, but "specified to" and "does, for 27 MB, through a preload
-  // bridge" are different claims.
+  // The point of this check: a ~27 MB typed array survives structured clone
+  // through the preload bridge.
   check('bake returns a Uint8Array', data instanceof Uint8Array, Object.prototype.toString.call(data));
   check('the timeline has bytes', data.byteLength > 0, data.byteLength);
   check('progress events crossed IPC', events.length > 0, events.length);

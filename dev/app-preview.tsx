@@ -70,7 +70,7 @@ async function makeProject(): Promise<Project> {
     }
   }
   // Deliberately NOT the replay's map: the page plans against different ground,
-  // which is the situation that showed the plan bleeding into replay mode.
+  // so a leak of the plan into replay mode is visible.
   const map = maps.find((m) => m.spaceName !== space && !m.archived) ?? maps[0]!;
   const p = createProject('Replay preview');
   p.pages[0]!.mapId = map.id;

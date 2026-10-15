@@ -95,7 +95,7 @@ function NoSelectionPanels() {
 /**
  * Style controls for one range circle of one ship.
  *
- * There is no page-level equivalent any more: a range belongs to the ship that
+ * A range belongs to the ship that
  * projects it, so its colour and weight are stored as an override on that
  * ship's object, layered over the built-in default.
  */

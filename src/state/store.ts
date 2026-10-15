@@ -190,7 +190,7 @@ interface Actions {
   deletePage(id: ID): void;
   /** Steps a page among its own folder's pages, or along the top of the list. */
   reorderPage(id: ID, delta: number): void;
-  /** Absolute reorder, used by drag and drop on the board tabs. */
+  /** Absolute reorder, used by drag and drop on the page tabs. */
   movePageTo(id: ID, index: number): void;
   /** Puts a page into a folder (null for none), in front of `beforeId` or at the end. */
   placePage(id: ID, folderId: ID | null, beforeId?: ID | null): void;
@@ -703,14 +703,10 @@ export const useStore = create<Store>((set, get) => {
     /* ------------------------------ pages ------------------------------ */
 
     /**
-     * Which page is showing is where the user is looking, not something they
-     * changed. Going through commit made every tab click an edit: the project
-     * read "unsaved" with nothing to save, the page was stamped as modified,
-     * and undo gained a step that only flipped back a tab.
-     *
-     * The page is still remembered for the next open. With nothing else
-     * waiting it is written straight away, without touching the saved state;
-     * otherwise it goes out with the save that is already owed.
+     * Not a commit: switching tabs must not mark the project unsaved, stamp
+     * the page modified or add an undo step. The page is still remembered for
+     * the next open: written at once if nothing else is pending, otherwise
+     * with the save already owed.
      */
     setActivePage(id) {
       const { project, dirty } = get();
@@ -1051,7 +1047,7 @@ export const useStore = create<Store>((set, get) => {
         const layer = page.layers.find((l) => l.id === id);
         if (!layer || layer.system) return;
         page.layers = page.layers.filter((l) => l.id !== id);
-        // Orphaned objects fall back to the shapes layer rather than vanishing.
+        // Orphaned objects fall back to Annotations rather than vanishing.
         page.objects = page.objects.map((o) => (o.layerId === id ? { ...o, layerId: LAYER_IDS.annotations } : o));
       });
       if (get().activeLayerId === id) set({ activeLayerId: LAYER_IDS.annotations });
@@ -1461,7 +1457,6 @@ function normalizeName(name: string): string {
 /* Derived helpers                                                     */
 /* ------------------------------------------------------------------ */
 
-/** Page defaults with the ship's own overrides applied on top. */
 /**
  * Keeps only the characteristics a page is allowed to set a default for.
  * Range keys are filtered out, because ranges are a per-ship decision.
@@ -1474,6 +1469,7 @@ export function pickPageFlags(flags: CharacteristicFlags | undefined): Character
   return out;
 }
 
+/** Page defaults with the ship's own overrides applied on top. */
 export function effectiveFlags(page: Page, ship: ShipObject): Required<CharacteristicFlags> {
   // Page defaults never carry range keys, so a ship's ranges come only from
   // its own overrides.

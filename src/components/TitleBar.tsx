@@ -231,7 +231,7 @@ function TitleCaption() {
  *
  * Both modes share the map, the tool rail and the right sidebar; what changes
  * is the left sidebar and whether a replay is drawn over the plan. Replay mode
- * still needs a project open, because the map it draws on belongs to the page.
+ * needs an open project because replay notes are saved on its page.
  */
 function ModeSwitch() {
   const mode = useReplayStore((s) => s.mode);
