@@ -582,7 +582,7 @@ export const useStore = create<Store>((set, get) => {
         });
         return page;
       });
-      if (!doc.pages.length) doc.pages = [createPage('01 - Default')];
+      if (!doc.pages.length) doc.pages = [createPage('Default')];
       if (!doc.activePageId || !doc.pages.some((p) => p.id === doc.activePageId)) {
         doc.activePageId = doc.pages[0].id;
       }
@@ -779,8 +779,7 @@ export const useStore = create<Store>((set, get) => {
     addPage(name, folderId) {
       const { project } = get();
       if (!project) return;
-      const index = project.pages.length + 1;
-      const page = createPage(name ?? `${String(index).padStart(2, '0')} - New Page`);
+      const page = createPage(name ?? 'New Page');
       // A new page inherits the map of the current one: pages are usually
       // successive phases of the same battle. For the same reason it joins
       // that page's folder unless told where to go.
