@@ -39,10 +39,8 @@ export function clearStagedSidecar() {
 /**
  * landaire's wows-toolkit, at the commit the sidecar is built against.
  *
- * The crates are published to crates.io, but a game patch can break replay
- * parsing and the fix lands upstream days before a release does — 15.9 moved
- * the roster packet's fields and left every ship without a name. So the
- * sidecar builds from a checkout pinned here instead.
+ * Built from a pinned checkout rather than crates.io: replay-parsing fixes
+ * for a game patch land upstream before a crates release.
  *
  * It is a sparse checkout made with git itself rather than a cargo git
  * dependency: the repository carries a Buck prelude whose paths run past

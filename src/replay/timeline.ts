@@ -362,12 +362,9 @@ export class ReplayTimeline {
   private readonly framesAt: number;
 
   /**
-   * True for a bake that never learned who was in the battle.
-   *
-   * Game 15.9 moved the fields of the roster packet, and a sidecar from before
-   * it knew that resolved no players at all: ships came out without names,
-   * relations or view direction. The recording player's own ship is drawn in
-   * every battle, so their name missing from the string table is the tell.
+   * True for a bake without player data (no names, relations or view
+   * direction). Detected by the recording player's name missing from the
+   * string table, since their ship is in every battle.
    */
   get lacksPlayers(): boolean {
     const name = this.header.player?.name;

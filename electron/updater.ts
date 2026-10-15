@@ -307,8 +307,8 @@ async function swapPortable(exe: string, newVersion: string): Promise<void> {
  * before running a line, so it needs a launcher that outlives us. `cmd /c
  * start` survives but opens a console that Windows Terminal, when it is the
  * default terminal, takes over and shows. wscript starting PowerShell with a
- * hidden window avoids both. VBScript is being retired from Windows, so
- * without wscript.exe the cmd route is still better than no update.
+ * hidden window avoids both. Without wscript.exe (VBScript is being removed
+ * from Windows), the cmd route is the fallback.
  */
 function launchHidden(script: string): void {
   const command = `powershell.exe -NoProfile -NonInteractive -WindowStyle Hidden -EncodedCommand ${Buffer.from(script, 'utf16le').toString('base64')}`;

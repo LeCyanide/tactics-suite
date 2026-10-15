@@ -146,8 +146,8 @@ export async function testReplayArchive(check: Check): Promise<void> {
 }
 
 /**
- * Replays from the store older versions kept in app data must come across
- * into the library, keeping the metadata they were probed with.
+ * Replays in the legacy app-data store move into the library with their
+ * probed metadata.
  */
 async function testMigration(check: Check, store: string, lib: string): Promise<void> {
   const oldDir = path.join(store, 'replays');

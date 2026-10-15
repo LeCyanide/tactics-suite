@@ -7,10 +7,9 @@
 import semver from 'semver';
 
 /**
- * Installers, portable exes, blockmaps and zips, in both the current dashed
- * names and the spaced names older builds used, and under the Toolkit name the
- * application had up to 2.1.0: those files are still on the server and in
- * release/, and have to be recognised to be cleared out. Captures the version.
+ * Installers, portable exes, blockmaps and zips, under the current dashed names
+ * and the legacy spaced and "Toolkit" names, so all of them get cleaned up.
+ * Captures the version.
  */
 export const RELEASE_FILE =
   /^WoW[Ss][- ]Tactics[- ](?:Toolkit|Suite)[- ](?:Setup[- ])?(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)(?: \([^)]*\))?\.(?:exe|zip)(?:\.blockmap)?$/;

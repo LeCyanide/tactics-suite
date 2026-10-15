@@ -58,8 +58,7 @@ export function storageRoot(): string {
   const override = process.env.WOWSPLAN_DATA_DIR;
   if (override) return path.resolve(override);
   if (!ROOT) {
-    // The folder is named after the application, so a store made under an
-    // earlier name is brought over here, before anything is read from it.
+    // Move a store from a legacy folder name first (see migrate.ts).
     const adopted = adoptLegacyStore(
       path.join(app.getPath('userData'), 'data'),
       LEGACY_APP_FOLDERS.map((name) => path.join(app.getPath('appData'), name, 'data')),
@@ -257,8 +256,8 @@ interface WithId {
  * never touched. A record dropped from a later seed also stays: a project may
  * still point at it, and deleting it would break that page.
  *
- * With no receipt at all -- an install predating this mechanism -- there is no
- * way to tell "deleted by the user" from "new in this release", so the pass is
+ * With no receipt there is no way to tell "deleted by the user" from "new in
+ * this release", so the pass is
  * add-only and nothing existing is modified. That can restore a map someone
  * deleted, once, which is the conservative direction: an unwanted row is a
  * nuisance, an overwritten edit is lost work.
@@ -308,10 +307,8 @@ function mergeRecords(
 /**
  * Install or refresh the shipped databases.
  *
- * Runs on every start, not just the first: a release that adds maps, ships or
- * capture point layouts has to be able to deliver them to a store that already
- * exists, which keying on the mere presence of an index file could never do.
- * Each database carries the digest of the seed it was filled from, so a start
+ * Runs on every start, so a release that adds maps, ships or capture point
+ * layouts delivers them to an existing store. Each database carries the digest of the seed it was filled from, so a start
  * that changes nothing costs one hash and no writes.
  *
  * The two kinds of database are treated differently because they are owned

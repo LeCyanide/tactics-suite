@@ -14,7 +14,7 @@
  * viewer sidecar instead of waiting for the toolkit to have scanned them, and
  * a replay outranks the toolkit's row for the same scenario. That matters
  * after a patch: the toolkit files a layout under the game's scenario config
- * id and never overwrites a row, and 15.9 renumbered those ids, so a reworked
+ * id and never overwrites a row, so when a patch renumbers ids a reworked
  * scenario can land on a number the toolkit already holds and be refused. The
  * game directory defaults to the one in the planner's settings.
  *
@@ -263,8 +263,8 @@ const skipped = [];
  * Each source layout carries a rank saying how much it is to be believed when
  * two of them describe the same scenario on the same space. A replay beats the
  * toolkit, and a replay from a later build beats an earlier one. Two toolkit
- * rows can only be told apart by config id, and the higher is taken as the
- * later — which is how 15.9 renumbered them, but is a guess, so it is reported.
+ * rows can only be told apart by config id; the higher is assumed to be the
+ * later, which is a guess, so it is reported.
  */
 const sources = rows.map((row) => {
   const decoded = decodeLayout(row.layout_data);
@@ -365,12 +365,9 @@ const previous = fs.existsSync(layoutsFile)
   : [];
 
 /*
- * The first layouts were published as `cap-<space>-<scenario config id>`, on
- * the understanding that the game's own number for a scenario would not move.
- * 15.9 moved them — Loop's tournament layout took the number its plain
- * domination had — so the number cannot be what identifies a layout. The
- * scenario's name on its space is, so a layout already published keeps its id
- * whatever it was built from, and a new one is named for the scenario.
+ * A layout is identified by its scenario name on its space, not by the game's
+ * scenario config id, which patches can renumber. A published layout keeps its
+ * id (some are `cap-<space>-<config id>`); a new one is named for the scenario.
  */
 const publishedId = new Map(previous.map((l) => [scenarioKey(l), l.id]));
 const idFor = (l) =>

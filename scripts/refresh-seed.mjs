@@ -34,9 +34,7 @@ const opt = (name) => {
 
 const dry = flag('--dry');
 
-// Defaults to the store the application itself uses. productName is read from
-// package.json rather than spelled out here, so renaming the application does
-// not quietly leave this script pointing at the old directory.
+// Defaults to the app's own store, named after productName in package.json.
 const { productName } = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 const defaultData = path.join(
   process.env.APPDATA ?? path.join(os.homedir(), 'AppData', 'Roaming'),

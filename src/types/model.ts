@@ -345,8 +345,8 @@ export const PAGE_CHARACTERISTIC_KEYS: CharacteristicKey[] = CHARACTERISTICS.fil
 export type CharacteristicFlags = Partial<Record<CharacteristicKey, boolean>>;
 
 /**
- * Default page-level state. Every characteristic is a range now, and ranges
- * are decided per ship, so there is nothing left for a page to default.
+ * Default page-level state. Every characteristic is a per-ship range, so a
+ * page has nothing to default.
  */
 export const DEFAULT_CHARACTERISTICS: CharacteristicFlags = {};
 
@@ -441,7 +441,7 @@ export function createDefaultLayers(): Layer[] {
   ];
 }
 
-/** Layer ids removed in schema 2, mapped onto their replacement. */
+/** Legacy layer ids, mapped to the layer that replaces them. */
 export const LEGACY_LAYER_REMAP: Record<string, string> = {
   'layer-zones': LAYER_IDS.annotations,
   'layer-routes': LAYER_IDS.annotations,
@@ -459,11 +459,7 @@ export const DEFAULT_TEAM_SIDES: { name: string; color: string }[] = [
   { name: 'Bravo', color: '#ff5f56' },
 ];
 
-/**
- * Sides from before the competitive names, mapped onto what they are now.
- * A project carrying these still has its two original sides untouched, so the
- * colour is brought up to convention along with the name.
- */
+/** Legacy default team names, mapped to the current sides (name and colour). */
 export const LEGACY_TEAM_NAMES: Record<string, { name: string; color: string }> = {
   'Team North': DEFAULT_TEAM_SIDES[0],
   'Team South': DEFAULT_TEAM_SIDES[1],
@@ -490,7 +486,7 @@ export type ObjectType =
   | 'ruler'
   | 'area';
 
-/** Object types dropped in schema 2; they are stripped when a project loads. */
+/** Unsupported object types, stripped when a project loads. */
 export const REMOVED_OBJECT_TYPES = ['ping', 'zone', 'ellipse', 'arc', 'bearing'] as const;
 
 export interface Vec2 {

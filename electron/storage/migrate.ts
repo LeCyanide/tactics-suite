@@ -1,31 +1,21 @@
 /**
- * Carries a store over from the folder an earlier name of the application
- * kept it in.
+ * Moves the data store from a legacy folder name (LEGACY_APP_FOLDERS) to the
+ * current one. Runs once, before the first read, and decides which folder is
+ * the store. No outcome loses or hides data:
  *
- * The data folder sits under the application's own name, so renaming the
- * application moves where it looks, and everything a user made would be left
- * behind in a folder nothing opens any more. This is run once, before the
- * first read, and decides which folder is the store.
+ *  - A store already in the current folder wins; nothing else is touched.
+ *  - Otherwise the legacy folder is renamed into place (same parent, so atomic).
+ *  - If the rename is refused, it is copied beside the target, then renamed in.
+ *  - If that fails too, the legacy folder is used as is. Starting empty would
+ *    create the current folder and hide the legacy one for good.
  *
- * The order is chosen so that no outcome loses data or hides it:
- *
- *  - A store already at the new place wins, and nothing else is touched.
- *  - Otherwise the old folder is renamed into place. Both sit in the same
- *    application-data directory, so that is one step that either happened or
- *    did not.
- *  - If the rename is refused, the store is copied beside the new place and
- *    only then renamed in, leaving the original where it was.
- *  - If that fails too, the old folder is used as it stands. Starting an empty
- *    store instead would create the new folder, and from then on the old one
- *    would never be looked at again.
- *
- * No electron import here, so the selftest can run it against a temp tree.
+ * No electron import, so the selftest can run it against a temp tree.
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
 
-/** Folder names the application has stored its data under, newest first. */
+/** Legacy data folder names, newest first. */
 export const LEGACY_APP_FOLDERS = ['WoWS Tactics Toolkit'];
 
 export interface AdoptedStore {

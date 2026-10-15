@@ -122,7 +122,7 @@ export interface ImportOutcome {
 export interface ConfigureResult {
   ok: boolean;
   reason?: string;
-  /** Replays carried over from the store older versions kept in app data. */
+  /** Replays moved in from the legacy app-data store. */
   migrated?: number;
 }
 
@@ -172,8 +172,8 @@ function requireRoot(): string {
  * Points the library at a folder and a game install.
  *
  * Called on start-up with the saved settings and again whenever either
- * changes. Creates the folder if needed, carries over replays from the store
- * older versions kept, and starts baking whatever the game can bake now.
+ * changes. Creates the folder if needed, moves in replays from the legacy
+ * app-data store, and starts baking whatever the game can bake.
  */
 export async function configure(opts: { root: string; gameDir?: string }): Promise<ConfigureResult> {
   const dir = path.resolve(String(opts.root ?? ''));
@@ -362,7 +362,7 @@ async function buildListing(): Promise<LibraryListing> {
       lib.replays[sha] = meta;
       dirty = true;
     } else if (!meta.probe && canProbe && meta.probeError?.startsWith(NO_ADDON)) {
-      // Imported before the add-on was there; it is now.
+      // Probe failed for lack of the add-on, which is now available.
       await fillProbe(meta, f.abs, canProbe);
       dirty = true;
     }
@@ -824,9 +824,8 @@ async function setBakeError(id: string, error: string | undefined): Promise<void
 /**
  * The timeline for a replay, baking it first if it has not been.
  *
- * Progress goes to the renderer on `replay:progress`, the same as ever. With
- * `rebake`, a stored timeline is thrown away and made again — for one this
- * version of the planner can no longer read.
+ * Progress goes to the renderer on `replay:progress`. With `rebake`, a stored
+ * timeline is discarded and baked again (e.g. one in an unsupported format).
  */
 export async function loadTimeline(id: string, opts: { rebake?: boolean } = {}): Promise<Uint8Array> {
   const out = bakedPath(id);
@@ -874,14 +873,14 @@ function unplayableReason(r: LibraryReplay): string {
 }
 
 /* ------------------------------------------------------------------ */
-/* Moving over from the old store                                      */
+/* Legacy store migration                                              */
 /* ------------------------------------------------------------------ */
 
 /**
- * Carries replays over from the store earlier versions kept in app data
- * (`data/replays/files/<id>.wowsreplay` plus an index), into the library as
- * unsorted files under the name they were imported with. Whatever cannot be
- * moved stays behind in the old index, to be tried again next start.
+ * Moves replays from the legacy app-data store (`data/replays/files/<id>.wowsreplay`
+ * plus an index) into the library as unsorted files under their imported
+ * names. Anything that cannot be moved stays in the legacy index and is
+ * retried on the next start.
  */
 async function migrateOldStore(): Promise<number> {
   const oldDir = path.join(storageRoot(), 'replays');

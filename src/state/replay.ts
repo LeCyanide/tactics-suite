@@ -370,17 +370,14 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
       try {
         timeline = new ReplayTimeline(await window.api.replay.load({ id }));
       } catch (err) {
-        // A stored timeline this version cannot read, from an older planner.
-        // Rebaking works only while the patch is installed; the library says
-        // so plainly if it is not.
+        // Stored timeline in an unsupported format: rebake it. Only works while
+        // the patch is installed; otherwise the library reports why.
         if (!(err instanceof TimelineFormatError)) throw err;
         timeline = new ReplayTimeline(await window.api.replay.load({ id, rebake: true }));
       }
       if (timeline.lacksPlayers && !rebakedForPlayers.has(id)) {
         rebakedForPlayers.add(id);
-        // Baked before the sidecar could read this patch's roster. Worth one
-        // more bake while the build is installed; when it is not, or the bake
-        // fails, the nameless timeline is still better than none.
+        // No player data: rebake once. If that fails, keep the nameless timeline.
         try {
           timeline = new ReplayTimeline(await window.api.replay.load({ id, rebake: true }));
         } catch {
