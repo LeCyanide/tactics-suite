@@ -582,7 +582,7 @@ export const useStore = create<Store>((set, get) => {
         });
         return page;
       });
-      if (!doc.pages.length) doc.pages = [createPage('01 - Opening')];
+      if (!doc.pages.length) doc.pages = [createPage('01 - Default')];
       if (!doc.activePageId || !doc.pages.some((p) => p.id === doc.activePageId)) {
         doc.activePageId = doc.pages[0].id;
       }
