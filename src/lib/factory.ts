@@ -48,6 +48,7 @@ export function createPage(name: string, mapId: ID | null = null): Page {
     mapId,
     mapView: clone(DEFAULT_MAP_VIEW),
     capLayoutId: null,
+    rulesetId: null,
     layers: createDefaultLayers(),
     objects: [],
     display: clone(DEFAULT_CHARACTERISTICS),

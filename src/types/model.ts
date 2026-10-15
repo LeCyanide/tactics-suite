@@ -123,7 +123,8 @@ export interface Ship {
  * Which ships a competition lets you bring — a clan battle season, a
  * tournament. Rulesets belong to the project that was made for that
  * competition: there are no standard ones, and a new project starts with none.
- * A ruleset only narrows the ship lists; it never touches what is on a page.
+ * A ruleset narrows the ship lists and, applied to a page, flags a lineup
+ * that breaks it; it never changes what is on a page.
  */
 export interface ShipRuleset {
   id: ID;
@@ -614,6 +615,8 @@ export interface Page {
   mapView: MapViewConfig;
   /** Selected capture point layout, or null for none. */
   capLayoutId: ID | null;
+  /** The ruleset the lineup on this page is held to, or null for none. */
+  rulesetId: ID | null;
   layers: Layer[];
   objects: TacticalObject[];
   /**

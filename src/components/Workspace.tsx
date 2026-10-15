@@ -4,6 +4,7 @@ import { getActivePage, useStore } from '@/state/store';
 import { loadAsset } from '@/state/assets';
 import { folderNameOf } from '@/lib/pageTree';
 import { InlineEdit, Tip } from './common/ui';
+import { RulesetFlag } from './common/RulesetFlag';
 import { renderMarkdown } from '@/lib/markdown';
 import { formatRelative } from '@/lib/util';
 
@@ -80,6 +81,7 @@ export function PageTabs() {
           >
             {folder !== null && <span className="tab-folder">{folder} –</span>}
             <InlineEdit value={page.name} onCommit={(v) => s().renamePage(page.id, v)} />
+            <RulesetFlag page={page} />
             {tabs.length > 1 && (
               <span
                 className="tab-close"

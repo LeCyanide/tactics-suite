@@ -666,14 +666,15 @@ function ShipBrowserPanel() {
   const [tier, setTier] = useState('');
   const [radar, setRadar] = useState<Availability>('');
   const [smoke, setSmoke] = useState<Availability>('');
-  const [rulesetId, setRulesetId] = useState('');
   const [team, setTeam] = useState<ID | ''>('');
   const rulesets = useStore(getRulesets);
   const s = () => useStore.getState();
 
   const nations = useMemo(() => [...new Set(ships.map((x) => x.nation))].sort(), [ships]);
   const tiers = useMemo(() => [...new Set(ships.map((x) => x.tier))].sort((a, b) => b - a), [ships]);
-  const ruleset = rulesets.find((r) => r.id === rulesetId) ?? null;
+  // The ruleset is the page's: picking one here holds the page's lineup to it.
+  const page = useStore(getActivePage);
+  const ruleset = rulesets.find((r) => r.id === page?.rulesetId) ?? null;
 
   const filtered = useMemo(
     () => filterShips(ships, { query, searchNation: true, nation, cls, tier, radar, smoke, ruleset }),
@@ -685,7 +686,6 @@ function ShipBrowserPanel() {
 
   // What the side being placed for already has on the page, for the ruleset's
   // limits: "max two of these" is counted per team.
-  const page = useStore(getActivePage);
   const placed = useMemo(
     () =>
       (page?.objects ?? [])
@@ -771,8 +771,8 @@ function ShipBrowserPanel() {
             </select>
             <select
               value={ruleset?.id ?? ''}
-              title="This project's ship restrictions — add and edit them in the ship database"
-              onChange={(e) => setRulesetId(e.target.value)}
+              title="The ship restrictions this page is held to — add and edit them in the ship database"
+              onChange={(e) => s().setPageRuleset(e.target.value || null)}
             >
               <option value="">Ruleset</option>
               {rulesets.map((r) => (

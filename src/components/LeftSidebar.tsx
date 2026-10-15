@@ -31,6 +31,7 @@ import { useReplayStore } from '@/state/replay';
 import { LAYER_IDS, type ID, type Page, type PageFolder } from '@/types/model';
 import { beforeIdFor, pageTree } from '@/lib/pageTree';
 import { formatRelative } from '@/lib/util';
+import { RulesetFlag } from './common/RulesetFlag';
 import { renderMarkdown } from '@/lib/markdown';
 
 export function LeftSidebar() {
@@ -282,6 +283,7 @@ function PagesPanel() {
     >
       <span className="idx">{String(numberOf.get(page.id) ?? 0).padStart(2, '0')}</span>
       <InlineEdit value={page.name} onCommit={(v) => s().renamePage(page.id, v)} className="row-label" />
+      <RulesetFlag page={page} />
       <div className="row-actions">
         <button className="icon-btn" title="Move up" onClick={(e) => { e.stopPropagation(); s().reorderPage(page.id, -1); }}>
           <ArrowUp size={11} />

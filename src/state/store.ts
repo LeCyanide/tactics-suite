@@ -206,6 +206,7 @@ interface Actions {
   placePageFolder(id: ID, beforeId?: ID | null): void;
   setPageMap(mapId: ID | null): void;
   setPageCapLayout(capLayoutId: ID | null): void;
+  setPageRuleset(rulesetId: ID | null): void;
   patchMapView(patch: Partial<MapViewConfig>): void;
   setNotes(text: string): void;
   setPageDisplay(key: CharacteristicKey, value: boolean): void;
@@ -880,6 +881,12 @@ export const useStore = create<Store>((set, get) => {
     setPageCapLayout(capLayoutId) {
       commitPage((page) => {
         page.capLayoutId = capLayoutId;
+      });
+    },
+
+    setPageRuleset(rulesetId) {
+      commitPage((page) => {
+        page.rulesetId = rulesetId;
       });
     },
 

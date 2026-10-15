@@ -3,7 +3,7 @@
  * the two can never disagree about which ships a set of filters leaves.
  */
 
-import type { ID, Ship, ShipClass, ShipRuleset } from '@/types/model';
+import type { ID, Ship, ShipClass, ShipObject, ShipRuleset, TacticalObject, Team } from '@/types/model';
 import { foldForSearch } from './util';
 
 /** A yes/no question a filter may also decline to ask. */
@@ -70,6 +70,45 @@ export function limitUse(
     if (!tightest || limit.max - used < tightest.max - tightest.used) tightest = { used, max: limit.max };
   }
   return tightest;
+}
+
+/**
+ * Every way the ships on a page break a ruleset, one line each, counted per
+ * team: too many ships, too many from a limited group, a ship the ruleset
+ * does not allow. Empty when the lineup is within it.
+ */
+export function rulesetBreaches(
+  ruleset: ShipRuleset,
+  objects: TacticalObject[],
+  ships: Ship[],
+  teams: Team[],
+): string[] {
+  const byId = new Map(ships.map((s) => [s.id, s]));
+  const sides = new Map<ID | null, ShipObject[]>();
+  for (const o of objects) {
+    if (o.type !== 'ship') continue;
+    sides.set(o.teamId, [...(sides.get(o.teamId) ?? []), o]);
+  }
+  const out: string[] = [];
+  for (const [teamId, placed] of sides) {
+    const team = teams.find((t) => t.id === teamId)?.name ?? 'No team';
+    if (ruleset.maxShips > 0 && placed.length > ruleset.maxShips) {
+      out.push(`${team}: ${placed.length} ships, ${ruleset.maxShips} allowed`);
+    }
+    for (const limit of ruleset.limits) {
+      const used = placed.filter((o) => o.shipId !== null && limit.ships.includes(o.shipId)).length;
+      if (used > limit.max) {
+        const names = limit.ships.map((id) => byId.get(id)?.name ?? id).join(', ');
+        out.push(`${team}: ${used} of ${names}, ${limit.max} allowed`);
+      }
+    }
+    for (const o of placed) {
+      // A ship missing from the database is judged by its snapshot.
+      const ship = (o.shipId && byId.get(o.shipId)) || ({ id: o.shipId ?? '', tier: o.tier, class: o.shipClass } as Ship);
+      if (!allowedBy(ruleset, ship)) out.push(`${team}: ${o.shipName} is not allowed`);
+    }
+  }
+  return out;
 }
 
 const wants = (want: Availability, has: boolean): boolean => !want || (want === 'yes') === has;
