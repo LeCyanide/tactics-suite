@@ -1,31 +1,16 @@
 /**
- * Refreshes the seed databases from a live store.
+ * Refreshes seed/ from a live store.
  *
  *   node scripts/refresh-seed.mjs [--data <dir>] [--dry]
  *
- * The import scripts in this directory write into the application-data
- * directory, because that is where the running application reads from. The
- * databases that ship with a build live in `seed/` instead, and are copied
- * into an empty store on first run. Without this script the two drift: a
- * re-import updates the store the developer can see and leaves every user of
- * the next release on the old data.
+ * Import scripts write to the app-data store; builds ship seed/. Run this after
+ * importing, then commit the diff.
  *
- * So: import as usual, run this, commit the diff.
- *
- * What travels with a build is exactly the shared reference data — ships,
- * maps and their images, capture point layouts. Projects, backups and
- * settings belong to whoever ran the import and are never copied; the check
- * at the end fails loudly if any of them ever turn up under `seed/`.
- *
- * The seed is pruned, not just topped up. An image left behind by a map that
- * has since been deleted would otherwise ship forever, so anything the
- * databases no longer reference is removed.
- *
- * Copying comes first and pruning second, and every file is replaced by a
- * rename rather than a truncate. Between them that means the seed is never
- * missing an image another process might be reading: emptying a directory and
- * refilling it, however briefly, is enough to make a running application
- * believe every map it asked for is gone.
+ * Only reference data is copied: ships, maps and their images, cap layouts.
+ * Projects, backups and settings never are, and the run fails if any turn up
+ * under seed/. Files no database references are pruned. Every file is replaced
+ * by write-then-rename, so a running app never sees a missing or half-written
+ * image.
  */
 
 import fs from 'node:fs';
@@ -49,9 +34,7 @@ const opt = (name) => {
 
 const dry = flag('--dry');
 
-// Defaults to the store the application itself uses. productName is read from
-// package.json rather than spelled out here, so renaming the application does
-// not quietly leave this script pointing at the old directory.
+// Defaults to the app's own store, named after productName in package.json.
 const { productName } = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 const defaultData = path.join(
   process.env.APPDATA ?? path.join(os.homedir(), 'AppData', 'Roaming'),

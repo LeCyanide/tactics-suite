@@ -384,7 +384,7 @@ function PagesPanel() {
 
   return (
     <Panel
-      title="Tactical Pages"
+      title="Tactical pages"
       count={project.pages.length}
       storageKey="pages"
       actions={
@@ -528,7 +528,7 @@ function MapPanel() {
       storageKey="map"
       actions={
         <>
-          <Tip label="Import map image" side="bottom">
+          <Tip label="Import map image…" side="bottom">
             <button className="icon-btn" onClick={() => void s().importMaps()}>
               <ImageIcon size={13} />
             </button>

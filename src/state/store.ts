@@ -473,11 +473,8 @@ export const useStore = create<Store>((set, get) => {
 
       const stored = rawSettings as Partial<AppSettings>;
       const settings: AppSettings = { ...clone(DEFAULT_APP_SETTINGS), ...stored };
-      // Ping presets were dropped in schema 2; discard any that were persisted.
+      // Strip settings keys the app does not use.
       delete (settings as unknown as Record<string, unknown>).pings;
-      // The bot's address and shared token were typed in by hand until 2.2.0.
-      // Connect Discord replaced both, and a shared token has no business
-      // staying in a settings file.
       delete (settings as unknown as Record<string, unknown>).discordUrl;
       delete (settings as unknown as Record<string, unknown>).discordToken;
       applyTheme(settings.theme);
@@ -522,7 +519,7 @@ export const useStore = create<Store>((set, get) => {
     },
 
     async newProject(name) {
-      const project = createProject(name || 'Untitled Project');
+      const project = createProject(name || 'Untitled project');
       await window.api.projects.save(project);
       set({
         project,
@@ -546,32 +543,30 @@ export const useStore = create<Store>((set, get) => {
         get().toast('Project could not be loaded', 'error');
         return;
       }
-      // Repair anything an older/hand-edited document might be missing.
+      // Normalise the document: fill missing fields, drop unknown ones.
       doc.pages = (doc.pages ?? []).map((p) => {
         const page = {
           ...createPage(p.name ?? 'Page'),
           ...p,
-          // Ranges left page level in schema 2; only the non-range flags survive.
+          // Page defaults hold only non-range flags; ranges are per ship.
           display: { ...clone(DEFAULT_CHARACTERISTICS), ...pickPageFlags(p.display) },
           layers: createDefaultLayers(),
         };
         delete (page as unknown as Record<string, unknown>).rangeStyles;
 
-        // Drop the object types schema 2 no longer knows how to draw, rather
-        // than keeping orphans that nothing can select or render.
+        // Drop object types the app cannot draw.
         const removed = new Set<string>(REMOVED_OBJECT_TYPES);
         page.objects = (page.objects ?? []).filter((o) => !removed.has(o.type));
 
-        // Objects must not live on the Grid pseudo-layer, or on a layer that
-        // no longer exists; either way they would be uneditable. Retired
-        // layers map onto Annotations rather than losing their contents.
+        // Map known legacy layer ids to their replacement; objects on Grid or
+        // on a missing layer move to Annotations so they stay editable.
         const known = new Set(page.layers.map((l) => l.id));
         page.objects = page.objects.map((o) => {
           const remapped = LEGACY_LAYER_REMAP[o.layerId] ?? o.layerId;
           const layerId =
             remapped === LAYER_IDS.grid || !known.has(remapped) ? LAYER_IDS.annotations : remapped;
           if (o.type === 'ship') {
-            // Routes are gone; strip their leftovers so they cannot be saved back.
+            // Strip unsupported route fields.
             const ship = { ...o, layerId } as unknown as Record<string, unknown>;
             delete ship.route;
             delete ship.routeVisible;
@@ -586,26 +581,19 @@ export const useStore = create<Store>((set, get) => {
       if (!doc.activePageId || !doc.pages.some((p) => p.id === doc.activePageId)) {
         doc.activePageId = doc.pages[0].id;
       }
-      // Projects from before folders carry neither folders nor a layout.
       settlePages(doc);
       settleTabs(doc);
-      // Projects made before the sides were named for the competitive format
-      // carry "Team North"/"Team South". Those untouched defaults take both the
-      // name and the colour of the side they became; a team someone named
-      // themselves is left exactly as it is.
-      // Projects from before rulesets carry none.
       doc.rulesets = (doc.rulesets ?? []).map((r) => ({ ...r, limits: r.limits ?? [], maxShips: r.maxShips ?? 0 }));
+      // Legacy default team names take the current side's name and colour.
       doc.teams = (doc.teams ?? []).map((t) => {
         const side = LEGACY_TEAM_NAMES[t.name];
         return side ? { ...t, name: side.name, color: side.color } : t;
       });
-      // Rebuilding settings from the known keys drops retired ones (showMinimap)
-      // rather than carrying them along in every future save.
+      // Keep only known project settings.
       doc.settings = { ...clone(DEFAULT_PROJECT_SETTINGS), ...(doc.settings ?? {}) };
       for (const key of Object.keys(doc.settings) as (keyof typeof doc.settings)[]) {
         if (!(key in DEFAULT_PROJECT_SETTINGS)) delete doc.settings[key];
       }
-      // The document now has schema 2 shape, so record that it does.
       doc.schemaVersion = SCHEMA_VERSION;
 
       set({
@@ -726,15 +714,10 @@ export const useStore = create<Store>((set, get) => {
     /* ------------------------------ pages ------------------------------ */
 
     /**
-     * Which page is showing, and which pages are open as tabs, is where the
-     * user is looking, not something they changed. Going through commit made
-     * every tab click an edit: the project read "unsaved" with nothing to
-     * save, the page was stamped as modified, and undo gained a step that only
-     * flipped back a tab.
-     *
-     * The view is still remembered for the next open. With nothing else
-     * waiting it is written straight away, without touching the saved state;
-     * otherwise it goes out with the save that is already owed.
+     * Not a commit: switching, closing or reordering tabs must not mark the
+     * project unsaved, stamp the page modified or add an undo step. The view
+     * is still remembered for the next open: written at once if nothing else
+     * is pending, otherwise with the save already owed.
      */
     setActivePage(id) {
       const { project } = get();
@@ -779,7 +762,7 @@ export const useStore = create<Store>((set, get) => {
     addPage(name, folderId) {
       const { project } = get();
       if (!project) return;
-      const page = createPage(name ?? 'New Page');
+      const page = createPage(name ?? 'New page');
       // A new page inherits the map of the current one: pages are usually
       // successive phases of the same battle. For the same reason it joins
       // that page's folder unless told where to go.
@@ -1096,7 +1079,7 @@ export const useStore = create<Store>((set, get) => {
         const layer = page.layers.find((l) => l.id === id);
         if (!layer || layer.system) return;
         page.layers = page.layers.filter((l) => l.id !== id);
-        // Orphaned objects fall back to the shapes layer rather than vanishing.
+        // Orphaned objects fall back to Annotations rather than vanishing.
         page.objects = page.objects.map((o) => (o.layerId === id ? { ...o, layerId: LAYER_IDS.annotations } : o));
       });
       if (get().activeLayerId === id) set({ activeLayerId: LAYER_IDS.annotations });
@@ -1506,7 +1489,6 @@ function normalizeName(name: string): string {
 /* Derived helpers                                                     */
 /* ------------------------------------------------------------------ */
 
-/** Page defaults with the ship's own overrides applied on top. */
 /**
  * Keeps only the characteristics a page is allowed to set a default for.
  * Range keys are filtered out, because ranges are a per-ship decision.
@@ -1519,6 +1501,7 @@ export function pickPageFlags(flags: CharacteristicFlags | undefined): Character
   return out;
 }
 
+/** Page defaults with the ship's own overrides applied on top. */
 export function effectiveFlags(page: Page, ship: ShipObject): Required<CharacteristicFlags> {
   // Page defaults never carry range keys, so a ship's ranges come only from
   // its own overrides.

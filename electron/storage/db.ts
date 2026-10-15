@@ -14,8 +14,6 @@
  *     maps/assets/<id>.<ext>        imported map images
  *     projects/<id>.json            one document per project
  *     backups/<id>/<ts>.wowsplan    rolling backups
- *     replays/index.json            the replay archive (electron/replay/archive.ts)
- *     replays/files/<id>.wowsreplay archived replays
  *     seed-state.json               which shipped databases this store has taken
  *
  * Writes are atomic: content goes to a sibling `.tmp` file which is then
@@ -24,9 +22,7 @@
  * A crash between the two steps leaves the temp file behind instead;
  * `sweepTempFiles` clears those orphans out on startup.
  *
- * The rest of the application only talks to this module through the IPC
- * surface in `electron/ipc.ts`, so the backing implementation can be replaced
- * with SQLite (or anything else) without touching the editor.
+ * The rest of the app reaches this module only through `electron/ipc.ts`.
  */
 
 import { app } from 'electron';
@@ -62,8 +58,7 @@ export function storageRoot(): string {
   const override = process.env.WOWSPLAN_DATA_DIR;
   if (override) return path.resolve(override);
   if (!ROOT) {
-    // The folder is named after the application, so a store made under an
-    // earlier name is brought over here, before anything is read from it.
+    // Move a store from a legacy folder name first (see migrate.ts).
     const adopted = adoptLegacyStore(
       path.join(app.getPath('userData'), 'data'),
       LEGACY_APP_FOLDERS.map((name) => path.join(app.getPath('appData'), name, 'data')),
@@ -176,23 +171,6 @@ function copyTreeInto(fromDir: string, toDir: string): void {
 }
 
 /**
- * Installs the ship database, the map library and the capture point layouts,
- * and keeps them current as later releases change them.
- *
- * Without this a fresh install opens with no ships, no maps and no layouts,
- * which is not an editor anyone can use: the databases were once only ever
- * created by the import scripts in `scripts/`, on the machine that ran them.
- *
- * Seeding used to be keyed on the mere presence of each index file, which had
- * the property it was chosen for -- a user's edits survived every release --
- * and one nobody wanted: a store that existed could never receive anything
- * new. A release that added forty maps delivered them only to people who had
- * never run the application before. What the check was missing is not the
- * file but its version, so each database now records the digest of the seed
- * it was filled from, and a start where nothing shipped has changed costs one
- * hash and no writes.
- */
-/**
  * What the store has already taken from a seed.
  *
  * `digest` is of the seed file as shipped, so a release that changes nothing
@@ -278,8 +256,8 @@ interface WithId {
  * never touched. A record dropped from a later seed also stays: a project may
  * still point at it, and deleting it would break that page.
  *
- * With no receipt at all -- an install predating this mechanism -- there is no
- * way to tell "deleted by the user" from "new in this release", so the pass is
+ * With no receipt there is no way to tell "deleted by the user" from "new in
+ * this release", so the pass is
  * add-only and nothing existing is modified. That can restore a map someone
  * deleted, once, which is the conservative direction: an unwanted row is a
  * nuisance, an overwritten edit is lost work.
@@ -329,10 +307,8 @@ function mergeRecords(
 /**
  * Install or refresh the shipped databases.
  *
- * Runs on every start, not just the first: a release that adds maps, ships or
- * capture point layouts has to be able to deliver them to a store that already
- * exists, which keying on the mere presence of an index file could never do.
- * Each database carries the digest of the seed it was filled from, so a start
+ * Runs on every start, so a release that adds maps, ships or capture point
+ * layouts delivers them to an existing store. Each database carries the digest of the seed it was filled from, so a start
  * that changes nothing costs one hash and no writes.
  *
  * The two kinds of database are treated differently because they are owned
@@ -443,13 +419,9 @@ export async function readJson<T>(file: string, fallback: T): Promise<T> {
 }
 
 /**
- * Creates the directory `file` lives in, if it is not already there.
- *
- * `fsp.mkdir(dir, { recursive: true })` is not the harmless no-op it looks
- * like on Windows: for the root of a drive it fails with EPERM instead of
- * reporting the directory as existing, so exporting straight onto `Z:\` used
- * to abort before a single byte was written. Stat first, and treat a racing
- * creator as success.
+ * Creates the parent directory of `file`. Stats first: on Windows, recursive
+ * mkdir of a drive root (`Z:\`) fails with EPERM instead of succeeding. A
+ * racing creator counts as success.
  */
 export async function ensureParentDir(file: string): Promise<void> {
   const dir = path.dirname(file);

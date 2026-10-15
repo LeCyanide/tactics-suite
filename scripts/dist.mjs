@@ -88,9 +88,8 @@ runNode(binEntry('vite'), ['build']);
 buildSidecar();
 pack('nsis', { withSidecar: true });
 
-// The portable exe must not carry it. Clearing the staging directory is not
-// enough on its own — the portable config never references it — but it keeps
-// the tree honest about what was packed.
+// The portable config never references the sidecar; clearing the staged
+// binary as well keeps the tree matching what was packed.
 clearStagedSidecar();
 pack('portable', { withSidecar: false });
 

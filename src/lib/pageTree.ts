@@ -69,9 +69,8 @@ export function openTab(project: Project, id: ID): void {
  * none, the layout names each folder and each loose page exactly once, and
  * `pages` follows the layout.
  *
- * Also what brings in a project from before folders, or one a hand edit left
- * inconsistent: whatever the layout does not place goes to the end, pages
- * first, in the order they already had.
+ * Anything the layout does not place (a project without folders, or a
+ * hand-edited one) goes to the end, pages first, in their existing order.
  */
 export function settlePages(project: Project): void {
   project.pageFolders ??= [];

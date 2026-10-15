@@ -6,8 +6,8 @@ import { shutdownLibrary } from './replay/archive';
 import { initSidecar, shutdownSidecar } from './replay/sidecar';
 import { checkForUpdates, initUpdater } from './updater';
 
-// This application is local. The only network traffic is the update check
-// in updater.ts, which talks to our own release server and nothing else.
+// Network access lives only in updater.ts (update server) and discord.ts
+// (clan bot), both fixed at build time.
 app.commandLine.appendSwitch('disable-http-cache');
 
 const isDev = !!process.env.VITE_DEV_SERVER_URL;

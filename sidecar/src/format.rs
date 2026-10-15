@@ -9,7 +9,7 @@
 //! every frame — about 15 ships, ten times a second, for fifteen minutes. They
 //! never change, so they live in the header string table and each record
 //! refers to them by a `u16` id. That alone is most of the difference between
-//! ~14 KB and ~2.3 KB per frame.
+//! ~14 KB and ~3 KB per frame.
 //!
 //! Layout, all little-endian:
 //!

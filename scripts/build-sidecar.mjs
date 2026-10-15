@@ -8,9 +8,8 @@
  * Windows 10 and later — so there is no redistributable to ship and nothing for
  * the user to download separately.
  *
- * Toolchain: this builds with the GNU target by default because the build
- * machine has no MSVC linker. Override with SIDECAR_TOOLCHAIN, or set it empty
- * to use whatever rustup has as default:
+ * Toolchain: GNU target by default, so no MSVC is needed. Override with
+ * SIDECAR_TOOLCHAIN, or set it empty to use rustup's default:
  *
  *   SIDECAR_TOOLCHAIN= node scripts/build-sidecar.mjs
  */
@@ -40,10 +39,8 @@ export function clearStagedSidecar() {
 /**
  * landaire's wows-toolkit, at the commit the sidecar is built against.
  *
- * The crates are published to crates.io, but a game patch can break replay
- * parsing and the fix lands upstream days before a release does — 15.9 moved
- * the roster packet's fields and left every ship without a name. So the
- * sidecar builds from a checkout pinned here instead.
+ * Built from a pinned checkout rather than crates.io: replay-parsing fixes
+ * for a game patch land upstream before a crates release.
  *
  * It is a sparse checkout made with git itself rather than a cargo git
  * dependency: the repository carries a Buck prelude whose paths run past

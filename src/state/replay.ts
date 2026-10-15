@@ -4,7 +4,7 @@
  * Kept out of the main store on purpose. A loaded timeline is tens of megabytes
  * and the playback frame changes ten times a second; neither belongs in the
  * store that holds the project and drives undo. Nothing here is ever persisted
- * — a timeline is rebuilt from the archive in a few seconds, so there is no
+ * — a timeline is rebuilt from the library in a few seconds, so there is no
  * reason to keep one around.
  */
 
@@ -74,7 +74,7 @@ interface SidecarStatus {
   reason?: string;
 }
 
-/** Background baking, for the status line under the archive header. */
+/** Background baking, for the status line under the library header. */
 export interface BakeQueue {
   done: number;
   total: number;
@@ -207,7 +207,7 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
     if (res.migrated) {
       useStore
         .getState()
-        .toast(`Moved ${res.migrated} replay${res.migrated === 1 ? '' : 's'} from the old archive into ${picked}.`);
+        .toast(`Moved ${res.migrated} replay${res.migrated === 1 ? '' : 's'} from the old replay store into ${picked}.`);
     }
     await get().refreshArchive();
   },
@@ -370,17 +370,14 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
       try {
         timeline = new ReplayTimeline(await window.api.replay.load({ id }));
       } catch (err) {
-        // A stored timeline this version cannot read, from an older planner.
-        // Rebaking works only while the patch is installed; the library says
-        // so plainly if it is not.
+        // Stored timeline in an unsupported format: rebake it. Only works while
+        // the patch is installed; otherwise the library reports why.
         if (!(err instanceof TimelineFormatError)) throw err;
         timeline = new ReplayTimeline(await window.api.replay.load({ id, rebake: true }));
       }
       if (timeline.lacksPlayers && !rebakedForPlayers.has(id)) {
         rebakedForPlayers.add(id);
-        // Baked before the sidecar could read this patch's roster. Worth one
-        // more bake while the build is installed; when it is not, or the bake
-        // fails, the nameless timeline is still better than none.
+        // No player data: rebake once. If that fails, keep the nameless timeline.
         try {
           timeline = new ReplayTimeline(await window.api.replay.load({ id, rebake: true }));
         } catch {
@@ -525,7 +522,7 @@ function reportImport(outcome: {
   const s = useStore.getState();
   const parts: string[] = [];
   if (outcome.added.length) parts.push(`${outcome.added.length} added`);
-  if (outcome.duplicates.length) parts.push(`${outcome.duplicates.length} already in the archive`);
+  if (outcome.duplicates.length) parts.push(`${outcome.duplicates.length} already in your library`);
   if (outcome.failed.length) parts.push(`${outcome.failed.length} skipped`);
   s.toast(parts.join(', ') || 'Nothing to import', outcome.failed.length && !outcome.added.length ? 'error' : 'info');
   // The reasons matter more than the count when something was skipped, and a

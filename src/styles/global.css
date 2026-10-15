@@ -1,7 +1,6 @@
 /* ==================================================================
-   WoWS Tactical Planner — interface shell
-   Dark, dense, map-first. No web fonts: the application is offline,
-   so everything falls back to system faces.
+   WoWs Tactics Suite — interface shell
+   Dark, dense, map-first. System fonts only.
    ================================================================== */
 
 :root {
@@ -1567,8 +1566,6 @@ input[type='range']::-webkit-slider-thumb {
   object-fit: cover;
 }
 
-/* Ping palette ----------------------------------------------------- */
-
 /* Variant picker for the grouped Shape / Line tools ---------------- */
 
 .variant-grid {
@@ -1675,15 +1672,9 @@ input[type='range']::-webkit-slider-thumb {
 }
 
 /*
- * The replay archive as a tree: collections first, unsorted replays below.
- * The rule down the left of a collection's children ties them to it, the way
- * a file browser does.
- */
-/*
- * The list is the growing panel's flexible child, so it takes the height the
- * panel was given and scrolls past it. Without this it shrank as a flex item
- * while its rows kept their own height, and the rows spilled over the folder
- * line below the list.
+ * Replay library as a tree: collections first, unsorted below, with a rule
+ * tying children to their collection. Flex child of the growing panel, so it
+ * takes the panel's height and scrolls.
  */
 .replay-tree {
   display: flex;
@@ -1962,7 +1953,7 @@ input[type='range']::-webkit-slider-thumb {
 }
 
 /* ==================================================================
-   Board tab drag & drop, ship list, save button
+   Page tab drag & drop, ship list, save button
    ================================================================== */
 
 .page-tab {
@@ -1971,7 +1962,7 @@ input[type='range']::-webkit-slider-thumb {
 .page-tab.dragging {
   opacity: 0.45;
 }
-/* Marks the slot the dragged board will drop into. */
+/* Marks the slot the dragged tab will drop into. */
 .page-tab.drop-target {
   box-shadow: inset 2px 0 0 var(--accent);
 }

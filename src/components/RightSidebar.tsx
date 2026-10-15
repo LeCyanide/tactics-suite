@@ -95,7 +95,7 @@ function NoSelectionPanels() {
 /**
  * Style controls for one range circle of one ship.
  *
- * There is no page-level equivalent any more: a range belongs to the ship that
+ * A range belongs to the ship that
  * projects it, so its colour and weight are stored as an override on that
  * ship's object, layered over the built-in default.
  */
@@ -144,7 +144,7 @@ function ToolDefaultsPanel() {
   const stroke = options.stroke;
 
   return (
-    <Panel title="Drawing Defaults" storageKey="toolDefaults">
+    <Panel title="Drawing defaults" storageKey="toolDefaults">
       <Field label="Colour">
         <ColorInput value={stroke.color} onChange={(v) => s().patchToolOptions({ stroke: { ...stroke, color: v } })} />
         <select
@@ -203,7 +203,7 @@ function ToolVariantPanel() {
   const labels = isShape ? SHAPE_TOOL_LABELS : ARROW_TOOL_LABELS;
 
   return (
-    <Panel title={isShape ? 'Shape' : 'Line & Arrow'} storageKey="toolVariant">
+    <Panel title={isShape ? 'Shape' : 'Line & arrow'} storageKey="toolVariant">
       <div className="variant-grid">
         {variants.map((v) => (
           <button
@@ -239,8 +239,8 @@ function SingleObjectPanels({ obj }: { obj: TacticalObject }) {
 }
 
 const TYPE_LABEL: Record<string, string> = {
-  freehand: 'Freehand', line: 'Line', arrow: 'Arrow', doubleArrow: 'Double Arrow', curvedArrow: 'Curved Arrow',
-  polygon: 'Polygon', ruler: 'Ruler', area: 'Area', rect: 'Rectangle', roundRect: 'Rounded Rectangle',
+  freehand: 'Freehand', line: 'Line', arrow: 'Arrow', doubleArrow: 'Double arrow', curvedArrow: 'Curved arrow',
+  polygon: 'Polygon', ruler: 'Ruler', area: 'Area', rect: 'Rectangle', roundRect: 'Rounded rectangle',
   circle: 'Circle', text: 'Text', number: 'Number', marker: 'Marker',
 };
 
@@ -400,7 +400,7 @@ function TextPropertiesPanel({ obj }: { obj: TextObject }) {
       <Field label="Align">
         <select value={obj.align} onChange={(e) => update({ align: e.target.value as TextObject['align'] })}>
           <option value="left">Left</option>
-          <option value="center">Center</option>
+          <option value="center">Centre</option>
           <option value="right">Right</option>
         </select>
       </Field>
@@ -717,7 +717,7 @@ function ShipBrowserPanel() {
               Import ship data…
             </button>
             <button className="btn sm block ghost" onClick={() => void s().loadSampleShips()}>
-              Load sample ship set
+              Load sample ships
             </button>
           </div>
         </div>

@@ -57,7 +57,7 @@ export function createPage(name: string, mapId: ID | null = null): Page {
   };
 }
 
-export function createProject(name = 'Untitled Project', pageNames?: string[]): Project {
+export function createProject(name = 'Untitled project', pageNames?: string[]): Project {
   const now = Date.now();
   const teams = createTeams();
   const pages = (pageNames?.length ? pageNames : ['Default']).map((n) => createPage(n));

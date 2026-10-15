@@ -409,8 +409,7 @@ function paintFrame(ctx: Konva.Context, args: PaintArgs): void {
           species: rec.species,
           color: rec.isSelf ? selfColor : rec.color,
           alpha,
-          // Your own ship now looks like any other ally, so a slight size bump
-          // is what is left to find it by.
+          // Your own ship is drawn like any ally; a slight size bump marks it.
           size: shipSize * (rec.isSelf ? 1.08 : 1),
           inv,
           // Self is flagged as a detected teammate too, but a rim saying "an

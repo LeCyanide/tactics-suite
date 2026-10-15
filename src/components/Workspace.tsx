@@ -232,7 +232,7 @@ export function NotesPanel() {
         <textarea
           value={page.notes}
           placeholder={
-            'Placeholder text for notes. You can use Markdown formatting here, and it will be rendered in the preview.'
+            'Notes for this page. Markdown is supported.'
           }
           onChange={(e) => s().setNotes(e.target.value)}
           onKeyDown={(e) => e.stopPropagation()}

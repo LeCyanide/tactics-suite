@@ -28,10 +28,10 @@ export function ProjectsModal() {
       footer={
         <>
           <button className="btn primary" onClick={() => s().openModal('newProject')}>
-            New Project
+            New project
           </button>
           <button className="btn" onClick={() => void s().importProject()}>
-            <FileUp size={13} /> Import .wowsplan
+            <FileUp size={13} /> Import project…
           </button>
           <span className="spacer" />
           {current && (
@@ -88,7 +88,7 @@ export function NewProjectModal() {
   const [name, setName] = useState(saveAs ? `${current?.name ?? 'Project'} (copy)` : 'tactics-planner');
 
   const submit = async () => {
-    const trimmed = name.trim() || 'Untitled Project';
+    const trimmed = name.trim() || 'Untitled project';
     if (saveAs) await s().saveProjectAs(trimmed);
     else await s().newProject(trimmed);
     s().closeModal();
@@ -106,7 +106,7 @@ export function NewProjectModal() {
             Cancel
           </button>
           <button className="btn primary" onClick={() => void submit()}>
-            {saveAs ? 'Save Copy' : 'Create'}
+            {saveAs ? 'Save copy' : 'Create'}
           </button>
         </>
       }
@@ -173,8 +173,8 @@ export function BackupsModal() {
       }
     >
       <div className="faint" style={{ fontSize: 11.5, marginBottom: 8, lineHeight: 1.5 }}>
-        A backup is written every time you save (up to {s().settings.maxBackupsPerProject} kept). Restoring imports the
-        backup as a separate project, so the current one is never overwritten.
+        A backup is written on every save (last {s().settings.maxBackupsPerProject} kept). Restoring opens it as a new
+        project; the current one is never overwritten.
       </div>
       {rows.length === 0 ? (
         <div className="empty-note">No backups yet.</div>

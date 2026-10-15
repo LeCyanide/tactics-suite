@@ -19,7 +19,7 @@ const RANGE_LABEL: Record<string, string> = {
   detection: 'Detection',
   radar: 'Radar',
   hydro: 'Hydro',
-  mainBattery: 'Main Battery',
+  mainBattery: 'Main battery',
   secondary: 'Secondary',
   torpedo: 'Torpedo',
   airstrike: 'Airstrike',
@@ -54,9 +54,8 @@ interface ShipNodeProps {
 /**
  * A ship on the map.
  *
- * The icon and its labels are drawn inside a group scaled by 1/zoom, so they
- * keep a constant on-screen size and stay legible at every zoom level, while
- * the ship's position itself lives in world metres.
+ * Icon and labels sit in a group scaled by 1/camera scale, so they keep a
+ * constant screen size while the position stays in world metres.
  */
 export const ShipNode = memo(function ShipNode({
   obj,
@@ -116,7 +115,7 @@ export const ShipNode = memo(function ShipNode({
           </Group>
         )}
 
-        {/* Hit area — generous enough to grab comfortably at any zoom */}
+        {/* Hit area — generous enough to grab comfortably */}
         <Rect x={-half - 3} y={-half - 3} width={size + 6} height={size + 6} fill="transparent" />
 
       </Group>

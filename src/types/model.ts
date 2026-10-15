@@ -9,7 +9,7 @@
  * object position, radius and length is expressed in metres. Ship ranges come
  * out of the ship database in kilometres and are multiplied by 1000 on render.
  *
- * This keeps range circles physically correct at any zoom level and makes the
+ * This keeps range circles physically correct at any canvas size and makes the
  * model independent of the pixel dimensions of whatever image the user
  * imported.
  */
@@ -30,7 +30,7 @@ export const SHIP_CLASS_LABEL: Record<ShipClass, string> = {
   DD: 'Destroyer',
   CA: 'Cruiser',
   BB: 'Battleship',
-  CV: 'Aircraft Carrier',
+  CV: 'Aircraft carrier',
   SS: 'Submarine',
 };
 
@@ -81,7 +81,7 @@ export interface Ship {
 
   torpedoRange_km?: number;
   torpedoSpeed_kn?: number;
-  /** Half-angle of the torpedo firing sector drawn on the map, in degrees. */
+  /** Half-angle of the torpedo firing sector, in degrees. Stored only; the torpedo ring is a full circle. */
   torpedoArc_deg?: number;
   torpedoes?: string;
 
@@ -317,16 +317,16 @@ export type CharacteristicKey =
   | 'airstrike';
 
 export const CHARACTERISTICS: { key: CharacteristicKey; label: string; group: 'range' | 'other' }[] = [
-  { key: 'detection', label: 'Detection Range', group: 'range' },
+  { key: 'detection', label: 'Detection range', group: 'range' },
   { key: 'radar', label: 'Radar', group: 'range' },
   { key: 'hydro', label: 'Hydro', group: 'range' },
-  { key: 'mainBattery', label: 'Main Battery Range', group: 'range' },
-  { key: 'secondary', label: 'Secondary Battery Range', group: 'range' },
-  { key: 'torpedo', label: 'Torpedo Range', group: 'range' },
+  { key: 'mainBattery', label: 'Main battery range', group: 'range' },
+  { key: 'secondary', label: 'Secondary battery range', group: 'range' },
+  { key: 'torpedo', label: 'Torpedo range', group: 'range' },
   { key: 'airstrike', label: 'Airstrike', group: 'range' },
 ];
 
-/** Characteristics that render as a circle / sector on the map. */
+/** Characteristics that render as a circle on the map. */
 export const RANGE_KEYS: CharacteristicKey[] = [
   'detection',
   'radar',
@@ -345,8 +345,8 @@ export const PAGE_CHARACTERISTIC_KEYS: CharacteristicKey[] = CHARACTERISTICS.fil
 export type CharacteristicFlags = Partial<Record<CharacteristicKey, boolean>>;
 
 /**
- * Default page-level state. Every characteristic is a range now, and ranges
- * are decided per ship, so there is nothing left for a page to default.
+ * Default page-level state. Every characteristic is a per-ship range, so a
+ * page has nothing to default.
  */
 export const DEFAULT_CHARACTERISTICS: CharacteristicFlags = {};
 
@@ -416,12 +416,12 @@ export const LAYER_IDS = {
 } as const;
 
 /**
- * Five layers, and no more. Shapes, arrows, text and markers all live on
+ * Five planning layers plus Replay notes. Shapes, arrows, text and markers all live on
  * "Annotations" — they are drawn the same way and are almost always shown or
  * hidden together — while ranges keep their own layer so every circle on the
  * page can be switched off in one click.
  *
- * Grid and Cap Zones are background pseudo-layers: they hold no objects and
+ * Grid and Cap zones are background pseudo-layers: they hold no objects and
  * exist only so the two can be toggled and faded like anything else. Both are
  * locked, which is what keeps them out of every "which layer does this object
  * go on" decision.
@@ -430,18 +430,18 @@ export function createDefaultLayers(): Layer[] {
   // Rendered back-to-front in array order.
   return [
     { id: LAYER_IDS.grid, name: 'Grid', visible: true, locked: true, opacity: 1, system: true },
-    { id: LAYER_IDS.caps, name: 'Cap Zones', visible: true, locked: true, opacity: 1, system: true },
-    { id: LAYER_IDS.ranges, name: 'Ship Ranges', visible: true, locked: false, opacity: 1, system: true },
+    { id: LAYER_IDS.caps, name: 'Cap zones', visible: true, locked: true, opacity: 1, system: true },
+    { id: LAYER_IDS.ranges, name: 'Ship ranges', visible: true, locked: false, opacity: 1, system: true },
     { id: LAYER_IDS.annotations, name: 'Annotations', visible: true, locked: false, opacity: 1, system: true },
     { id: LAYER_IDS.ships, name: 'Ships', visible: true, locked: false, opacity: 1, system: true },
     // Replay notes are a plan for a battle that already happened, on ground the
     // page may not even be planning against, so they are kept apart from the
     // plan and drawn only in replay mode.
-    { id: LAYER_IDS.replay, name: 'Replay Notes', visible: true, locked: false, opacity: 1, system: true },
+    { id: LAYER_IDS.replay, name: 'Replay notes', visible: true, locked: false, opacity: 1, system: true },
   ];
 }
 
-/** Layer ids removed in schema 2, mapped onto their replacement. */
+/** Legacy layer ids, mapped to the layer that replaces them. */
 export const LEGACY_LAYER_REMAP: Record<string, string> = {
   'layer-zones': LAYER_IDS.annotations,
   'layer-routes': LAYER_IDS.annotations,
@@ -459,11 +459,7 @@ export const DEFAULT_TEAM_SIDES: { name: string; color: string }[] = [
   { name: 'Bravo', color: '#ff5f56' },
 ];
 
-/**
- * Sides from before the competitive names, mapped onto what they are now.
- * A project carrying these still has its two original sides untouched, so the
- * colour is brought up to convention along with the name.
- */
+/** Legacy default team names, mapped to the current sides (name and colour). */
 export const LEGACY_TEAM_NAMES: Record<string, { name: string; color: string }> = {
   'Team North': DEFAULT_TEAM_SIDES[0],
   'Team South': DEFAULT_TEAM_SIDES[1],
@@ -490,7 +486,7 @@ export type ObjectType =
   | 'ruler'
   | 'area';
 
-/** Object types dropped in schema 2; they are stripped when a project loads. */
+/** Unsupported object types, stripped when a project loads. */
 export const REMOVED_OBJECT_TYPES = ['ping', 'zone', 'ellipse', 'arc', 'bearing'] as const;
 
 export interface Vec2 {
@@ -560,7 +556,7 @@ export interface TextObject extends BaseObject {
   color: string;
   background: string | null;
   align: 'left' | 'center' | 'right';
-  /** Number badges only. */
+  /** Number objects only. */
   value?: number;
 }
 

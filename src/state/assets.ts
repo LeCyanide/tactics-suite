@@ -6,14 +6,10 @@
  * than a custom protocol) keep the export canvas untainted, so `toDataURL`
  * works for image export.
  *
- * A read can fail for reasons that pass: the store is being rewritten by an
- * import, a sync client has the file open, the disk is slow to answer. Once
- * that happened the image was gone for the life of the window, because a
- * failure resolved to null and nothing asked again -- and the canvas draws
- * its empty sheet for a missing image, so a map that failed to load looked
- * exactly like a map with no image. So a failed read is retried a few times
- * before it is believed, and when it is finally given up on the reason is
- * kept and handed to whoever asked, rather than being swallowed here.
+ * Reads can fail transiently (an import rewriting the store, a sync client
+ * holding the file, a slow disk). A failed read is retried a few times. If it
+ * still fails, the reason goes to the caller instead of a bare null, so a
+ * broken image can be told apart from no image.
  */
 
 import { useEffect, useState } from 'react';

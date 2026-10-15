@@ -1,13 +1,8 @@
 import type { Ship } from '@/types/model';
 
 /**
- * OPTIONAL starter set — never loaded automatically.
- *
- * The ship database is meant to be supplied by the user (Ships -> Import
- * Data). This handful of Tier X ships exists only so the editor is usable the
- * moment it opens, and the values are approximations rounded for planning
- * geometry, not an authoritative stat sheet. The Ship Database panel labels
- * them as sample data and every field is editable.
+ * Optional Tier X starter set, loaded only by "Load sample ships". Values are
+ * approximations for planning geometry, not an authoritative stat sheet.
  */
 export const SAMPLE_SHIPS: Omit<Ship, 'id'>[] = [
   {

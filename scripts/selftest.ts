@@ -2,8 +2,9 @@
  * Headless checks for the paths that are pure logic and would otherwise only
  * be exercised by hand: messy ship-data import, the .wowsplan
  * pack/read/import round-trip, the destinations an export can be written to,
- * the accent folding every name lookup goes through, and the startup sweep
- * of orphaned temp files.
+ * the accent folding every name lookup goes through, the startup sweep of
+ * orphaned temp files, the store migration after the rename, and seeding
+ * across releases.
  *
  *   npm run selftest
  */
@@ -186,9 +187,8 @@ async function testShipFilters(): Promise<void> {
 }
 
 /**
- * The store follows the application's name, so the rename from Toolkit to
- * Suite has to bring every user's projects with it. Each case is a tree under
- * a temp directory standing in for %APPDATA%.
+ * A store under a legacy folder name moves to the current one with everything
+ * in it. Each case is a temp tree standing in for %APPDATA%.
  */
 async function testStoreMigration(): Promise<void> {
   console.log('\nstore migration on rename');
@@ -340,9 +340,8 @@ async function testExportDestinations(): Promise<void> {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'wowsplan-selftest4-'));
   process.env.WOWSPLAN_DATA_DIR = root;
 
-  // The root of a drive is the case that used to break the exporter: it is a
-  // directory that plainly exists, yet Windows answers `mkdir 'Z:\'` with
-  // EPERM rather than EEXIST, and recursive mkdir only forgives EEXIST.
+  // A drive root: Windows answers `mkdir 'Z:\'` with EPERM, not EEXIST, and
+  // recursive mkdir only forgives EEXIST.
   const driveRoot = path.parse(root).root;
   let mkdirRejected = false;
   try {
@@ -574,7 +573,7 @@ async function testSeeding(): Promise<void> {
   // Reference data the editor never writes is replaced outright.
   check('upgrade: cap layouts replaced wholesale', (await db.listCapLayouts()).length === 2);
 
-  // --- a store predating the receipt: add-only, nothing overwritten ---
+  // --- a store without a receipt: add-only, nothing overwritten ---
   const legacy = await fs.mkdtemp(path.join(os.tmpdir(), 'wowsplan-seed-legacy-'));
   process.env.WOWSPLAN_DATA_DIR = legacy;
   db.ensureDirs();
