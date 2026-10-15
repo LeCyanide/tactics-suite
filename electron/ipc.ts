@@ -83,6 +83,8 @@ export function registerIpc(getWindow: GetWindow): void {
   });
   handle('discord:cancelLink', () => discord.cancelLink());
   handle('discord:unlink', () => discord.unlink());
+  handle('discord:bot', () => discord.bot());
+  handle('discord:setBot', (url: string | null) => discord.setBot(url));
   handle('discord:share', (opts: { channelId: string; title: string; note?: string; image: string }) =>
     discord.share(opts),
   );

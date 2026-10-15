@@ -136,6 +136,7 @@ const listing = () => ({
 });
 
 let discordLink: unknown = { status: 'unlinked' };
+let discordBot = { url: 'https://bot.example.com', builtIn: 'https://bot.example.com', custom: false };
 let cancelDiscordLink = () => {};
 
 const api = {
@@ -230,6 +231,15 @@ const api = {
     cancelLink: async () => cancelDiscordLink(),
     unlink: async () => (discordLink = { status: 'unlinked' }),
     share: async () => 'https://discord.com/channels/10/101/1',
+    bot: async () => discordBot,
+    // Any https address is a bot here; switching disconnects, as it does for real.
+    setBot: async (url: string | null) => {
+      const next = (url ?? '').trim();
+      if (next !== '' && !next.startsWith('https://')) throw new Error('The bot address must start with https://');
+      discordBot = { url: next || 'https://bot.example.com', builtIn: 'https://bot.example.com', custom: next !== '' };
+      discordLink = { status: 'unlinked' };
+      return discordBot;
+    },
   },
   exporter: { image: async () => null, text: async () => null, toClipboard: async () => true },
   dialog: { confirm: async (o: { message: string }) => window.confirm(o.message) },
