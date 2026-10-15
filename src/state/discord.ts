@@ -1,8 +1,8 @@
 import { useEffect, useSyncExternalStore } from 'react';
-import type { DiscordChannel, DiscordGuild, DiscordStatus } from '../../electron/preload';
+import type { DiscordBot, DiscordChannel, DiscordGuild, DiscordStatus } from '../../electron/preload';
 import { useStore } from './store';
 
-export type { DiscordChannel, DiscordGuild, DiscordStatus };
+export type { DiscordBot, DiscordChannel, DiscordGuild, DiscordStatus };
 
 /**
  * Which Discord account this copy is connected to, and where it may post.
@@ -83,4 +83,15 @@ export function findChannel(discord: DiscordStatus | null, id: string): DiscordC
     if (channel) return channel;
   }
   return null;
+}
+
+/**
+ * Points this copy at another bot, or back at the built-in one with an empty
+ * address. Throws a sentence fit to show when the address is not a bot.
+ * Switching disconnects, so the connection is asked for again afterwards.
+ */
+export async function setDiscordBot(url: string): Promise<DiscordBot> {
+  const bot = await window.api.discord.setBot(url.trim() === '' ? null : url);
+  await refreshDiscord();
+  return bot;
 }
