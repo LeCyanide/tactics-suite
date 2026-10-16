@@ -382,3 +382,18 @@ sidecar/                   Rust: .wowsreplay -> .wtreply (see sidecar/README.md)
 - Navigation away from the app is blocked, and window-open requests are denied.
 - Images are loaded as `data:` URLs rather than through a custom protocol,
   specifically so the export canvas is never tainted and `toDataURL` works.
+
+
+## License
+
+Copyright (C) 2026 Sye (LeCyanide)
+
+WoWs Tactics Suite is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License, version 3, as published by
+the Free Software Foundation. It is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; see [LICENSE](LICENSE) for the full terms.
+
+Third-party components keep their own licenses
+([notices](resources/licenses/THIRD-PARTY-NOTICES.txt)). Map images, ship icons
+and other game assets and data from World of Warships belong to Wargaming and
+are not covered by this license.

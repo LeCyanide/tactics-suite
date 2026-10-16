@@ -3,6 +3,7 @@
   "productName": "WoWs Tactics Suite",
   "version": "2.4.0",
   "description": "Tactics planner and replay viewer for World of Warships",
+  "license": "GPL-3.0-only",
   "private": true,
   "main": "dist-electron/main.js",
   "scripts": {
