@@ -11,14 +11,14 @@ item under it one note. Use `### Changelog` for what is finished and
 
 Collect notes under `## Unreleased` and rename it to the version when releasing.
 
-## Unreleased
+## 2.4.0
 
 ### Changelog
 
+- Closing a tab no longer deletes the page. Tabs are now a set of open pages for quick switching: click a page in the sidebar to open it as a tab, close tabs you are done with, and drag tabs into any order without changing the page list. Ctrl+Tab cycles through the open tabs, and their maps are loaded ahead so switching is instant. Delete a page from the sidebar
 - Page tabs now show the folder a page is in, so "TEST – Okinawa" and "FINAL – Okinawa" can be told apart
-- Closing a tab no longer deletes the page. Tabs are now a set of open pages for quick switching: click a page in the sidebar to open it as a tab, close tabs you are done with, and drag tabs into any order without changing the page list. Ctrl+Tab cycles through the open tabs. The maps of open tabs are loaded ahead so switching is instant. Delete a page from the sidebar
-- New pages are no longer numbered: the first page of a new project is called "Default" instead of "01 - Opening", and added pages "New page" instead of "02 - New page"
-- Settings → Share to Discord can point at a self-hosted bot: enter its address, and the app checks it before switching. Leave it empty to use the built-in bot
+- New: lineup check. The ruleset picked in the Ships panel now belongs to the page, and when the ships on it break the ruleset (too many per team, too many from a limited group, a ship it does not allow) a red "!" follows the page's name on its tab and in the page list. Hover it to see what is broken
+- Settings → Share to Discord can point at a [self-hosted bot](https://github.com/LeCyanide/tactics-suite-discord-bot): enter its address, and the app checks it before switching. Leave it empty to use the built-in bot
 
 ## 2.3.0
 
