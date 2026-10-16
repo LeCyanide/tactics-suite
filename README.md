@@ -2,6 +2,9 @@
 
 Windows desktop app for planning World of Warships, with an integrated replay viewer.
 
+**Download:** [fw-suite.de/tactics](https://fw-suite.de/tactics/) has the
+installer, the portable version and the patch notes.
+
 ## Running it
 
 ```bash
