@@ -105,6 +105,20 @@ your local `release/` folder to the Recycle Bin the same way (on its own:
 `node scripts/prune-local-releases.mjs`). Keep the token stable: builds made with an old token
 can no longer update once it changes.
 
+**Download site:** https://fw-suite.de offers the current installer and
+portable exe and shows every version's notes from `PATCHNOTES.md`. The page is
+built from `site/index.html` by `scripts/build-site.mjs` (`node
+scripts/build-site.mjs` builds it into `release/site` for a look) and uploaded
+by `release` and `release -- --notes-only` to `VPS_SITE_DIR`. Its download
+links are served straight from the update folder, which makes only the `.exe`
+files public there. Set it up once on the VPS, with the domain's and `www`'s
+DNS records pointing at it:
+
+```bash
+scp deploy/site.caddy deploy/setup-site.sh root@vps:
+ssh root@vps 'bash setup-site.sh fw-suite.de'
+```
+
 ---
 
 ## Data storage

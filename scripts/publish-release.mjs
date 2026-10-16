@@ -8,7 +8,11 @@
  * Discord: where and when the notes are posted is decided there, by whoever
  * runs the command.
  *
- *   --notes-only           re-publish the notes alone, to fix them after a release
+ * The download site (scripts/build-site.mjs) is rebuilt and uploaded last, to
+ * VPS_SITE_DIR, so its buttons never point at installers that are not there yet.
+ * With VPS_SITE_DIR unset the site is skipped.
+ *
+ *   --notes-only           re-publish the notes and the site alone, to fix them after a release
  *
  * Installers go up first and the manifests last, each manifest under a temp
  * name and then renamed, so a client checking mid-upload never sees a version
@@ -24,6 +28,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { SITE_DIR, SITE_FILES, buildSite } from './build-site.mjs';
 import { PUBLISHED_NAME, patchNotes } from './patch-notes.mjs';
 import { pruneLocalReleases } from './prune-local-releases.mjs';
 import { staleReleases } from './release-files.mjs';
@@ -82,9 +87,26 @@ function publishNotes() {
   console.log(`Published ${count} patch note(s) for ${version} under ${notes.sections.map((s) => s.title).join(', ')}.`);
 }
 
+/** The download page, each file under a temp name and then renamed like the rest. */
+function publishSite() {
+  if (!env.VPS_SITE_DIR) {
+    console.log('VPS_SITE_DIR is not set in .env.release; the download site was not updated.');
+    return;
+  }
+  buildSite(version);
+  const site = (f) => `${env.VPS_SSH}:${env.VPS_SITE_DIR}/${f}`;
+  for (const f of SITE_FILES) run('scp', [path.join(SITE_DIR, f), site(`${f}.tmp`)]);
+  run('ssh', [
+    env.VPS_SSH,
+    `cd '${env.VPS_SITE_DIR}' && ${SITE_FILES.map((f) => `chmod 644 ${f}.tmp && mv -f ${f}.tmp ${f}`).join(' && ')}`,
+  ]);
+  console.log(`Published the download site for ${version}.`);
+}
+
 // The notes alone, for a typo found after the installers went out.
 if (has('--notes-only')) {
   publishNotes();
+  publishSite();
   process.exit(0);
 }
 
@@ -136,5 +158,7 @@ if (stale.length) {
   console.log(`Removed from the server: ${stale.join(', ')}`);
 }
 console.log(`Server keeps ${previous ? `${version} and ${previous}` : version}.`);
+
+publishSite();
 
 pruneLocalReleases(version);

@@ -1,0 +1,29 @@
+# Download site for WoWs Tactics Suite. setup-site.sh installs this as
+# /etc/caddy/conf.d/wows-site.caddy with SITE_DOMAIN filled in.
+#
+# The page comes from /srv/wows-site, which `npm run release` uploads. The
+# installers it links to are served from the update folder itself, so they are
+# uploaded once: only the .exe files are public here, never the manifests,
+# blockmaps or patch-notes.json, which stay behind the update token.
+
+SITE_DOMAIN {
+	encode zstd gzip
+
+	@download path_regexp exe ^/download/(WoWs-Tactics-Suite-[A-Za-z0-9.-]+\.exe)$
+	handle @download {
+		rewrite * /{re.exe.1}
+		root * /srv/wows-updates
+		header Content-Disposition attachment
+		file_server
+	}
+
+	handle {
+		root * /srv/wows-site
+		header /index.html Cache-Control "no-cache"
+		file_server
+	}
+}
+
+www.SITE_DOMAIN {
+	redir https://SITE_DOMAIN{uri} permanent
+}

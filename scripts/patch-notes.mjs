@@ -71,6 +71,21 @@ export function sectionsFor(text, version) {
   return sections.filter((section) => section.notes.length > 0);
 }
 
+/**
+ * Every released version in the file, newest first as written, with its
+ * sections. "Unreleased" and anything else that is not a version is skipped.
+ */
+export function allVersions(text) {
+  const versions = [];
+  for (const line of text.split(/\r?\n/)) {
+    const m = /^##\s+v?(\d+\.\d+\.\d+\S*)\s*$/.exec(line);
+    if (!m) continue;
+    const sections = sectionsFor(text, m[1]);
+    if (sections.length > 0) versions.push({ version: m[1], sections });
+  }
+  return versions;
+}
+
 /** What gets published for a version. Throws with what to do when there is nothing to publish. */
 export function patchNotes(version) {
   if (!fs.existsSync(PATCH_NOTES_FILE)) throw new Error('PATCHNOTES.md is missing.');
