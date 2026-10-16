@@ -8,11 +8,10 @@
  * Discord: where and when the notes are posted is decided there, by whoever
  * runs the command.
  *
- * The download site (scripts/build-site.mjs) is rebuilt and uploaded last, to
- * VPS_SITE_DIR, so its buttons never point at installers that are not there yet.
- * With VPS_SITE_DIR unset the site is skipped.
+ * releases.json (scripts/releases-feed.mjs), which the download site at
+ * fw-suite.de reads, goes up with the notes.
  *
- *   --notes-only           re-publish the notes and the site alone, to fix them after a release
+ *   --notes-only           re-publish the notes and releases.json alone, to fix them after a release
  *
  * Installers go up first and the manifests last, each manifest under a temp
  * name and then renamed, so a client checking mid-upload never sees a version
@@ -28,9 +27,9 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { SITE_DIR, SITE_FILES, buildSite } from './build-site.mjs';
 import { PUBLISHED_NAME, patchNotes } from './patch-notes.mjs';
 import { pruneLocalReleases } from './prune-local-releases.mjs';
+import { FEED_NAME, releasesFeed } from './releases-feed.mjs';
 import { staleReleases } from './release-files.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -71,42 +70,28 @@ const { version } = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 
 // Read before anything is uploaded: a release with no notes written for it is
 // refused here rather than discovered when someone asks the bot for them.
 const notes = patchNotes(version);
-const notesFile = path.join(releaseDir, PUBLISHED_NAME);
 const remote = (f) => `${env.VPS_SSH}:${env.VPS_DIR}/${f}`;
 
 /** Under a temp name and then renamed, like the manifests, so a reader never sees half a file. */
-function publishNotes() {
+function publishJson(name, data) {
+  const file = path.join(releaseDir, name);
   fs.mkdirSync(releaseDir, { recursive: true });
-  fs.writeFileSync(notesFile, JSON.stringify(notes, null, 2) + '\n');
-  run('scp', [notesFile, remote(`${PUBLISHED_NAME}.tmp`)]);
-  run('ssh', [
-    env.VPS_SSH,
-    `cd '${env.VPS_DIR}' && chmod g+r,o-rwx ${PUBLISHED_NAME}.tmp && mv -f ${PUBLISHED_NAME}.tmp ${PUBLISHED_NAME}`,
-  ]);
-  const count = notes.sections.reduce((sum, section) => sum + section.notes.length, 0);
-  console.log(`Published ${count} patch note(s) for ${version} under ${notes.sections.map((s) => s.title).join(', ')}.`);
+  fs.writeFileSync(file, JSON.stringify(data, null, 2) + '\n');
+  run('scp', [file, remote(`${name}.tmp`)]);
+  run('ssh', [env.VPS_SSH, `cd '${env.VPS_DIR}' && chmod g+r,o-rwx ${name}.tmp && mv -f ${name}.tmp ${name}`]);
 }
 
-/** The download page, each file under a temp name and then renamed like the rest. */
-function publishSite() {
-  if (!env.VPS_SITE_DIR) {
-    console.log('VPS_SITE_DIR is not set in .env.release; the download site was not updated.');
-    return;
-  }
-  buildSite(version);
-  const site = (f) => `${env.VPS_SSH}:${env.VPS_SITE_DIR}/${f}`;
-  for (const f of SITE_FILES) run('scp', [path.join(SITE_DIR, f), site(`${f}.tmp`)]);
-  run('ssh', [
-    env.VPS_SSH,
-    `cd '${env.VPS_SITE_DIR}' && ${SITE_FILES.map((f) => `chmod 644 ${f}.tmp && mv -f ${f}.tmp ${f}`).join(' && ')}`,
-  ]);
-  console.log(`Published the download site for ${version}.`);
+function publishNotes() {
+  publishJson(PUBLISHED_NAME, notes);
+  const count = notes.sections.reduce((sum, section) => sum + section.notes.length, 0);
+  console.log(`Published ${count} patch note(s) for ${version} under ${notes.sections.map((s) => s.title).join(', ')}.`);
+  publishJson(FEED_NAME, releasesFeed(version));
+  console.log(`Published ${FEED_NAME} for the download site.`);
 }
 
 // The notes alone, for a typo found after the installers went out.
 if (has('--notes-only')) {
   publishNotes();
-  publishSite();
   process.exit(0);
 }
 
@@ -158,7 +143,5 @@ if (stale.length) {
   console.log(`Removed from the server: ${stale.join(', ')}`);
 }
 console.log(`Server keeps ${previous ? `${version} and ${previous}` : version}.`);
-
-publishSite();
 
 pruneLocalReleases(version);
