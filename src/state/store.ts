@@ -1,3 +1,4 @@
+import { confirmDialog } from '@/state/confirm';
 import { create } from 'zustand';
 import {
   DEFAULT_APP_SETTINGS,
@@ -664,7 +665,7 @@ export const useStore = create<Store>((set, get) => {
     },
 
     async deleteProject(id) {
-      const ok = await window.api.dialog.confirm({
+      const ok = await confirmDialog({
         title: 'Delete project',
         message: 'Delete this project permanently?',
         detail: 'The project and its backups are removed from local storage. This cannot be undone.',
@@ -838,10 +839,9 @@ export const useStore = create<Store>((set, get) => {
       }
       const page = project.pages.find((p) => p.id === id);
       if (!page) return;
-      const ok = await window.api.dialog.confirm({
+      const ok = await confirmDialog({
         title: 'Delete page',
         message: `Delete "${page.name}"?`,
-        detail: 'Everything drawn on it goes with it. Undo (Ctrl+Z) brings it back.',
         confirmLabel: 'Delete',
         danger: true,
       });
@@ -1262,7 +1262,7 @@ export const useStore = create<Store>((set, get) => {
     },
 
     async deleteMap(id) {
-      const ok = await window.api.dialog.confirm({
+      const ok = await confirmDialog({
         title: 'Delete map',
         message: 'Delete this map and its image?',
         detail: 'Pages using it will keep their objects but lose the background image.',

@@ -244,7 +244,6 @@ const api = {
     },
   },
   exporter: { image: async () => null, text: async () => null, toClipboard: async () => true },
-  dialog: { confirm: async (o: { message: string }) => window.confirm(o.message) },
 
   replay: {
     status: async () => ({ available: true }),

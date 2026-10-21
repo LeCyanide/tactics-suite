@@ -8,6 +8,7 @@
  * reason to keep one around.
  */
 
+import { confirmDialog } from '@/state/confirm';
 import { create } from 'zustand';
 import { DEFAULT_REPLAY_VIEW, type ReplayViewOptions } from '@/canvas/ReplayLayer';
 import { ReplayTimeline, TimelineFormatError } from '@/replay/timeline';
@@ -245,7 +246,7 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
         );
         return;
       }
-      const ok = await window.api.dialog.confirm({
+      const ok = await confirmDialog({
         title: 'Import from the game folder',
         message: `Add ${fresh.length} replay${fresh.length === 1 ? '' : 's'} to your library?`,
         detail: `${(fresh.reduce((n, f) => n + f.size, 0) / 1048576).toFixed(0)} MB will be copied into ${get().root}. The originals are left alone.`,
@@ -262,7 +263,7 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
 
   async removeReplay(id) {
     const replay = get().archive.find((r) => r.id === id);
-    const ok = await window.api.dialog.confirm({
+    const ok = await confirmDialog({
       title: 'Delete replay',
       message: 'Delete this replay?',
       detail:
@@ -309,7 +310,7 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
     const held = get().archive.filter((r) => r.collection === name).length;
     // An empty folder costs nothing to lose, so it goes without asking.
     if (held) {
-      const ok = await window.api.dialog.confirm({
+      const ok = await confirmDialog({
         title: 'Delete collection',
         message: `Delete "${name}"?`,
         detail: `Its ${held} replay${held === 1 ? '' : 's'} move back to the top of your replay folder, unsorted.`,

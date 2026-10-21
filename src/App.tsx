@@ -12,6 +12,7 @@ import { MapManagerModal, ShipDatabaseModal } from './components/modals/LibraryM
 import { ExportModal, SettingsModal, ShortcutsModal } from './components/modals/SystemModals';
 import { preloadIcons } from './state/assets';
 import { UpdateNotice } from './components/UpdateNotice';
+import { ConfirmDialog } from './components/modals/ConfirmDialog';
 
 export default function App() {
   const booted = useStore((s) => s.booted);
@@ -78,6 +79,8 @@ export default function App() {
       {modal === 'settings' && <SettingsModal />}
       {modal === 'shortcuts' && <ShortcutsModal />}
       {modal === 'backups' && <BackupsModal />}
+      {/* After the other modals, so a question asked from one sits on top of it. */}
+      <ConfirmDialog />
 
       <UpdateNotice />
 

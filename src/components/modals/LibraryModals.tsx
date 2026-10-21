@@ -1,3 +1,4 @@
+import { confirmDialog } from '@/state/confirm';
 import { useMemo, useState } from 'react';
 import { Copy, Database, FileDown, FileUp, Image as ImageIcon, Plus, RefreshCw, Search, Trash2 } from 'lucide-react';
 import { getActivePage, getRulesets, useStore } from '@/state/store';
@@ -715,7 +716,7 @@ function ShipEditor({ ship, onDeleted }: { ship: Ship; onDeleted: () => void }) 
         className="btn sm danger block"
         style={{ marginTop: 10 }}
         onClick={async () => {
-          const ok = await window.api.dialog.confirm({
+          const ok = await confirmDialog({
             title: 'Delete ship',
             message: `Remove "${ship.name}" from the ship database?`,
             confirmLabel: 'Delete',

@@ -193,10 +193,6 @@ const api = {
       };
     },
   },
-  dialog: {
-    confirm: (opts: { title: string; message: string; detail?: string; confirmLabel?: string; danger?: boolean }) =>
-      call<boolean>('dialog:confirm', opts),
-  },
 };
 
 contextBridge.exposeInMainWorld('api', api);

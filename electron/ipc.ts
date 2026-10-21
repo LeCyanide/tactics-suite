@@ -392,20 +392,4 @@ export function registerIpc(getWindow: GetWindow): void {
     return true;
   });
 
-  /* ---------------- generic confirm dialog ---------------- */
-
-  handle('dialog:confirm', async (opts: { title: string; message: string; detail?: string; confirmLabel?: string; danger?: boolean }) => {
-    const w = getWindow();
-    const res = await dialog.showMessageBox(w!, {
-      type: opts.danger ? 'warning' : 'question',
-      buttons: [opts.confirmLabel ?? 'OK', 'Cancel'],
-      defaultId: 0,
-      cancelId: 1,
-      title: opts.title,
-      message: opts.message,
-      detail: opts.detail,
-      noLink: true,
-    });
-    return res.response === 0;
-  });
 }
