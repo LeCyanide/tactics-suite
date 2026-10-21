@@ -20,8 +20,8 @@ const LINE_PX = 1.6;
 const SHIP_PX = 22;
 const NAME_PX = 9;
 const CROSS_PX = 4;
-/** A ship not seen at `until` is drawn at its last known spot, fainter still. */
-const STALE_ALPHA = 0.45;
+/** A ship sunk or unseen at `until` is drawn fainter, at its last known spot. */
+const STALE_ALPHA = 0.6;
 
 interface Props {
   data: ReplayPaths;
@@ -79,18 +79,18 @@ export const OverlayLayer = memo(function OverlayLayer({ data, map, until, allie
         const sunk = path.diedAt !== null && path.diedAt <= until;
         const alpha = sunk || until - end.t > maxGap ? STALE_ALPHA : 1;
 
+        // Every trail ends in its ship's icon, sunk or not, so each line can be told apart.
+        drawShip(ctx, { px: ex, py: ey, yaw: end.yaw, species: path.species, color, alpha, size: SHIP_PX * inv, inv, outline: null });
         if (sunk) {
-          ctx.setAttr('globalAlpha', alpha);
-          ctx.setAttr('strokeStyle', cssColor(color));
-          ctx.setAttr('lineWidth', LINE_PX * 1.4 * inv);
+          ctx.setAttr('globalAlpha', 1);
+          ctx.setAttr('strokeStyle', '#e8eef6');
+          ctx.setAttr('lineWidth', LINE_PX * 1.2 * inv);
           ctx.beginPath();
           ctx.moveTo(ex - cross, ey - cross);
           ctx.lineTo(ex + cross, ey + cross);
           ctx.moveTo(ex + cross, ey - cross);
           ctx.lineTo(ex - cross, ey + cross);
           ctx.stroke();
-        } else {
-          drawShip(ctx, { px: ex, py: ey, yaw: end.yaw, species: path.species, color, alpha, size: SHIP_PX * inv, inv, outline: null });
         }
 
         if (path.shipName) {
