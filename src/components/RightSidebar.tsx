@@ -533,6 +533,16 @@ function ShipPropertiesPanels({ obj }: { obj: ShipObject }) {
             </Tip>
           )}
         </Field>
+        <Field label="Opacity">
+          <Slider value={obj.opacity} onChange={(v) => update({ opacity: v })} />
+        </Field>
+        {(obj.opacity !== 1 || obj.iconColor) && (
+          <Tip label="Full opacity and the team colour, as a freshly placed ship" side="bottom">
+            <button className="btn sm" style={{ width: '100%', marginTop: 4 }} onClick={() => update(STANDARD_LOOK)}>
+              Standard look
+            </button>
+          </Tip>
+        )}
 
         <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
           <button className="btn sm" style={{ flex: 1 }} onClick={() => update({ locked: !obj.locked })}>
@@ -615,10 +625,17 @@ function ShipFlagCheck({
   );
 }
 
+/**
+ * How a freshly placed ship looks: full opacity, in its team colour. Extracted
+ * replay ships arrive faded (unspotted) or black (sunk); this puts them back.
+ */
+const STANDARD_LOOK = { opacity: 1, iconColor: undefined } as Partial<ShipObject>;
+
 function MultiSelectionPanel({ objects }: { objects: TacticalObject[] }) {
   const page = useStore(getActivePage);
   const s = () => useStore.getState();
   const ids = objects.map((o) => o.id);
+  const shipIds = objects.filter((o) => o.type === 'ship').map((o) => o.id);
   if (!page) return null;
 
   return (
@@ -656,6 +673,17 @@ function MultiSelectionPanel({ objects }: { objects: TacticalObject[] }) {
           Delete
         </button>
       </div>
+      {shipIds.length > 0 && (
+        <Tip label="Full opacity and the team colour for every selected ship" side="bottom">
+          <button
+            className="btn sm"
+            style={{ width: '100%', marginTop: 6 }}
+            onClick={() => s().updateObjects(shipIds, STANDARD_LOOK as Partial<TacticalObject>)}
+          >
+            Standard look for {shipIds.length} ship{shipIds.length === 1 ? '' : 's'}
+          </button>
+        </Tip>
+      )}
     </Panel>
   );
 }
