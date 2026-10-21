@@ -444,7 +444,7 @@ function circle(ctx: Konva.Context, cx: number, cy: number, radius: number): voi
   ctx.arc(cx, cy, Math.max(radius, 0), 0, Math.PI * 2, false);
 }
 
-function text(
+export function text(
   ctx: Konva.Context,
   value: string,
   cx: number,
@@ -478,7 +478,7 @@ interface ShipArgs {
  * not have — the planner's neutral grey stands in, which is the same fallback
  * a ship with no team gets on a tactics page.
  */
-function drawShip(ctx: Konva.Context, a: ShipArgs): void {
+export function drawShip(ctx: Konva.Context, a: ShipArgs): void {
   const glyph = REPLAY_GLYPHS[classForSpecies(a.species)];
   const size = a.size * glyph.scale;
 

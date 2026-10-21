@@ -304,7 +304,7 @@ export async function testReplayTimeline(check: (l: string, c: boolean, d?: unkn
   );
   check('paths: self keeps no tint of its own', own?.color === null, own?.color);
   check('paths: carry the map for matching', op.spaceName === 'spaces/40_Okinawa' && op.minimapSize === 768, op.spaceName);
-  const pts = [0, 1, 2, 5].map((t) => ({ t, pos: { x: 0, y: 0 } }));
+  const pts = [0, 1, 2, 5].map((t) => ({ t, pos: { x: 0, y: 0 }, yaw: 0 }));
   check(
     'paths: lastIndexAt finds the last point at or before a time',
     lastIndexAt(pts, -1) === -1 && lastIndexAt(pts, 0) === 0 && lastIndexAt(pts, 3) === 2 && lastIndexAt(pts, 9) === 3,

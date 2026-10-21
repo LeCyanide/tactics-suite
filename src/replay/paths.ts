@@ -12,6 +12,8 @@ export interface PathPoint {
   /** Battle clock, seconds. */
   t: number;
   pos: Px;
+  /** Heading, radians, as the ship record gives it. */
+  yaw: number;
 }
 
 export interface ShipPath {
@@ -21,6 +23,8 @@ export interface ShipPath {
   color: Rgb | null;
   shipName?: string;
   playerName?: string;
+  /** Ship class as the renderer names it, for the glyph. */
+  species?: string;
   /** Only positions where the ship was actually seen; gaps mean undetected. */
   points: PathPoint[];
   /** Battle clock of the first frame it shows as sunk, or null. */
@@ -61,17 +65,21 @@ export function extractPaths(timeline: ReplayTimeline, stepSeconds = 1): ReplayP
         const p = pathFor(rec.entityId);
         p.shipName ??= rec.shipName;
         p.playerName ??= rec.playerName;
+        p.species ??= rec.species;
         const relation = rec.playerName ? relationByPlayer.get(rec.playerName) : undefined;
         // shortcut: without a roster relation, only self and spotted-teammate flags mark an ally; a nameless bake may class a hidden ally as enemy.
         if (rec.isSelf || rec.isDetectedTeammate || relation === 0 || relation === 1) p.ally = true;
         if (!rec.isSelf && rec.color !== null) p.color ??= rec.color;
         // Undetected records are last-known ghosts, not where the ship was.
-        if (rec.visibility !== Visibility.Undetected) p.points.push({ t, pos: rec.pos });
+        if (rec.visibility !== Visibility.Undetected) p.points.push({ t, pos: rec.pos, yaw: rec.yaw });
       } else if (rec.kind === 'deadShip') {
         const p = pathFor(rec.entityId);
+        p.shipName ??= rec.shipName;
+        p.playerName ??= rec.playerName;
+        p.species ??= rec.species;
         if (p.diedAt === null) {
           p.diedAt = t;
-          p.points.push({ t, pos: rec.pos });
+          p.points.push({ t, pos: rec.pos, yaw: rec.yaw });
         }
       }
     }
