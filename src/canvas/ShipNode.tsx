@@ -170,6 +170,22 @@ export const ShipLabel = memo(function ShipLabel({
           strokeWidth={2.6}
           fillAfterStrokeEnabled
         />
+        {obj.note && (
+          <Text
+            text={obj.note}
+            x={-NAME_PLATE_W / 2}
+            y={half + 5 + NAME_FONT * 1.3}
+            width={NAME_PLATE_W}
+            align="center"
+            fontSize={NAME_FONT * 0.88}
+            fontFamily="Inter, Segoe UI, sans-serif"
+            fill={theme.plateText}
+            opacity={0.75}
+            stroke={theme.contrast}
+            strokeWidth={2.2}
+            fillAfterStrokeEnabled
+          />
+        )}
       </Group>
     </Group>
   );

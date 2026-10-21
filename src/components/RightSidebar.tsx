@@ -499,6 +499,14 @@ function ShipPropertiesPanels({ obj }: { obj: ShipObject }) {
             onChange={(e) => update({ label: e.target.value || undefined })}
           />
         </Field>
+        <Field label="Note">
+          <input
+            type="text"
+            placeholder="Shown under the name"
+            value={obj.note ?? ''}
+            onChange={(e) => update({ note: e.target.value || undefined })}
+          />
+        </Field>
         <Field label="Position">
           <NumInput value={obj.x / 1000} step={0.1} onChange={(v) => update({ x: v * 1000 })} suffix="km" />
           <NumInput value={obj.y / 1000} step={0.1} onChange={(v) => update({ y: v * 1000 })} suffix="km" />

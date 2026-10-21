@@ -589,6 +589,8 @@ export interface ShipObject extends BaseObject {
    */
   iconColor?: string;
   label?: string;
+  /** A short second line under the name, e.g. "sunk 3:19" on an extracted replay ship. */
+  note?: string;
 }
 
 export type TacticalObject = ShipObject | PathObject | ShapeObject | TextObject | MarkerObject;

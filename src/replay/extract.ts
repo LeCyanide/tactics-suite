@@ -81,10 +81,10 @@ export function extractPage(input: ExtractInput): ExtractResult {
     obj.rotation = yawToDegrees(end.yaw);
     if (sunk) {
       obj.iconColor = SUNK_COLOR;
-      obj.label = `${name}\nsunk ${clock(path.diedAt!)}`;
+      obj.note = `sunk ${clock(path.diedAt!)}`;
     } else if (unspotted) {
       obj.opacity = UNSPOTTED_OPACITY;
-      obj.label = `${name}\nlast seen ${clock(end.t)}`;
+      obj.note = `last seen ${clock(end.t)}`;
     }
 
     page.objects.push(obj);

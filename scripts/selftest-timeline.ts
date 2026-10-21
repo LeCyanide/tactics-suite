@@ -428,7 +428,7 @@ async function testRealTimeline(check: (l: string, c: boolean, d?: unknown) => v
   check('extract: the page is named after the map and the player ship, no time', page.name === 'Okinawa – Des Moines', page.name);
   const dm = placed.find((o) => o.shipName === 'Des Moines');
   check('extract: a known ship is linked to the database', dm?.shipId === 'dm' && dm.teamId === 'alpha', dm?.shipId);
-  const sunk = placed.filter((o) => o.label?.includes('sunk'));
+  const sunk = placed.filter((o) => o.note?.startsWith('sunk'));
   check('extract: sunk ships are black and say when they sank', sunk.length > 0 && sunk.every((o) => o.iconColor === '#000000'), sunk.length);
   check('extract: unknown ships are listed, not dropped', unmatched.length === new Set(placed.map((o) => o.shipName)).size - 1 && page.notes.includes('Not in the ship database'));
   check('extract: only ships, no route arrows', page.objects.every((o) => o.type === 'ship'));
