@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Copy, Eye, Grid3x3, HardDrive, Plus, Save, X } from 'lucide-react';
+import { Eye, Grid3x3, HardDrive, ListX, Plus, Save, X } from 'lucide-react';
 import { getActivePage, useStore } from '@/state/store';
 import { loadAsset } from '@/state/assets';
 import { folderNameOf } from '@/lib/pageTree';
@@ -44,6 +44,8 @@ export function PageTabs() {
 
   return (
     <div className="page-tabs" onDragLeave={() => setOverIndex(null)}>
+      {/* Tabs keep their full names until the bar is full; only then do they shrink, ending in "…". */}
+      <div className="page-tabs-list">
       {tabs.map((page, i) => {
         const folder = folderNameOf(project, page);
         return (
@@ -80,7 +82,7 @@ export function PageTabs() {
             }}
           >
             {folder !== null && <span className="tab-folder">{folder} –</span>}
-            <InlineEdit value={page.name} onCommit={(v) => s().renamePage(page.id, v)} />
+            <InlineEdit className="tab-name" value={page.name} onCommit={(v) => s().renamePage(page.id, v)} />
             <RulesetFlag page={page} />
             {tabs.length > 1 && (
               <span
@@ -98,19 +100,20 @@ export function PageTabs() {
           </div>
         );
       })}
-      <Tip label="Duplicate current page" side="bottom">
-        <button
-          className="page-tab-add"
-          onClick={() => project.activePageId && s().duplicatePage(project.activePageId)}
-        >
-          <Copy size={12} />
-        </button>
-      </Tip>
+      </div>
       <Tip label="New page" side="bottom">
         <button className="page-tab-add" onClick={() => s().addPage()}>
           <Plus size={14} />
         </button>
       </Tip>
+      <span className="page-tabs-spacer" />
+      {tabs.length > 1 && (
+        <Tip label="Close the other tabs (the pages stay in the project)" side="bottom">
+          <button className="page-tab-add" onClick={() => s().closeOtherTabs()}>
+            <ListX size={14} />
+          </button>
+        </Tip>
+      )}
     </div>
   );
 }

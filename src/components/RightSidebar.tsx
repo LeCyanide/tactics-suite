@@ -879,14 +879,15 @@ function ShipBrowserPanel() {
                     <div className="ship-name">{ship.name}</div>
                     <div className="ship-sub">{ship.nation}</div>
                   </div>
-                  <span className="class-chip" style={{ background: `${CLASS_COLORS[ship.class]}22`, color: CLASS_COLORS[ship.class] }}>
-                    {shipClassCode(ship)}
-                  </span>
+                  {/* Before the class, so class and tier stay in line whether a row has a limit or not. */}
                   {use && (
                     <span className={`tier-chip limit-chip${use.used >= use.max ? ' full' : ''}`}>
                       {use.used}/{use.max}
                     </span>
                   )}
+                  <span className="class-chip" style={{ background: `${CLASS_COLORS[ship.class]}22`, color: CLASS_COLORS[ship.class] }}>
+                    {shipClassCode(ship)}
+                  </span>
                   <span className="tier-chip">{ship.tier}</span>
                 </div>
               );

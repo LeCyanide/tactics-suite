@@ -29,7 +29,7 @@
   --font: "Segoe UI Variable Text", "Segoe UI", -apple-system, Roboto, Helvetica, Arial, sans-serif;
   --mono: "Cascadia Mono", Consolas, "JetBrains Mono", ui-monospace, monospace;
 
-  --titlebar-h: 34px;
+  --titlebar-h: 40px;
   --statusbar-h: 24px;
   --tabbar-h: 30px;
 
@@ -183,7 +183,7 @@ body {
   padding: 0 12px 0 11px;
   font-weight: 650;
   letter-spacing: 0.02em;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--fg);
   white-space: nowrap;
 }
@@ -210,12 +210,12 @@ body {
 
 .menu-root > button {
   height: var(--titlebar-h);
-  padding: 0 10px;
+  padding: 0 12px;
   background: transparent;
   border: 0;
   color: var(--fg-dim);
   font: inherit;
-  font-size: 12px;
+  font-size: 13px;
   cursor: default;
 }
 .menu-root > button:hover,
@@ -243,13 +243,13 @@ body {
   justify-content: space-between;
   gap: 18px;
   width: 100%;
-  padding: 5px 9px;
+  padding: 6px 10px;
   background: transparent;
   border: 0;
   border-radius: 3px;
   color: var(--fg);
   font: inherit;
-  font-size: 12px;
+  font-size: 12.5px;
   text-align: left;
   cursor: default;
 }
@@ -330,9 +330,18 @@ body {
   flex: none;
 }
 
+/* A few pixels between each sidebar's contents and the app's edge, in the sidebar's own colour. */
+.sidebar.left {
+  padding-left: 4px;
+}
+.sidebar.right {
+  padding-right: 4px;
+}
+
 .sidebar.collapsed {
   width: 0 !important;
   overflow: hidden;
+  padding: 0;
 }
 
 .sidebar-resizer {
@@ -980,11 +989,25 @@ input[type='range']::-webkit-slider-thumb {
   background: var(--bg-0);
   border-bottom: 1px solid var(--line);
   flex: none;
+  min-width: 0;
+}
+/* Shrinks before anything else on the bar; scrolls only once every tab is at its minimum. */
+.page-tabs-list {
+  display: flex;
+  align-items: stretch;
+  flex: 0 1 auto;
+  min-width: 0;
   overflow-x: auto;
   overflow-y: hidden;
 }
-.page-tabs::-webkit-scrollbar {
+.page-tabs-list::-webkit-scrollbar {
   height: 0;
+}
+.page-tabs-spacer {
+  flex: 1;
+}
+.page-tabs > .page-tab-add {
+  flex: none;
 }
 
 .page-tab {
@@ -1001,6 +1024,18 @@ input[type='range']::-webkit-slider-thumb {
   cursor: default;
   white-space: nowrap;
   position: relative;
+  flex: 0 1 auto;
+  min-width: 96px;
+  overflow: hidden;
+}
+.page-tab .tab-name,
+.page-tab .tab-folder {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.page-tab .tab-close {
+  flex: none;
 }
 .page-tab:hover {
   background: var(--bg-1);
@@ -1806,6 +1841,8 @@ input[type='range']::-webkit-slider-thumb {
 /* The Tactics | Replay switch in the title bar. */
 .mode-switch {
   display: flex;
+  /* Centred, not stretched to the bar's height, so it never touches the bar's edges. */
+  align-self: center;
   gap: 2px;
   padding: 2px;
   border-radius: 6px;
@@ -1817,8 +1854,10 @@ input[type='range']::-webkit-slider-thumb {
   background: none;
   color: var(--fg-2);
   font: inherit;
-  font-size: 11.5px;
-  padding: 2px 10px;
+  font-size: 12.5px;
+  /* 28px buttons in a 2px-padded track: a 32px switch in the 40px bar. */
+  height: 28px;
+  padding: 0 12px;
   border-radius: 4px;
   cursor: pointer;
   display: flex;

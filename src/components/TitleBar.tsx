@@ -243,7 +243,7 @@ function ModeSwitch() {
         onClick={() => setMode('tactics')}
         title="Plan on the map"
       >
-        <MapIcon size={12} /> Tactics
+        <MapIcon size={14} /> Tactics
       </button>
       <button
         className={mode === 'replay' ? 'active' : ''}
@@ -251,7 +251,7 @@ function ModeSwitch() {
         disabled={!hasProject}
         title={hasProject ? 'Watch a replay on the map' : 'Open a project first'}
       >
-        <Clapperboard size={12} /> Replay
+        <Clapperboard size={14} /> Replay
       </button>
     </div>
   );
