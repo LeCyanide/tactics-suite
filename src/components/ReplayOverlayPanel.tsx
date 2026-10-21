@@ -30,13 +30,22 @@ export function ReplayOverlayPanel() {
     [archive, space],
   );
 
-  const ships = useMemo(
-    () =>
-      [...(o.paths?.paths ?? [])].sort(
-        (a, b) => Number(b.ally) - Number(a.ally) || (a.shipName ?? '').localeCompare(b.shipName ?? ''),
-      ),
-    [o.paths],
-  );
+  const ships = useMemo(() => {
+    const sorted = [...(o.paths?.paths ?? [])].sort(
+      (a, b) => Number(b.ally) - Number(a.ally) || (a.shipName ?? '').localeCompare(b.shipName ?? ''),
+    );
+    // Ship names only; the same ship twice on a team is told apart by a number.
+    const label = (p: (typeof sorted)[number]) => `${p.ally ? 'Ally' : 'Enemy'} · ${p.shipName ?? '?'}`;
+    const total = new Map<string, number>();
+    for (const p of sorted) total.set(label(p), (total.get(label(p)) ?? 0) + 1);
+    const seen = new Map<string, number>();
+    return sorted.map((p) => {
+      const base = label(p);
+      const n = (seen.get(base) ?? 0) + 1;
+      seen.set(base, n);
+      return { id: p.entityId, text: total.get(base)! > 1 ? `${base} ${n}` : base };
+    });
+  }, [o.paths]);
 
   if (mode !== 'tactics' || !page || status?.available === false) return null;
 
@@ -104,10 +113,9 @@ export function ReplayOverlayPanel() {
               onChange={(e) => o.set({ only: e.target.value ? Number(e.target.value) : null })}
             >
               <option value="">All ships</option>
-              {ships.map((p) => (
-                <option key={p.entityId} value={p.entityId}>
-                  {p.ally ? 'Ally' : 'Enemy'} · {p.shipName ?? '?'}
-                  {p.playerName ? ` (${p.playerName})` : ''}
+              {ships.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.text}
                 </option>
               ))}
             </select>
