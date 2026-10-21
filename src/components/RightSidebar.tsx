@@ -531,9 +531,6 @@ function ShipPropertiesPanels({ obj }: { obj: ShipObject }) {
         <Field label="Grid">
           <span className="mono dim">{ref}</span>
         </Field>
-        <Field label="Heading">
-          <NumInput value={obj.rotation} step={5} onChange={(v) => update({ rotation: ((v % 360) + 360) % 360 })} suffix="°" />
-        </Field>
         <Field label="Icon size">
           <Slider value={obj.iconScale} min={0.5} max={2.5} step={0.05} onChange={(v) => update({ iconScale: v })} format={(v) => `${v.toFixed(2)}x`} />
         </Field>
