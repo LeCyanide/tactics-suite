@@ -19,7 +19,8 @@ const LINE_PX = 1.6;
 /** A little smaller than the replay viewer's ships, so the plan stays on top visually. */
 const SHIP_PX = 22;
 const NAME_PX = 9;
-const CROSS_PX = 4;
+const SUNK_FILL = 0x000000;
+const SUNK_OUTLINE = '#9aa6b2';
 /** A ship sunk or unseen at `until` is drawn fainter, at its last known spot. */
 const STALE_ALPHA = 0.6;
 
@@ -70,7 +71,6 @@ export const OverlayLayer = memo(function OverlayLayer({ data, map, until, allie
         ctx.stroke();
       }
 
-      const cross = CROSS_PX * inv;
       const nameSize = NAME_PX * inv;
       for (const { path, last, color } of shown) {
         const end = path.points[last]!;
@@ -79,19 +79,20 @@ export const OverlayLayer = memo(function OverlayLayer({ data, map, until, allie
         const sunk = path.diedAt !== null && path.diedAt <= until;
         const alpha = sunk || until - end.t > maxGap ? STALE_ALPHA : 1;
 
-        // Every trail ends in its ship's icon, sunk or not, so each line can be told apart.
-        drawShip(ctx, { px: ex, py: ey, yaw: end.yaw, species: path.species, color, alpha, size: SHIP_PX * inv, inv, outline: null });
-        if (sunk) {
-          ctx.setAttr('globalAlpha', 1);
-          ctx.setAttr('strokeStyle', '#e8eef6');
-          ctx.setAttr('lineWidth', LINE_PX * 1.2 * inv);
-          ctx.beginPath();
-          ctx.moveTo(ex - cross, ey - cross);
-          ctx.lineTo(ex + cross, ey + cross);
-          ctx.moveTo(ex + cross, ey - cross);
-          ctx.lineTo(ex - cross, ey + cross);
-          ctx.stroke();
-        }
+        // Every trail ends in its ship's icon, so each line can be told apart. Sunk
+        // ships go black, as the game's minimap shows them, with a light edge so
+        // they still read on dark water.
+        drawShip(ctx, {
+          px: ex,
+          py: ey,
+          yaw: end.yaw,
+          species: path.species,
+          color: sunk ? SUNK_FILL : color,
+          alpha,
+          size: SHIP_PX * inv,
+          inv,
+          outline: sunk ? SUNK_OUTLINE : null,
+        });
 
         if (path.shipName) {
           // Names sit a step behind the icons: readable, but quieter than the plan's own labels.
