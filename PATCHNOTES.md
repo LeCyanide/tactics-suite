@@ -11,6 +11,22 @@ item under it one note. Use `### Changelog` for what is finished and
 
 Collect notes under `## Unreleased` and rename it to the version when releasing.
 
+## 2.5.0
+
+### New
+
+- Replay overlay: draw a replay's ship routes behind a tactics page on the same map
+- Extract to plan: turn a moment of a replay into a tactics page with every ship in place
+- Ship panel: ships can carry a note under their name, and their look can be reset to the team colour
+- Ping drag: hold and drag on the map to leave a trail of pings
+
+### Changes
+
+- Replay playback: new controls, with the speed in a dropdown (1× to 20×, starting at 8×)
+- Deleting a page now asks for confirmation
+- Close all other page tabs at once from the tab bar
+- Light UI changes across the app
+
 ## 2.4.0
 
 ### Changelog
