@@ -421,10 +421,9 @@ async function testRealTimeline(check: (l: string, c: boolean, d?: unknown) => v
   const map = { id: 'map-okinawa', name: 'Okinawa', widthMeters: 42000, heightMeters: 42000 } as GameMap;
   const db = [{ id: 'dm', name: 'Des Moines', nation: 'USA', class: 'CA', tier: 10 }] as Ship[];
   const { page, unmatched } = extractPage({
-    timeline: t, frame: t.frameCount - 1, windowSeconds: 120, map, ships: db, teams, capLayouts: [], replayName: 'test',
+    timeline: t, frame: t.frameCount - 1, map, ships: db, teams, capLayouts: [], replayName: 'test',
   });
   const placed = page.objects.filter((o): o is ShipObject => o.type === 'ship');
-  const arrows = page.objects.filter((o) => o.type === 'arrow');
   check('extract: every ship seen in the battle is placed, sunk ones too', placed.length === op.paths.length, placed.length);
   check('extract: the page is named after the map and the player ship, no time', page.name === 'Okinawa – Des Moines', page.name);
   const dm = placed.find((o) => o.shipName === 'Des Moines');
@@ -432,9 +431,9 @@ async function testRealTimeline(check: (l: string, c: boolean, d?: unknown) => v
   const sunk = placed.filter((o) => o.label?.includes('sunk'));
   check('extract: sunk ships are black and say when they sank', sunk.length > 0 && sunk.every((o) => o.iconColor === '#000000'), sunk.length);
   check('extract: unknown ships are listed, not dropped', unmatched.length === new Set(placed.map((o) => o.shipName)).size - 1 && page.notes.includes('Not in the ship database'));
-  check('extract: routes become arrows on the annotations layer', arrows.length > 0 && arrows.every((a) => a.layerId === 'layer-annotations'), arrows.length);
+  check('extract: only ships, no route arrows', page.objects.every((o) => o.type === 'ship'));
   check('extract: ships stay inside the map', placed.every((o) => o.x >= -500 && o.x <= 42500 && o.y >= -500 && o.y <= 42500));
-  console.log(`  info  ${placed.length} ships (${sunk.length} sunk), ${arrows.length} arrows`);
+  console.log(`  info  ${placed.length} ships (${sunk.length} sunk)`);
 }
 
 /**
