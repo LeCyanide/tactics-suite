@@ -432,6 +432,7 @@ async function testRealTimeline(check: (l: string, c: boolean, d?: unknown) => v
   check('extract: sunk ships are black and say when they sank', sunk.length > 0 && sunk.every((o) => o.iconColor === '#000000'), sunk.length);
   check('extract: unknown ships are listed, not dropped', unmatched.length === new Set(placed.map((o) => o.shipName)).size - 1 && page.notes.includes('Not in the ship database'));
   check('extract: only ships, no route arrows', page.objects.every((o) => o.type === 'ship'));
+  check('extract: headings are whole degrees in 0..359', placed.every((o) => Number.isInteger(o.rotation) && o.rotation >= 0 && o.rotation < 360));
   check('extract: ships stay inside the map', placed.every((o) => o.x >= -500 && o.x <= 42500 && o.y >= -500 && o.y <= 42500));
   console.log(`  info  ${placed.length} ships (${sunk.length} sunk)`);
 }

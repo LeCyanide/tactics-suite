@@ -78,7 +78,8 @@ export function extractPage(input: ExtractInput): ExtractResult {
           ...createShipObject({ id: '', name, nation: '', class: shipClass, tier: 0 }, toWorld(end), team?.id ?? null),
           shipId: null,
         };
-    obj.rotation = yawToDegrees(end.yaw);
+    // Whole degrees in 0..359, as the heading field shows them.
+    obj.rotation = ((Math.round(yawToDegrees(end.yaw)) % 360) + 360) % 360;
     if (sunk) {
       obj.iconColor = SUNK_COLOR;
       obj.note = `sunk ${clock(path.diedAt!)}`;

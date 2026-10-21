@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
-import { ChevronRight, Database, Palette, Radar as RadarIcon, Save, Search, Trash2 } from 'lucide-react';
+import { ChevronRight, Database, Lock, LockOpen, Palette, Radar as RadarIcon, RotateCcw, Save, Search, Trash2 } from 'lucide-react';
 import {
   CHARACTERISTICS,
   SHIP_CLASSES,
@@ -476,7 +476,24 @@ function ShipPropertiesPanels({ obj }: { obj: ShipObject }) {
 
   return (
     <>
-      <Panel title={obj.shipName} storageKey="shipMain">
+      <Panel
+        title={obj.shipName}
+        storageKey="shipMain"
+        actions={
+          <>
+            <button
+              className={`icon-btn${obj.locked ? ' active' : ''}`}
+              title={obj.locked ? 'Unlock ship' : 'Lock ship'}
+              onClick={() => update({ locked: !obj.locked })}
+            >
+              {obj.locked ? <Lock size={12} /> : <LockOpen size={12} />}
+            </button>
+            <button className="icon-btn danger" title="Delete ship" onClick={() => s().deleteSelection()}>
+              <Trash2 size={12} />
+            </button>
+          </>
+        }
+      >
         <div className="faint mono" style={{ fontSize: 10.5, marginBottom: 6 }}>
           {SHIP_CLASS_LABEL[obj.shipClass]} · Tier {obj.tier} · {ship?.nation ?? 'Unknown'}
         </div>
@@ -525,36 +542,23 @@ function ShipPropertiesPanels({ obj }: { obj: ShipObject }) {
             value={obj.iconColor ?? team?.color ?? NEUTRAL_ICON_COLOR}
             onChange={(v) => update({ iconColor: v })}
           />
-          {obj.iconColor && (
-            <Tip label="Follow the team colour again" side="bottom">
-              <button className="btn sm" onClick={() => update({ iconColor: undefined })}>
-                Team
-              </button>
-            </Tip>
+          {(obj.opacity !== 1 || obj.iconColor) && (
+            <button
+              className="icon-btn"
+              title="Reset to the team default: team colour, full opacity"
+              onClick={() => update(STANDARD_LOOK)}
+            >
+              <RotateCcw size={13} />
+            </button>
           )}
         </Field>
         <Field label="Opacity">
           <Slider value={obj.opacity} onChange={(v) => update({ opacity: v })} />
         </Field>
-        {(obj.opacity !== 1 || obj.iconColor) && (
-          <Tip label="Full opacity and the team colour, as a freshly placed ship" side="bottom">
-            <button className="btn sm" style={{ width: '100%', marginTop: 4 }} onClick={() => update(STANDARD_LOOK)}>
-              Standard look
-            </button>
-          </Tip>
-        )}
 
-        <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
-          <button className="btn sm" style={{ flex: 1 }} onClick={() => update({ locked: !obj.locked })}>
-            {obj.locked ? 'Unlock' : 'Lock'}
-          </button>
-          <button className="btn sm" style={{ flex: 1 }} onClick={() => s().duplicateSelection()}>
-            Duplicate
-          </button>
-          <button className="btn sm danger" onClick={() => s().deleteSelection()}>
-            <Trash2 size={12} />
-          </button>
-        </div>
+        <button className="btn sm" style={{ width: '100%', marginTop: 6 }} onClick={() => s().duplicateSelection()}>
+          Duplicate
+        </button>
       </Panel>
 
       {/* Range rings, per ship --------------------------------------- */}
