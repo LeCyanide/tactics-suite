@@ -904,6 +904,7 @@ export default function MapCanvas() {
               allies={overlay.allies}
               enemies={overlay.enemies}
               unique={overlay.unique}
+              only={overlay.only}
               opacity={overlay.opacity}
               inv={inv}
             />

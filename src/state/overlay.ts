@@ -25,10 +25,12 @@ interface OverlayState {
   enemies: boolean;
   /** Each ship gets its own colour instead of its team's, to tell trails apart. */
   unique: boolean;
+  /** Entity id of the one ship to show, or null for every ship. */
+  only: number | null;
 
   show(id: string): Promise<void>;
   clear(): void;
-  set(patch: Partial<Pick<OverlayState, 'until' | 'opacity' | 'allies' | 'enemies' | 'unique'>>): void;
+  set(patch: Partial<Pick<OverlayState, 'until' | 'opacity' | 'allies' | 'enemies' | 'unique' | 'only'>>): void;
 }
 
 export const useOverlayStore = create<OverlayState>((set, get) => ({
@@ -40,9 +42,10 @@ export const useOverlayStore = create<OverlayState>((set, get) => ({
   allies: true,
   enemies: true,
   unique: false,
+  only: null,
 
   async show(id) {
-    set({ replayId: id, paths: null, load: { phase: 'loading', frame: 0, total: 1 } });
+    set({ replayId: id, paths: null, only: null, load: { phase: 'loading', frame: 0, total: 1 } });
     // A replay that is not baked yet bakes now; show how far along it is.
     const off = window.api.replay.onProgress((e) => {
       if (get().replayId === id && e.t === 'progress') set({ load: { phase: 'loading', frame: e.frame, total: e.total } });
@@ -60,7 +63,7 @@ export const useOverlayStore = create<OverlayState>((set, get) => ({
   },
 
   clear() {
-    set({ replayId: null, paths: null, load: { phase: 'idle' } });
+    set({ replayId: null, paths: null, only: null, load: { phase: 'idle' } });
   },
 
   set(patch) {

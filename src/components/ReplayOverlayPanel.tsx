@@ -30,6 +30,14 @@ export function ReplayOverlayPanel() {
     [archive, space],
   );
 
+  const ships = useMemo(
+    () =>
+      [...(o.paths?.paths ?? [])].sort(
+        (a, b) => Number(b.ally) - Number(a.ally) || (a.shipName ?? '').localeCompare(b.shipName ?? ''),
+      ),
+    [o.paths],
+  );
+
   if (mode !== 'tactics' || !page || status?.available === false) return null;
 
   const onOtherMap = o.paths && o.paths.spaceName !== space;
@@ -88,6 +96,21 @@ export function ReplayOverlayPanel() {
               format={formatClock}
               onChange={(until) => o.set({ until })}
             />
+          </Field>
+          <Field label="Ship">
+            <select
+              style={{ flex: 1, minWidth: 0 }}
+              value={o.only ?? ''}
+              onChange={(e) => o.set({ only: e.target.value ? Number(e.target.value) : null })}
+            >
+              <option value="">All ships</option>
+              {ships.map((p) => (
+                <option key={p.entityId} value={p.entityId}>
+                  {p.ally ? 'Ally' : 'Enemy'} · {p.shipName ?? '?'}
+                  {p.playerName ? ` (${p.playerName})` : ''}
+                </option>
+              ))}
+            </select>
           </Field>
           <Field label="Opacity">
             <Slider value={o.opacity} min={0.1} max={1} onChange={(opacity) => o.set({ opacity })} />

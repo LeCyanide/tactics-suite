@@ -14,7 +14,8 @@
 import fs from 'node:fs/promises';
 
 import { ReplayTimeline, TimelineFormatError, cssColor } from '../src/replay/timeline';
-import { extractPaths, lastIndexAt } from '../src/replay/paths';
+import { extractPaths, lastIndexAt, type ShipPath } from '../src/replay/paths';
+import { DISTINCT_COLORS, colorDistance, distinctStyles } from '../src/replay/colors';
 
 /** Minimal little-endian writer, so the fixture shares no code with the reader. */
 class W {
@@ -310,6 +311,24 @@ export async function testReplayTimeline(check: (l: string, c: boolean, d?: unkn
     lastIndexAt(pts, -1) === -1 && lastIndexAt(pts, 0) === 0 && lastIndexAt(pts, 3) === 2 && lastIndexAt(pts, 9) === 3,
   );
 
+  // Unique colours: crowded trails get far-apart colours, and every style is used once.
+  const line = (id: number, x0: number, y: number): ShipPath => ({
+    entityId: id,
+    ally: true,
+    color: null,
+    diedAt: null,
+    points: Array.from({ length: 30 }, (_, i) => ({ t: i, pos: { x: x0 + i, y }, yaw: 0 })),
+  });
+  const crowd = Array.from({ length: 24 }, (_, i) => line(i, 0, 100 + i)); // all within reach of each other
+  const crowdStyles = distinctStyles(crowd, 768);
+  check(
+    'colours: 24 crowded ships get 24 different styles',
+    new Set(crowdStyles.map((st) => `${st.color}:${st.dashed}`)).size === 24,
+  );
+  const pair = distinctStyles([line(1, 0, 100), line(2, 0, 102)], 768);
+  const best = Math.max(...DISTINCT_COLORS.map((c) => colorDistance(DISTINCT_COLORS[0], c)));
+  check('colours: two neighbours are as far apart as the first colour allows', colorDistance(pair[0]!.color, pair[1]!.color) === best, pair);
+
   await testRealTimeline(check);
 }
 
@@ -385,6 +404,12 @@ async function testRealTimeline(check: (l: string, c: boolean, d?: unknown) => v
   );
   check('real paths: extracted in under half a second', ms < 500, ms);
   console.log(`  info  ${op.paths.length} paths in ${ms} ms`);
+
+  const t0 = performance.now();
+  const styles = distinctStyles(op.paths, op.minimapSize);
+  const styleMs = Math.round(performance.now() - t0);
+  check('real colours: every ship has its own style', new Set(styles.map((st) => `${st.color}:${st.dashed}`)).size === op.paths.length);
+  check('real colours: assigned in under half a second', styleMs < 500, styleMs);
 }
 
 /**
