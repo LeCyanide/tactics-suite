@@ -21,6 +21,8 @@ import { useReplayStore } from '@/state/replay';
 import { useAsset, useAssetState } from '@/state/assets';
 import { MapBackground } from './MapBackground';
 import { ReplayLayer } from './ReplayLayer';
+import { OverlayLayer } from './OverlayLayer';
+import { useOverlayStore } from '@/state/overlay';
 import { CapZones } from './CapZones';
 import { ObjectNode, flatten } from './ObjectNode';
 import { ShipLabel, ShipNode, ShipRanges, attachmentName } from './ShipNode';
@@ -99,6 +101,7 @@ export default function MapCanvas() {
   const replayView = useReplayStore((s) => s.view);
   const replayOpacity = useReplayStore((s) => s.opacity);
   const replayTimeline = replayMode === 'replay' ? replayTimelineRaw : null;
+  const overlay = useOverlayStore();
 
   const [size, setSize] = useState({ width: 800, height: 600 });
   const [draft, setDraft] = useState<DraftState>(null);
@@ -886,6 +889,22 @@ export default function MapCanvas() {
               options={replayView}
               inv={inv}
               opacity={replayOpacity}
+            />
+          </Layer>
+        )}
+
+        {/* Replay overlay: a battle's paths under the plan, on the map it was
+            played on only, and never in an export. */}
+        {!inReplay && !exportOpts && overlay.paths && overlay.paths.spaceName === map?.spaceName && (
+          <Layer listening={false}>
+            <OverlayLayer
+              data={overlay.paths}
+              map={map}
+              until={overlay.until}
+              allies={overlay.allies}
+              enemies={overlay.enemies}
+              opacity={overlay.opacity}
+              inv={inv}
             />
           </Layer>
         )}

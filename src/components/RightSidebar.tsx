@@ -36,6 +36,7 @@ import { CLASS_COLORS } from '@/canvas/shipGlyphs';
 import { useAsset } from '@/state/assets';
 import { canvasApi } from '@/canvas/canvasBridge';
 import { ClassIcon } from './common/ClassIcon';
+import { ReplayOverlayPanel } from './ReplayOverlayPanel';
 import { gridRef } from '@/lib/util';
 import { filterShips, limitUse, type Availability } from '@/lib/shipFilters';
 
@@ -75,6 +76,7 @@ export function RightSidebar() {
         {selected.length === 1 && <SingleObjectPanels obj={selected[0]} />}
         {selected.length > 1 && <MultiSelectionPanel objects={selected} />}
         <ToolVariantPanel />
+        <ReplayOverlayPanel />
         <ShipBrowserPanel />
       </div>
     </div>

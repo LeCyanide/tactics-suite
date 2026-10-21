@@ -103,6 +103,8 @@ const library = {
     ['25_sea_hope', '17.09.2026 21:35:32', 'PISB518-Vittorio-Veneto', null, 'baked'],
     ['40_Okinawa', '16.08.2026 22:30:11', 'PASC020-Des-Moines-1948', null, 'unplayable'],
     ['22_tierra_del_fuego', '16.08.2026 22:02:44', 'PVSB010-Libertad', null, 'unplayable'],
+    // The fixture's own battle, so the replay overlay has something to offer on Okinawa.
+    ['40_Okinawa', '15.08.2026 21:10:05', 'PASC020-Des-Moines-1948', null, 'baked'],
   ].map(([map, dateTime, vehicle, collection, state], i) => {
     const name = `${dateTime!.slice(0, 10)}_${vehicle}_${map}.wowsreplay`;
     return {

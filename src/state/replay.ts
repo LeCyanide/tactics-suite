@@ -366,24 +366,7 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
     });
 
     try {
-      let timeline: ReplayTimeline;
-      try {
-        timeline = new ReplayTimeline(await window.api.replay.load({ id }));
-      } catch (err) {
-        // Stored timeline in an unsupported format: rebake it. Only works while
-        // the patch is installed; otherwise the library reports why.
-        if (!(err instanceof TimelineFormatError)) throw err;
-        timeline = new ReplayTimeline(await window.api.replay.load({ id, rebake: true }));
-      }
-      if (timeline.lacksPlayers && !rebakedForPlayers.has(id)) {
-        rebakedForPlayers.add(id);
-        // No player data: rebake once. If that fails, keep the nameless timeline.
-        try {
-          timeline = new ReplayTimeline(await window.api.replay.load({ id, rebake: true }));
-        } catch {
-          /* keep what we have */
-        }
-      }
+      const timeline = await loadTimeline(id);
       if (get().selectedId !== id) return;
       set({ timeline, frame: firstActiveFrame(timeline), bake: { phase: 'idle' } });
     } catch (err) {
@@ -531,6 +514,29 @@ function reportImport(outcome: {
 }
 
 /** Formats a battle clock as m:ss. */
+/** Loads a library replay's timeline, baking or rebaking it when needed. */
+export async function loadTimeline(id: string): Promise<ReplayTimeline> {
+  let timeline: ReplayTimeline;
+  try {
+    timeline = new ReplayTimeline(await window.api.replay.load({ id }));
+  } catch (err) {
+    // Stored timeline in an unsupported format: rebake it. Only works while
+    // the patch is installed; otherwise the library reports why.
+    if (!(err instanceof TimelineFormatError)) throw err;
+    timeline = new ReplayTimeline(await window.api.replay.load({ id, rebake: true }));
+  }
+  if (timeline.lacksPlayers && !rebakedForPlayers.has(id)) {
+    rebakedForPlayers.add(id);
+    // No player data: rebake once. If that fails, keep the nameless timeline.
+    try {
+      timeline = new ReplayTimeline(await window.api.replay.load({ id, rebake: true }));
+    } catch {
+      /* keep what we have */
+    }
+  }
+  return timeline;
+}
+
 export function formatClock(seconds: number): string {
   const s = Math.max(0, Math.floor(seconds));
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;

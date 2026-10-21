@@ -14,6 +14,7 @@
 import fs from 'node:fs/promises';
 
 import { ReplayTimeline, TimelineFormatError, cssColor } from '../src/replay/timeline';
+import { extractPaths, lastIndexAt } from '../src/replay/paths';
 
 /** Minimal little-endian writer, so the fixture shares no code with the reader. */
 class W {
@@ -293,6 +294,22 @@ export async function testReplayTimeline(check: (l: string, c: boolean, d?: unkn
     'clipped frames',
   );
 
+  // Overlay paths: the fixture's one ship is the recording player, seen on the minimap.
+  const op = extractPaths(t);
+  const own = op.paths[0];
+  check(
+    'paths: the self ship is one ally path with its position',
+    op.paths.length === 1 && own?.ally === true && own.points.length === 1 && own.points[0]!.pos.x === 100.5,
+    op.paths,
+  );
+  check('paths: self keeps no tint of its own', own?.color === null, own?.color);
+  check('paths: carry the map for matching', op.spaceName === 'spaces/40_Okinawa' && op.minimapSize === 768, op.spaceName);
+  const pts = [0, 1, 2, 5].map((t) => ({ t, pos: { x: 0, y: 0 } }));
+  check(
+    'paths: lastIndexAt finds the last point at or before a time',
+    lastIndexAt(pts, -1) === -1 && lastIndexAt(pts, 0) === 0 && lastIndexAt(pts, 3) === 2 && lastIndexAt(pts, 9) === 3,
+  );
+
   await testRealTimeline(check);
 }
 
@@ -357,6 +374,17 @@ async function testRealTimeline(check: (l: string, c: boolean, d?: unknown) => v
   console.log(`  info  ${records} records, ${kinds.size} kinds: ${[...kinds].sort().join(', ')}`);
 
   checkHeadings(check, t);
+
+  const started = performance.now();
+  const op = extractPaths(t);
+  const ms = Math.round(performance.now() - started);
+  check('real paths: both teams present', op.paths.some((p) => p.ally) && op.paths.some((p) => !p.ally), op.paths.length);
+  check(
+    'real paths: points in time order',
+    op.paths.every((p) => p.points.every((q, i) => i === 0 || q.t >= p.points[i - 1]!.t)),
+  );
+  check('real paths: extracted in under half a second', ms < 500, ms);
+  console.log(`  info  ${op.paths.length} paths in ${ms} ms`);
 }
 
 /**
