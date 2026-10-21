@@ -108,7 +108,7 @@ export function PageTabs() {
       </Tip>
       <span className="page-tabs-spacer" />
       {tabs.length > 1 && (
-        <Tip label="Close the other tabs (the pages stay in the project)" side="bottom">
+        <Tip label="Multi-close all pages" side="bottom">
           <button className="page-tab-add" onClick={() => s().closeOtherTabs()}>
             <ListX size={14} />
           </button>

@@ -552,10 +552,6 @@ function ShipPropertiesPanels({ obj }: { obj: ShipObject }) {
         <Field label="Opacity">
           <Slider value={obj.opacity} onChange={(v) => update({ opacity: v })} />
         </Field>
-
-        <button className="btn sm" style={{ width: '100%', marginTop: 6 }} onClick={() => s().duplicateSelection()}>
-          Duplicate
-        </button>
       </Panel>
 
       {/* Range rings, per ship --------------------------------------- */}
