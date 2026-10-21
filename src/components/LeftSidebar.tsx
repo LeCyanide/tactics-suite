@@ -297,7 +297,7 @@ function PagesPanel() {
         <button
           className="icon-btn danger"
           title="Delete page"
-          onClick={(e) => { e.stopPropagation(); s().deletePage(page.id); }}
+          onClick={(e) => { e.stopPropagation(); void s().deletePage(page.id); }}
         >
           <Trash2 size={11} />
         </button>
@@ -489,7 +489,7 @@ function PageMenu({
       {item(LIST_END, 'No folder', () => s().placePage(page.id, null), page.folderId !== null)}
       <div className="ctx-sep" />
       {item('duplicate', 'Duplicate page', () => s().duplicatePage(page.id))}
-      {item('delete', 'Delete page', () => s().deletePage(page.id))}
+      {item('delete', 'Delete page', () => void s().deletePage(page.id))}
     </div>
   );
 }

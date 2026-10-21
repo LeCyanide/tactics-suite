@@ -50,6 +50,8 @@ const CREDIT_SIZE = { width: 96, height: 14 };
 const PING_MS = 620;
 /** How far behind the leading ring the second one follows, as a fraction of PING_MS. */
 const PING_TRAIL = 0.22;
+/** While the button is held on the water, a fresh ping follows the cursor this often. */
+const PING_DRAG_MS = 70;
 
 /** A click ping in flight. Purely a flash of feedback: never part of the plan. */
 interface Ping {
@@ -111,6 +113,8 @@ export default function MapCanvas() {
   const [menu, setMenu] = useState<ContextMenuState | null>(null);
   const [exportOpts, setExportOpts] = useState<ExportOptions | null>(null);
   const [pings, setPings] = useState<Ping[]>([]);
+  /** Time of the last ping while the button is held on empty water; null when not pinging. */
+  const pingDrag = useRef<number | null>(null);
 
   /**
    * The move in progress: the node under the pointer, and everything that
@@ -353,6 +357,7 @@ export default function MapCanvas() {
       if (onEmpty) {
         useStore.getState().clearSelection();
         ping(toWorld(pos));
+        pingDrag.current = performance.now();
       }
       return;
     }
@@ -421,7 +426,7 @@ export default function MapCanvas() {
     }
   };
 
-  const onMouseMove = () => {
+  const onMouseMove = (e: KonvaEventObject<MouseEvent>) => {
     const stage = stageRef.current;
     if (!stage) return;
     const pos = stage.getPointerPosition();
@@ -429,6 +434,17 @@ export default function MapCanvas() {
     const raw = toWorld(pos);
     setCursorWorld(raw);
     const world = snap(raw);
+
+    // A release outside the canvas never reaches onMouseUp, so check the button too.
+    if (pingDrag.current !== null && !(e.evt.buttons & 1)) pingDrag.current = null;
+    if (pingDrag.current !== null) {
+      const now = performance.now();
+      if (now - pingDrag.current >= PING_DRAG_MS) {
+        pingDrag.current = now;
+        ping(raw);
+      }
+      return;
+    }
 
     if (marquee) {
       setMarquee({ x: marquee.x, y: marquee.y, w: pos.x - marquee.x, h: pos.y - marquee.y });
@@ -479,8 +495,9 @@ export default function MapCanvas() {
    */
   const ping = (world: Vec2) => {
     const id = uid('ping-');
-    // Bounded so a drummed-on canvas cannot pile up animations.
-    setPings((prev) => [...prev.slice(-4), { id, x: world.x, y: world.y, colour: toolOptions.stroke.color }]);
+    // Bounded so a drummed-on canvas cannot pile up animations; a drag trail
+    // needs about PING_MS / PING_DRAG_MS of them alive at once.
+    setPings((prev) => [...prev.slice(-11), { id, x: world.x, y: world.y, colour: toolOptions.stroke.color }]);
   };
 
   const finishMarquee = (additive: boolean) => {
@@ -547,6 +564,7 @@ export default function MapCanvas() {
   };
 
   const onMouseUp = (e: KonvaEventObject<MouseEvent>) => {
+    pingDrag.current = null;
     if (marquee) {
       finishMarquee(e.evt.shiftKey);
       return;

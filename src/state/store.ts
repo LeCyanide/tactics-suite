@@ -194,7 +194,8 @@ interface Actions {
   addPageToFolder(page: Page, folderName: string): void;
   duplicatePage(id: ID): void;
   renamePage(id: ID, name: string): void;
-  deletePage(id: ID): void;
+  /** Asks first; the page goes only on a yes. */
+  deletePage(id: ID): Promise<void>;
   /** Steps a page among its own folder's pages, or along the top of the list. */
   reorderPage(id: ID, delta: number): void;
   /** Puts a page into a folder (null for none), in front of `beforeId` or at the end. */
@@ -829,12 +830,22 @@ export const useStore = create<Store>((set, get) => {
       });
     },
 
-    deletePage(id) {
+    async deletePage(id) {
       const { project } = get();
       if (!project || project.pages.length <= 1) {
         get().toast('A project needs at least one page', 'error');
         return;
       }
+      const page = project.pages.find((p) => p.id === id);
+      if (!page) return;
+      const ok = await window.api.dialog.confirm({
+        title: 'Delete page',
+        message: `Delete "${page.name}"?`,
+        detail: 'Everything drawn on it goes with it. Undo (Ctrl+Z) brings it back.',
+        confirmLabel: 'Delete',
+        danger: true,
+      });
+      if (!ok) return;
       commit((draft) => {
         const at = draft.pages.findIndex((p) => p.id === id);
         const tab = draft.openPageIds.indexOf(id);
