@@ -95,6 +95,12 @@ export function ReplayOverlayPanel() {
           <div style={{ display: 'flex', gap: 10 }}>
             <Check label="Allies" checked={o.allies} onChange={(allies) => o.set({ allies })} />
             <Check label="Enemies" checked={o.enemies} onChange={(enemies) => o.set({ enemies })} />
+            <Check
+              label="Unique colours"
+              title="Give every ship its own colour, to tell the trails apart"
+              checked={o.unique}
+              onChange={(unique) => o.set({ unique })}
+            />
           </div>
         </>
       )}

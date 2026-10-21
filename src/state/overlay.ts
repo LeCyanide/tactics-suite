@@ -23,10 +23,12 @@ interface OverlayState {
   opacity: number;
   allies: boolean;
   enemies: boolean;
+  /** Each ship gets its own colour instead of its team's, to tell trails apart. */
+  unique: boolean;
 
   show(id: string): Promise<void>;
   clear(): void;
-  set(patch: Partial<Pick<OverlayState, 'until' | 'opacity' | 'allies' | 'enemies'>>): void;
+  set(patch: Partial<Pick<OverlayState, 'until' | 'opacity' | 'allies' | 'enemies' | 'unique'>>): void;
 }
 
 export const useOverlayStore = create<OverlayState>((set, get) => ({
@@ -37,6 +39,7 @@ export const useOverlayStore = create<OverlayState>((set, get) => ({
   opacity: 0.6,
   allies: true,
   enemies: true,
+  unique: false,
 
   async show(id) {
     set({ replayId: id, paths: null, load: { phase: 'loading', frame: 0, total: 1 } });

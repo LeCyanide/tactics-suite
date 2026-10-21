@@ -30,12 +30,14 @@ interface Props {
   until: number;
   allies: boolean;
   enemies: boolean;
+  /** Give each ship its own colour instead of its team's. */
+  unique: boolean;
   opacity: number;
   /** Inverse camera scale, so lines and icons keep a constant on-screen size. */
   inv: number;
 }
 
-export const OverlayLayer = memo(function OverlayLayer({ data, map, until, allies, enemies, opacity, inv }: Props) {
+export const OverlayLayer = memo(function OverlayLayer({ data, map, until, allies, enemies, unique, opacity, inv }: Props) {
   const k = useMemo(() => {
     const w = map?.widthMeters || data.spaceSize * 30;
     return w / data.minimapSize;
@@ -47,11 +49,11 @@ export const OverlayLayer = memo(function OverlayLayer({ data, map, until, allie
       // A gap longer than this means the ship went unseen; the line breaks there.
       const maxGap = data.stepSeconds * 1.5;
       const shown: { path: ShipPath; last: number; color: number }[] = [];
-      for (const path of data.paths) {
-        if (path.ally ? !allies : !enemies) continue;
+      data.paths.forEach((path, i) => {
+        if (path.ally ? !allies : !enemies) return;
         const last = lastIndexAt(path.points, until);
-        if (last >= 0) shown.push({ path, last, color: path.color ?? allyColor });
-      }
+        if (last >= 0) shown.push({ path, last, color: unique ? uniqueColor(i) : (path.color ?? allyColor) });
+      });
 
       ctx.save();
       ctx.setAttr('lineCap', 'round');
@@ -97,14 +99,30 @@ export const OverlayLayer = memo(function OverlayLayer({ data, map, until, allie
         if (path.shipName) {
           // Names sit a step behind the icons: readable, but quieter than the plan's own labels.
           ctx.setAttr('globalAlpha', alpha * 0.75);
-          ctx.setAttr('fillStyle', '#c9d3de');
+          ctx.setAttr('fillStyle', unique ? cssColor(color) : '#c9d3de');
           text(ctx, path.shipName, ex, ey + SHIP_PX * inv * 0.6, nameSize, 'center', 'top');
         }
       }
       ctx.restore();
     },
-    [data, until, allies, enemies, inv, k],
+    [data, until, allies, enemies, unique, inv, k],
   );
 
   return <Shape listening={false} opacity={opacity} perfectDrawEnabled={false} sceneFunc={sceneFunc} />;
 });
+
+/**
+ * The i-th ship's own colour. Hues step by the golden angle, so ships next to
+ * each other in the list never get similar colours; saturation and lightness
+ * stay fixed so every trail reads equally well on dark water.
+ */
+export function uniqueColor(i: number): number {
+  const h = (i * 137.508) % 360;
+  const s = 0.75;
+  const l = 0.6;
+  const f = (n: number) => {
+    const k = (n + h / 30) % 12;
+    return Math.round(255 * (l - s * Math.min(l, 1 - l) * Math.max(-1, Math.min(k - 3, 9 - k, 1))));
+  };
+  return (f(0) << 16) | (f(8) << 8) | f(4);
+}
