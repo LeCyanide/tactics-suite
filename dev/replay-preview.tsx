@@ -48,7 +48,7 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [frame, setFrame] = useState(START_FRAME);
   const [playing, setPlaying] = useState(false);
-  const [speed, setSpeed] = useState(1);
+  const [speed, setSpeed] = useState(8);
   const [options, setOptions] = useState<ReplayViewOptions>(() => {
     const next = { ...DEFAULT_REPLAY_VIEW };
     for (const key of OFF) if (key in next) next[key as keyof ReplayViewOptions] = false;

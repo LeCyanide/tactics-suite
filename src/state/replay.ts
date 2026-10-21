@@ -30,7 +30,7 @@ export type BakeState =
  * are never shown, so a single salvo's tracers can pass unseen. That is the
  * right trade for skimming to the part of a battle worth watching.
  */
-export const SPEEDS = [0.25, 0.5, 1, 2, 4, 8, 10, 20] as const;
+export const SPEEDS = [1, 4, 8, 10, 20] as const;
 
 /**
  * Bake cadence, in frames per second of game time.
@@ -123,7 +123,6 @@ interface ReplayState {
   pause(): void;
   togglePlay(): void;
   seek(frame: number): void;
-  step(delta: number): void;
   setSpeed(speed: number): void;
   setView(patch: Partial<ReplayViewOptions>): void;
   setOpacity(value: number): void;
@@ -154,7 +153,7 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
   bake: { phase: 'idle' },
   frame: 0,
   playing: false,
-  speed: 1,
+  speed: 8,
   view: DEFAULT_REPLAY_VIEW,
   opacity: 1,
 
@@ -423,11 +422,6 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
     const t = get().timeline;
     if (!t) return;
     set({ frame: Math.max(0, Math.min(t.frameCount - 1, Math.round(frame))) });
-  },
-
-  step(delta) {
-    get().pause();
-    get().seek(get().frame + delta);
   },
 
   setSpeed(speed) {
