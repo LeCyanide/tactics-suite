@@ -16,6 +16,8 @@ import { fileURLToPath } from 'node:url';
 
 import { parseShipData, serializeShips } from '../src/lib/shipImport';
 import { foldForSearch } from '../src/lib/util';
+import { matchShip } from '../src/lib/shipMatch';
+import type { Ship } from '../src/types/model';
 import { allowedBy, filterShips, hasRadar, hasSmoke, inScope, limitUse, type ShipFilter } from '../src/lib/shipFilters';
 import { mergeKey, shipRangeKm } from '../src/state/store';
 import * as db from '../electron/storage/db';
@@ -435,6 +437,27 @@ async function testTempSweep(): Promise<void> {
   await fs.rm(root, { recursive: true, force: true });
 }
 
+async function testShipMatch(): Promise<void> {
+  console.log('\nreplay ship names');
+  const db = [
+    'Vittorio Veneto', 'Vittorio Cuniberti', 'Almirante Irízar', 'Almirante Oquendo', 'Alberico da Barbiano',
+    'Ruggiero di Lauria', 'Prins van Oranje', 'Prins van Oranje Golden', 'San Martín', 'Napoli', 'Napoli B',
+    'Bismarck', 'AL Bismarck', 'Thrasher', 'Thrasher',
+  ].map((name, i) => ({ id: `s${i}`, name, nation: 'x', class: i === 14 ? 'BB' : 'CA', tier: 10 }) as Ship);
+  const found = (replay: string, cls?: 'CA' | 'BB') => matchShip(replay, db, cls)?.name ?? null;
+  check('match: "V. Veneto" is Vittorio Veneto, not Cuniberti', found('V. Veneto') === 'Vittorio Veneto');
+  check('match: "Almte. Irízar" is Almirante Irízar', found('Almte. Irízar') === 'Almirante Irízar');
+  check('match: "A. da Barbiano" is Alberico da Barbiano', found('A. da Barbiano') === 'Alberico da Barbiano');
+  check('match: "R. Lauria" is Ruggiero di Lauria', found('R. Lauria') === 'Ruggiero di Lauria');
+  check('match: "Pr. van Oranje" is not the Golden one', found('Pr. van Oranje') === 'Prins van Oranje');
+  check('match: a non-breaking space still matches', found('San Martín') === 'San Martín');
+  check('match: "Napoli" is not "Napoli B"', found('Napoli') === 'Napoli');
+  check('match: "Bismarck" is not "AL Bismarck"', found('Bismarck') === 'Bismarck');
+  check('match: a name twice in the DB is settled by class', matchShip('Thrasher', db, 'BB')?.id === 's14');
+  check('match: an unknown ship is null', found('Yamato') === null);
+  check('match: a bracketed variant tag is ignored', found('Napoli (Scope)') === 'Napoli');
+}
+
 async function testNameFolding(): Promise<void> {
   console.log('\nname folding');
 
@@ -602,6 +625,7 @@ async function main(): Promise<void> {
   await testShipFilters();
   await testStoreMigration();
   await testNameFolding();
+  await testShipMatch();
   await testPackage();
   await testExportDestinations();
   await testTempSweep();

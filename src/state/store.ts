@@ -190,6 +190,8 @@ interface Actions {
   moveTab(id: ID, index: number): void;
   /** Adds a page to `folderId`, or next to the current page when none is given. */
   addPage(name?: string, folderId?: ID | null): void;
+  /** Adds a ready-made page (a replay extraction) to the named folder, making it if needed, and opens it. */
+  addPageToFolder(page: Page, folderName: string): void;
   duplicatePage(id: ID): void;
   renamePage(id: ID, name: string): void;
   deletePage(id: ID): void;
@@ -777,6 +779,25 @@ export const useStore = create<Store>((set, get) => {
         settlePages(draft);
       });
       set({ selection: [] });
+    },
+
+    addPageToFolder(page, folderName) {
+      if (!get().project) return;
+      commit((draft) => {
+        let folder = draft.pageFolders.find((f) => f.name === folderName);
+        if (!folder) {
+          folder = { id: uid('folder-'), name: folderName };
+          draft.pageFolders.push(folder);
+          draft.pageLayout.push(folder.id);
+        }
+        page.folderId = folder.id;
+        draft.pages.push(page);
+        openTab(draft, page.id);
+        draft.activePageId = page.id;
+        settlePages(draft);
+      });
+      set({ selection: [] });
+      get().requestFit();
     },
 
     duplicatePage(id) {
