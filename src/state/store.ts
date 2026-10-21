@@ -187,6 +187,8 @@ interface Actions {
   setActivePage(id: ID): void;
   /** Closes a page's tab. The page itself stays in the project. */
   closeTab(id: ID): void;
+  /** Closes every tab but the active page's. The pages stay in the project. */
+  closeOtherTabs(): void;
   /** Moves a tab to `index` along the tab bar; the page list is left alone. */
   moveTab(id: ID, index: number): void;
   /** Adds a page to `folderId`, or next to the current page when none is given. */
@@ -751,6 +753,13 @@ export const useStore = create<Store>((set, get) => {
       setView({ ...project, openPageIds, activePageId });
       set({ selection: [] });
       get().requestFit();
+    },
+
+    closeOtherTabs() {
+      const { project } = get();
+      if (!project?.activePageId || project.openPageIds.length <= 1) return;
+      // Tabs are a view, not an edit: no undo step, no "unsaved", as closeTab.
+      setView({ ...project, openPageIds: [project.activePageId] });
     },
 
     moveTab(id, index) {

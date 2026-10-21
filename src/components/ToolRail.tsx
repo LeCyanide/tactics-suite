@@ -2,6 +2,7 @@ import {
   ArrowUpRight,
   Circle,
   Hash,
+  ListX,
   MousePointer2,
   Pencil,
   Pin,
@@ -43,6 +44,7 @@ export function ToolRail() {
   const setTool = useStore((s) => s.setTool);
   const options = useStore((s) => s.toolOptions);
   const hasProject = useStore((s) => !!s.project);
+  const openTabs = useStore((s) => s.project?.openPageIds.length ?? 0);
 
   const button = (t: ToolDef) => {
     const Icon = t.icon;
@@ -93,6 +95,16 @@ export function ToolRail() {
 
   return (
     <div className="toolrail">
+      <Tip label="Close all other page tabs — the pages stay in the list" side="left">
+        <button
+          className="tool-btn"
+          disabled={openTabs <= 1}
+          onClick={() => useStore.getState().closeOtherTabs()}
+        >
+          <ListX size={15} />
+        </button>
+      </Tip>
+      <div className="tool-sep" />
       {GROUPS[0].map(button)}
       <div className="tool-sep" />
       {GROUPS[1].map(button)}
