@@ -657,22 +657,15 @@ export interface Project {
   teams: Team[];
   /** Ship restrictions for this project, offered as a filter wherever ships are listed. */
   rulesets: ShipRuleset[];
-  /** Grid snapping and other editor prefs stored with the project. */
+  /** Editor prefs stored with the project. */
   settings: ProjectSettings;
 }
 
 export interface ProjectSettings {
-  snapToGrid: boolean;
-  /** Snap step in metres. */
-  snapStep: number;
-  shipIconSize: number;
   defaultTeamId: ID | null;
 }
 
 export const DEFAULT_PROJECT_SETTINGS: ProjectSettings = {
-  snapToGrid: false,
-  snapStep: 500,
-  shipIconSize: 30,
   defaultTeamId: null,
 };
 
@@ -700,6 +693,8 @@ export interface AppSettings {
   recentProjectIds: ID[];
   accentColor: string;
   uiScale: number;
+  /** Multiplier on every ship icon the map draws (planner, replay, overlay). */
+  shipIconScale: number;
   autosave: boolean;
   autosaveIntervalMs: number;
   backupOnSave: boolean;
@@ -730,6 +725,7 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   recentProjectIds: [],
   accentColor: '#4ea3ff',
   uiScale: 1,
+  shipIconScale: 1,
   autosave: true,
   autosaveIntervalMs: 4000,
   backupOnSave: true,

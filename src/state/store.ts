@@ -598,8 +598,8 @@ export const useStore = create<Store>((set, get) => {
       });
       // Keep only known project settings.
       doc.settings = { ...clone(DEFAULT_PROJECT_SETTINGS), ...(doc.settings ?? {}) };
-      for (const key of Object.keys(doc.settings) as (keyof typeof doc.settings)[]) {
-        if (!(key in DEFAULT_PROJECT_SETTINGS)) delete doc.settings[key];
+      for (const key of Object.keys(doc.settings)) {
+        if (!(key in DEFAULT_PROJECT_SETTINGS)) delete (doc.settings as unknown as Record<string, unknown>)[key];
       }
       doc.schemaVersion = SCHEMA_VERSION;
 

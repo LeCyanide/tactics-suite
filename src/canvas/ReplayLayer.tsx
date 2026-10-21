@@ -17,6 +17,7 @@ import { memo, useMemo } from 'react';
 import type Konva from 'konva';
 import { Shape } from 'react-konva';
 import type { GameMap } from '@/types/model';
+import { useStore } from '@/state/store';
 import {
   cssColor,
   type Px,
@@ -24,6 +25,7 @@ import {
   type ReplayTimeline,
   Visibility,
 } from '@/replay/timeline';
+import { hullLength } from './shipGlyphs';
 import { GLYPH_BOX, REPLAY_GLYPHS, classForSpecies, yawToDegrees } from './replayGlyphs';
 
 /** What the viewer draws. Each maps to a toggle in the replay sidebar. */
@@ -142,9 +144,10 @@ export const ReplayLayer = memo(function ReplayLayer({
     return { kx: w / timeline.minimapSize, ky: h / timeline.minimapSize };
   }, [map?.widthMeters, map?.heightMeters, timeline.spaceSize, timeline.minimapSize]);
 
+  const scale = useStore((s) => s.settings.shipIconScale);
   const sceneFunc = useMemo(
-    () => (ctx: Konva.Context) => paintFrame(ctx, { records, kx, ky, inv, options }),
-    [records, kx, ky, inv, options],
+    () => (ctx: Konva.Context) => paintFrame(ctx, { records, kx, ky, inv, options, scale }),
+    [records, kx, ky, inv, options, scale],
   );
 
   return <Shape listening={false} opacity={opacity} perfectDrawEnabled={false} sceneFunc={sceneFunc} />;
@@ -156,6 +159,7 @@ interface PaintArgs {
   ky: number;
   inv: number;
   options: ReplayViewOptions;
+  scale: number;
 }
 
 /**
@@ -166,13 +170,13 @@ interface PaintArgs {
  * here would mean re-deriving a z-order that already exists and is correct.
  */
 function paintFrame(ctx: Konva.Context, args: PaintArgs): void {
-  const { records, kx, ky, inv, options } = args;
+  const { records, kx, ky, inv, options, scale } = args;
   const x = (p: Px) => p.x * kx;
   const y = (p: Px) => p.y * ky;
   /** Radii arrive in minimap pixels; the map is square, so one axis is enough. */
   const r = (px: number) => px * kx;
 
-  const shipSize = SHIP_PX * inv;
+  const shipSize = SHIP_PX * inv * scale;
   const nameSize = NAME_PX * inv;
 
   /**
@@ -395,6 +399,7 @@ function paintFrame(ctx: Konva.Context, args: PaintArgs): void {
           alpha: 0.32,
           size: shipSize * 0.85,
           inv,
+          length: hullLength(scale),
         });
         break;
       }
@@ -412,6 +417,7 @@ function paintFrame(ctx: Konva.Context, args: PaintArgs): void {
           // Your own ship is drawn like any ally; a slight size bump marks it.
           size: shipSize * (rec.isSelf ? 1.08 : 1),
           inv,
+          length: hullLength(scale),
           // Self is flagged as a detected teammate too, but a rim saying "an
           // ally can see this" is noise on the ship you are looking out of.
           outline: !rec.isSelf && rec.isDetectedTeammate ? SPOTTED_OUTLINE : null,
@@ -469,6 +475,8 @@ interface ShipArgs {
   size: number;
   inv: number;
   outline?: string | null;
+  /** Lengthwise squash from `hullLength`; 1 draws the glyph as authored. */
+  length?: number;
 }
 
 /**
@@ -487,7 +495,7 @@ export function drawShip(ctx: Konva.Context, a: ShipArgs): void {
   ctx.translate(a.px, a.py);
   ctx.rotate((yawToDegrees(a.yaw) * Math.PI) / 180);
   const s = size / GLYPH_BOX;
-  ctx.scale(s, s);
+  ctx.scale(s, s * (a.length ?? 1));
   ctx.translate(-GLYPH_BOX / 2, -GLYPH_BOX / 2);
 
   ctx.beginPath();

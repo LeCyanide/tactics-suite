@@ -99,3 +99,13 @@ export const CLASS_COLORS: Record<ShipClass, string> = {
  */
 export const GLYPH_CONTRAST = '#080c11';
 export const GLYPH_CONTRAST_WIDTH = 1;
+
+/**
+ * Extra lengthwise squash for glyphs drawn away from 1x icon scale.
+ *
+ * The hulls are about twice as long as wide, so at small sizes they thin out
+ * into needles and at large sizes they read as overlong. Shortening them a
+ * little more than they narrow keeps them reading as ships; the large side
+ * gets a gentler squash. 0.85 at 0.5x, 1 at 1x, 0.9 at 1.5x.
+ */
+export const hullLength = (scale: number) => 1 - (scale < 1 ? 0.3 * (1 - scale) : 0.2 * (scale - 1));

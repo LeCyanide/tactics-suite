@@ -2,7 +2,8 @@ import { memo } from 'react';
 import { Circle, Group, Image as KonvaImage, Line, Path, Rect, Text } from 'react-konva';
 import type { CharacteristicFlags, RangeStyle, Ship, ShipObject, Team } from '@/types/model';
 import { RANGE_KEYS, DEFAULT_RANGE_STYLES } from '@/types/model';
-import { CLASS_GLYPHS, GLYPH_CONTRAST_WIDTH } from './shipGlyphs';
+import { CLASS_GLYPHS, GLYPH_CONTRAST_WIDTH, hullLength } from './shipGlyphs';
+import { useStore } from '@/state/store';
 import { shipRangeKm } from '@/state/store';
 import type { CanvasTheme } from '@/state/theme';
 import { withAlpha } from '@/lib/util';
@@ -73,6 +74,7 @@ export const ShipNode = memo(function ShipNode({
   // Team membership is the only thing that colours a ship. A ship with no
   // team falls back to neutral grey rather than to a class colour.
   const teamColor = obj.iconColor ?? team?.color ?? theme.neutral;
+  const length = hullLength(useStore((s) => s.settings.shipIconScale));
 
   return (
     <Group
@@ -104,7 +106,7 @@ export const ShipNode = memo(function ShipNode({
         {icon ? (
           <KonvaImage image={icon} width={size} height={size} offsetX={half} offsetY={half} listening={false} />
         ) : (
-          <Group scaleX={size / 24} scaleY={size / 24} offsetX={12} offsetY={12} listening={false}>
+          <Group scaleX={size / 24} scaleY={(size / 24) * length} offsetX={12} offsetY={12} listening={false}>
             <Path
               data={glyph.solid}
               fill={withAlpha(teamColor, 0.94)}

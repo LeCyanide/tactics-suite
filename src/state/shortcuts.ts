@@ -195,7 +195,7 @@ export function useShortcuts(): void {
 
       if (e.key.startsWith('Arrow')) {
         e.preventDefault();
-        const step = (e.shiftKey ? 10 : 1) * (s().project?.settings.snapStep ?? 500) * 0.2;
+        const step = e.shiftKey ? 1000 : 100; // metres
         const map: Record<string, [number, number]> = {
           ArrowLeft: [-step, 0],
           ArrowRight: [step, 0],

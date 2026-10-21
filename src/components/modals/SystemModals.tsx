@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Clipboard, HardDrive, ImageDown, Keyboard, RefreshCw, Scale, Send, Unplug } from 'lucide-react';
+import { Clipboard, HardDrive, ImageDown, Keyboard, RefreshCw, RotateCcw, Scale, Send, Unplug } from 'lucide-react';
 import { getActivePage, useStore } from '@/state/store';
 import { Check, Field, Modal, NumInput, SectionLabel, Slider, Tip } from '../common/ui';
 import { canvasApi, DEFAULT_EXPORT, type ExportOptions } from '@/canvas/canvasBridge';
@@ -183,7 +183,6 @@ export function ExportModal() {
 
 export function SettingsModal() {
   const settings = useStore((s) => s.settings);
-  const project = useStore((s) => s.project);
   const s = () => useStore.getState();
   const [info, setInfo] = useState<Record<string, string> | null>(null);
   const [usage, setUsage] = useState<{ path: string; bytes: number; files: number }[]>([]);
@@ -212,52 +211,29 @@ export function SettingsModal() {
           <option value="light">Light</option>
         </select>
       </Field>
+      <Field label="Ship icon scale">
+        <Slider
+          value={settings.shipIconScale}
+          min={0.5}
+          max={1.5}
+          step={0.05}
+          format={(v) => `${v.toFixed(2)}×`}
+          onChange={(v) => s().patchSettings({ shipIconScale: v })}
+        />
+        <button
+          className="btn sm ghost"
+          title="Reset to 1×"
+          aria-label="Reset ship icon scale"
+          disabled={settings.shipIconScale === 1}
+          onClick={() => s().patchSettings({ shipIconScale: 1 })}
+        >
+          <RotateCcw size={12} />
+        </button>
+      </Field>
 
       <SectionLabel>Share to Discord</SectionLabel>
       <BotAddress />
       <DiscordSection />
-
-      <SectionLabel>Editor</SectionLabel>
-      {project && (
-        <>
-          <Check
-            label="Snap to grid"
-            checked={project.settings.snapToGrid}
-            onChange={(v) =>
-              useStore.setState({ project: { ...project, settings: { ...project.settings, snapToGrid: v } }, dirty: true })
-            }
-          />
-          <Field label="Snap step">
-            <NumInput
-              value={project.settings.snapStep / 1000}
-              step={0.1}
-              min={0.05}
-              suffix="km"
-              onChange={(v) =>
-                useStore.setState({
-                  project: { ...project, settings: { ...project.settings, snapStep: v * 1000 } },
-                  dirty: true,
-                })
-              }
-            />
-          </Field>
-          <Field label="Ship icon size">
-            <Slider
-              value={project.settings.shipIconSize}
-              min={16}
-              max={72}
-              step={1}
-              format={(v) => `${Math.round(v)}px`}
-              onChange={(v) =>
-                useStore.setState({
-                  project: { ...project, settings: { ...project.settings, shipIconSize: v } },
-                  dirty: true,
-                })
-              }
-            />
-          </Field>
-        </>
-      )}
 
       <SectionLabel>Saving</SectionLabel>
       <Check label="Autosave while editing" checked={settings.autosave} onChange={(v) => s().patchSettings({ autosave: v })} />

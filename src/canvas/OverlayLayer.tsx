@@ -12,7 +12,9 @@ import type { GameMap } from '@/types/model';
 import { lastIndexAt, type ReplayPaths, type ShipPath } from '@/replay/paths';
 import { cssColor } from '@/replay/timeline';
 import { drawShip, text } from './ReplayLayer';
+import { hullLength } from './shipGlyphs';
 import { distinctStyles } from '@/replay/colors';
+import { useStore } from '@/state/store';
 
 /** Fallback ally green, as in `ReplayLayer`; the recording player's ship has no tint of its own. */
 const ALLY_COLOR = 0x4ce8aa;
@@ -46,6 +48,7 @@ export const OverlayLayer = memo(function OverlayLayer({ data, map, until, allie
     return w / data.minimapSize;
   }, [map?.widthMeters, data]);
 
+  const scale = useStore((s) => s.settings.shipIconScale);
   const styles = useMemo(() => (unique ? distinctStyles(data.paths, data.minimapSize) : null), [data, unique]);
 
   const sceneFunc = useMemo(
@@ -100,7 +103,8 @@ export const OverlayLayer = memo(function OverlayLayer({ data, map, until, allie
           species: path.species,
           color: sunk ? SUNK_FILL : color,
           alpha,
-          size: SHIP_PX * inv,
+          size: SHIP_PX * inv * scale,
+          length: hullLength(scale),
           inv,
           outline: sunk ? SUNK_OUTLINE : null,
         });
@@ -109,12 +113,12 @@ export const OverlayLayer = memo(function OverlayLayer({ data, map, until, allie
           // Names sit a step behind the icons: readable, but quieter than the plan's own labels.
           ctx.setAttr('globalAlpha', alpha * 0.75);
           ctx.setAttr('fillStyle', styles ? cssColor(color) : '#c9d3de');
-          text(ctx, path.shipName, ex, ey + SHIP_PX * inv * 0.6, nameSize, 'center', 'top');
+          text(ctx, path.shipName, ex, ey + SHIP_PX * inv * scale * 0.6, nameSize, 'center', 'top');
         }
       }
       ctx.restore();
     },
-    [data, until, allies, enemies, only, styles, inv, k],
+    [data, until, allies, enemies, only, styles, inv, k, scale],
   );
 
   return <Shape listening={false} opacity={opacity} perfectDrawEnabled={false} sceneFunc={sceneFunc} />;

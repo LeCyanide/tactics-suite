@@ -32,6 +32,9 @@ import { DEVELOPER_CREDIT } from '@/lib/credit';
 import { createMarker, createNumber, createPath, createShape, createText } from '@/lib/factory';
 import { canvasThemeFor, type CanvasTheme } from '@/state/theme';
 
+/** Ship icon size at 1× scale; Settings → Ship icon scale multiplies it. */
+const SHIP_ICON_PX = 30;
+
 const FALLBACK_W = 30000;
 const FALLBACK_H = 30000;
 
@@ -184,9 +187,8 @@ export default function MapCanvas() {
       : bandBelow >= CREDIT_SIZE.height
         ? { right: Math.max(bandRight, 4), bottom: (bandBelow - CREDIT_SIZE.height) / 2 }
         : null;
-  const snapStep = project?.settings.snapStep ?? 500;
-  const snapOn = !!project?.settings.snapToGrid;
-  const iconSize = project?.settings.shipIconSize ?? 30;
+  const iconScale = useStore((s) => s.settings.shipIconScale);
+  const iconSize = SHIP_ICON_PX * iconScale;
 
   /* ------------------------------------------------------------------ */
   /* Sizing & camera                                                     */
@@ -229,12 +231,6 @@ export default function MapCanvas() {
   const toScreen = useCallback(
     (p: Vec2): Vec2 => ({ x: p.x * camera.scale + camera.x, y: p.y * camera.scale + camera.y }),
     [camera],
-  );
-
-  const snap = useCallback(
-    (p: Vec2): Vec2 =>
-      snapOn ? { x: Math.round(p.x / snapStep) * snapStep, y: Math.round(p.y / snapStep) * snapStep } : p,
-    [snapOn, snapStep],
   );
 
   const pointerWorld = useCallback((): Vec2 => {
@@ -346,7 +342,7 @@ export default function MapCanvas() {
     if (!stage || !page) return;
     const pos = stage.getPointerPosition();
     if (!pos) return;
-    const world = snap(toWorld(pos));
+    const world = toWorld(pos);
     const onEmpty = e.target === stage || e.target.name() === 'backdrop';
 
     if (e.evt.button !== 0) return;
@@ -433,7 +429,7 @@ export default function MapCanvas() {
     if (!pos) return;
     const raw = toWorld(pos);
     setCursorWorld(raw);
-    const world = snap(raw);
+    const world = raw;
 
     // A release outside the canvas never reaches onMouseUp, so check the button too.
     if (pingDrag.current !== null && !(e.evt.buttons & 1)) pingDrag.current = null;
@@ -659,10 +655,6 @@ export default function MapCanvas() {
     const state = dragRef.current;
     if (!state || e.target !== state.lead) return;
     const { lead, origin, followers } = state;
-    if (snapOn) {
-      lead.x(Math.round(lead.x() / snapStep) * snapStep);
-      lead.y(Math.round(lead.y() / snapStep) * snapStep);
-    }
     // Imperative, so a group drag stays smooth without a store write per frame.
     const dx = lead.x() - origin.x;
     const dy = lead.y() - origin.y;
@@ -765,7 +757,7 @@ export default function MapCanvas() {
     if (!shipId) return;
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
-    const world = snap(toWorld({ x: e.clientX - rect.left, y: e.clientY - rect.top }));
+    const world = toWorld({ x: e.clientX - rect.left, y: e.clientY - rect.top });
     useStore.getState().placeShip(shipId, world, teamId || undefined);
   };
 

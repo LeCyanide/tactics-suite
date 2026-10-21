@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Eye, Grid3x3, HardDrive, ListX, Plus, Save, X } from 'lucide-react';
+import { Eye, HardDrive, ListX, Plus, Save, X } from 'lucide-react';
 import { getActivePage, useStore } from '@/state/store';
 import { loadAsset } from '@/state/assets';
 import { folderNameOf } from '@/lib/pageTree';
@@ -152,25 +152,6 @@ export function StatusBar() {
 
 
       <span className="spacer" />
-
-      {project && (
-        <>
-          <button
-            className={project.settings.snapToGrid ? '' : ''}
-            title="Toggle snap to grid"
-            onClick={() =>
-              useStore.setState({
-                project: { ...project, settings: { ...project.settings, snapToGrid: !project.settings.snapToGrid } },
-                dirty: true,
-              })
-            }
-          >
-            <Grid3x3 size={12} color={project.settings.snapToGrid ? 'var(--accent)' : undefined} />
-            Snap {project.settings.snapToGrid ? `${(project.settings.snapStep / 1000).toFixed(1)} km` : 'off'}
-          </button>
-          <span className="sep" />
-        </>
-      )}
 
       <button onClick={() => s().openModal('settings')} title="Storage location">
         <HardDrive size={12} />
