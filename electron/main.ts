@@ -1,4 +1,5 @@
 import { app, BrowserWindow, shell, Menu } from 'electron';
+import fs from 'node:fs';
 import path from 'node:path';
 import { ensureDirs, seedStore, storageRoot, sweepTempFiles } from './storage/db';
 import { registerIpc } from './ipc';
@@ -11,6 +12,27 @@ import { checkForUpdates, initUpdater } from './updater';
 app.commandLine.appendSwitch('disable-http-cache');
 
 const isDev = !!process.env.VITE_DEV_SERVER_URL;
+if (isDev && !process.env.WOWSPLAN_DATA_DIR) useFreshCopyOfLiveData();
+
+/**
+ * Points the dev app at its own folder, refilled from the installed app's data
+ * on every launch, so the two never write to the same settings and projects.
+ * Moving userData also gives the dev app its own browser cache.
+ */
+function useFreshCopyOfLiveData(): void {
+  const live = path.join(app.getPath('userData'), 'data');
+  app.setPath('userData', `${app.getPath('userData')} Dev`);
+  const copy = path.join(app.getPath('userData'), 'data');
+  // Set explicitly so storage skips legacy-folder adoption, which moves rather than copies.
+  process.env.WOWSPLAN_DATA_DIR = copy;
+  try {
+    fs.rmSync(copy, { recursive: true, force: true });
+    if (fs.existsSync(live)) fs.cpSync(live, copy, { recursive: true });
+    console.log(`[storage] dev copy refreshed from ${live}`);
+  } catch (err) {
+    console.error('[storage] could not refresh the dev copy, using what is there:', err);
+  }
+}
 
 let mainWindow: BrowserWindow | null = null;
 
