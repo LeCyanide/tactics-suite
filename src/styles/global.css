@@ -76,6 +76,97 @@
   --canvas-void-hi: #e9edf2;
 }
 
+/* Extra themes: a tinted neutral base plus one contrasting accent. */
+:root[data-theme='dusk'] {
+  --bg-0: #0f0d0b;
+  --bg-1: #15120f;
+  --bg-2: #1b1713;
+  --bg-3: #221d18;
+  --bg-4: #2a241e;
+  --line: #2a241e;
+  --line-strong: #3a3129;
+  --fg: #eee6dc;
+  --fg-dim: #b0a394;
+  --fg-faint: #7a6e61;
+  --accent: #ff8a3d;
+  --accent-dim: #a8592a;
+  --canvas-void: #0a0807;
+  --canvas-void-hi: #16120e;
+}
+
+:root[data-theme='aurora'] {
+  --bg-0: #0b100d;
+  --bg-1: #0f1511;
+  --bg-2: #141b16;
+  --bg-3: #1a231c;
+  --bg-4: #202b23;
+  --line: #1e2922;
+  --line-strong: #2c3a30;
+  --fg: #e3ece5;
+  --fg-dim: #9aaa9e;
+  --fg-faint: #67766b;
+  --accent: #d9b36c;
+  --accent-dim: #8a7340;
+  --canvas-void: #070a08;
+  --canvas-void-hi: #111a14;
+}
+
+:root[data-theme='midnight'] {
+  --bg-0: #0b0a14;
+  --bg-1: #100e1c;
+  --bg-2: #151325;
+  --bg-3: #1c192f;
+  --bg-4: #232039;
+  --line: #1f1c33;
+  --line-strong: #2e2a48;
+  --fg: #e8e6f5;
+  --fg-dim: #a29fc0;
+  --fg-faint: #6c6990;
+  --accent: #c77dff;
+  --accent-dim: #7f4fa8;
+  --canvas-void: #07060d;
+  --canvas-void-hi: #13112a;
+}
+
+:root[data-theme='nocturne'] {
+  --bg-0: #08101a;
+  --bg-1: #0b1522;
+  --bg-2: #0f1b2b;
+  --bg-3: #142335;
+  --bg-4: #1a2b40;
+  --line: #182638;
+  --line-strong: #24374f;
+  --fg: #e2ecf7;
+  --fg-dim: #93a9c2;
+  --fg-faint: #5f7690;
+  --accent: #3ec7ff;
+  --accent-dim: #2a7fa8;
+  --canvas-void: #050b13;
+  --canvas-void-hi: #0d1a2b;
+}
+
+:root[data-theme='dawn'] {
+  --bg-0: #ebe6dc;
+  --bg-1: #f7f4ee;
+  --bg-2: #f0ebe2;
+  --bg-3: #e6e0d4;
+  --bg-4: #dad2c3;
+  --line: #ddd5c7;
+  --line-strong: #c2b8a6;
+  --fg: #2a241d;
+  --fg-dim: #5e5447;
+  --fg-faint: #8a7f70;
+  --accent: #c4572e;
+  --accent-dim: #c4572e;
+  --danger: #c0262d;
+  --success: #2f7d4a;
+  --warn: #95660a;
+  --shadow: 0 8px 28px rgba(60, 45, 25, 0.16);
+  --shadow-sm: 0 2px 10px rgba(60, 45, 25, 0.12);
+  --canvas-void: #e2dccf;
+  --canvas-void-hi: #eee9df;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -101,7 +192,7 @@ body {
 }
 
 ::selection {
-  background: rgba(78, 163, 255, 0.35);
+  background: color-mix(in srgb, var(--accent) 35%, transparent);
 }
 
 /* Scrollbars ------------------------------------------------------- */
@@ -561,7 +652,7 @@ input:focus,
 textarea:focus,
 select:focus {
   border-color: var(--accent-dim);
-  box-shadow: 0 0 0 2px rgba(78, 163, 255, 0.14);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 14%, transparent);
 }
 input[type='number'] {
   font-family: var(--mono);
@@ -1109,7 +1200,7 @@ input[type='range']::-webkit-slider-thumb {
 .marquee {
   position: absolute;
   border: 1px solid var(--accent);
-  background: rgba(78, 163, 255, 0.11);
+  background: color-mix(in srgb, var(--accent) 11%, transparent);
   pointer-events: none;
   z-index: 5;
 }
@@ -2061,4 +2152,35 @@ input[type='range']::-webkit-slider-thumb {
 .row .ruleset-flag {
   margin-left: 6px;
   margin-right: auto;
+}
+
+/* Colour wave behind the shell chrome. Fixed to the window so it flows as one
+   continuous gradient across every panel; only the wave themes define it. */
+:root[data-theme='dusk'] {
+  --wave:
+    radial-gradient(110% 70% at 0% 0%, rgba(255, 128, 48, 0.14), transparent 60%),
+    radial-gradient(90% 60% at 100% 100%, rgba(214, 70, 42, 0.125), transparent 60%),
+    linear-gradient(115deg, transparent 15%, rgba(255, 176, 84, 0.075) 35%, transparent 52%, rgba(232, 96, 52, 0.09) 72%, transparent 90%);
+}
+:root[data-theme='aurora'] {
+  --wave:
+    radial-gradient(110% 70% at 0% 0%, rgba(96, 176, 132, 0.125), transparent 60%),
+    radial-gradient(90% 60% at 100% 100%, rgba(58, 150, 150, 0.125), transparent 60%),
+    linear-gradient(115deg, transparent 15%, rgba(168, 196, 104, 0.075) 35%, transparent 52%, rgba(80, 168, 140, 0.09) 72%, transparent 90%);
+}
+:root[data-theme='midnight'] {
+  --wave:
+    radial-gradient(110% 70% at 0% 0%, rgba(168, 96, 255, 0.125), transparent 60%),
+    radial-gradient(90% 60% at 100% 100%, rgba(72, 96, 230, 0.125), transparent 60%),
+    linear-gradient(115deg, transparent 15%, rgba(214, 120, 240, 0.075) 35%, transparent 52%, rgba(110, 110, 255, 0.09) 72%, transparent 90%);
+}
+:root[data-theme='nocturne'] {
+  --wave:
+    radial-gradient(110% 70% at 0% 0%, rgba(60, 140, 255, 0.125), transparent 60%),
+    radial-gradient(90% 60% at 100% 100%, rgba(40, 190, 210, 0.125), transparent 60%),
+    linear-gradient(115deg, transparent 15%, rgba(110, 190, 255, 0.075) 35%, transparent 52%, rgba(60, 210, 230, 0.09) 72%, transparent 90%);
+}
+:root:is([data-theme='dusk'], [data-theme='aurora'], [data-theme='midnight'], [data-theme='nocturne']) :is(.titlebar, .sidebar, .page-tabs, .toolrail, .statusbar) {
+  background-image: var(--wave);
+  background-attachment: fixed;
 }

@@ -209,6 +209,11 @@ export function SettingsModal() {
         >
           <option value="dark">Dark</option>
           <option value="light">Light</option>
+          <option value="dusk">Dusk</option>
+          <option value="aurora">Aurora</option>
+          <option value="midnight">Midnight</option>
+          <option value="nocturne">Nocturne</option>
+          <option value="dawn">Dawn</option>
         </select>
       </Field>
       <Field label="Ship icon scale">

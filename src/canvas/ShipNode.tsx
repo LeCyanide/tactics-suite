@@ -5,8 +5,11 @@ import { RANGE_KEYS, DEFAULT_RANGE_STYLES } from '@/types/model';
 import { CLASS_GLYPHS, GLYPH_CONTRAST_WIDTH, hullLength } from './shipGlyphs';
 import { useStore } from '@/state/store';
 import { shipRangeKm } from '@/state/store';
-import type { CanvasTheme } from '@/state/theme';
+import { CANVAS_THEMES, type CanvasTheme } from '@/state/theme';
 import { withAlpha } from '@/lib/util';
+
+// Ships keep the dark theme's ink on every theme: light outlines wash out icons and names over the map.
+const SHIP_INK = CANVAS_THEMES.dark;
 
 /**
  * Drag is handled by delegation on the content Layer (see MapCanvas), which
@@ -110,7 +113,7 @@ export const ShipNode = memo(function ShipNode({
             <Path
               data={glyph.solid}
               fill={withAlpha(teamColor, 0.94)}
-              stroke={theme.contrast}
+              stroke={SHIP_INK.contrast}
               strokeWidth={GLYPH_CONTRAST_WIDTH}
               lineJoin="round"
             />
@@ -167,8 +170,8 @@ export const ShipLabel = memo(function ShipLabel({
           lineHeight={1.25}
           fontFamily="Inter, Segoe UI, sans-serif"
           fontStyle="600"
-          fill={theme.plateText}
-          stroke={theme.contrast}
+          fill={SHIP_INK.plateText}
+          stroke={SHIP_INK.contrast}
           strokeWidth={2.6}
           fillAfterStrokeEnabled
         />
@@ -181,9 +184,9 @@ export const ShipLabel = memo(function ShipLabel({
             align="center"
             fontSize={NAME_FONT * 0.88}
             fontFamily="Inter, Segoe UI, sans-serif"
-            fill={theme.plateText}
+            fill={SHIP_INK.plateText}
             opacity={0.75}
-            stroke={theme.contrast}
+            stroke={SHIP_INK.contrast}
             strokeWidth={2.2}
             fillAfterStrokeEnabled
           />
@@ -272,7 +275,7 @@ export const ShipRanges = memo(function ShipRanges({ obj, ship, flags, inv, them
                   fontSize={10}
                   fontFamily="JetBrains Mono, Consolas, monospace"
                   fill={style.color}
-                  stroke={theme.contrast}
+                  stroke={SHIP_INK.contrast}
                   strokeWidth={2.4}
                   fillAfterStrokeEnabled
                 />

@@ -685,7 +685,7 @@ export interface ProjectSummary {
 /* Application settings                                                */
 /* ------------------------------------------------------------------ */
 
-export type ThemeName = 'dark' | 'light';
+export type ThemeName = 'dark' | 'light' | 'dusk' | 'aurora' | 'midnight' | 'nocturne' | 'dawn';
 
 export interface AppSettings {
   theme: ThemeName;
