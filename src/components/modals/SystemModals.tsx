@@ -207,8 +207,8 @@ export function SettingsModal() {
           value={settings.theme}
           onChange={(e) => s().patchSettings({ theme: e.target.value as ThemeName })}
         >
-          <option value="dark">Dark</option>
-          <option value="light">Light</option>
+          <option value="dark">Standard (Dark)</option>
+          <option value="light">Standard (Light)</option>
           <option value="dusk">Dusk</option>
           <option value="aurora">Aurora</option>
           <option value="midnight">Midnight</option>
