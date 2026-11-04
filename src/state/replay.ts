@@ -171,9 +171,21 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
       if (get().root) await get().refreshArchive();
       return;
     }
+    // The overlay panel calls this on mount, before boot has read the saved replay folder.
+    if (!useStore.getState().booted) {
+      await new Promise<void>((resolve) => {
+        const off = useStore.subscribe((s) => {
+          if (s.booted) {
+            off();
+            resolve();
+          }
+        });
+      });
+    }
     const status = await window.api.replay.status();
     set({ status });
-    if (!status.available) return;
+    // Another caller that was waiting alongside this one may have finished first.
+    if (!status.available || initialised) return;
     initialised = true;
     listenToLibrary();
 
