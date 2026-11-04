@@ -1793,7 +1793,12 @@ input[type='range']::-webkit-slider-thumb {
   border-top: 1px solid var(--line);
   font-size: 10.5px;
 }
-.replay-root .link:first-child {
+.replay-root + .replay-root {
+  margin-top: 2px;
+  padding-top: 0;
+  border-top: none;
+}
+.replay-root > :first-child {
   flex: 1;
   min-width: 0;
   overflow: hidden;
