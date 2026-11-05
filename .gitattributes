@@ -9,3 +9,5 @@ seed/** -text
 # Run on the Linux VPS; Windows line endings would break bash and Caddy.
 *.sh text eol=lf
 deploy/Caddyfile text eol=lf
+# Applied by git apply against LF sources; CRLF would make them fail.
+sidecar/patches/*.patch -text
