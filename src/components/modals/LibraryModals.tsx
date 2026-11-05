@@ -299,6 +299,11 @@ export function ShipDatabaseModal() {
                 limitId={pickingLimit?.id ?? ''}
                 onLimitId={setLimitId}
                 onChange={(patch) => patchRuleset(ruleset.id, patch)}
+                onDuplicate={() => {
+                  const copy: ShipRuleset = { ...ruleset, id: uid('rules-'), name: `${ruleset.name} (copy)` };
+                  saveRulesets([...rulesets, copy]);
+                  setRulesetId(copy.id);
+                }}
                 onDelete={() => {
                   saveRulesets(rulesets.filter((r) => r.id !== ruleset.id));
                   setRulesetId('');
@@ -464,6 +469,7 @@ function RulesetEditor({
   limitId,
   onLimitId,
   onChange,
+  onDuplicate,
   onDelete,
 }: {
   ruleset: ShipRuleset;
@@ -474,6 +480,7 @@ function RulesetEditor({
   limitId: string;
   onLimitId: (id: string) => void;
   onChange: (patch: Partial<ShipRuleset>) => void;
+  onDuplicate: () => void;
   onDelete: () => void;
 }) {
   const nameOf = useMemo(() => new Map(ships.map((x) => [x.id, x.name])), [ships]);
@@ -501,6 +508,11 @@ function RulesetEditor({
     <div className="ruleset-editor">
       <Field label="Name">
         <NameInput value={ruleset.name} onCommit={(name) => onChange({ name })} />
+        <Tip label="Duplicate ruleset" side="top">
+          <button className="btn sm" onClick={onDuplicate}>
+            <Copy size={12} />
+          </button>
+        </Tip>
         <Tip label="Delete ruleset" side="top">
           <button className="btn sm danger" onClick={onDelete}>
             <Trash2 size={12} />
