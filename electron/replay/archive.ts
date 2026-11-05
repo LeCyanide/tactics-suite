@@ -141,10 +141,20 @@ interface ReplayMeta {
   probe: ReplayProbe | null;
   probeError?: string;
   bakeError?: string;
+  /** Set once its bake is known good: dropped for a rebake, or baked by this version. */
+  rebaked?: true;
 }
 
+/**
+ * Builds whose bakes made before 2.6.0 are wrong: 2.5.0's sidecar misread the
+ * 15.10 roster, putting every ship on one team with no shells or torpedoes.
+ * Those bakes are dropped once and rebaked, but only while the build is still
+ * installed — otherwise the flawed bake is the best the replay can ever have.
+ */
+const STALE_BAKE_BUILDS = new Set([13533378]);
+
 /* ------------------------------------------------------------------ */
-/* Configuration                                                       */
+/* Configuration                                                   */
 /* ------------------------------------------------------------------ */
 
 let root: string | null = null;
@@ -372,6 +382,12 @@ async function buildListing(): Promise<LibraryListing> {
     }
 
     const build = buildOf(meta.probe);
+    if (build !== null && STALE_BAKE_BUILDS.has(build) && builds.has(build) && !meta.rebaked) {
+      await fsp.rm(bakedPath(sha), { force: true });
+      baked.delete(sha);
+      meta.rebaked = true;
+      dirty = true;
+    }
     replays.push({
       id: sha,
       path: relPath,
@@ -816,7 +832,11 @@ async function setBakeError(id: string, error: string | undefined): Promise<void
     const meta = lib.replays[id];
     if (!meta) return;
     if (error) meta.bakeError = error;
-    else delete meta.bakeError;
+    else {
+      delete meta.bakeError;
+      // Baked by this version's sidecar, so not one of the stale bakes.
+      meta.rebaked = true;
+    }
     await writeJson(libraryFile(), lib);
   });
 }

@@ -11,6 +11,24 @@ item under it one note. Use `### Changelog` for what is finished and
 
 Collect notes under `## Unreleased` and rename it to the version when releasing.
 
+## 2.6.0
+
+### New
+
+- Themes: Dusk, Aurora, Midnight, Nocturne and Dawn, next to the Standard dark and light themes
+- Ship rulesets: a Duplicate button, to make a variant of a ruleset (different bans, say) without setting it up again
+- Settings → Appearance: a ship icon scale from 0.5× to 1.5×, for the planner, replays and the overlay
+
+### Changes
+
+- Replay viewer: works with game update 15.10
+- Snap to grid is removed
+
+### Fixes
+
+- Replay sidebar: shows the game folder in use, and says why a replay cannot be played
+- The replay folder is now kept across restarts
+
 ## 2.5.0
 
 ### New

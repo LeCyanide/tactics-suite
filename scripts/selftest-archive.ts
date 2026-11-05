@@ -336,6 +336,21 @@ async function testRealReplay(check: Check): Promise<void> {
     const data = await loadTimeline(entry.id);
     check('real: baked into the library', data.length > 0 && (await exists(path.join(root, '.wowstactics', 'baked', `${entry.id}.wtreply`))));
     check('real: now listed as baked', (await listLibrary()).replays.find((r) => r.id === entry.id)?.state === 'baked');
+
+    // A bake of a stale build left by an older version, which never marked it.
+    if (entry.build === 13533378) {
+      const libFile = path.join(root, '.wowstactics', 'library.json');
+      const bake = path.join(root, '.wowstactics', 'baked', `${entry.id}.wtreply`);
+      const lib = JSON.parse(await fs.readFile(libFile, 'utf8'));
+      delete lib.replays[entry.id].rebaked;
+      await fs.writeFile(libFile, JSON.stringify(lib));
+      await fs.writeFile(bake, 'WTREPLY1 stale');
+      const relisted = (await listLibrary()).replays.find((r) => r.id === entry.id);
+      check('real: a stale 15.10 bake is dropped for a rebake', relisted?.state === 'bakeable' && !(await exists(bake)), relisted?.state);
+      await fs.writeFile(bake, 'WTREPLY1 fresh');
+      const again = (await listLibrary()).replays.find((r) => r.id === entry.id);
+      check('real: it is dropped only once', again?.state === 'baked' && (await exists(bake)), again?.state);
+    }
     await configure({ root, gameDir: '' });
   }
 }
