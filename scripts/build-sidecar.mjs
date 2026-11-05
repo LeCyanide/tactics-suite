@@ -65,14 +65,38 @@ export function ensureToolkit() {
     git(['clone', '--filter=blob:none', '--no-checkout', '--sparse', TOOLKIT_REPO, toolkitDir]);
     git(['sparse-checkout', 'set', 'crates', 'build-support'], toolkitDir);
   }
-  if (git(['rev-parse', 'HEAD'], toolkitDir) === TOOLKIT_REV) return;
-  console.log(`[sidecar] moving wows-toolkit to ${TOOLKIT_REV.slice(0, 8)}`);
-  try {
-    git(['checkout', '--quiet', TOOLKIT_REV], toolkitDir);
-  } catch {
-    // The pin moved to a commit this clone has not seen yet.
-    git(['fetch', '--filter=blob:none', 'origin'], toolkitDir);
-    git(['checkout', '--quiet', TOOLKIT_REV], toolkitDir);
+  if (git(['rev-parse', 'HEAD'], toolkitDir) !== TOOLKIT_REV) {
+    console.log(`[sidecar] moving wows-toolkit to ${TOOLKIT_REV.slice(0, 8)}`);
+    // Patches from the previous pin would block the checkout.
+    git(['checkout', '--quiet', '--', '.'], toolkitDir);
+    try {
+      git(['checkout', '--quiet', TOOLKIT_REV], toolkitDir);
+    } catch {
+      // The pin moved to a commit this clone has not seen yet.
+      git(['fetch', '--filter=blob:none', 'origin'], toolkitDir);
+      git(['checkout', '--quiet', TOOLKIT_REV], toolkitDir);
+    }
+  }
+  applyToolkitPatches();
+}
+
+/**
+ * Game-patch fixes not yet upstream, kept in sidecar/patches/ and applied on
+ * top of the pin. Drop a patch once the pin moves past its upstream fix.
+ */
+function applyToolkitPatches() {
+  const dir = path.join(crateDir, 'patches');
+  if (!fs.existsSync(dir)) return;
+  for (const name of fs.readdirSync(dir).filter((f) => f.endsWith('.patch')).sort()) {
+    const file = path.join(dir, name);
+    try {
+      git(['apply', '--reverse', '--check', file], toolkitDir);
+      continue; // already applied
+    } catch {
+      /* not applied yet */
+    }
+    console.log(`[sidecar] applying ${name}`);
+    git(['apply', file], toolkitDir);
   }
 }
 
