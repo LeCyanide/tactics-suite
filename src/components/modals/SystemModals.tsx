@@ -123,7 +123,7 @@ export function ExportModal() {
           </button>
           <Tip label={shareTip} side="top">
             <button className="btn" disabled={busy || !channel} onClick={() => void share()}>
-              <Send size={13} /> Share to Discord
+              <Send size={13} /> Share to Discord <span className="beta-tag">Beta</span>
             </button>
           </Tip>
           <span className="spacer" />
@@ -262,6 +262,7 @@ export function SettingsModal() {
           max={100}
           step={1}
           suffix="backups"
+          width={130}
           onChange={(v) => s().patchSettings({ maxBackupsPerProject: Math.round(v) })}
         />
       </Field>
@@ -395,7 +396,7 @@ function BotAddress() {
       >
         {error ??
           (bot.builtIn
-            ? 'Leave empty for the built-in bot, or enter the address of one your community runs. Changing it disconnects Discord.'
+            ? 'Leave empty for the built-in bot, or enter the address of one that your community runs. Changing it disconnects Discord.'
             : 'The address of the bot your community runs. Changing it disconnects Discord.')}
       </div>
     </>

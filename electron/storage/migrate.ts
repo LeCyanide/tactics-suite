@@ -54,7 +54,13 @@ export function adoptLegacyStore(target: string, candidates: string[]): AdoptedS
     fs.renameSync(staging, target);
     return { root: target, outcome: 'copied', from, reason };
   } catch (error) {
-    fs.rmSync(staging, { recursive: true, force: true });
+    // Best effort: where the staging path cannot exist at all (a file in the
+    // way), removing it fails too, and that must not stop the fallback.
+    try {
+      fs.rmSync(staging, { recursive: true, force: true });
+    } catch {
+      /* nothing to clean up */
+    }
     return { root: from, outcome: 'left-in-place', from, reason: `${reason}; then ${message(error)}` };
   }
 }

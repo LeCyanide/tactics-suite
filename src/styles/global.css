@@ -778,6 +778,11 @@ input[type='range']::-webkit-slider-thumb {
   font-size: 11.5px;
   color: var(--fg-dim);
 }
+/* A dialog's own fields (Settings) have room for labels like "Ship icon scale"
+   on one line. Fields nested in cards or side panels keep the compact width. */
+.modal-body > .field > label {
+  width: 100px;
+}
 .field > .control {
   flex: 1;
   min-width: 0;

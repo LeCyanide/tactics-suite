@@ -341,6 +341,14 @@ async function buildListing(): Promise<LibraryListing> {
   const replays: LibraryReplay[] = [];
   const duplicates: string[] = [];
 
+  // Where one battle is in the folder twice, the copy the library already
+  // listed stays listed and the newcomer is the duplicate. Without this the
+  // folder's own order decides, and that differs between file systems.
+  files.sort((a, b) => {
+    const known = Number(rel(b.abs) in lib.files) - Number(rel(a.abs) in lib.files);
+    return known || (rel(a.abs) < rel(b.abs) ? -1 : rel(a.abs) > rel(b.abs) ? 1 : 0);
+  });
+
   for (const f of files) {
     const relPath = rel(f.abs);
     seenPaths.add(relPath);

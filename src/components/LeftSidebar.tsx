@@ -121,7 +121,7 @@ function ProjectPanel() {
               className="row-label"
             />
             <div className="faint mono" style={{ fontSize: 10.5, marginTop: 2 }}>
-              {project.pages.length} pages · {dirty ? 'unsaved' : `saved ${formatRelative(lastSavedAt)}`}
+              {project.pages.length} {project.pages.length === 1 ? 'page' : 'pages'} · {dirty ? 'unsaved' : `saved ${formatRelative(lastSavedAt)}`}
             </div>
           </div>
           <div style={{ display: 'flex', gap: 4 }}>
