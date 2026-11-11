@@ -20,6 +20,7 @@ Collect notes under `## Unreleased` and rename it to the version when releasing.
 ### Changes
 
 - The grid square and position under the cursor, in the map's bottom-left corner, can be hidden in Settings → Appearance
+- Moving the mouse over the map takes much less work: only the position readout updates, not the whole map
 
 ### Fixes
 
