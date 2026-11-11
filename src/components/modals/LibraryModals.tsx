@@ -452,7 +452,7 @@ export function ShipDatabaseModal() {
                         <td onClick={(e) => e.stopPropagation()}>
                           <Switch
                             on={blueprint.ships.includes(ship.id)}
-                            label={blueprint.ships.includes(ship.id) ? 'In it' : 'Add'}
+                            label={blueprint.ships.includes(ship.id) ? 'Added' : 'Add'}
                             onChange={() => patchBlueprint(blueprint.id, { ships: toggled(blueprint.ships, ship.id) })}
                           />
                         </td>
