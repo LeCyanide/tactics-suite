@@ -96,3 +96,13 @@ export function patchNotes(version) {
   if (sections.length === 0) throw new Error(`The "## ${version}" section of PATCHNOTES.md has no notes in it.`);
   return { version, sections };
 }
+
+/**
+ * Every released version's notes, for the app to show after an update. The
+ * build bakes these in (see `__PATCH_NOTES__` in the Vite configs), so the
+ * notes always match the version and need no network.
+ */
+export function bundledPatchNotes() {
+  if (!fs.existsSync(PATCH_NOTES_FILE)) return [];
+  return allVersions(fs.readFileSync(PATCH_NOTES_FILE, 'utf8'));
+}

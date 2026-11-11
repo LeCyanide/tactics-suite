@@ -36,6 +36,7 @@ import {
 import { clamp, clone, debounce, foldForSearch, uid } from '@/lib/util';
 import { dissolveFolder, openTab, placeFolder, placePage, settlePages, settleTabs, stepFolder, stepPage } from '@/lib/pageTree';
 import { applyTheme } from './theme';
+import { BUNDLED_PATCH_NOTES, onLaunch, type PatchNotesArg } from '@/lib/patchNotes';
 import {
   createPage,
   createProject,
@@ -115,7 +116,8 @@ export type ModalId =
   | 'export'
   | 'settings'
   | 'shortcuts'
-  | 'backups';
+  | 'backups'
+  | 'patchNotes';
 
 export interface Toast {
   id: string;
@@ -163,6 +165,8 @@ interface State {
 
 interface Actions {
   boot(): Promise<void>;
+  /** Opens the patch notes when this is the first launch after an update. */
+  offerPatchNotes(freshInstall: boolean): Promise<void>;
   toast(text: string, kind?: Toast['kind']): void;
   dismissToast(id: string): void;
 
@@ -400,7 +404,7 @@ export const useStore = create<Store>((set, get) => {
    * The project and its pages array are copied shallowly and the active page is
    * deep-cloned; every other page is shared with the previous version. That is
    * what keeps dragging cheap on a large project — moveObjectsTo runs once per
-   * pointer move — and stops the fifty-entry undo stack from holding a
+   * pointer move — and stops the fifty-entry undo stack from holding
    * fifty copies of pages that never changed.
    *
    * The callback gets the page and nothing else, deliberately: the sharing
@@ -501,6 +505,26 @@ export const useStore = create<Store>((set, get) => {
         await get().openProject(last);
       } else {
         set({ modal: 'projects' });
+      }
+
+      await get().offerPatchNotes(Object.keys(stored).length === 0 && (projectList as unknown[]).length === 0);
+    },
+
+    async offerPatchNotes(freshInstall) {
+      const info = await window.api.app.info().catch(() => null);
+      const { settings, modal } = get();
+      const decision = onLaunch({
+        all: BUNDLED_PATCH_NOTES,
+        current: String(info?.version ?? ''),
+        seen: settings.patchNotesSeen,
+        enabled: settings.showPatchNotes,
+        freshInstall,
+      });
+      if (decision.markSeen) get().patchSettings({ patchNotesSeen: decision.markSeen });
+      if (decision.show) {
+        // On top of the project picker when that opened: it comes back once the notes are closed.
+        const arg: PatchNotesArg = { versions: decision.show, afterUpdate: true, returnTo: modal ?? undefined };
+        set({ modal: 'patchNotes', modalArg: arg });
       }
     },
 
@@ -1195,7 +1219,10 @@ export const useStore = create<Store>((set, get) => {
     pushHistory() {
       const current = get().project;
       if (!current) return;
-      set((s) => ({ past: [...s.past, clone(current)].slice(-HISTORY_LIMIT), future: [] }));
+      // No copy: a project version is never changed in place (every edit goes
+      // through commit or commitPage, which build a new one), so the version
+      // itself is the undo step, sharing its pages like any other.
+      set((s) => ({ past: [...s.past, current].slice(-HISTORY_LIMIT), future: [] }));
     },
 
     undo() {

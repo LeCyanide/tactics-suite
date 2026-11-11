@@ -13,10 +13,23 @@ Collect notes under `## Unreleased` and rename it to the version when releasing.
 
 ## Unreleased
 
+### New
+
+- Patch notes: after an update, the app shows what changed the first time it starts. "Don't show again" turns this off; Settings → Updates turns it back on and has a View patch notes button for every version
+
 ### Changes
 
+- Ship database updated for game update 15.10: 24 new ships, and corrected concealment, torpedo range, hydro and smoke values
+- The grid square and position under the cursor, in the map's bottom-left corner, can be hidden in Settings → Appearance
+- Moving the mouse over the map takes much less work: only the position readout updates, not the whole map
+- Edits are quicker and use less memory: the ship list is no longer redrawn after every change, and moving or resizing an object no longer stores a full copy of the project for undo
 - Lower memory use: the Map Manager shows small previews instead of loading every map at full size, and maps are only kept in memory while a tab uses them
 - Undo keeps the last 50 steps instead of 100
+
+### Fixes
+
+- Replay library: when the same replay is in the folder twice, the copy that was already listed stays listed, and the new copy is the one reported as a duplicate
+- Ship database: with a ruleset open beside the ship editor, the ship table no longer runs off the right edge or wraps ship names
 
 ## 2.6.0
 

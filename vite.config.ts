@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import electron from 'vite-plugin-electron/simple';
 import path from 'node:path';
+import { bundledPatchNotes } from './scripts/patch-notes.mjs';
 
 // Update server and token, and the clan bot's address, baked into the main
 // process at build time. They come from the untracked .env.release (see
@@ -12,6 +13,11 @@ const release = loadEnv('release', __dirname, ['UPDATE_', 'BOT_']);
 export default defineConfig({
   // Relative base so the production build loads from file:// inside Electron.
   base: './',
+  // Patch notes, shown in the app after an update. Read at build time, so a
+  // change to PATCHNOTES.md needs a restart of `npm run dev` to show.
+  define: {
+    __PATCH_NOTES__: JSON.stringify(bundledPatchNotes()),
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),

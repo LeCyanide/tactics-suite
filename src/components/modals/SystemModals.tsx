@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Clipboard, HardDrive, ImageDown, Keyboard, RefreshCw, RotateCcw, Scale, Send, Unplug } from 'lucide-react';
+import { Clipboard, HardDrive, ImageDown, Keyboard, RefreshCw, RotateCcw, Scale, ScrollText, Send, Unplug } from 'lucide-react';
 import { getActivePage, useStore } from '@/state/store';
 import { Check, Field, Modal, NumInput, SectionLabel, Slider, Tip } from '../common/ui';
 import { canvasApi, DEFAULT_EXPORT, type ExportOptions } from '@/canvas/canvasBridge';
@@ -20,6 +20,7 @@ import {
   type DiscordBot,
 } from '@/state/discord';
 import type { ThemeName } from '@/types/model';
+import { BUNDLED_PATCH_NOTES, type PatchNotesArg } from '@/lib/patchNotes';
 
 /* ================================================================== */
 /* Image export                                                        */
@@ -122,7 +123,7 @@ export function ExportModal() {
           </button>
           <Tip label={shareTip} side="top">
             <button className="btn" disabled={busy || !channel} onClick={() => void share()}>
-              <Send size={13} /> Share to Discord
+              <Send size={13} /> Share to Discord <span className="beta-tag">Beta</span>
             </button>
           </Tip>
           <span className="spacer" />
@@ -235,8 +236,15 @@ export function SettingsModal() {
           <RotateCcw size={12} />
         </button>
       </Field>
+      <Check
+        label="Show the cursor position in the map's corner"
+        checked={settings.showCursorPosition}
+        onChange={(v) => s().patchSettings({ showCursorPosition: v })}
+      />
 
-      <SectionLabel>Share to Discord</SectionLabel>
+      <SectionLabel>
+        Share to Discord <span className="beta-tag" title="Still being tested: it may change, and may not always work">Beta</span>
+      </SectionLabel>
       <BotAddress />
       <DiscordSection />
 
@@ -254,6 +262,7 @@ export function SettingsModal() {
           max={100}
           step={1}
           suffix="backups"
+          width={130}
           onChange={(v) => s().patchSettings({ maxBackupsPerProject: Math.round(v) })}
         />
       </Field>
@@ -387,7 +396,7 @@ function BotAddress() {
       >
         {error ??
           (bot.builtIn
-            ? 'Leave empty for the built-in bot, or enter the address of one your community runs. Changing it disconnects Discord.'
+            ? 'Leave empty for the built-in bot, or enter the address of one that your community runs. Changing it disconnects Discord.'
             : 'The address of the bot your community runs. Changing it disconnects Discord.')}
       </div>
     </>
@@ -548,8 +557,14 @@ function describeUpdate(u: UpdateState): string {
 
 function UpdateSection() {
   const u = useUpdateState();
+  const showPatchNotes = useStore((s) => s.settings.showPatchNotes);
   return (
     <>
+      <Check
+        label="Show patch notes after an update"
+        checked={showPatchNotes}
+        onChange={(v) => useStore.getState().patchSettings({ showPatchNotes: v })}
+      />
       <div className="faint" style={{ fontSize: 11.5, marginBottom: 8, color: u.status === 'error' ? 'var(--danger)' : undefined }}>
         {describeUpdate(u)}
       </div>
@@ -570,6 +585,20 @@ function UpdateSection() {
           <RefreshCw size={12} /> Check for updates
         </button>
       )}
+      <button
+        className="btn sm"
+        style={{ marginLeft: 6 }}
+        disabled={BUNDLED_PATCH_NOTES.length === 0}
+        onClick={() =>
+          useStore.getState().openModal('patchNotes', {
+            versions: BUNDLED_PATCH_NOTES,
+            afterUpdate: false,
+            returnTo: 'settings',
+          } satisfies PatchNotesArg)
+        }
+      >
+        <ScrollText size={12} /> View patch notes
+      </button>
     </>
   );
 }

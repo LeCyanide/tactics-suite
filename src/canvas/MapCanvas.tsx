@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import Konva from 'konva';
 import { Circle, Group, Layer, Line, Rect, Stage, Text, Transformer } from 'react-konva';
 import type { KonvaEventObject } from 'konva/lib/Node';
@@ -111,7 +111,8 @@ export default function MapCanvas() {
   const [size, setSize] = useState({ width: 800, height: 600 });
   const [draft, setDraft] = useState<DraftState>(null);
   const [marquee, setMarquee] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
-  const [cursorWorld, setCursorWorld] = useState<Vec2>({ x: 0, y: 0 });
+  // Not state: a move would re-render the whole map. Only the readout listens.
+  const cursor = useMemo(() => cursorStore(), []);
   const [editingText, setEditingText] = useState<{ id: ID; value: string } | null>(null);
   const [menu, setMenu] = useState<ContextMenuState | null>(null);
   const [exportOpts, setExportOpts] = useState<ExportOptions | null>(null);
@@ -188,6 +189,7 @@ export default function MapCanvas() {
         ? { right: Math.max(bandRight, 4), bottom: (bandBelow - CREDIT_SIZE.height) / 2 }
         : null;
   const iconScale = useStore((s) => s.settings.shipIconScale);
+  const showCursorPosition = useStore((s) => s.settings.showCursorPosition);
   const iconSize = SHIP_ICON_PX * iconScale;
 
   /* ------------------------------------------------------------------ */
@@ -428,7 +430,7 @@ export default function MapCanvas() {
     const pos = stage.getPointerPosition();
     if (!pos) return;
     const raw = toWorld(pos);
-    setCursorWorld(raw);
+    cursor.set(raw);
     const world = raw;
 
     // A release outside the canvas never reaches onMouseUp, so check the button too.
@@ -1094,14 +1096,9 @@ export default function MapCanvas() {
         />
       )}
 
-      <div className="canvas-readout">
-        <span className="mono">
-          {gridRef(cursorWorld.x, cursorWorld.y, worldW, worldH, gridCols, gridRows)}
-        </span>
-        <span className="mono dim">
-          {(cursorWorld.x / 1000).toFixed(2)} , {(cursorWorld.y / 1000).toFixed(2)} km
-        </span>
-      </div>
+      {showCursorPosition && (
+        <CursorReadout cursor={cursor} worldW={worldW} worldH={worldH} gridCols={gridCols} gridRows={gridRows} />
+      )}
       {creditStyle && (
         <div className="canvas-credit" style={creditStyle}>
           {DEVELOPER_CREDIT}
@@ -1120,6 +1117,48 @@ export default function MapCanvas() {
  * the one that means something other than "resize", so it is given a round
  * body and the conventional circular arrow drawn into it.
  */
+/** The cursor's world position, for whoever subscribes; setting it re-renders nothing else. */
+function cursorStore() {
+  let pos: Vec2 = { x: 0, y: 0 };
+  const listeners = new Set<() => void>();
+  return {
+    get: () => pos,
+    set(next: Vec2) {
+      pos = next;
+      for (const l of listeners) l();
+    },
+    subscribe(l: () => void) {
+      listeners.add(l);
+      return () => void listeners.delete(l);
+    },
+  };
+}
+
+/** Grid square and km position under the cursor, in the map's bottom-left corner. */
+function CursorReadout({
+  cursor,
+  worldW,
+  worldH,
+  gridCols,
+  gridRows,
+}: {
+  cursor: ReturnType<typeof cursorStore>;
+  worldW: number;
+  worldH: number;
+  gridCols: number;
+  gridRows: number;
+}) {
+  const pos = useSyncExternalStore(cursor.subscribe, cursor.get);
+  return (
+    <div className="canvas-readout">
+      <span className="mono">{gridRef(pos.x, pos.y, worldW, worldH, gridCols, gridRows)}</span>
+      <span className="mono dim">
+        {(pos.x / 1000).toFixed(2)} , {(pos.y / 1000).toFixed(2)} km
+      </span>
+    </div>
+  );
+}
+
 function styleAnchor(anchor: Konva.Rect): void {
   if (anchor.name().indexOf('rotater') === -1) return;
   const d = 14;

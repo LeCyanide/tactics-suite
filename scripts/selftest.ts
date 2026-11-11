@@ -25,6 +25,9 @@ import { LEGACY_APP_FOLDERS, adoptLegacyStore } from '../electron/storage/migrat
 import { testReplayArchive } from './selftest-archive';
 import { testSidecar } from './selftest-sidecar';
 import { testReplayTimeline } from './selftest-timeline';
+import { testHistory } from './selftest-history';
+import { compareVersions, notesSince, onLaunch, type VersionNotes } from '../src/lib/patchNotes';
+import { bundledPatchNotes } from './patch-notes.mjs';
 
 let failures = 0;
 
@@ -620,6 +623,43 @@ async function testSeeding(): Promise<void> {
   await fs.rm(legacy, { recursive: true, force: true });
 }
 
+async function testPatchNotes(): Promise<void> {
+  console.log('\npatch notes');
+
+  const bundled = bundledPatchNotes();
+  check('PATCHNOTES.md: versions parsed, newest first', bundled.length > 0 && compareVersions(bundled[0]!.version, bundled[bundled.length - 1]!.version)! > 0, bundled.map((v) => v.version));
+  check('PATCHNOTES.md: no "Unreleased" baked in', bundled.every((v) => compareVersions(v.version, v.version) !== null));
+
+  const n = (version: string): VersionNotes => ({ version, sections: [{ title: 'New', notes: [version] }] });
+  const all = [n('2.8.0'), n('2.7.1'), n('2.7.0'), n('2.6.0')];
+  const at = (current: string, seen: string, extra: { enabled?: boolean; freshInstall?: boolean } = {}) =>
+    onLaunch({ all, current, seen, enabled: extra.enabled ?? true, freshInstall: extra.freshInstall ?? false });
+  const shown = (d: ReturnType<typeof onLaunch>) => d.show?.map((v) => v.version) ?? null;
+
+  check('compare: 2.10.0 is newer than 2.9.0', compareVersions('2.10.0', '2.9.0')! > 0);
+  check('compare: "preview" is not a version', compareVersions('preview', '2.6.0') === null);
+  check('since: skipped updates included, newest first', JSON.stringify(notesSince(all, '2.6.0', '2.8.0').map((v) => v.version)) === '["2.8.0","2.7.1","2.7.0"]');
+
+  let d = at('2.7.0', '2.6.0');
+  check('update: shows the new version and marks it seen', JSON.stringify(shown(d)) === '["2.7.0"]' && d.markSeen === '2.7.0', d);
+  d = at('2.8.0', '2.6.0');
+  check('update over several versions: shows each', JSON.stringify(shown(d)) === '["2.8.0","2.7.1","2.7.0"]', d);
+  d = at('2.7.0', '2.7.0');
+  check('same version again: nothing, nothing written', d.show === null && d.markSeen === null, d);
+  d = at('2.7.0', '', { freshInstall: true });
+  check('fresh install: nothing shown, version marked', d.show === null && d.markSeen === '2.7.0', d);
+  d = at('2.7.0', '');
+  check('upgrade from before the feature: current version only', JSON.stringify(shown(d)) === '["2.7.0"]', d);
+  d = at('2.7.0', '2.6.0', { enabled: false });
+  check('turned off: nothing shown, version still marked', d.show === null && d.markSeen === '2.7.0', d);
+  d = at('2.7.0', '2.8.0');
+  check('downgrade: nothing shown, version marked', d.show === null && d.markSeen === '2.7.0', d);
+  d = at('2.9.0', '2.8.0');
+  check('version with no notes: nothing shown, version marked', d.show === null && d.markSeen === '2.9.0', d);
+  d = at('preview', '');
+  check('not a version: nothing at all', d.show === null && d.markSeen === null, d);
+}
+
 async function main(): Promise<void> {
   await testShipImport();
   await testShipFilters();
@@ -630,6 +670,8 @@ async function main(): Promise<void> {
   await testExportDestinations();
   await testTempSweep();
   await testSeeding();
+  await testPatchNotes();
+  await testHistory(check);
   await testReplayTimeline(check);
   await testSidecar(check);
   await testReplayArchive(check);

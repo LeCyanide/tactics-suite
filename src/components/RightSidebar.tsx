@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { memo, useMemo, useRef, useState } from 'react';
 import { ChevronRight, Database, Lock, LockOpen, Palette, Radar as RadarIcon, RotateCcw, Save, Search, Trash2 } from 'lucide-react';
 import {
   CHARACTERISTICS,
@@ -14,6 +14,7 @@ import {
   type ID,
   type ShipClass,
   type ShipObject,
+  type Team,
   type TacticalObject,
   type TextObject,
 } from '@/types/model';
@@ -691,10 +692,20 @@ function MultiSelectionPanel({ objects }: { objects: TacticalObject[] }) {
 /* Ship selector                                                       */
 /* ================================================================== */
 
-function ShipBrowserPanel() {
+/** Stable empty list, so a selector falling back to it does not count as a change. */
+const NO_TEAMS: Team[] = [];
+
+/**
+ * Memoised, and subscribed to only the parts of the project it uses: the list
+ * holds every ship in the database, and redrawing it on each edit (a drop, a
+ * colour change) cost more than the rest of the window together.
+ */
+const ShipBrowserPanel = memo(function ShipBrowserPanel() {
   const ships = useStore((s) => s.ships);
   const icons = useStore((s) => s.icons);
-  const project = useStore((s) => s.project);
+  const teams = useStore((s) => s.project?.teams ?? NO_TEAMS);
+  const defaultTeamId = useStore((s) => s.project?.settings.defaultTeamId ?? null);
+  const hasProject = useStore((s) => !!s.project);
   const [query, setQuery] = useState('');
   const [nation, setNation] = useState('');
   const [cls, setCls] = useState<'' | ShipClass>('');
@@ -708,26 +719,28 @@ function ShipBrowserPanel() {
   const nations = useMemo(() => [...new Set(ships.map((x) => x.nation))].sort(), [ships]);
   const tiers = useMemo(() => [...new Set(ships.map((x) => x.tier))].sort((a, b) => b - a), [ships]);
   // The ruleset is the page's: picking one here holds the page's lineup to it.
-  const page = useStore(getActivePage);
-  const ruleset = rulesets.find((r) => r.id === page?.rulesetId) ?? null;
+  const rulesetId = useStore((s) => getActivePage(s)?.rulesetId ?? null);
+  const ruleset = rulesets.find((r) => r.id === rulesetId) ?? null;
 
   const filtered = useMemo(
     () => filterShips(ships, { query, searchNation: true, nation, cls, tier, radar, smoke, ruleset }),
     [ships, query, nation, cls, tier, radar, smoke, ruleset],
   );
 
-  const teamId = team || project?.settings.defaultTeamId || project?.teams[0]?.id || null;
+  const teamId = team || defaultTeamId || teams[0]?.id || null;
   const iconById = useMemo(() => new Map(icons.map((i) => [i.id, i])), [icons]);
 
   // What the side being placed for already has on the page, for the ruleset's
   // limits: "max two of these" is counted per team.
-  const placed = useMemo(
-    () =>
-      (page?.objects ?? [])
-        .filter((o): o is ShipObject => o.type === 'ship' && o.teamId === teamId)
-        .map((o) => o.shipId),
-    [page?.objects, teamId],
+  // Read as a string, so an edit that leaves this list as it is (moving a
+  // ship, recolouring one) does not count as a change.
+  const placedKey = useStore((s) =>
+    (getActivePage(s)?.objects ?? [])
+      .filter((o): o is ShipObject => o.type === 'ship' && o.teamId === teamId)
+      .map((o) => o.shipId)
+      .join('\n'),
   );
+  const placed = useMemo(() => (placedKey ? placedKey.split('\n') : []), [placedKey]);
   const teamFull = !!ruleset && ruleset.maxShips > 0 && placed.length >= ruleset.maxShips;
 
   return (
@@ -818,10 +831,10 @@ function ShipBrowserPanel() {
             </select>
           </div>
 
-          {project && project.teams.length > 0 && (
+          {hasProject && teams.length > 0 && (
             <select value={team} onChange={(e) => setTeam(e.target.value)} style={{ marginBottom: 5 }}>
               <option value="">Place on default team</option>
-              {project.teams.map((t) => (
+              {teams.map((t) => (
                 <option key={t.id} value={t.id}>
                   Place on {t.name}
                 </option>
@@ -831,7 +844,7 @@ function ShipBrowserPanel() {
 
           {ruleset && ruleset.maxShips > 0 && (
             <div className={`team-count${placed.length >= ruleset.maxShips ? ' full' : ''}`}>
-              <span>{project?.teams.find((t) => t.id === teamId)?.name ?? 'Team'}</span>
+              <span>{teams.find((t) => t.id === teamId)?.name ?? 'Team'}</span>
               <span className="mono">
                 {placed.length}/{ruleset.maxShips} ships
               </span>
@@ -894,7 +907,7 @@ function ShipBrowserPanel() {
       )}
     </Panel>
   );
-}
+});
 
 function ShipThumb({ file, mime, cls }: { file?: string; mime?: string; cls: ShipClass }) {
   const img = useAsset('icon', file, mime ?? '');

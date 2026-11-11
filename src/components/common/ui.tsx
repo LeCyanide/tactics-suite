@@ -336,8 +336,11 @@ export function Modal({
   footer,
   size = 'normal',
   headerExtra,
+  icon,
 }: {
   title: string;
+  /** Shown before the title. */
+  icon?: ReactNode;
   subtitle?: string;
   onClose: () => void;
   children: ReactNode;
@@ -360,6 +363,7 @@ export function Modal({
     <div className="modal-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div className={`modal${size === 'wide' ? ' wide' : size === 'narrow' ? ' narrow' : ''}`}>
         <div className="modal-head">
+          {icon}
           <h2>{title}</h2>
           {subtitle && <span className="sub">{subtitle}</span>}
           <span className="spacer" />
