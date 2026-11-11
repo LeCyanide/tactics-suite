@@ -105,6 +105,7 @@ const api = {
     replaceImage: (id: string, ext: string, dataUrl: string) => call<any>('map:replaceImage', id, ext, dataUrl),
     remove: (id: string) => call<any[]>('map:delete', id),
     dataUrl: (file: string, mime: string) => call<AssetResult>('map:dataUrl', file, mime),
+    thumbUrl: (file: string, mime: string, width: number) => call<AssetResult>('map:thumbUrl', file, mime, width),
   },
   capLayouts: {
     list: () => call<any[]>('capLayout:list'),

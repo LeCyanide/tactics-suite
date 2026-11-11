@@ -6,6 +6,11 @@
  * than a custom protocol) keep the export canvas untainted, so `toDataURL`
  * works for image export.
  *
+ * Icons are small and stay for the session. Maps are large (a 1078 px map is
+ * about 4.6 MB decoded), so only the maps `retainMaps` names are kept: the
+ * boards of the open tabs. The Map Manager shows its own thumbnails and does
+ * not go through this cache at all.
+ *
  * Reads can fail transiently (an import rewriting the store, a sync client
  * holding the file, a slow disk). A failed read is retried a few times. If it
  * still fails, the reason goes to the caller instead of a bare null, so a
@@ -24,6 +29,12 @@ const cache = new Map<string, HTMLImageElement>();
 const pending = new Map<string, Promise<HTMLImageElement | null>>();
 const failures = new Map<string, string>();
 const listeners = new Set<() => void>();
+/** Map files allowed to stay cached; null until the workspace first says. */
+let keptMaps: Set<string> | null = null;
+
+function keeps(kind: Kind, file: string): boolean {
+  return kind !== 'map' || keptMaps === null || keptMaps.has(file);
+}
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -65,7 +76,9 @@ export function loadAsset(kind: Kind, file: string, mime: string): Promise<HTMLI
     for (let attempt = 1; attempt <= ATTEMPTS; attempt++) {
       try {
         const img = await fetchOnce(kind, file, mime);
-        cache.set(k, img);
+        // A map that left the open tabs while it loaded is handed to whoever
+        // asked, but not kept.
+        if (keeps(kind, file)) cache.set(k, img);
         failures.delete(k);
         listeners.forEach((fn) => fn());
         return img;
@@ -139,6 +152,23 @@ export function useAssetState(
 /** The image alone, for the callers that have nothing to say about a failure. */
 export function useAsset(kind: Kind, file?: string | null, mime = ''): HTMLImageElement | null {
   return useAssetState(kind, file, mime).image;
+}
+
+/**
+ * Keeps only these map files cached and drops the rest. A canvas still showing
+ * a dropped map keeps its own reference, so nothing on screen changes.
+ */
+export function retainMaps(files: Iterable<string>): void {
+  keptMaps = new Set(files);
+  for (const k of [...cache.keys()]) {
+    if (k.startsWith('map:') && !keptMaps.has(k.slice(4))) cache.delete(k);
+  }
+}
+
+/** Drops one cached image, so the next request reads the file again. */
+export function forgetAsset(kind: Kind, file: string): void {
+  cache.delete(key(kind, file));
+  failures.delete(key(kind, file));
 }
 
 /** Warms the cache for a batch of icons so the canvas does not pop in. */

@@ -44,7 +44,7 @@ import {
 import { parseShipData, serializeShips } from '@/lib/shipImport';
 import { SAMPLE_SHIPS } from '@/data/sampleShips';
 
-const HISTORY_LIMIT = 100;
+const HISTORY_LIMIT = 50;
 
 export type ToolId =
   | 'select'
@@ -400,8 +400,8 @@ export const useStore = create<Store>((set, get) => {
    * The project and its pages array are copied shallowly and the active page is
    * deep-cloned; every other page is shared with the previous version. That is
    * what keeps dragging cheap on a large project — moveObjectsTo runs once per
-   * pointer move — and stops the hundred-entry undo stack from holding a
-   * hundred copies of pages that never changed.
+   * pointer move — and stops the fifty-entry undo stack from holding a
+   * fifty copies of pages that never changed.
    *
    * The callback gets the page and nothing else, deliberately: the sharing
    * above is sound precisely because nothing here can reach another page. A
