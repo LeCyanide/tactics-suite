@@ -35,7 +35,7 @@ export function PatchNotesModal() {
     <Modal
       title={afterUpdate && latest ? `What's new in ${latest}` : 'Patch notes'}
       subtitle={afterUpdate && versions.length > 1 ? `${versions.length} updates since you last looked` : undefined}
-      icon={afterUpdate ? <Sparkles size={15} style={{ color: 'var(--accent)', flex: 'none' }} /> : undefined}
+      icon={afterUpdate ? <Sparkles size={13} style={{ color: 'var(--accent)', flex: 'none' }} /> : undefined}
       onClose={close}
       footer={
         <>
