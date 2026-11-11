@@ -45,7 +45,7 @@ export function PatchNotesModal() {
             </button>
           )}
           <span className="spacer" />
-          <button className="btn primary" onClick={close} autoFocus>
+          <button className="btn primary" onClick={close}>
             Close
           </button>
         </>
