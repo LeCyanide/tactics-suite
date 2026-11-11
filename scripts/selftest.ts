@@ -161,11 +161,22 @@ async function testShipFilters(): Promise<void> {
     back.map((s) => [s.name, s.smoke, s.smokeRadius_km]),
   );
 
-  const base: ShipFilter = { query: '', nation: '', cls: '', tier: '', radar: '', smoke: '', ruleset: null };
+  const base: ShipFilter = { query: '', nation: '', cls: '', tier: '', consumable: '', ruleset: null };
   const names = (f: Partial<ShipFilter>) => filterShips(ships, { ...base, ...f }).map((s) => s.name).sort().join(',');
-  check('filter: has radar', names({ radar: 'yes' }) === 'Des Moines,Minotaur', names({ radar: 'yes' }));
-  check('filter: no smoke', names({ smoke: 'no' }) === 'Des Moines,Yamato', names({ smoke: 'no' }));
-  check('filter: radar and smoke together', names({ radar: 'yes', smoke: 'yes' }) === 'Minotaur');
+  check('filter: has radar', names({ consumable: 'radar' }) === 'Des Moines,Minotaur', names({ consumable: 'radar' }));
+  check('filter: no smoke', names({ consumable: 'no-smoke' }) === 'Des Moines,Yamato', names({ consumable: 'no-smoke' }));
+  check(
+    'filter: has and lacks split the list',
+    ['radar', 'hydro', 'smoke'].every(
+      (c) =>
+        filterShips(ships, { ...base, consumable: c as 'radar' }).length +
+          filterShips(ships, { ...base, consumable: `no-${c}` as 'no-radar' }).length ===
+        ships.length,
+    ),
+  );
+  const lineup = { id: 'b', name: 'Lineup', ships: [named('Minotaur').id, named('Yamato').id] };
+  check('blueprint: narrows the list to its ships', names({ blueprint: lineup }) === 'Minotaur,Yamato', names({ blueprint: lineup }));
+  check('blueprint: other filters still apply', names({ blueprint: lineup, consumable: 'radar' }) === 'Minotaur');
 
   const open = { id: 'r', name: 'Open', tiers: [], classes: [], banned: [], limits: [], maxShips: 0 };
   check('ruleset: an empty one allows everything', ships.every((s) => allowedBy(open, s)));

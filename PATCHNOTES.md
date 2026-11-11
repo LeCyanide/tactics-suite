@@ -11,6 +11,19 @@ item under it one note. Use `### Changelog` for what is finished and
 
 Collect notes under `## Unreleased` and rename it to the version when releasing.
 
+## Unreleased
+
+### New
+
+- Ship blueprints: save a lineup of ships in the ship database (**+ Blueprint**, then switch ships on in the table) and place the whole lineup at once from the ship list
+- Map picker: type to search the map list
+
+### Changes
+
+- Ship list and ship database: radar, hydro and smoke are now one Consumables filter
+- Text size is now S, M or L (340 m, 750 m, 1200 m)
+- The ship list's team picker names the default team, such as "Place on Alpha (default)"
+
 ## 2.6.0
 
 ### New

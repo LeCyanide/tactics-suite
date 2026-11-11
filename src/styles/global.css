@@ -671,6 +671,94 @@ option {
   background: var(--bg-2);
 }
 
+/* Searchable dropdown (SearchSelect): a button dressed as the select above. */
+.search-select-button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 24px;
+  padding: 0 22px 0 7px;
+  background: var(--bg-0);
+  border: 1px solid var(--line-strong);
+  border-radius: 3px;
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: default;
+  outline: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--fg-dim) 50%),
+    linear-gradient(135deg, var(--fg-dim) 50%, transparent 50%);
+  background-position: calc(100% - 13px) 10px, calc(100% - 9px) 10px;
+  background-size: 4px 4px;
+  background-repeat: no-repeat;
+}
+.search-select-button > span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.search-select-button:focus,
+.search-select-button[aria-expanded='true'] {
+  border-color: var(--accent-dim);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 14%, transparent);
+}
+.search-select-pop {
+  position: fixed;
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.search-select-search {
+  position: relative;
+  padding: 5px;
+  border-bottom: 1px solid var(--line);
+  color: var(--fg-faint);
+}
+.search-select-search svg {
+  position: absolute;
+  left: 12px;
+  top: 11px;
+}
+.search-select-search input {
+  padding-left: 24px;
+}
+.search-select-list {
+  overflow-y: auto;
+  padding: 4px;
+}
+.search-select-group {
+  padding: 8px 8px 3px;
+  color: var(--fg-faint);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.search-select-item {
+  padding: 5px 8px;
+  border-radius: 3px;
+  color: var(--fg);
+  font-size: 12px;
+  cursor: default;
+}
+.search-select-item.current {
+  color: var(--accent);
+}
+.search-select-item.active {
+  background: var(--accent-dim);
+  color: #fff;
+}
+.search-select-empty {
+  padding: 8px;
+  color: var(--fg-faint);
+  font-size: 12px;
+}
+
 input[type='color'] {
   width: 26px;
   height: 22px;
@@ -888,6 +976,25 @@ input[type='range']::-webkit-slider-thumb {
   grid-template-columns: 1fr 1fr 1fr;
   gap: 4px;
   padding: 0 0 5px;
+}
+.ship-filters.two {
+  grid-template-columns: 1fr 1fr;
+}
+.blueprint-row {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 5px;
+}
+.blueprint-row select {
+  flex: 1;
+  min-width: 0;
+}
+.blueprint-row .btn {
+  flex: none;
+  max-width: 55%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Ruleset editor, in the ship database */
@@ -1699,6 +1806,16 @@ input[type='range']::-webkit-slider-thumb {
   grid-template-columns: 1fr 1fr;
   gap: 4px;
   padding: 2px 0 4px;
+}
+.size-picker {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  flex: 1;
+}
+.size-picker .variant-chip {
+  padding: 3px 0;
+  font-weight: 600;
 }
 .variant-chip {
   padding: 6px 8px;

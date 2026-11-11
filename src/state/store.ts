@@ -29,6 +29,7 @@ import {
   type ShipObject,
   type StrokeStyle,
   type TacticalObject,
+  type ShipBlueprint,
   type ShipRuleset,
   type Team,
   type Vec2,
@@ -233,6 +234,8 @@ interface Actions {
 
   /* ships on map */
   placeShip(shipId: ID, at: Vec2, teamId?: ID | null): void;
+  /** Places several ships as one undo step and selects them as a group. */
+  placeShips(placements: { shipId: ID; at: Vec2 }[], teamId?: ID | null): void;
   setShipDisplay(objectId: ID, key: CharacteristicKey, value: boolean | undefined): void;
 
   /* layers */
@@ -249,6 +252,7 @@ interface Actions {
 
   /* ship rulesets */
   setRulesets(rulesets: ShipRuleset[]): void;
+  setBlueprints(blueprints: ShipBlueprint[]): void;
 
   /* history */
   pushHistory(): void;
@@ -329,6 +333,9 @@ function groupSelection(tool: ToolId, selection: ID[]): { selection: ID[]; tool:
  */
 const NO_RULESETS: ShipRuleset[] = [];
 export const getRulesets = (s: Store): ShipRuleset[] => s.project?.rulesets ?? NO_RULESETS;
+
+const NO_BLUEPRINTS: ShipBlueprint[] = [];
+export const getBlueprints = (s: Store): ShipBlueprint[] => s.project?.blueprints ?? NO_BLUEPRINTS;
 
 export const useStore = create<Store>((set, get) => {
   /** Persists the current project; debounced for autosave. */
@@ -591,6 +598,7 @@ export const useStore = create<Store>((set, get) => {
       settlePages(doc);
       settleTabs(doc);
       doc.rulesets = (doc.rulesets ?? []).map((r) => ({ ...r, limits: r.limits ?? [], maxShips: r.maxShips ?? 0 }));
+      doc.blueprints = (doc.blueprints ?? []).map((b) => ({ ...b, ships: b.ships ?? [] }));
       // Legacy default team names take the current side's name and colour.
       doc.teams = (doc.teams ?? []).map((t) => {
         const side = LEGACY_TEAM_NAMES[t.name];
@@ -1093,6 +1101,18 @@ export const useStore = create<Store>((set, get) => {
       get().addObjects([obj]);
     },
 
+    placeShips(placements, teamId) {
+      const { ships, project } = get();
+      if (!project) return;
+      const team = teamId !== undefined ? teamId : project.settings.defaultTeamId ?? project.teams[0]?.id ?? null;
+      const byId = new Map(ships.map((s) => [s.id, s]));
+      const objects = placements.flatMap(({ shipId, at }) => {
+        const ship = byId.get(shipId);
+        return ship ? [createShipObject(ship, at, team)] : [];
+      });
+      get().addObjects(objects);
+    },
+
     setShipDisplay(objectId, key, value) {
       commitPage((page) => {
         page.objects = page.objects.map((o) => {
@@ -1175,6 +1195,12 @@ export const useStore = create<Store>((set, get) => {
     setRulesets(rulesets) {
       commit((draft) => {
         draft.rulesets = rulesets;
+      });
+    },
+
+    setBlueprints(blueprints) {
+      commit((draft) => {
+        draft.blueprints = blueprints;
       });
     },
 

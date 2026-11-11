@@ -3,11 +3,23 @@
  * the two can never disagree about which ships a set of filters leaves.
  */
 
-import type { ID, Ship, ShipClass, ShipObject, ShipRuleset, TacticalObject, Team } from '@/types/model';
+import type { ID, Ship, ShipBlueprint, ShipClass, ShipObject, ShipRuleset, TacticalObject, Team } from '@/types/model';
 import { foldForSearch } from './util';
 
-/** A yes/no question a filter may also decline to ask. */
-export type Availability = '' | 'yes' | 'no';
+/**
+ * One consumable question at a time: which of radar, hydro and smoke a ship
+ * carries or lacks. Empty asks nothing.
+ */
+export type ConsumableFilter = '' | 'radar' | 'no-radar' | 'hydro' | 'no-hydro' | 'smoke' | 'no-smoke';
+
+export const CONSUMABLE_FILTERS: { value: Exclude<ConsumableFilter, ''>; label: string }[] = [
+  { value: 'radar', label: 'Has radar' },
+  { value: 'no-radar', label: 'No radar' },
+  { value: 'hydro', label: 'Has hydro' },
+  { value: 'no-hydro', label: 'No hydro' },
+  { value: 'smoke', label: 'Has smoke' },
+  { value: 'no-smoke', label: 'No smoke' },
+];
 
 export interface ShipFilter {
   query: string;
@@ -16,9 +28,10 @@ export interface ShipFilter {
   nation: string;
   cls: '' | ShipClass;
   tier: string;
-  radar: Availability;
-  smoke: Availability;
+  consumable: ConsumableFilter;
   ruleset: ShipRuleset | null;
+  /** Narrows the list to a blueprint's ships. */
+  blueprint?: ShipBlueprint | null;
 }
 
 const hasConsumable = (ship: Ship, pattern: RegExp): boolean =>
@@ -27,6 +40,10 @@ const hasConsumable = (ship: Ship, pattern: RegExp): boolean =>
 /** A radar range is the fact; a listed consumable covers data without one. */
 export function hasRadar(ship: Ship): boolean {
   return (ship.radar_km ?? 0) > 0 || hasConsumable(ship, /radar/i);
+}
+
+export function hasHydro(ship: Ship): boolean {
+  return (ship.hydro_km ?? 0) > 0 || hasConsumable(ship, /hydro/i);
 }
 
 /**
@@ -111,9 +128,26 @@ export function rulesetBreaches(
   return out;
 }
 
-const wants = (want: Availability, has: boolean): boolean => !want || (want === 'yes') === has;
+function matchesConsumable(ship: Ship, want: ConsumableFilter): boolean {
+  switch (want) {
+    case '':
+      return true;
+    case 'radar':
+      return hasRadar(ship);
+    case 'no-radar':
+      return !hasRadar(ship);
+    case 'hydro':
+      return hasHydro(ship);
+    case 'no-hydro':
+      return !hasHydro(ship);
+    case 'smoke':
+      return hasSmoke(ship);
+    case 'no-smoke':
+      return !hasSmoke(ship);
+  }
+}
 
-/** Every filter but the ruleset. */
+/** Every filter but the ruleset. A blueprint's ships keep the database order. */
 export function matchesShip(ship: Ship, f: ShipFilter): boolean {
   const q = foldForSearch(f.query.trim());
   return (
@@ -121,8 +155,8 @@ export function matchesShip(ship: Ship, f: ShipFilter): boolean {
     (!f.nation || ship.nation === f.nation) &&
     (!f.cls || ship.class === f.cls) &&
     (!f.tier || String(ship.tier) === f.tier) &&
-    wants(f.radar, hasRadar(ship)) &&
-    wants(f.smoke, hasSmoke(ship))
+    matchesConsumable(ship, f.consumable) &&
+    (!f.blueprint || f.blueprint.ships.includes(ship.id))
   );
 }
 

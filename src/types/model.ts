@@ -152,6 +152,16 @@ export interface ShipLimit {
   ships: ID[];
 }
 
+/**
+ * A named set of ships to place in one go — a standard lineup to start a page
+ * from. Like rulesets, blueprints belong to the project.
+ */
+export interface ShipBlueprint {
+  id: ID;
+  name: string;
+  ships: ID[];
+}
+
 export interface ShipIconAsset {
   id: ID;
   name: string;
@@ -657,6 +667,8 @@ export interface Project {
   teams: Team[];
   /** Ship restrictions for this project, offered as a filter wherever ships are listed. */
   rulesets: ShipRuleset[];
+  /** Ship lineups to place in bulk, picked in the ship list. */
+  blueprints: ShipBlueprint[];
   /** Editor prefs stored with the project. */
   settings: ProjectSettings;
 }
