@@ -13,7 +13,7 @@ import { create } from 'zustand';
 import { DEFAULT_REPLAY_VIEW, type ReplayViewOptions } from '@/canvas/ReplayLayer';
 import { ReplayTimeline, TimelineFormatError } from '@/replay/timeline';
 import { extractPaths, type ReplayPaths } from '@/replay/paths';
-import { distinctStyles, type TrailStyle } from '@/replay/colors';
+import { nextStyle, type TrailStyle } from '@/replay/colors';
 import { useStore } from './store';
 
 export type AppMode = 'tactics' | 'replay';
@@ -107,7 +107,11 @@ interface ReplayState {
   opacity: number;
   /** Ship paths of the open replay, for the lineup's trails. */
   paths: ReplayPaths | null;
-  /** Each ship's own trail colour, by entity id, so trails drawn together tell apart. */
+  /**
+   * Trail style by entity id, handed out as trails are switched on so the ones
+   * on screen stay as far apart as possible. Kept after a trail goes off, so a
+   * ship switched back on gets its old colour if it is still free.
+   */
   trailStyles: Map<number, TrailStyle>;
   /** Entity ids whose trail is drawn. */
   trails: number[];
@@ -399,12 +403,10 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
     try {
       const timeline = await loadTimeline(id);
       if (get().selectedId !== id) return;
-      const paths = extractPaths(timeline);
-      const styles = distinctStyles(paths.paths, paths.minimapSize);
       set({
         timeline,
-        paths,
-        trailStyles: new Map(paths.paths.map((p, i) => [p.entityId, styles[i]!])),
+        paths: extractPaths(timeline),
+        trailStyles: new Map(),
         frame: firstActiveFrame(timeline),
         bake: { phase: 'idle' },
       });
@@ -476,9 +478,18 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
   },
 
   toggleTrail(entityId) {
-    set((s) => ({
-      trails: s.trails.includes(entityId) ? s.trails.filter((id) => id !== entityId) : [...s.trails, entityId],
-    }));
+    const { trails, trailStyles } = get();
+    if (trails.includes(entityId)) {
+      set({ trails: trails.filter((id) => id !== entityId) });
+      return;
+    }
+    const taken = trails.map((id) => trailStyles.get(id)!);
+    const old = trailStyles.get(entityId);
+    const free = old && !taken.some((t) => t.color === old.color && t.dashed === old.dashed);
+    set({
+      trails: [...trails, entityId],
+      trailStyles: free ? trailStyles : new Map(trailStyles).set(entityId, nextStyle(taken)),
+    });
   },
 
   setOpacity(value) {

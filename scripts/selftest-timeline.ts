@@ -15,7 +15,7 @@ import fs from 'node:fs/promises';
 
 import { ReplayTimeline, TimelineFormatError, cssColor } from '../src/replay/timeline';
 import { extractPaths, lastIndexAt, type ShipPath } from '../src/replay/paths';
-import { DISTINCT_COLORS, colorDistance, distinctStyles } from '../src/replay/colors';
+import { DISTINCT_COLORS, colorDistance, distinctStyles, nextStyle } from '../src/replay/colors';
 import { extractPage } from '../src/replay/extract';
 import type { GameMap, Ship, ShipObject, Team } from '../src/types/model';
 
@@ -330,6 +330,14 @@ export async function testReplayTimeline(check: (l: string, c: boolean, d?: unkn
   const pair = distinctStyles([line(1, 0, 100), line(2, 0, 102)], 768);
   const best = Math.max(...DISTINCT_COLORS.map((c) => colorDistance(DISTINCT_COLORS[0], c)));
   check('colours: two neighbours are as far apart as the first colour allows', colorDistance(pair[0]!.color, pair[1]!.color) === best, pair);
+
+  const picked: { color: number; dashed: boolean }[] = [];
+  for (let i = 0; i < 16; i++) picked.push(nextStyle(picked));
+  check('next style: the first palette-full of trails are all solid', picked.slice(0, DISTINCT_COLORS.length).every((st) => !st.dashed));
+  check('next style: past the palette, trails go dashed', picked.slice(DISTINCT_COLORS.length).every((st) => st.dashed));
+  check('next style: no two trails share a style', new Set(picked.map((st) => `${st.color}:${st.dashed}`)).size === picked.length);
+  const second = nextStyle([picked[0]!]);
+  check('next style: a second trail is as far from the first as the palette allows', colorDistance(picked[0]!.color, second.color) === best, second);
 
   await testRealTimeline(check);
 }

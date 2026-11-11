@@ -13,7 +13,7 @@ import { lastIndexAt, type ReplayPaths, type ShipPath } from '@/replay/paths';
 import { cssColor } from '@/replay/timeline';
 import { drawShip, text } from './ReplayLayer';
 import { hullLength } from './shipGlyphs';
-import { distinctStyles } from '@/replay/colors';
+import { distinctStyles, type TrailStyle } from '@/replay/colors';
 import { useStore } from '@/state/store';
 
 /** Fallback ally green, as in `ReplayLayer`; the recording player's ship has no tint of its own. */
@@ -38,6 +38,8 @@ interface Props {
   /** Entity id of the one ship to show, or null for all. */
   only: number | null;
   opacity: number;
+  /** Fixed per-ship styles; overrides `unique`. */
+  styleOf?: ReadonlyMap<number, TrailStyle>;
   /** Draw only these ships; overrides the team and `only` filters. */
   pick?: ReadonlySet<number>;
   /** End each trail in its ship's icon and name. Off where the ships are already drawn. */
@@ -56,6 +58,7 @@ export const OverlayLayer = memo(function OverlayLayer({
   only,
   opacity,
   pick,
+  styleOf,
   icons = true,
   inv,
 }: Props) {
@@ -77,7 +80,7 @@ export const OverlayLayer = memo(function OverlayLayer({
         if (pick ? !pick.has(path.entityId) : only !== null ? path.entityId !== only : path.ally ? !allies : !enemies) return;
         const last = lastIndexAt(path.points, until);
         if (last < 0) return;
-        const style = styles?.[i];
+        const style = styleOf?.get(path.entityId) ?? styles?.[i];
         shown.push({ path, last, color: style?.color ?? path.color ?? allyColor, dashed: style?.dashed ?? false });
       });
 
@@ -134,7 +137,7 @@ export const OverlayLayer = memo(function OverlayLayer({
       }
       ctx.restore();
     },
-    [data, until, allies, enemies, only, pick, icons, styles, inv, k, scale],
+    [data, until, allies, enemies, only, pick, styleOf, icons, styles, inv, k, scale],
   );
 
   return <Shape listening={false} opacity={opacity} perfectDrawEnabled={false} sceneFunc={sceneFunc} />;

@@ -107,6 +107,7 @@ export default function MapCanvas() {
   const replayView = useReplayStore((s) => s.view);
   const replayPaths = useReplayStore((s) => s.paths);
   const replayTrailIds = useReplayStore((s) => s.trails);
+  const replayTrailStyles = useReplayStore((s) => s.trailStyles);
   const replayTrails = useMemo(() => new Set(replayTrailIds), [replayTrailIds]);
   const replayOpacity = useReplayStore((s) => s.opacity);
   const replayTimeline = replayMode === 'replay' ? replayTimelineRaw : null;
@@ -945,9 +946,10 @@ export default function MapCanvas() {
               until={replayTimeline.clockAt(replayFrame)}
               allies
               enemies
-              unique
+              unique={false}
               only={null}
               pick={replayTrails}
+              styleOf={replayTrailStyles}
               icons={false}
               opacity={replayOpacity}
               inv={inv}
