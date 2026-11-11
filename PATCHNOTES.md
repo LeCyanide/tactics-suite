@@ -18,10 +18,12 @@ Collect notes under `## Unreleased` and rename it to the version when releasing.
 - Patch notes: after an update, the app shows what changed the first time it starts. "Don't show again" turns this off; Settings → Updates turns it back on and has a View patch notes button for every version
 - Ship blueprints: save a lineup of ships in the ship database (**+ Blueprint**, then switch ships on in the table). Pick it in the ship list and click the map to spawn the whole lineup in formation; Esc cancels
 - Map picker: type to search the map list
+- Ruler travel time: start a ruler on a ship and it shows how long the ship takes to get there at top speed, with and without Engine Boost (the boost only lasts its real duration)
 
 ### Changes
 
 - Ship database updated for game update 15.10: 24 new ships, and corrected concealment, torpedo range, hydro and smoke values
+- Ship database: top speed for every ship and Engine Boost duration and speed for 272, with corrected rudder shift and turning radius where they were out of date
 - The grid square and position under the cursor, in the map's bottom-left corner, can be hidden in Settings → Appearance
 - Moving the mouse over the map takes much less work: only the position readout updates, not the whole map
 - Edits are quicker and use less memory: the ship list is no longer redrawn after every change, and moving or resizing an object no longer stores a full copy of the project for undo

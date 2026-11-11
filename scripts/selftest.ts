@@ -27,6 +27,7 @@ import { testReplayArchive } from './selftest-archive';
 import { testSidecar } from './selftest-sidecar';
 import { testReplayTimeline } from './selftest-timeline';
 import { testHistory } from './selftest-history';
+import { MAP_SPEED_FACTOR, formatDuration, travelTime } from '../src/lib/travel';
 import { compareVersions, notesSince, onLaunch, type VersionNotes } from '../src/lib/patchNotes';
 import { bundledPatchNotes } from './patch-notes.mjs';
 
@@ -675,6 +676,21 @@ async function testPatchNotes(): Promise<void> {
   check('not a version: nothing at all', d.show === null && d.markSeen === null, d);
 }
 
+async function testTravelTime(): Promise<void> {
+  console.log('\ntravel time');
+  const v = 30 * 0.514444 * MAP_SPEED_FACTOR; // a 30 kn ship, m/s on the map
+  const regolo = { id: 'r', name: 'R', nation: '', class: 'DD', tier: 10, speed_kn: 30, engineBoostDuration_s: 60, engineBoostSpeed_pct: 25 } as Ship;
+  const short = travelTime(v * 30, regolo)!;
+  check('plain: distance over map speed', Math.abs(short.plain - 30) < 1e-9, short);
+  check('short run: boosted the whole way', Math.abs(short.boosted! - 30 / 1.25) < 1e-9, short);
+  const long = travelTime(v * 180, regolo)!;
+  // 60 s on boost covers 75 s worth of plain running; the other 105 s stay at plain speed.
+  check('long run: boost runs out after its duration', Math.abs(long.boosted! - (60 + 105)) < 1e-9, long);
+  check('no boost: no boosted time', travelTime(1000, { ...regolo, engineBoostSpeed_pct: undefined })!.boosted === null);
+  check('no speed: nothing to show', travelTime(1000, { ...regolo, speed_kn: undefined }) === null);
+  check('format: 112 s -> 1:52', formatDuration(112) === '1:52');
+}
+
 async function main(): Promise<void> {
   await testShipImport();
   await testShipFilters();
@@ -686,6 +702,7 @@ async function main(): Promise<void> {
   await testTempSweep();
   await testSeeding();
   await testPatchNotes();
+  await testTravelTime();
   await testHistory(check);
   await testReplayTimeline(check);
   await testSidecar(check);

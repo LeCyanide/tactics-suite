@@ -67,6 +67,9 @@ export interface Ship {
 
   hp?: number;
   speed_kn?: number;
+  /** Engine Boost: how long one activation lasts, and the speed it adds in percent. */
+  engineBoostDuration_s?: number;
+  engineBoostSpeed_pct?: number;
   rudderShift_s?: number;
   turningCircle_m?: number;
 
@@ -546,6 +549,8 @@ export interface PathObject extends BaseObject {
   /** Curved arrow bow, as a fraction of the chord length. */
   curvature?: number;
   showMeasurement?: boolean;
+  /** Ruler only: the ship object it was drawn from, whose travel time it shows. */
+  fromShipId?: ID;
 }
 
 export interface ShapeObject extends BaseObject {

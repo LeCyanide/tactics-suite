@@ -4,6 +4,7 @@ import type {
   MarkerObject,
   PathObject,
   ShapeObject,
+  Ship,
   TacticalObject,
   TextObject,
   Vec2,
@@ -11,6 +12,7 @@ import type {
 import { MARKER_ICONS } from '@/data/markerIcons';
 import type { CanvasTheme } from '@/state/theme';
 import { dashArray, formatArea, formatKm, pathLength, polygonArea, withAlpha } from '@/lib/util';
+import { formatDuration, travelTime } from '@/lib/travel';
 
 const MARKER_PATHS: Record<MarkerObject['shape'], string> = MARKER_ICONS;
 
@@ -49,9 +51,11 @@ interface Props {
   draggable: boolean;
   /** Canvas palette; a prop so a theme switch invalidates the memo. */
   theme: CanvasTheme;
+  /** Rulers drawn from a ship: that ship, for the travel time. */
+  travelShip?: Ship;
 }
 
-export const ObjectNode = memo(function ObjectNode({ obj, inv, selected, draggable, theme }: Props) {
+export const ObjectNode = memo(function ObjectNode({ obj, inv, selected, draggable, theme, travelShip }: Props) {
   const common = {
     id: obj.id,
     name: 'object',
@@ -74,7 +78,7 @@ export const ObjectNode = memo(function ObjectNode({ obj, inv, selected, draggab
     case 'polygon':
     case 'ruler':
     case 'area':
-      return <PathNode {...common} obj={obj as PathObject} inv={inv} selected={selected} theme={theme} />;
+      return <PathNode {...common} obj={obj as PathObject} inv={inv} selected={selected} theme={theme} travelShip={travelShip} />;
     case 'rect':
     case 'roundRect':
     case 'circle':
@@ -95,7 +99,14 @@ type NodeCommon = Record<string, unknown>;
 
 type Themed = { theme: CanvasTheme };
 
-function PathNode({ obj, inv, selected, theme, ...rest }: NodeCommon & Themed & { obj: PathObject; inv: number; selected: boolean }) {
+function PathNode({
+  obj,
+  inv,
+  selected,
+  theme,
+  travelShip,
+  ...rest
+}: NodeCommon & Themed & { obj: PathObject; inv: number; selected: boolean; travelShip?: Ship }) {
   const s = obj.stroke;
   const width = s.width * inv;
   const dash = dashArray(s.dash, width);
@@ -175,13 +186,13 @@ function PathNode({ obj, inv, selected, theme, ...rest }: NodeCommon & Themed & 
   let measurement: React.ReactNode = null;
   if (obj.showMeasurement) {
     if (obj.type === 'ruler') {
-      // TODO(travel time): a ruler starting on a ship should also show how long
-      // that ship takes to cover the distance, with and without Engine Boost.
-      // Blocked on data — see "Planned: travel time" in the README.
       const mid = { x: (first.x + last.x) / 2, y: (first.y + last.y) / 2 };
-      measurement = (
-        <MeasureLabel x={mid.x} y={mid.y} inv={inv} color={s.color} theme={theme} text={formatKm(pathLength(pts))} />
-      );
+      const length = pathLength(pts);
+      const time = travelShip ? travelTime(length, travelShip) : null;
+      const text = !time
+        ? formatKm(length)
+        : `${formatKm(length)} · ${formatDuration(time.plain)} min${time.boosted !== null ? ` · ${formatDuration(time.boosted)} min (SB)` : ''}`;
+      measurement = <MeasureLabel x={mid.x} y={mid.y} inv={inv} color={s.color} theme={theme} text={text} />;
     } else if (obj.type === 'area') {
       const cx = pts.reduce((a, p) => a + p.x, 0) / pts.length;
       const cy = pts.reduce((a, p) => a + p.y, 0) / pts.length;

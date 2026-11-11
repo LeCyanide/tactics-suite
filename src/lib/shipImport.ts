@@ -54,6 +54,8 @@ const FIELD_ALIASES: Record<string, string[]> = {
   tier: ['tier', 'level', 'lvl'],
   hp: ['hp', 'health', 'hitpoints', 'survivability'],
   speed_kn: ['speed', 'maxspeed', 'speedkn', 'knots'],
+  engineBoostDuration_s: ['engineboostdurations', 'engineboostduration', 'engineboosttime', 'boostduration'],
+  engineBoostSpeed_pct: ['engineboostspeedpct', 'engineboostspeed', 'engineboostpct', 'boostspeed'],
   rudderShift_s: ['ruddershift', 'rudder', 'ruddershifttime'],
   turningCircle_m: ['turningcircle', 'turningradius', 'turncircle'],
   concealment_km: ['concealment', 'detectability', 'detection', 'detectionrange', 'seadetection', 'concealmentsea', 'detectabilitybysea', 'detectionbysea', 'detectionsea', 'surfacedetection'],
@@ -273,6 +275,8 @@ export function normalizeShip(raw: Raw, existing?: Ship): Ship {
     tier: pick(raw, 'tier') !== undefined ? toTier(pick(raw, 'tier')) : (existing?.tier ?? 10),
     hp: pos(pick(raw, 'hp')) ?? existing?.hp,
     speed_kn: pos(pick(raw, 'speed_kn')) ?? existing?.speed_kn,
+    engineBoostDuration_s: pos(pick(raw, 'engineBoostDuration_s')) ?? existing?.engineBoostDuration_s,
+    engineBoostSpeed_pct: pos(pick(raw, 'engineBoostSpeed_pct')) ?? existing?.engineBoostSpeed_pct,
     rudderShift_s: pos(pick(raw, 'rudderShift_s')) ?? existing?.rudderShift_s,
     turningCircle_m: pos(pick(raw, 'turningCircle_m')) ?? existing?.turningCircle_m,
     concealment_km: toKm(pick(raw, 'concealment_km')) ?? existing?.concealment_km,
@@ -376,7 +380,7 @@ function coerceRows(data: unknown): Raw[] {
 /* ------------------------------------------------------------------ */
 
 const CSV_COLUMNS: (keyof Ship)[] = [
-  'id', 'name', 'nation', 'class', 'cruiserType', 'tier', 'hp', 'speed_kn', 'rudderShift_s', 'turningCircle_m',
+  'id', 'name', 'nation', 'class', 'cruiserType', 'tier', 'hp', 'speed_kn', 'engineBoostDuration_s', 'engineBoostSpeed_pct', 'rudderShift_s', 'turningCircle_m',
   'concealment_km', 'concealmentAir_km', 'mainBatteryRange_km', 'mainBattery', 'secondaryRange_km',
   'torpedoRange_km', 'torpedoSpeed_kn', 'torpedoArc_deg', 'torpedoes',
   'airstrikeMinRange_km', 'airstrikeMaxRange_km', 'aaRange_km', 'aa',

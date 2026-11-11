@@ -238,25 +238,20 @@ and accents, so `Hakuryu` finds `Hakuryū`.
 
 Export back out as JSON, CSV or YAML.
 
-### Planned: travel time
+### Travel time
 
-A ruler that starts on a ship should also show how long that ship takes to
-cover the distance, with and without Engine Boost. It is not built yet,
-because the data is missing:
+A ruler drawn from a ship (press on the ship with the ruler tool) starts at
+its centre and shows how long that ship takes to cover the distance at top
+speed, with and without one Engine Boost: `8.4 km · 1:52 min · 1:44 min (SB)`, SB being
+speed (Engine) Boost. The
+boost only lasts its duration, so on a long run the rest is at plain speed.
+There is no acceleration or turning in it: a straight run from full speed.
 
-- **Ship speed.** Only 18 of the 811 shipped ships carry `speed_kn`.
-- **Engine Boost.** The consumable is listed for 3 ships, with no figure for
-  how much faster it makes them. Its effect varies by ship, so it needs a
-  per-ship value (a percentage and a duration).
-- **Map speed.** Ships cover the map faster than their displayed knots
-  suggest. The factor that turns knots into metres per second on the map has
-  to be confirmed before any time is shown.
-
-The speed and boost figures can come from the ship sheet (two more columns
-for the importer) or from the game's own data, which the replay sidecar
-already loads. The ruler code carries a `TODO(travel time)` where the
-read-out belongs.
-
+Ships cover the map 5.2× faster than their listed knots (`MAP_SPEED_FACTOR`
+in `src/lib/travel.ts`). That was checked against a baked replay: ships at
+full speed ran at a median of 5.24×, the rest being speed flags and skills.
+Speed and Engine Boost come with the ship database (`speed_kn`,
+`engineBoostDuration_s`, `engineBoostSpeed_pct`).
 ---
 
 ## Cap layouts

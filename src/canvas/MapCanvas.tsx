@@ -426,10 +426,19 @@ export default function MapCanvas() {
       if (['rect', 'roundRect', 'circle'].includes(tool)) {
         obj = createShape(tool as ShapeObject['type'], layerFor(), world, 0, 0, toolOptions.stroke);
       } else {
-        obj = createPath(tool as PathObject['type'], layerFor(), world, [
+        // A ruler started on a ship measures from its centre and shows its travel time.
+        const from =
+          tool === 'ruler'
+            ? page.objects.find((o) => o.type === 'ship' && Math.hypot(o.x - world.x, o.y - world.y) <= iconSize * inv * 0.6)
+            : undefined;
+        const origin = from ? { x: from.x, y: from.y } : world;
+        obj = createPath(tool as PathObject['type'], layerFor(), origin, [
           { x: 0, y: 0 },
           { x: 0, y: 0 },
         ], toolOptions.stroke);
+        if (from) (obj as PathObject).fromShipId = from.id;
+        setDraft({ kind: 'shape', obj, start: origin });
+        return;
       }
       setDraft({ kind: 'shape', obj, start: world });
     }
@@ -822,6 +831,13 @@ export default function MapCanvas() {
     return true;
   };
 
+  /** The ship whose travel time a ruler shows: the one it was drawn from, while it is still on the page. */
+  const travelShipFor = (o: TacticalObject): Ship | undefined => {
+    if (o.type !== 'ruler' || !(o as PathObject).fromShipId) return undefined;
+    const from = page?.objects.find((x) => x.id === (o as PathObject).fromShipId) as ShipObject | undefined;
+    return from?.shipId ? shipById.get(from.shipId) : undefined;
+  };
+
   const renderObject = (o: TacticalObject) => {
     if (!isVisible(o)) return null;
     if (o.type === 'ship') {
@@ -850,6 +866,7 @@ export default function MapCanvas() {
         selected={selection.includes(o.id)}
         draggable={isDraggable(o)}
         theme={theme}
+        travelShip={travelShipFor(o)}
       />
     );
   };
@@ -998,7 +1015,7 @@ export default function MapCanvas() {
         {/* Overlay: drafts, marquee, handles — never part of an export */}
         <Layer visible={!exportOpts}>
           {draft?.kind === 'shape' && (
-            <ObjectNode obj={draft.obj} inv={inv} selected draggable={false} theme={theme} />
+            <ObjectNode obj={draft.obj} inv={inv} selected draggable={false} theme={theme} travelShip={travelShipFor(draft.obj)} />
           )}
           {draft?.kind === 'poly' && (
             <Group listening={false}>
