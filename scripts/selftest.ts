@@ -179,6 +179,8 @@ async function testShipFilters(): Promise<void> {
   check('formation: destroyer row ahead of the cruisers', spots[2].y === 3000 && spots[2].x === 5000, spots);
   check('formation: battleship row behind', spots[1].y === 7000, spots);
   check('formation: cruiser row through the click, 2.5 km apart', spots[0].x === 2500 && spots[3].x === 5000 && spots[4].x === 7500 && spots[0].y === 5000, spots);
+  const mixed = spawnFormation(['SS', 'CV'], { x: 0, y: 0 }, { x: 0, y: -1 });
+  check('formation: submarines with destroyers, carriers with battleships', mixed[0].y === -2000 && mixed[1].y === 2000, mixed);
   const east = spawnFormation(['DD'], { x: 0, y: 0 }, { x: 1, y: 0 });
   check('formation: turns with the facing', Math.abs(east[0].x - 2000) < 1e-9 && Math.abs(east[0].y) < 1e-9, east);
 

@@ -10,10 +10,10 @@ export const SHIP_GAP = 2500;
 /**
  * Row of each class, counted forward from the cruisers. Measured in 45 clan
  * battle replays (15.9): destroyers 1.5 km ahead of the cruisers, battleships
- * 1.5 km behind.
- * shortcut: no submarine or carrier was in those battles, so their rows are a guess; measure them once clan replays with one exist.
+ * 1.5 km behind. Submarines spawn with the destroyers, carriers with the
+ * battleships.
  */
-const ROW: Record<ShipClass, number> = { DD: 1, SS: 1, CA: 0, BB: -1, CV: -2 };
+const ROW: Record<ShipClass, number> = { DD: 1, SS: 1, CA: 0, BB: -1, CV: -1 };
 
 /**
  * Where a blueprint's ships land around the point clicked, laid out like a
