@@ -1,7 +1,7 @@
 import { confirmDialog } from '@/state/confirm';
 import { useEffect, useMemo, useState } from 'react';
-import { Copy, Database, FileDown, FileUp, Image as ImageIcon, Plus, RefreshCw, Search, Trash2 } from 'lucide-react';
-import { getActivePage, getRulesets, useStore } from '@/state/store';
+import { Copy, Database, FileDown, FileUp, Image as ImageIcon, Plus, RefreshCw, Search, Trash2, X } from 'lucide-react';
+import { getActivePage, getBlueprints, getRulesets, useStore } from '@/state/store';
 import { Check, ColorInput, Field, InlineEdit, Modal, NumInput, SectionLabel, Tip } from '../common/ui';
 import { useAsset } from '@/state/assets';
 import {
@@ -9,6 +9,7 @@ import {
   shipClassCode,
   type GameMap,
   type Ship,
+  type ShipBlueprint,
   type ShipClass,
   type ShipLimit,
   type ShipRuleset,
@@ -16,7 +17,7 @@ import {
 import { CLASS_COLORS } from '@/canvas/shipGlyphs';
 import { ClassIcon } from '../common/ClassIcon';
 import { uid } from '@/lib/util';
-import { filterShips, hasRadar, hasSmoke, inScope, type Availability } from '@/lib/shipFilters';
+import { CONSUMABLE_FILTERS, filterShips, hasRadar, hasSmoke, inScope, type ConsumableFilter } from '@/lib/shipFilters';
 
 /* ================================================================== */
 /* Map manager                                                         */
@@ -154,9 +155,10 @@ export function ShipDatabaseModal() {
   const [nation, setNation] = useState('');
   const [cls, setCls] = useState<'' | ShipClass>('');
   const [tier, setTier] = useState('');
-  const [radar, setRadar] = useState<Availability>('');
-  const [smoke, setSmoke] = useState<Availability>('');
+  const [consumable, setConsumable] = useState<ConsumableFilter>('');
   const [rulesetId, setRulesetId] = useState('');
+  const [blueprintId, setBlueprintId] = useState('');
+  const [blueprintOnly, setBlueprintOnly] = useState(false);
   const [bannedOnly, setBannedOnly] = useState(false);
   // The limit whose ships are being picked; the table's switches then set
   // membership of that group instead of bans.
@@ -170,6 +172,12 @@ export function ShipDatabaseModal() {
   const patchRuleset = (id: string, patch: Partial<ShipRuleset>) =>
     saveRulesets(rulesets.map((r) => (r.id === id ? { ...r, ...patch } : r)));
 
+  const blueprints = useStore(getBlueprints);
+  const blueprint = blueprints.find((b) => b.id === blueprintId) ?? null;
+  const saveBlueprints = (next: ShipBlueprint[]) => s().setBlueprints(next);
+  const patchBlueprint = (id: string, patch: Partial<ShipBlueprint>) =>
+    saveBlueprints(blueprints.map((b) => (b.id === id ? { ...b, ...patch } : b)));
+
   const nations = useMemo(() => [...new Set(ships.map((x) => x.nation))].sort(), [ships]);
   const tiers = useMemo(() => [...new Set(ships.map((x) => x.tier))].sort((a, b) => b - a), [ships]);
 
@@ -179,14 +187,22 @@ export function ShipDatabaseModal() {
   // ruleset is set up, and a ship that vanished when banned could neither be
   // checked nor brought back. Only tiers and classes take ships off it.
   const filtered = useMemo(() => {
-    const list = filterShips(ships, { query, nation, cls, tier, radar, smoke, ruleset: null });
+    const list = filterShips(ships, {
+      query,
+      nation,
+      cls,
+      tier,
+      consumable,
+      ruleset: null,
+      blueprint: blueprintOnly ? blueprint : null,
+    });
     if (!ruleset) return list;
     return list.filter((ship) => inScope(ruleset, ship) && (!bannedOnly || ruleset.banned.includes(ship.id)));
-  }, [ships, query, nation, cls, tier, radar, smoke, ruleset, bannedOnly]);
+  }, [ships, query, nation, cls, tier, consumable, ruleset, bannedOnly, blueprint, blueprintOnly]);
 
   const selected = ships.find((x) => x.id === selectedId) ?? null;
-  // A ruleset column next to the open ship editor does not fit the usual table: tighten it.
-  const compact = !!ruleset && !!selected;
+  // A ruleset or blueprint column next to the open ship editor does not fit the usual table: tighten it.
+  const compact = (!!ruleset || !!blueprint) && !!selected;
   const withoutIcon = ships.filter((x) => !x.iconId).length;
 
   return (
@@ -251,7 +267,7 @@ export function ShipDatabaseModal() {
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: selected ? '1fr 330px' : '1fr', gap: 12, minHeight: 400 }}>
           <div style={{ minWidth: 0 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 130px 100px 90px', gap: 6, marginBottom: 8 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 130px 100px 90px 130px', gap: 6, marginBottom: 8 }}>
               <div style={{ position: 'relative' }}>
                 <Search size={12} style={{ position: 'absolute', left: 7, top: 6, color: 'var(--fg-faint)' }} />
                 <input type="search" placeholder="Search…" value={query} onChange={(e) => setQuery(e.target.value)} style={{ paddingLeft: 24 }} />
@@ -274,8 +290,16 @@ export function ShipDatabaseModal() {
                   <option key={t}>{t}</option>
                 ))}
               </select>
+              <select value={consumable} onChange={(e) => setConsumable(e.target.value as ConsumableFilter)}>
+                <option value="">All consumables</option>
+                {CONSUMABLE_FILTERS.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 100px 90px', gap: 6, marginBottom: 8 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr auto', gap: 6, marginBottom: 8 }}>
               <select
                 value={ruleset?.id ?? ''}
                 disabled={!rulesets.length}
@@ -309,16 +333,35 @@ export function ShipDatabaseModal() {
               >
                 <Plus size={12} /> Ruleset
               </button>
-              <select value={radar} onChange={(e) => setRadar(e.target.value as Availability)}>
-                <option value="">Radar: any</option>
-                <option value="yes">Has radar</option>
-                <option value="no">No radar</option>
+              <select
+                value={blueprint?.id ?? ''}
+                disabled={!blueprints.length}
+                title="Ship lineups belonging to this project, placed in one go from the ship list"
+                onChange={(e) => {
+                  setBlueprintId(e.target.value);
+                  setBlueprintOnly(false);
+                }}
+              >
+                <option value="">No blueprint</option>
+                {blueprints.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.name}
+                  </option>
+                ))}
               </select>
-              <select value={smoke} onChange={(e) => setSmoke(e.target.value as Availability)}>
-                <option value="">Smoke: any</option>
-                <option value="yes">Has smoke</option>
-                <option value="no">No smoke</option>
-              </select>
+              <button
+                className="btn sm"
+                disabled={!hasProject}
+                title={hasProject ? 'Add a blueprint to this project' : 'Open a project to add a blueprint'}
+                onClick={() => {
+                  const created: ShipBlueprint = { id: uid('blueprint-'), name: 'New blueprint', ships: [] };
+                  saveBlueprints([...blueprints, created]);
+                  setBlueprintId(created.id);
+                  setBlueprintOnly(false);
+                }}
+              >
+                <Plus size={12} /> Blueprint
+              </button>
             </div>
 
             {ruleset && (
@@ -340,6 +383,27 @@ export function ShipDatabaseModal() {
                 onDelete={() => {
                   saveRulesets(rulesets.filter((r) => r.id !== ruleset.id));
                   setRulesetId('');
+                }}
+              />
+            )}
+
+            {blueprint && (
+              <BlueprintEditor
+                key={blueprint.id}
+                blueprint={blueprint}
+                ships={ships}
+                only={blueprintOnly}
+                onOnly={setBlueprintOnly}
+                onChange={(patch) => patchBlueprint(blueprint.id, patch)}
+                onDuplicate={() => {
+                  const copy: ShipBlueprint = { ...blueprint, id: uid('blueprint-'), name: `${blueprint.name} (copy)` };
+                  saveBlueprints([...blueprints, copy]);
+                  setBlueprintId(copy.id);
+                }}
+                onDelete={() => {
+                  saveBlueprints(blueprints.filter((b) => b.id !== blueprint.id));
+                  setBlueprintId('');
+                  setBlueprintOnly(false);
                 }}
               />
             )}
@@ -366,6 +430,7 @@ export function ShipDatabaseModal() {
                     <th style={{ width: 50 }}>Smoke</th>
                     <th style={{ width: 56 }}>Range</th>
                     {ruleset && <th style={{ width: compact ? 1 : 96 }}>{pickingLimit ? 'In limit' : 'Ruleset'}</th>}
+                    {blueprint && <th style={{ width: compact ? 1 : 96 }}>Blueprint</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -420,6 +485,16 @@ export function ShipDatabaseModal() {
                               onChange={() => patchRuleset(ruleset.id, { banned: toggled(ruleset.banned, ship.id) })}
                             />
                           )}
+                        </td>
+                      )}
+                      {blueprint && (
+                        <td onClick={(e) => e.stopPropagation()}>
+                          <Switch
+                            compact={compact}
+                            on={blueprint.ships.includes(ship.id)}
+                            label={blueprint.ships.includes(ship.id) ? 'Added' : 'Add'}
+                            onChange={() => patchBlueprint(blueprint.id, { ships: toggled(blueprint.ships, ship.id) })}
+                          />
                         </td>
                       )}
                     </tr>
@@ -495,6 +570,73 @@ function NameInput({ value, onCommit }: { value: string; onCommit: (v: string) =
         if (e.key === 'Escape') setDraft(value);
       }}
     />
+  );
+}
+
+/**
+ * One blueprint: a name and the ships in it, in the order they were added,
+ * which is the order they are placed in. Ships are added from the table.
+ */
+function BlueprintEditor({
+  blueprint,
+  ships,
+  only,
+  onOnly,
+  onChange,
+  onDuplicate,
+  onDelete,
+}: {
+  blueprint: ShipBlueprint;
+  ships: Ship[];
+  only: boolean;
+  onOnly: (v: boolean) => void;
+  onChange: (patch: Partial<ShipBlueprint>) => void;
+  onDuplicate: () => void;
+  onDelete: () => void;
+}) {
+  const nameOf = useMemo(() => new Map(ships.map((x) => [x.id, x.name])), [ships]);
+  return (
+    <div className="ruleset-editor">
+      <Field label="Blueprint">
+        <NameInput value={blueprint.name} onCommit={(name) => onChange({ name })} />
+        <Tip label="Duplicate blueprint" side="top">
+          <button className="btn sm" onClick={onDuplicate}>
+            <Copy size={12} />
+          </button>
+        </Tip>
+        <Tip label="Delete blueprint" side="top">
+          <button className="btn sm danger" onClick={onDelete}>
+            <Trash2 size={12} />
+          </button>
+        </Tip>
+      </Field>
+      <Field label="Ships">
+        <div className="ruleset-chips">
+          {blueprint.ships.length === 0 && (
+            <span className="faint" style={{ fontSize: 11 }}>
+              None yet — switch ships on in the table to add them.
+            </span>
+          )}
+          {blueprint.ships.map((id) => (
+            <button
+              key={id}
+              className="variant-chip"
+              title="Remove from the blueprint"
+              onClick={() => onChange({ ships: blueprint.ships.filter((x) => x !== id) })}
+            >
+              {nameOf.get(id) ?? 'Missing ship'} <X size={10} style={{ verticalAlign: -1 }} />
+            </button>
+          ))}
+          <button
+            className={`variant-chip${only ? ' active' : ''}`}
+            disabled={!blueprint.ships.length && !only}
+            onClick={() => onOnly(!only)}
+          >
+            Show added
+          </button>
+        </div>
+      </Field>
+    </div>
   );
 }
 

@@ -190,6 +190,7 @@ const api = {
     replaceImage: async () => null,
     remove: async () => [],
     dataUrl: async (file: string, mime: string) => ({ dataUrl: await dataUrl(`/seed/maps/assets/${file}`, mime) }),
+    thumbUrl: async (file: string, mime: string) => ({ dataUrl: await dataUrl(`/seed/maps/assets/${file}`, mime) }),
   },
   capLayouts: {
     list: async () => {

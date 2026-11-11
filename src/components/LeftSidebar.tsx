@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
+import { SearchSelect } from './common/SearchSelect';
 import {
   ArrowDown,
   ArrowUp,
@@ -543,29 +544,20 @@ function MapPanel() {
         </>
       }
     >
-      <select value={page.mapId ?? ''} onChange={(e) => s().setPageMap(e.target.value || null)}>
-        <option value="">— No map —</option>
-        {maps
-          .filter((m) => !m.archived)
-          .map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.name}
-            </option>
-          ))}
-        {/* Stand-ins are grouped rather than mixed in, so the real maps stay
-            the obvious choice and the temporary set is easy to spot. */}
-        {maps.some((m) => m.archived) && (
-          <optgroup label="Archived — layout baked into image">
-            {maps
-              .filter((m) => m.archived)
-              .map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name}
-                </option>
-              ))}
-          </optgroup>
-        )}
-      </select>
+      {/* Stand-ins are grouped rather than mixed in, so the real maps stay
+          the obvious choice and the temporary set is easy to spot. */}
+      <SearchSelect
+        value={page.mapId ?? ''}
+        placeholder="Search maps…"
+        options={[
+          { value: '', label: '— No map —' },
+          ...maps.filter((m) => !m.archived).map((m) => ({ value: m.id, label: m.name })),
+          ...maps
+            .filter((m) => m.archived)
+            .map((m) => ({ value: m.id, label: m.name, group: 'Archived — layout baked into image' })),
+        ]}
+        onChange={(v) => s().setPageMap(v || null)}
+      />
 
       {map && (
         <div className="faint mono" style={{ fontSize: 10.5, margin: '5px 2px' }}>

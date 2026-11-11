@@ -1,4 +1,4 @@
-import { memo, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronRight, Database, Lock, LockOpen, Palette, Radar as RadarIcon, RotateCcw, Save, Search, Trash2 } from 'lucide-react';
 import {
   CHARACTERISTICS,
@@ -19,18 +19,12 @@ import {
   type TextObject,
 } from '@/types/model';
 import {
-  ARROW_TOOLS,
-  ARROW_TOOL_LABELS,
-  SHAPE_TOOLS,
-  SHAPE_TOOL_LABELS,
   effectiveFlags,
   getActivePage,
+  getBlueprints,
   getRulesets,
   shipRangeKm,
   useStore,
-  type ArrowTool,
-  type ShapeTool,
-  type ToolId,
 } from '@/state/store';
 import { Check, ColorInput, Field, NumInput, Panel, Slider, Tip } from './common/ui';
 import { CLASS_COLORS } from '@/canvas/shipGlyphs';
@@ -39,7 +33,7 @@ import { canvasApi } from '@/canvas/canvasBridge';
 import { ClassIcon } from './common/ClassIcon';
 import { ReplayOverlayPanel } from './ReplayOverlayPanel';
 import { gridRef } from '@/lib/util';
-import { filterShips, limitUse, type Availability } from '@/lib/shipFilters';
+import { CONSUMABLE_FILTERS, filterShips, limitUse, type ConsumableFilter } from '@/lib/shipFilters';
 
 export function RightSidebar() {
   const open = useStore((s) => s.rightOpen);
@@ -76,7 +70,6 @@ export function RightSidebar() {
         {selected.length === 0 && <NoSelectionPanels />}
         {selected.length === 1 && <SingleObjectPanels obj={selected[0]} />}
         {selected.length > 1 && <MultiSelectionPanel objects={selected} />}
-        <ToolVariantPanel />
         <ReplayOverlayPanel />
         <ShipBrowserPanel />
       </div>
@@ -174,8 +167,8 @@ function ToolDefaultsPanel() {
           <Slider value={stroke.fillOpacity} max={0.8} onChange={(v) => s().patchToolOptions({ stroke: { ...stroke, fillOpacity: v } })} />
         )}
       </Field>
-      <Field label="Font size">
-        <NumInput value={options.fontSize} min={40} max={4000} step={20} onChange={(v) => s().patchToolOptions({ fontSize: v })} />
+      <Field label="Text size">
+        <TextSizePicker value={options.fontSize} onChange={(v) => s().patchToolOptions({ fontSize: v })} />
       </Field>
       <Field label="Arrowhead">
         <NumInput value={options.arrowSize} min={4} max={48} step={1} onChange={(v) => s().patchToolOptions({ arrowSize: v })} suffix="px" />
@@ -188,41 +181,30 @@ function ToolDefaultsPanel() {
 }
 
 /**
- * Which shape or arrow the grouped rail button draws.
- *
- * The rail carries one button per family; the choice of variant lives here,
- * where there is room to show every option with its name.
+ * Text heights in world metres, so a size reads the same on every map at
+ * any zoom. S is the size text always started at.
  */
-function ToolVariantPanel() {
-  const tool = useStore((s) => s.tool);
-  const setTool = useStore((s) => s.setTool);
-  const patch = useStore((s) => s.patchToolOptions);
+const TEXT_SIZES: { label: string; value: number; hint: string }[] = [
+  { label: 'S', value: 340, hint: 'Small — 340 m tall on the map' },
+  { label: 'M', value: 750, hint: 'Medium — 750 m tall on the map' },
+  { label: 'L', value: 1200, hint: 'Large — 1200 m tall on the map' },
+];
 
-  const isShape = (SHAPE_TOOLS as readonly string[]).includes(tool);
-  const isArrow = (ARROW_TOOLS as readonly string[]).includes(tool);
-  if (!isShape && !isArrow) return null;
-
-  const variants: readonly string[] = isShape ? SHAPE_TOOLS : ARROW_TOOLS;
-  const labels = isShape ? SHAPE_TOOL_LABELS : ARROW_TOOL_LABELS;
-
+/** Text that was resized by hand on the map matches none of the three, and none is lit. */
+function TextSizePicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
-    <Panel title={isShape ? 'Shape' : 'Line & arrow'} storageKey="toolVariant">
-      <div className="variant-grid">
-        {variants.map((v) => (
-          <button
-            key={v}
-            className={`variant-chip${tool === v ? ' active' : ''}`}
-            onClick={() => {
-              if (isShape) patch({ shapeVariant: v as ShapeTool });
-              else patch({ arrowVariant: v as ArrowTool });
-              setTool(v as ToolId);
-            }}
-          >
-            {labels[v as keyof typeof labels]}
-          </button>
-        ))}
-      </div>
-    </Panel>
+    <div className="size-picker">
+      {TEXT_SIZES.map((size) => (
+        <button
+          key={size.label}
+          className={`variant-chip${Math.round(value) === size.value ? ' active' : ''}`}
+          title={size.hint}
+          onClick={() => onChange(size.value)}
+        >
+          {size.label}
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -389,7 +371,7 @@ function TextPropertiesPanel({ obj }: { obj: TextObject }) {
     <Panel title="Text" storageKey="textStyle">
       <textarea value={obj.text} rows={3} onChange={(e) => update({ text: e.target.value })} />
       <Field label="Size">
-        <NumInput value={obj.fontSize} min={20} step={20} onChange={(v) => update({ fontSize: v })} />
+        <TextSizePicker value={obj.fontSize} onChange={(v) => update({ fontSize: v })} />
       </Field>
       <Field label="Colour">
         <ColorInput value={obj.color} onChange={(v) => update({ color: v })} />
@@ -710,10 +692,11 @@ const ShipBrowserPanel = memo(function ShipBrowserPanel() {
   const [nation, setNation] = useState('');
   const [cls, setCls] = useState<'' | ShipClass>('');
   const [tier, setTier] = useState('');
-  const [radar, setRadar] = useState<Availability>('');
-  const [smoke, setSmoke] = useState<Availability>('');
+  const [consumable, setConsumable] = useState<ConsumableFilter>('');
   const [team, setTeam] = useState<ID | ''>('');
   const rulesets = useStore(getRulesets);
+  const blueprints = useStore(getBlueprints);
+  const armed = useStore((s) => s.blueprintSpawn);
   const s = () => useStore.getState();
 
   const nations = useMemo(() => [...new Set(ships.map((x) => x.nation))].sort(), [ships]);
@@ -723,11 +706,19 @@ const ShipBrowserPanel = memo(function ShipBrowserPanel() {
   const ruleset = rulesets.find((r) => r.id === rulesetId) ?? null;
 
   const filtered = useMemo(
-    () => filterShips(ships, { query, searchNation: true, nation, cls, tier, radar, smoke, ruleset }),
-    [ships, query, nation, cls, tier, radar, smoke, ruleset],
+    () => filterShips(ships, { query, searchNation: true, nation, cls, tier, consumable, ruleset }),
+    [ships, query, nation, cls, tier, consumable, ruleset],
   );
 
-  const teamId = team || defaultTeamId || teams[0]?.id || null;
+  const resolvedDefaultId = defaultTeamId || teams[0]?.id || null;
+  const teamId = team || resolvedDefaultId;
+  const teamName = (id: ID | null) => teams.find((t) => t.id === id)?.name ?? 'team';
+
+  // An armed blueprint spawns for whichever team is picked when the map is clicked.
+  useEffect(() => {
+    if (armed && armed.teamId !== teamId) s().armBlueprint({ ...armed, teamId });
+  }, [armed, teamId]);
+
   const iconById = useMemo(() => new Map(icons.map((i) => [i.id, i])), [icons]);
 
   // What the side being placed for already has on the page, for the ruleset's
@@ -807,15 +798,15 @@ const ShipBrowserPanel = memo(function ShipBrowserPanel() {
                 </option>
               ))}
             </select>
-            <select value={radar} onChange={(e) => setRadar(e.target.value as Availability)}>
-              <option value="">Radar</option>
-              <option value="yes">Has radar</option>
-              <option value="no">No radar</option>
-            </select>
-            <select value={smoke} onChange={(e) => setSmoke(e.target.value as Availability)}>
-              <option value="">Smoke</option>
-              <option value="yes">Has smoke</option>
-              <option value="no">No smoke</option>
+          </div>
+          <div className="ship-filters two">
+            <select value={consumable} onChange={(e) => setConsumable(e.target.value as ConsumableFilter)}>
+              <option value="">Consumables</option>
+              {CONSUMABLE_FILTERS.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
+              ))}
             </select>
             <select
               value={ruleset?.id ?? ''}
@@ -831,9 +822,30 @@ const ShipBrowserPanel = memo(function ShipBrowserPanel() {
             </select>
           </div>
 
+          <select
+            className={armed ? 'armed' : undefined}
+            style={{ marginBottom: 4, flex: 'none' }}
+            value={armed?.blueprintId ?? ''}
+            title={
+              armed
+                ? 'Click the map to spawn this lineup — Esc to cancel'
+                : blueprints.length
+                  ? 'Pick a blueprint, then click the map to spawn its ships'
+                  : 'No blueprints yet — add one in the ship database'
+            }
+            onChange={(e) => s().armBlueprint(e.target.value ? { blueprintId: e.target.value, teamId } : null)}
+          >
+            <option value="">{blueprints.length ? 'Blueprint' : 'Blueprint — none yet'}</option>
+            {blueprints.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.name} ({b.ships.length})
+              </option>
+            ))}
+          </select>
+
           {hasProject && teams.length > 0 && (
-            <select value={team} onChange={(e) => setTeam(e.target.value)} style={{ marginBottom: 5 }}>
-              <option value="">Place on default team</option>
+            <select value={team} onChange={(e) => setTeam(e.target.value)} style={{ marginBottom: 5, flex: 'none' }}>
+              <option value="">Place on {teamName(resolvedDefaultId)} (default)</option>
               {teams.map((t) => (
                 <option key={t.id} value={t.id}>
                   Place on {t.name}
@@ -841,6 +853,8 @@ const ShipBrowserPanel = memo(function ShipBrowserPanel() {
               ))}
             </select>
           )}
+
+          {armed && <div className="spawn-hint">Click the map to spawn the lineup · Esc cancels</div>}
 
           {ruleset && ruleset.maxShips > 0 && (
             <div className={`team-count${placed.length >= ruleset.maxShips ? ' full' : ''}`}>

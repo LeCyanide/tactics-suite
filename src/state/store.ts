@@ -29,6 +29,7 @@ import {
   type ShipObject,
   type StrokeStyle,
   type TacticalObject,
+  type ShipBlueprint,
   type ShipRuleset,
   type Team,
   type Vec2,
@@ -43,6 +44,7 @@ import {
   createShipObject,
 } from '@/lib/factory';
 import { parseShipData, serializeShips } from '@/lib/shipImport';
+import { spawnFormation } from '@/lib/formation';
 import { SAMPLE_SHIPS } from '@/data/sampleShips';
 
 const HISTORY_LIMIT = 50;
@@ -237,6 +239,8 @@ interface Actions {
 
   /* ships on map */
   placeShip(shipId: ID, at: Vec2, teamId?: ID | null): void;
+  /** Places several ships as one undo step and selects them as a group. */
+  placeShips(placements: { shipId: ID; at: Vec2 }[], teamId?: ID | null): void;
   setShipDisplay(objectId: ID, key: CharacteristicKey, value: boolean | undefined): void;
 
   /* layers */
@@ -253,6 +257,15 @@ interface Actions {
 
   /* ship rulesets */
   setRulesets(rulesets: ShipRuleset[]): void;
+  setBlueprints(blueprints: ShipBlueprint[]): void;
+  /**
+   * A blueprint waiting for a click on the map, and the team it spawns for.
+   * Null when none is armed. Not saved: it is a mode, like the current tool.
+   */
+  blueprintSpawn: { blueprintId: ID; teamId: ID | null } | null;
+  armBlueprint(spawn: { blueprintId: ID; teamId: ID | null } | null): void;
+  /** Spawns the armed blueprint around a point, `spacing` metres apart, and disarms it. */
+  spawnBlueprint(at: Vec2, spacing: number, bounds: { width: number; height: number }): void;
 
   /* history */
   pushHistory(): void;
@@ -333,6 +346,9 @@ function groupSelection(tool: ToolId, selection: ID[]): { selection: ID[]; tool:
  */
 const NO_RULESETS: ShipRuleset[] = [];
 export const getRulesets = (s: Store): ShipRuleset[] => s.project?.rulesets ?? NO_RULESETS;
+
+const NO_BLUEPRINTS: ShipBlueprint[] = [];
+export const getBlueprints = (s: Store): ShipBlueprint[] => s.project?.blueprints ?? NO_BLUEPRINTS;
 
 export const useStore = create<Store>((set, get) => {
   /** Persists the current project; debounced for autosave. */
@@ -615,6 +631,7 @@ export const useStore = create<Store>((set, get) => {
       settlePages(doc);
       settleTabs(doc);
       doc.rulesets = (doc.rulesets ?? []).map((r) => ({ ...r, limits: r.limits ?? [], maxShips: r.maxShips ?? 0 }));
+      doc.blueprints = (doc.blueprints ?? []).map((b) => ({ ...b, ships: b.ships ?? [] }));
       // Legacy default team names take the current side's name and colour.
       doc.teams = (doc.teams ?? []).map((t) => {
         const side = LEGACY_TEAM_NAMES[t.name];
@@ -658,7 +675,7 @@ export const useStore = create<Store>((set, get) => {
       if (!project) return;
       const copy: Project = { ...clone(project), id: uid('prj-'), name, createdAt: Date.now(), updatedAt: Date.now() };
       await window.api.projects.save(copy);
-      set({ project: copy, past: [], future: [], dirty: false, lastSavedAt: Date.now() });
+      set({ project: copy, blueprintSpawn: null, past: [], future: [], dirty: false, lastSavedAt: Date.now() });
       get().patchSettings({ lastProjectId: copy.id });
       await get().refreshProjects();
       get().toast(`Saved as "${name}"`, 'success');
@@ -701,7 +718,7 @@ export const useStore = create<Store>((set, get) => {
       if (!ok) return;
       await window.api.projects.remove(id);
       if (get().project?.id === id) {
-        set({ project: null, past: [], future: [], selection: [], modal: 'projects' });
+        set({ project: null, blueprintSpawn: null, past: [], future: [], selection: [], modal: 'projects' });
         get().patchSettings({ lastProjectId: null });
       }
       await get().refreshProjects();
@@ -739,7 +756,7 @@ export const useStore = create<Store>((set, get) => {
 
     async closeProject() {
       if (get().dirty) await persist();
-      set({ project: null, selection: [], past: [], future: [], modal: 'projects' });
+      set({ project: null, blueprintSpawn: null, selection: [], past: [], future: [], modal: 'projects' });
     },
 
     /* ------------------------------ pages ------------------------------ */
@@ -1117,6 +1134,18 @@ export const useStore = create<Store>((set, get) => {
       get().addObjects([obj]);
     },
 
+    placeShips(placements, teamId) {
+      const { ships, project } = get();
+      if (!project) return;
+      const team = teamId !== undefined ? teamId : project.settings.defaultTeamId ?? project.teams[0]?.id ?? null;
+      const byId = new Map(ships.map((s) => [s.id, s]));
+      const objects = placements.flatMap(({ shipId, at }) => {
+        const ship = byId.get(shipId);
+        return ship ? [createShipObject(ship, at, team)] : [];
+      });
+      get().addObjects(objects);
+    },
+
     setShipDisplay(objectId, key, value) {
       commitPage((page) => {
         page.objects = page.objects.map((o) => {
@@ -1200,6 +1229,35 @@ export const useStore = create<Store>((set, get) => {
       commit((draft) => {
         draft.rulesets = rulesets;
       });
+    },
+
+    setBlueprints(blueprints) {
+      commit((draft) => {
+        draft.blueprints = blueprints;
+      });
+      const armed = get().blueprintSpawn;
+      if (armed && !blueprints.some((b) => b.id === armed.blueprintId)) set({ blueprintSpawn: null });
+    },
+
+    blueprintSpawn: null,
+
+    armBlueprint(spawn) {
+      set({ blueprintSpawn: spawn });
+    },
+
+    spawnBlueprint(at, spacing, bounds) {
+      const armed = get().blueprintSpawn;
+      const blueprint = get().project?.blueprints.find((b) => b.id === armed?.blueprintId);
+      set({ blueprintSpawn: null });
+      if (!armed || !blueprint) return;
+      const known = new Set(get().ships.map((s) => s.id));
+      const ids = blueprint.ships.filter((id) => known.has(id));
+      const inside = (v: number, max: number) => Math.min(max, Math.max(0, v));
+      const spots = spawnFormation(ids.length, at, spacing);
+      get().placeShips(
+        ids.map((shipId, i) => ({ shipId, at: { x: inside(spots[i].x, bounds.width), y: inside(spots[i].y, bounds.height) } })),
+        armed.teamId,
+      );
     },
 
     removeTeam(id) {
@@ -1492,6 +1550,10 @@ export const useStore = create<Store>((set, get) => {
     setTool(tool) {
       const keep = tool === 'marquee' || (tool === 'select' && get().selection.length <= 1);
       set(keep ? { tool } : { tool, selection: [] });
+      // A shape or arrow picked by any route (rail, side bar, shortcut) is
+      // the one its rail button shows and draws next time.
+      if ((SHAPE_TOOLS as readonly string[]).includes(tool)) get().patchToolOptions({ shapeVariant: tool as ShapeTool });
+      if ((ARROW_TOOLS as readonly string[]).includes(tool)) get().patchToolOptions({ arrowVariant: tool as ArrowTool });
     },
 
     patchToolOptions(patch) {

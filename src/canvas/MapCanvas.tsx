@@ -94,6 +94,7 @@ export default function MapCanvas() {
   const selection = useStore((s) => s.selection);
   const activeLayerId = useStore((s) => s.activeLayerId);
   const fitRequest = useStore((s) => s.fitRequest);
+  const blueprintArmed = useStore((s) => !!s.blueprintSpawn);
   // Subscribing here is what makes a theme switch repaint the map: the palette
   // then flows down as a prop and invalidates every memoised Konva node.
   const themeName = useStore((s) => s.settings.theme);
@@ -348,6 +349,16 @@ export default function MapCanvas() {
     const onEmpty = e.target === stage || e.target.name() === 'backdrop';
 
     if (e.evt.button !== 0) return;
+
+    // An armed blueprint takes the click, whatever the tool: its ships land
+    // around it, about a kilometre apart, or farther when zoomed out so
+    // their icons and names do not pile up.
+    if (useStore.getState().blueprintSpawn) {
+      if (inReplay) return;
+      const spacing = Math.max(1000, 110 / camera.scale);
+      useStore.getState().spawnBlueprint(world, spacing, { width: worldW, height: worldH });
+      return;
+    }
 
     // Select works on one object at a time: empty water has nothing to offer
     // it but a way to let go of that object.
@@ -843,7 +854,7 @@ export default function MapCanvas() {
     );
   };
 
-  const cursorClass = tool === 'select' || tool === 'marquee' ? 'default' : 'cross';
+  const cursorClass = blueprintArmed ? 'cross' : tool === 'select' || tool === 'marquee' ? 'default' : 'cross';
 
   return (
     <div
@@ -1112,11 +1123,6 @@ export default function MapCanvas() {
 /* Small helpers                                                       */
 /* ------------------------------------------------------------------ */
 
-/**
- * Konva draws every transformer anchor as a plain rect. The rotate handle is
- * the one that means something other than "resize", so it is given a round
- * body and the conventional circular arrow drawn into it.
- */
 /** The cursor's world position, for whoever subscribes; setting it re-renders nothing else. */
 function cursorStore() {
   let pos: Vec2 = { x: 0, y: 0 };
@@ -1159,6 +1165,11 @@ function CursorReadout({
   );
 }
 
+/**
+ * Konva draws every transformer anchor as a plain rect. The rotate handle is
+ * the one that means something other than "resize", so it is given a round
+ * body and the conventional circular arrow drawn into it.
+ */
 function styleAnchor(anchor: Konva.Rect): void {
   if (anchor.name().indexOf('rotater') === -1) return;
   const d = 14;

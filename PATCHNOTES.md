@@ -16,6 +16,8 @@ Collect notes under `## Unreleased` and rename it to the version when releasing.
 ### New
 
 - Patch notes: after an update, the app shows what changed the first time it starts. "Don't show again" turns this off; Settings → Updates turns it back on and has a View patch notes button for every version
+- Ship blueprints: save a lineup of ships in the ship database (**+ Blueprint**, then switch ships on in the table). Pick it in the ship list and click the map to spawn the whole lineup in formation; Esc cancels
+- Map picker: type to search the map list
 
 ### Changes
 
@@ -25,6 +27,11 @@ Collect notes under `## Unreleased` and rename it to the version when releasing.
 - Edits are quicker and use less memory: the ship list is no longer redrawn after every change, and moving or resizing an object no longer stores a full copy of the project for undo
 - Lower memory use: the Map Manager shows small previews instead of loading every map at full size, and maps are only kept in memory while a tab uses them
 - Undo keeps the last 50 steps instead of 100
+- Ship list and ship database: radar, hydro and smoke are now one Consumables filter
+- Text size is now S, M or L (340 m, 750 m, 1200 m)
+- Shapes and arrows: pick the kind from a small bar that opens beside the tool rail and stays open while you draw, instead of from the sidebar
+- The team picker is now the last option in the ship list's filters
+- The ship list's team picker names the default team, such as "Place on Alpha (default)"
 
 ### Fixes
 
