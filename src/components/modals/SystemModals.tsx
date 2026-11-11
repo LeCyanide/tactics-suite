@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Clipboard, HardDrive, ImageDown, Keyboard, RefreshCw, RotateCcw, Scale, Send, Unplug } from 'lucide-react';
+import { Clipboard, HardDrive, ImageDown, Keyboard, RefreshCw, RotateCcw, Scale, ScrollText, Send, Unplug } from 'lucide-react';
 import { getActivePage, useStore } from '@/state/store';
 import { Check, Field, Modal, NumInput, SectionLabel, Slider, Tip } from '../common/ui';
 import { canvasApi, DEFAULT_EXPORT, type ExportOptions } from '@/canvas/canvasBridge';
@@ -20,6 +20,7 @@ import {
   type DiscordBot,
 } from '@/state/discord';
 import type { ThemeName } from '@/types/model';
+import { BUNDLED_PATCH_NOTES, type PatchNotesArg } from '@/lib/patchNotes';
 
 /* ================================================================== */
 /* Image export                                                        */
@@ -548,8 +549,14 @@ function describeUpdate(u: UpdateState): string {
 
 function UpdateSection() {
   const u = useUpdateState();
+  const showPatchNotes = useStore((s) => s.settings.showPatchNotes);
   return (
     <>
+      <Check
+        label="Show patch notes after an update"
+        checked={showPatchNotes}
+        onChange={(v) => useStore.getState().patchSettings({ showPatchNotes: v })}
+      />
       <div className="faint" style={{ fontSize: 11.5, marginBottom: 8, color: u.status === 'error' ? 'var(--danger)' : undefined }}>
         {describeUpdate(u)}
       </div>
@@ -570,6 +577,20 @@ function UpdateSection() {
           <RefreshCw size={12} /> Check for updates
         </button>
       )}
+      <button
+        className="btn sm"
+        style={{ marginLeft: 6 }}
+        disabled={BUNDLED_PATCH_NOTES.length === 0}
+        onClick={() =>
+          useStore.getState().openModal('patchNotes', {
+            versions: BUNDLED_PATCH_NOTES,
+            afterUpdate: false,
+            returnTo: 'settings',
+          } satisfies PatchNotesArg)
+        }
+      >
+        <ScrollText size={12} /> View patch notes
+      </button>
     </>
   );
 }

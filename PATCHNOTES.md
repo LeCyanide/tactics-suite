@@ -11,6 +11,12 @@ item under it one note. Use `### Changelog` for what is finished and
 
 Collect notes under `## Unreleased` and rename it to the version when releasing.
 
+## Unreleased
+
+### New
+
+- Patch notes: after an update, the app shows what changed the first time it starts. "Don't show again" turns this off; Settings → Updates turns it back on and has a View patch notes button for every version
+
 ## 2.6.0
 
 ### New

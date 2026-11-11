@@ -14,6 +14,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import react from '@vitejs/plugin-react';
 import { defineConfig, type Plugin } from 'vite';
+import { bundledPatchNotes } from '../scripts/patch-notes.mjs';
 
 const root = path.resolve(__dirname, '..');
 
@@ -67,6 +68,9 @@ function fixtures(): Plugin {
 
 export default defineConfig({
   root,
+  define: {
+    __PATCH_NOTES__: JSON.stringify(bundledPatchNotes()),
+  },
   resolve: { alias: { '@': path.join(root, 'src') } },
   plugins: [react(), fixtures()],
   server: {

@@ -717,6 +717,13 @@ export interface AppSettings {
    * is not a setting: the main process keeps that, encrypted, on its own.
    */
   discordChannel: string;
+  /** Open the patch notes on the first launch after an update. */
+  showPatchNotes: boolean;
+  /**
+   * The version whose patch notes were last offered, so they open once per
+   * update. Empty on a fresh install and for users coming from before 2.7.
+   */
+  patchNotesSeen: string;
 }
 
 export const DEFAULT_APP_SETTINGS: AppSettings = {
@@ -735,4 +742,6 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   wowsGameDir: '',
   replayDir: '',
   discordChannel: '',
+  showPatchNotes: true,
+  patchNotesSeen: '',
 };
