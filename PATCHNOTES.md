@@ -28,7 +28,8 @@ Collect notes under `## Unreleased` and rename it to the version when releasing.
 - Lower memory use: the Map Manager shows small previews instead of loading every map at full size, and maps are only kept in memory while a tab uses them
 - Undo keeps the last 50 steps instead of 100
 - Ship list and ship database: radar, hydro and smoke are now one Consumables filter
-- Text size is now S, M or L (340 m, 750 m, 1200 m)
+- Ship list: the Nation filter is removed (search by nation still works); Consumables moves into the first row and Blueprint into the second
+- Text size is now S, M or L (600 m, 900 m, 1200 m); new text starts at M
 - Shapes and arrows: pick the kind from a small bar that opens beside the tool rail and stays open while you draw, instead of from the sidebar
 - The team picker is now the last option in the ship list's filters
 - The ship list's team picker names the default team, such as "Place on Alpha (default)"

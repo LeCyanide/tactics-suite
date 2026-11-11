@@ -6,19 +6,13 @@
 import type { ID, Ship, ShipBlueprint, ShipClass, ShipObject, ShipRuleset, TacticalObject, Team } from '@/types/model';
 import { foldForSearch } from './util';
 
-/**
- * One consumable question at a time: which of radar, hydro and smoke a ship
- * carries or lacks. Empty asks nothing.
- */
-export type ConsumableFilter = '' | 'radar' | 'no-radar' | 'hydro' | 'no-hydro' | 'smoke' | 'no-smoke';
+/** One consumable a ship must carry: radar, hydro or smoke. Empty asks nothing. */
+export type ConsumableFilter = '' | 'radar' | 'hydro' | 'smoke';
 
 export const CONSUMABLE_FILTERS: { value: Exclude<ConsumableFilter, ''>; label: string }[] = [
-  { value: 'radar', label: 'Has radar' },
-  { value: 'no-radar', label: 'No radar' },
-  { value: 'hydro', label: 'Has hydro' },
-  { value: 'no-hydro', label: 'No hydro' },
-  { value: 'smoke', label: 'Has smoke' },
-  { value: 'no-smoke', label: 'No smoke' },
+  { value: 'radar', label: 'Radar' },
+  { value: 'hydro', label: 'Hydro' },
+  { value: 'smoke', label: 'Smoke' },
 ];
 
 export interface ShipFilter {
@@ -134,16 +128,10 @@ function matchesConsumable(ship: Ship, want: ConsumableFilter): boolean {
       return true;
     case 'radar':
       return hasRadar(ship);
-    case 'no-radar':
-      return !hasRadar(ship);
     case 'hydro':
       return hasHydro(ship);
-    case 'no-hydro':
-      return !hasHydro(ship);
     case 'smoke':
       return hasSmoke(ship);
-    case 'no-smoke':
-      return !hasSmoke(ship);
   }
 }
 

@@ -310,7 +310,7 @@ export type Store = State & Actions;
 
 const initialToolOptions: ToolOptions = {
   stroke: clone(DEFAULT_STROKE),
-  fontSize: 340,
+  fontSize: 900,
   arrowSize: 14,
   shapeVariant: 'circle',
   arrowVariant: 'arrow',

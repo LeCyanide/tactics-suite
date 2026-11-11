@@ -991,7 +991,8 @@ input[type='range']::-webkit-slider-thumb {
 
 .ship-filters {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  /* Class, Tier, Consumables: Tier holds two digits, Consumables the longest label. */
+  grid-template-columns: 1fr 0.7fr 1.3fr;
   gap: 4px;
   padding: 0 0 5px;
 }

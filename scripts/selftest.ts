@@ -168,16 +168,7 @@ async function testShipFilters(): Promise<void> {
   const base: ShipFilter = { query: '', nation: '', cls: '', tier: '', consumable: '', ruleset: null };
   const names = (f: Partial<ShipFilter>) => filterShips(ships, { ...base, ...f }).map((s) => s.name).sort().join(',');
   check('filter: has radar', names({ consumable: 'radar' }) === 'Des Moines,Minotaur', names({ consumable: 'radar' }));
-  check('filter: no smoke', names({ consumable: 'no-smoke' }) === 'Des Moines,Yamato', names({ consumable: 'no-smoke' }));
-  check(
-    'filter: has and lacks split the list',
-    ['radar', 'hydro', 'smoke'].every(
-      (c) =>
-        filterShips(ships, { ...base, consumable: c as 'radar' }).length +
-          filterShips(ships, { ...base, consumable: `no-${c}` as 'no-radar' }).length ===
-        ships.length,
-    ),
-  );
+  check('filter: has smoke', !/Des Moines|Yamato/.test(names({ consumable: 'smoke' })) && names({ consumable: 'smoke' }) !== '', names({ consumable: 'smoke' }));
   const lineup = { id: 'b', name: 'Lineup', ships: [named('Minotaur').id, named('Yamato').id] };
   check('blueprint: narrows the list to its ships', names({ blueprint: lineup }) === 'Minotaur,Yamato', names({ blueprint: lineup }));
   check('blueprint: other filters still apply', names({ blueprint: lineup, consumable: 'radar' }) === 'Minotaur');

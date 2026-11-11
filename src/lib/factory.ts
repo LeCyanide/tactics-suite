@@ -135,7 +135,7 @@ export function createShape(
   } as ShapeObject;
 }
 
-export function createText(layerId: ID, origin: Vec2, text = 'Text', fontSize = 340): TextObject {
+export function createText(layerId: ID, origin: Vec2, text = 'Text', fontSize = 900): TextObject {
   return {
     ...base('text', layerId, origin.x, origin.y),
     type: 'text',

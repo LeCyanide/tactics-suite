@@ -182,11 +182,11 @@ function ToolDefaultsPanel() {
 
 /**
  * Text heights in world metres, so a size reads the same on every map at
- * any zoom. S is the size text always started at.
+ * any zoom. New text starts at M.
  */
 const TEXT_SIZES: { label: string; value: number; hint: string }[] = [
-  { label: 'S', value: 340, hint: 'Small — 340 m tall on the map' },
-  { label: 'M', value: 750, hint: 'Medium — 750 m tall on the map' },
+  { label: 'S', value: 600, hint: 'Small — 600 m tall on the map' },
+  { label: 'M', value: 900, hint: 'Medium — 900 m tall on the map' },
   { label: 'L', value: 1200, hint: 'Large — 1200 m tall on the map' },
 ];
 
@@ -689,7 +689,6 @@ const ShipBrowserPanel = memo(function ShipBrowserPanel() {
   const defaultTeamId = useStore((s) => s.project?.settings.defaultTeamId ?? null);
   const hasProject = useStore((s) => !!s.project);
   const [query, setQuery] = useState('');
-  const [nation, setNation] = useState('');
   const [cls, setCls] = useState<'' | ShipClass>('');
   const [tier, setTier] = useState('');
   const [consumable, setConsumable] = useState<ConsumableFilter>('');
@@ -699,15 +698,14 @@ const ShipBrowserPanel = memo(function ShipBrowserPanel() {
   const armed = useStore((s) => s.blueprintSpawn);
   const s = () => useStore.getState();
 
-  const nations = useMemo(() => [...new Set(ships.map((x) => x.nation))].sort(), [ships]);
   const tiers = useMemo(() => [...new Set(ships.map((x) => x.tier))].sort((a, b) => b - a), [ships]);
   // The ruleset is the page's: picking one here holds the page's lineup to it.
   const rulesetId = useStore((s) => getActivePage(s)?.rulesetId ?? null);
   const ruleset = rulesets.find((r) => r.id === rulesetId) ?? null;
 
   const filtered = useMemo(
-    () => filterShips(ships, { query, searchNation: true, nation, cls, tier, consumable, ruleset }),
-    [ships, query, nation, cls, tier, consumable, ruleset],
+    () => filterShips(ships, { query, searchNation: true, nation: '', cls, tier, consumable, ruleset }),
+    [ships, query, cls, tier, consumable, ruleset],
   );
 
   const resolvedDefaultId = defaultTeamId || teams[0]?.id || null;
@@ -774,14 +772,6 @@ const ShipBrowserPanel = memo(function ShipBrowserPanel() {
           </div>
 
           <div className="ship-filters">
-            <select value={nation} onChange={(e) => setNation(e.target.value)}>
-              <option value="">Nation</option>
-              {nations.map((n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
-              ))}
-            </select>
             <select value={cls} onChange={(e) => setCls(e.target.value as ShipClass | '')}>
               <option value="">Class</option>
               {SHIP_CLASSES.map((c) => (
@@ -798,8 +788,6 @@ const ShipBrowserPanel = memo(function ShipBrowserPanel() {
                 </option>
               ))}
             </select>
-          </div>
-          <div className="ship-filters two">
             <select value={consumable} onChange={(e) => setConsumable(e.target.value as ConsumableFilter)}>
               <option value="">Consumables</option>
               {CONSUMABLE_FILTERS.map((c) => (
@@ -808,6 +796,8 @@ const ShipBrowserPanel = memo(function ShipBrowserPanel() {
                 </option>
               ))}
             </select>
+          </div>
+          <div className="ship-filters two">
             <select
               value={ruleset?.id ?? ''}
               title="The ship restrictions this page is held to — add and edit them in the ship database"
@@ -820,28 +810,26 @@ const ShipBrowserPanel = memo(function ShipBrowserPanel() {
                 </option>
               ))}
             </select>
+            <select
+              className={armed ? 'armed' : undefined}
+              value={armed?.blueprintId ?? ''}
+              title={
+                armed
+                  ? 'Click the map to spawn this lineup — Esc to cancel'
+                  : blueprints.length
+                    ? 'Pick a blueprint, then click the map to spawn its ships'
+                    : 'No blueprints yet — add one in the ship database'
+              }
+              onChange={(e) => s().armBlueprint(e.target.value ? { blueprintId: e.target.value, teamId } : null)}
+            >
+              <option value="">{blueprints.length ? 'Blueprint' : 'No blueprints'}</option>
+              {blueprints.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.name} ({b.ships.length})
+                </option>
+              ))}
+            </select>
           </div>
-
-          <select
-            className={armed ? 'armed' : undefined}
-            style={{ marginBottom: 4, flex: 'none' }}
-            value={armed?.blueprintId ?? ''}
-            title={
-              armed
-                ? 'Click the map to spawn this lineup — Esc to cancel'
-                : blueprints.length
-                  ? 'Pick a blueprint, then click the map to spawn its ships'
-                  : 'No blueprints yet — add one in the ship database'
-            }
-            onChange={(e) => s().armBlueprint(e.target.value ? { blueprintId: e.target.value, teamId } : null)}
-          >
-            <option value="">{blueprints.length ? 'Blueprint' : 'Blueprint — none yet'}</option>
-            {blueprints.map((b) => (
-              <option key={b.id} value={b.id}>
-                {b.name} ({b.ships.length})
-              </option>
-            ))}
-          </select>
 
           {hasProject && teams.length > 0 && (
             <select value={team} onChange={(e) => setTeam(e.target.value)} style={{ marginBottom: 5, flex: 'none' }}>
