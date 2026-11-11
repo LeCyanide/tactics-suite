@@ -35,6 +35,7 @@ Collect notes under `## Unreleased` and rename it to the version when releasing.
 - Shapes and arrows: pick the kind from a small bar that opens beside the tool rail and stays open while you draw, instead of from the sidebar
 - The team picker is now the last option in the ship list's filters
 - The ship list's team picker names the default team, such as "Place on Alpha (default)"
+- Text tool: clicking the map while a note is open finishes it instead of starting a new one; the next click starts the new note
 
 ### Fixes
 

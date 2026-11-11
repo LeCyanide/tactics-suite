@@ -393,10 +393,12 @@ export default function MapCanvas() {
       // the editor would blur, commit an empty string and delete itself before
       // a single key could be typed.
       e.evt.preventDefault();
-      // Holding the focus means a second note does not blur the first one's
-      // editor, which is re-pointed rather than unmounted: without this the
-      // note being typed would be dropped on the way to the next one.
-      commitTextEdit();
+      // A click while a note is open only finishes it, so clicking away is a
+      // way to confirm; the next click starts a new note.
+      if (editingText) {
+        commitTextEdit();
+        return;
+      }
       const obj = createText(layerFor(), world, '', toolOptions.fontSize);
       useStore.getState().addObjects([obj]);
       setEditingText({ id: obj.id, value: '' });
