@@ -25,6 +25,7 @@ import { LEGACY_APP_FOLDERS, adoptLegacyStore } from '../electron/storage/migrat
 import { testReplayArchive } from './selftest-archive';
 import { testSidecar } from './selftest-sidecar';
 import { testReplayTimeline } from './selftest-timeline';
+import { testHistory } from './selftest-history';
 import { compareVersions, notesSince, onLaunch, type VersionNotes } from '../src/lib/patchNotes';
 import { bundledPatchNotes } from './patch-notes.mjs';
 
@@ -670,6 +671,7 @@ async function main(): Promise<void> {
   await testTempSweep();
   await testSeeding();
   await testPatchNotes();
+  await testHistory(check);
   await testReplayTimeline(check);
   await testSidecar(check);
   await testReplayArchive(check);
