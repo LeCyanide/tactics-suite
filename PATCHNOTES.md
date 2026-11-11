@@ -15,13 +15,15 @@ Collect notes under `## Unreleased` and rename it to the version when releasing.
 
 ### New
 
-- Ship blueprints: save a lineup of ships in the ship database (**+ Blueprint**, then switch ships on in the table) and place the whole lineup at once from the ship list
+- Ship blueprints: save a lineup of ships in the ship database (**+ Blueprint**, then switch ships on in the table). Pick it in the ship list and click the map to spawn the whole lineup in formation; Esc cancels
 - Map picker: type to search the map list
 
 ### Changes
 
 - Ship list and ship database: radar, hydro and smoke are now one Consumables filter
 - Text size is now S, M or L (340 m, 750 m, 1200 m)
+- Shapes and arrows: pick the kind from a small bar that opens beside the tool rail and stays open while you draw, instead of from the sidebar
+- The team picker is now the last option in the ship list's filters
 - The ship list's team picker names the default team, such as "Place on Alpha (default)"
 
 ## 2.6.0

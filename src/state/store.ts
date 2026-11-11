@@ -43,6 +43,7 @@ import {
   createShipObject,
 } from '@/lib/factory';
 import { parseShipData, serializeShips } from '@/lib/shipImport';
+import { spawnFormation } from '@/lib/formation';
 import { SAMPLE_SHIPS } from '@/data/sampleShips';
 
 const HISTORY_LIMIT = 100;
@@ -253,6 +254,14 @@ interface Actions {
   /* ship rulesets */
   setRulesets(rulesets: ShipRuleset[]): void;
   setBlueprints(blueprints: ShipBlueprint[]): void;
+  /**
+   * A blueprint waiting for a click on the map, and the team it spawns for.
+   * Null when none is armed. Not saved: it is a mode, like the current tool.
+   */
+  blueprintSpawn: { blueprintId: ID; teamId: ID | null } | null;
+  armBlueprint(spawn: { blueprintId: ID; teamId: ID | null } | null): void;
+  /** Spawns the armed blueprint around a point, `spacing` metres apart, and disarms it. */
+  spawnBlueprint(at: Vec2, spacing: number, bounds: { width: number; height: number }): void;
 
   /* history */
   pushHistory(): void;
@@ -642,7 +651,7 @@ export const useStore = create<Store>((set, get) => {
       if (!project) return;
       const copy: Project = { ...clone(project), id: uid('prj-'), name, createdAt: Date.now(), updatedAt: Date.now() };
       await window.api.projects.save(copy);
-      set({ project: copy, past: [], future: [], dirty: false, lastSavedAt: Date.now() });
+      set({ project: copy, blueprintSpawn: null, past: [], future: [], dirty: false, lastSavedAt: Date.now() });
       get().patchSettings({ lastProjectId: copy.id });
       await get().refreshProjects();
       get().toast(`Saved as "${name}"`, 'success');
@@ -685,7 +694,7 @@ export const useStore = create<Store>((set, get) => {
       if (!ok) return;
       await window.api.projects.remove(id);
       if (get().project?.id === id) {
-        set({ project: null, past: [], future: [], selection: [], modal: 'projects' });
+        set({ project: null, blueprintSpawn: null, past: [], future: [], selection: [], modal: 'projects' });
         get().patchSettings({ lastProjectId: null });
       }
       await get().refreshProjects();
@@ -723,7 +732,7 @@ export const useStore = create<Store>((set, get) => {
 
     async closeProject() {
       if (get().dirty) await persist();
-      set({ project: null, selection: [], past: [], future: [], modal: 'projects' });
+      set({ project: null, blueprintSpawn: null, selection: [], past: [], future: [], modal: 'projects' });
     },
 
     /* ------------------------------ pages ------------------------------ */
@@ -1202,6 +1211,29 @@ export const useStore = create<Store>((set, get) => {
       commit((draft) => {
         draft.blueprints = blueprints;
       });
+      const armed = get().blueprintSpawn;
+      if (armed && !blueprints.some((b) => b.id === armed.blueprintId)) set({ blueprintSpawn: null });
+    },
+
+    blueprintSpawn: null,
+
+    armBlueprint(spawn) {
+      set({ blueprintSpawn: spawn });
+    },
+
+    spawnBlueprint(at, spacing, bounds) {
+      const armed = get().blueprintSpawn;
+      const blueprint = get().project?.blueprints.find((b) => b.id === armed?.blueprintId);
+      set({ blueprintSpawn: null });
+      if (!armed || !blueprint) return;
+      const known = new Set(get().ships.map((s) => s.id));
+      const ids = blueprint.ships.filter((id) => known.has(id));
+      const inside = (v: number, max: number) => Math.min(max, Math.max(0, v));
+      const spots = spawnFormation(ids.length, at, spacing);
+      get().placeShips(
+        ids.map((shipId, i) => ({ shipId, at: { x: inside(spots[i].x, bounds.width), y: inside(spots[i].y, bounds.height) } })),
+        armed.teamId,
+      );
     },
 
     removeTeam(id) {
@@ -1482,6 +1514,10 @@ export const useStore = create<Store>((set, get) => {
     setTool(tool) {
       const keep = tool === 'marquee' || (tool === 'select' && get().selection.length <= 1);
       set(keep ? { tool } : { tool, selection: [] });
+      // A shape or arrow picked by any route (rail, side bar, shortcut) is
+      // the one its rail button shows and draws next time.
+      if ((SHAPE_TOOLS as readonly string[]).includes(tool)) get().patchToolOptions({ shapeVariant: tool as ShapeTool });
+      if ((ARROW_TOOLS as readonly string[]).includes(tool)) get().patchToolOptions({ arrowVariant: tool as ArrowTool });
     },
 
     patchToolOptions(patch) {

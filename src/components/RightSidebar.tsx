@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronRight, Database, Lock, LockOpen, Palette, Radar as RadarIcon, RotateCcw, Save, Search, Trash2 } from 'lucide-react';
 import {
   CHARACTERISTICS,
@@ -18,19 +18,12 @@ import {
   type TextObject,
 } from '@/types/model';
 import {
-  ARROW_TOOLS,
-  ARROW_TOOL_LABELS,
-  SHAPE_TOOLS,
-  SHAPE_TOOL_LABELS,
   effectiveFlags,
   getActivePage,
   getBlueprints,
   getRulesets,
   shipRangeKm,
   useStore,
-  type ArrowTool,
-  type ShapeTool,
-  type ToolId,
 } from '@/state/store';
 import { Check, ColorInput, Field, NumInput, Panel, Slider, Tip } from './common/ui';
 import { CLASS_COLORS } from '@/canvas/shipGlyphs';
@@ -76,7 +69,6 @@ export function RightSidebar() {
         {selected.length === 0 && <NoSelectionPanels />}
         {selected.length === 1 && <SingleObjectPanels obj={selected[0]} />}
         {selected.length > 1 && <MultiSelectionPanel objects={selected} />}
-        <ToolVariantPanel />
         <ReplayOverlayPanel />
         <ShipBrowserPanel />
       </div>
@@ -212,45 +204,6 @@ function TextSizePicker({ value, onChange }: { value: number; onChange: (v: numb
         </button>
       ))}
     </div>
-  );
-}
-
-/**
- * Which shape or arrow the grouped rail button draws.
- *
- * The rail carries one button per family; the choice of variant lives here,
- * where there is room to show every option with its name.
- */
-function ToolVariantPanel() {
-  const tool = useStore((s) => s.tool);
-  const setTool = useStore((s) => s.setTool);
-  const patch = useStore((s) => s.patchToolOptions);
-
-  const isShape = (SHAPE_TOOLS as readonly string[]).includes(tool);
-  const isArrow = (ARROW_TOOLS as readonly string[]).includes(tool);
-  if (!isShape && !isArrow) return null;
-
-  const variants: readonly string[] = isShape ? SHAPE_TOOLS : ARROW_TOOLS;
-  const labels = isShape ? SHAPE_TOOL_LABELS : ARROW_TOOL_LABELS;
-
-  return (
-    <Panel title={isShape ? 'Shape' : 'Line & arrow'} storageKey="toolVariant">
-      <div className="variant-grid">
-        {variants.map((v) => (
-          <button
-            key={v}
-            className={`variant-chip${tool === v ? ' active' : ''}`}
-            onClick={() => {
-              if (isShape) patch({ shapeVariant: v as ShapeTool });
-              else patch({ arrowVariant: v as ArrowTool });
-              setTool(v as ToolId);
-            }}
-          >
-            {labels[v as keyof typeof labels]}
-          </button>
-        ))}
-      </div>
-    </Panel>
   );
 }
 
@@ -729,11 +682,10 @@ function ShipBrowserPanel() {
   const [cls, setCls] = useState<'' | ShipClass>('');
   const [tier, setTier] = useState('');
   const [consumable, setConsumable] = useState<ConsumableFilter>('');
-  const [blueprintId, setBlueprintId] = useState('');
   const [team, setTeam] = useState<ID | ''>('');
   const rulesets = useStore(getRulesets);
   const blueprints = useStore(getBlueprints);
-  const blueprint = blueprints.find((b) => b.id === blueprintId) ?? null;
+  const armed = useStore((s) => s.blueprintSpawn);
   const s = () => useStore.getState();
 
   const nations = useMemo(() => [...new Set(ships.map((x) => x.nation))].sort(), [ships]);
@@ -743,43 +695,19 @@ function ShipBrowserPanel() {
   const ruleset = rulesets.find((r) => r.id === page?.rulesetId) ?? null;
 
   const filtered = useMemo(
-    () => filterShips(ships, { query, searchNation: true, nation, cls, tier, consumable, ruleset, blueprint }),
-    [ships, query, nation, cls, tier, consumable, ruleset, blueprint],
+    () => filterShips(ships, { query, searchNation: true, nation, cls, tier, consumable, ruleset }),
+    [ships, query, nation, cls, tier, consumable, ruleset],
   );
 
   const defaultTeamId = project?.settings.defaultTeamId || project?.teams[0]?.id || null;
   const teamId = team || defaultTeamId;
   const teamName = (id: ID | null) => project?.teams.find((t) => t.id === id)?.name ?? 'team';
 
-  // A blueprint is placed in its own order, and only the ships the filters
-  // above still show: a ruleset that bans one keeps it off the page.
-  const blueprintShips = useMemo(() => {
-    if (!blueprint) return [];
-    const shown = new Set(filtered.map((x) => x.id));
-    return blueprint.ships.filter((id) => shown.has(id));
-  }, [blueprint, filtered]);
+  // An armed blueprint spawns for whichever team is picked when the map is clicked.
+  useEffect(() => {
+    if (armed && armed.teamId !== teamId) s().armBlueprint({ ...armed, teamId });
+  }, [armed, teamId]);
 
-  const placeBlueprint = () => {
-    const api = canvasApi();
-    const host = document.querySelector('.canvas-host');
-    if (!api || !host || !blueprintShips.length) return;
-    // A column down the middle of the view, in columns of eight. Icons keep
-    // their screen size at any zoom, so the spacing is set in screen pixels.
-    const perColumn = 8;
-    const rowGap = 54;
-    const colGap = 170;
-    const columns = Math.ceil(blueprintShips.length / perColumn);
-    const rows = Math.min(perColumn, blueprintShips.length);
-    const cx = host.clientWidth / 2 - ((columns - 1) * colGap) / 2;
-    const cy = host.clientHeight / 2 - ((rows - 1) * rowGap) / 2;
-    s().placeShips(
-      blueprintShips.map((shipId, i) => ({
-        shipId,
-        at: api.screenToWorld({ x: cx + Math.floor(i / perColumn) * colGap, y: cy + (i % perColumn) * rowGap }),
-      })),
-      teamId,
-    );
-  };
   const iconById = useMemo(() => new Map(icons.map((i) => [i.id, i])), [icons]);
 
   // What the side being placed for already has on the page, for the ruleset's
@@ -881,8 +809,29 @@ function ShipBrowserPanel() {
             </select>
           </div>
 
+          <select
+            className={armed ? 'armed' : undefined}
+            style={{ marginBottom: 4, flex: 'none' }}
+            value={armed?.blueprintId ?? ''}
+            title={
+              armed
+                ? 'Click the map to spawn this lineup — Esc to cancel'
+                : blueprints.length
+                  ? 'Pick a blueprint, then click the map to spawn its ships'
+                  : 'No blueprints yet — add one in the ship database'
+            }
+            onChange={(e) => s().armBlueprint(e.target.value ? { blueprintId: e.target.value, teamId } : null)}
+          >
+            <option value="">{blueprints.length ? 'Blueprint' : 'Blueprint — none yet'}</option>
+            {blueprints.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.name} ({b.ships.length})
+              </option>
+            ))}
+          </select>
+
           {project && project.teams.length > 0 && (
-            <select value={team} onChange={(e) => setTeam(e.target.value)} style={{ marginBottom: 5 }}>
+            <select value={team} onChange={(e) => setTeam(e.target.value)} style={{ marginBottom: 5, flex: 'none' }}>
               <option value="">Place on {teamName(defaultTeamId)} (default)</option>
               {project.teams.map((t) => (
                 <option key={t.id} value={t.id}>
@@ -892,39 +841,7 @@ function ShipBrowserPanel() {
             </select>
           )}
 
-          <div className="blueprint-row">
-            <select
-              value={blueprint?.id ?? ''}
-              title={
-                blueprints.length
-                  ? 'Show a blueprint’s ships, to place them all at once'
-                  : 'No blueprints yet — add one in the ship database'
-              }
-              onChange={(e) => setBlueprintId(e.target.value)}
-            >
-              <option value="">{blueprints.length ? 'Blueprint' : 'Blueprint — none yet'}</option>
-              {blueprints.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.name}
-                </option>
-              ))}
-            </select>
-            {blueprint && (
-              <button
-                className="btn sm primary"
-                disabled={!blueprintShips.length}
-                title={
-                  blueprintShips.length < blueprint.ships.length
-                    ? `${blueprint.ships.length - blueprintShips.length} of its ships are hidden by the filters and are left out`
-                    : `Place all ${blueprintShips.length} in the middle of the view`
-                }
-                onClick={placeBlueprint}
-              >
-                Place {blueprintShips.length} on {teamName(teamId)}
-              </button>
-            )}
-          </div>
-
+          {armed && <div className="spawn-hint">Click the map to spawn the lineup · Esc cancels</div>}
 
           {ruleset && ruleset.maxShips > 0 && (
             <div className={`team-count${placed.length >= ruleset.maxShips ? ' full' : ''}`}>

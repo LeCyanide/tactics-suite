@@ -182,6 +182,10 @@ export function useShortcuts(): void {
       }
 
       if (e.key === 'Escape') {
+        if (s().blueprintSpawn) {
+          s().armBlueprint(null);
+          return;
+        }
         s().clearSelection();
         if (s().tool !== 'select') s().setTool('select');
         return;
