@@ -37,6 +37,7 @@ import {
 import { clamp, clone, debounce, foldForSearch, uid } from '@/lib/util';
 import { dissolveFolder, openTab, placeFolder, placePage, settlePages, settleTabs, stepFolder, stepPage } from '@/lib/pageTree';
 import { applyTheme } from './theme';
+import { forgetAsset } from './assets';
 import { BUNDLED_PATCH_NOTES, onLaunch, type PatchNotesArg } from '@/lib/patchNotes';
 import {
   createPage,
@@ -1384,15 +1385,8 @@ export const useStore = create<Store>((set, get) => {
       set({ maps: (await window.api.maps.list()) as GameMap[] });
     },
 
-    // TODO (known bug, low priority): replacing an image with one of the same
-    // type keeps the asset file name (`<id>.<ext>`), so the page canvas keeps
-    // drawing the old image: the asset cache and useAssetState in MapCanvas are
-    // keyed on the file name alone. The Map Manager previews do refresh, as
-    // they also key on updatedAt. Workaround: switch the page to another map
-    // and back, or restart. Fix: call forgetAsset('map', file) here and key the
-    // canvas image on the map's updatedAt as well.
-    // Repro: Map Manager -> "Use on page" on a map -> Replace image with a
-    // visibly different PNG -> close the Map Manager; the old map is still shown.
+    // A same-type replacement keeps the file name (`<id>.<ext>`), so the cached
+    // image is dropped here and the canvas reloads on the new updatedAt.
     async replaceMapImage(id) {
       const picked = await window.api.maps.pickImages();
       if (!picked.length) return;
@@ -1402,6 +1396,7 @@ export const useStore = create<Store>((set, get) => {
       const maps = (await window.api.maps.list()) as GameMap[];
       const updated = maps.find((m) => m.id === id);
       if (updated) {
+        forgetAsset('map', updated.file);
         await window.api.maps.update({ ...updated, pixelWidth: size.width, pixelHeight: size.height, updatedAt: Date.now() });
       }
       set({ maps: (await window.api.maps.list()) as GameMap[] });

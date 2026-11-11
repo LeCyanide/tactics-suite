@@ -115,11 +115,15 @@ function decode(dataUrl: string): Promise<HTMLImageElement | null> {
  * `error` is set only once the retries above are spent, and only for a file
  * that was actually asked for -- a record with no image at all reports
  * neither an image nor an error.
+ *
+ * `version` reloads the same file name when it changes, for an image replaced
+ * in place (a map's `updatedAt`).
  */
 export function useAssetState(
   kind: Kind,
   file?: string | null,
   mime = '',
+  version?: unknown,
 ): { image: HTMLImageElement | null; error: string | null } {
   const [state, setState] = useState<{ image: HTMLImageElement | null; error: string | null }>(() => ({
     image: getCachedAsset(kind, file),
@@ -144,7 +148,7 @@ export function useAssetState(
     return () => {
       alive = false;
     };
-  }, [kind, file, mime]);
+  }, [kind, file, mime, version]);
 
   return state;
 }

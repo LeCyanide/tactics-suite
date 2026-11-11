@@ -155,7 +155,7 @@ export default function MapCanvas() {
   // Replay mode draws the battle's own map, never the page's.
   const inReplay = replayMode === 'replay';
   const map: GameMap | null = inReplay ? replayMap : plannedMap;
-  const { image: mapImage, error: mapImageError } = useAssetState('map', map?.file, map?.mime ?? '');
+  const { image: mapImage, error: mapImageError } = useAssetState('map', map?.file, map?.mime ?? '', map?.updatedAt);
 
   // With no map for the battle in the library, the timeline still knows how
   // big the ground is, so the replay can be drawn to scale over bare water

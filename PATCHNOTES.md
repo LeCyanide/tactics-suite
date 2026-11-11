@@ -40,6 +40,7 @@ Collect notes under `## Unreleased` and rename it to the version when releasing.
 
 - Replay library: when the same replay is in the folder twice, the copy that was already listed stays listed, and the new copy is the one reported as a duplicate
 - Ship database: with a ruleset open beside the ship editor, the ship table no longer runs off the right edge or wraps ship names
+- Map Manager: replacing a map image with one of the same file type now shows the new image on the page straight away, instead of the old one until a restart
 
 ## 2.6.0
 
