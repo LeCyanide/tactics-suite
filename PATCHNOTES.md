@@ -11,6 +11,13 @@ item under it one note. Use `### Changelog` for what is finished and
 
 Collect notes under `## Unreleased` and rename it to the version when releasing.
 
+## Unreleased
+
+### Changes
+
+- Lower memory use: the Map Manager shows small previews instead of loading every map at full size, and maps are only kept in memory while a tab uses them
+- Undo keeps the last 50 steps instead of 100
+
 ## 2.6.0
 
 ### New

@@ -1,5 +1,5 @@
 import { confirmDialog } from '@/state/confirm';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Copy, Database, FileDown, FileUp, Image as ImageIcon, Plus, RefreshCw, Search, Trash2 } from 'lucide-react';
 import { getActivePage, getRulesets, useStore } from '@/state/store';
 import { Check, ColorInput, Field, InlineEdit, Modal, NumInput, SectionLabel, Tip } from '../common/ui';
@@ -63,14 +63,45 @@ export function MapManagerModal() {
   );
 }
 
+/** Card thumbnails are about 300 CSS px wide; this covers that at 2× zoom. */
+const THUMB_CSS_WIDTH = 320;
+
+/**
+ * A scaled-down image for a map card, held by the card alone. Going through
+ * the shared asset cache would decode every map at full size and keep them
+ * all after the Map Manager closes.
+ */
+function useMapThumb(map: GameMap): string | null {
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let alive = true;
+    const width = Math.round(THUMB_CSS_WIDTH * Math.min(window.devicePixelRatio || 1, 2));
+    // The previous thumbnail stays up until the new one arrives, so editing a
+    // field on the card does not flash it back to "loading…".
+    void window.api.maps.thumbUrl(map.file, map.mime, width).then(
+      (res) => {
+        if (alive) setUrl('dataUrl' in res ? res.dataUrl : null);
+      },
+      () => {
+        if (alive) setUrl(null);
+      },
+    );
+    return () => {
+      alive = false;
+    };
+    // updatedAt moves when the image is replaced under the same file name.
+  }, [map.file, map.mime, map.updatedAt]);
+  return url;
+}
+
 function MapCard({ map, active }: { map: GameMap; active: boolean }) {
-  const img = useAsset('map', map.file, map.mime);
+  const thumb = useMapThumb(map);
   const s = () => useStore.getState();
   const update = (patch: Partial<GameMap>) => void s().updateMap({ ...map, ...patch });
 
   return (
     <div className={`card${active ? ' selected' : ''}`}>
-      <div className="thumb">{img ? <img src={img.src} alt="" /> : <span className="faint">loading…</span>}</div>
+      <div className="thumb">{thumb ? <img src={thumb} alt="" /> : <span className="faint">loading…</span>}</div>
       <InlineEdit value={map.name} onCommit={(v) => update({ name: v })} className="card-title" />
       <div className="card-sub">
         {map.pixelWidth} × {map.pixelHeight} px

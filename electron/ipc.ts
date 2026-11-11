@@ -7,7 +7,7 @@
  * opens a socket itself.
  */
 
-import { BrowserWindow, ClipboardItem, dialog, ipcMain, shell, app, clipboard } from 'electron';
+import { BrowserWindow, ClipboardItem, dialog, ipcMain, shell, app, clipboard, nativeImage } from 'electron';
 import fsp from 'node:fs/promises';
 import path from 'node:path';
 import * as db from './storage/db';
@@ -229,6 +229,20 @@ export function registerIpc(getWindow: GetWindow): void {
     const res = await db.readMapAssetResult(file);
     if (!('data' in res)) return { error: res.error, code: res.code };
     return { dataUrl: `data:${mime || mimeFor(path.extname(file))};base64,${res.data.toString('base64')}` };
+  });
+
+  // A scaled-down copy for the Map Manager's cards, so listing every map does
+  // not decode every map at full size. nativeImage reads PNG and JPEG only; for
+  // anything else (WebP) the original comes back, which still renders.
+  handle('map:thumbUrl', async (file: string, mime: string, width: number) => {
+    const res = await db.readMapAssetResult(file);
+    if (!('data' in res)) return { error: res.error, code: res.code };
+    const image = nativeImage.createFromBuffer(res.data);
+    const size = image.getSize();
+    if (image.isEmpty() || size.width <= width) {
+      return { dataUrl: `data:${mime || mimeFor(path.extname(file))};base64,${res.data.toString('base64')}` };
+    }
+    return { dataUrl: image.resize({ width, quality: 'good' }).toDataURL() };
   });
 
   /* ---------------- ships ---------------- */

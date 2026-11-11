@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Eye, HardDrive, ListX, Plus, Save, X } from 'lucide-react';
 import { getActivePage, useStore } from '@/state/store';
-import { loadAsset } from '@/state/assets';
+import { loadAsset, retainMaps } from '@/state/assets';
 import { folderNameOf } from '@/lib/pageTree';
 import { InlineEdit, Tip } from './common/ui';
 import { RulesetFlag } from './common/RulesetFlag';
@@ -27,13 +27,19 @@ export function PageTabs() {
   }, [project]);
 
   // Tabs are for switching quickly, so the boards behind them are decoded
-  // before they are asked for. The cache keeps them for the session.
+  // before they are asked for. Only these stay cached; a map whose last tab
+  // closes is let go. The active page counts even if it is somehow not a tab.
   // Keyed on the files as a string, since the list is rebuilt on every render.
-  const mapFiles = tabs.flatMap((p) => maps.find((m) => m.id === p.mapId && m.file) ?? []);
+  const active = useStore(getActivePage);
+  const shown = active && !tabs.includes(active) ? [...tabs, active] : tabs;
+  const mapFiles = shown.flatMap((p) => maps.find((m) => m.id === p.mapId && m.file) ?? []);
   const mapKey = mapFiles.map((m) => `${m.file}\n${m.mime}`).join('\n');
   useEffect(() => {
+    retainMaps(mapFiles.map((m) => m.file));
     for (const map of mapFiles) void loadAsset('map', map.file, map.mime);
   }, [mapKey]);
+  // No project, no tabs: nothing to keep.
+  useEffect(() => () => retainMaps([]), []);
 
   if (!project) return null;
 
