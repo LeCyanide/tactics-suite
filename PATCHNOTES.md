@@ -19,7 +19,7 @@ Collect notes under `## Unreleased` and rename it to the version when releasing.
 
 ### Changes
 
-- The grid square and position under the cursor, in the map's bottom-left corner, can be hidden: View → Cursor Position, or Settings → Appearance
+- The grid square and position under the cursor, in the map's bottom-left corner, can be hidden in Settings → Appearance
 
 ## 2.6.0
 

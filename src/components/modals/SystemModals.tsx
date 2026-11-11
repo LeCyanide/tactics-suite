@@ -242,7 +242,9 @@ export function SettingsModal() {
         onChange={(v) => s().patchSettings({ showCursorPosition: v })}
       />
 
-      <SectionLabel>Share to Discord</SectionLabel>
+      <SectionLabel>
+        Share to Discord <span className="beta-tag" title="Still being tested: it may change, and may not always work">Beta</span>
+      </SectionLabel>
       <BotAddress />
       <DiscordSection />
 

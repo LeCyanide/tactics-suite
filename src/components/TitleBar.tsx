@@ -100,11 +100,6 @@ export function TitleBar() {
         action: () => page && s().patchMapView({ showCoordinates: !page.mapView.showCoordinates }),
         enabled: !!page,
       },
-      {
-        label: 'Cursor Position',
-        checked: settings.showCursorPosition,
-        action: () => s().patchSettings({ showCursorPosition: !settings.showCursorPosition }),
-      },
     ],
     // Everything not about the open document.
     Settings: [

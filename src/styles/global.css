@@ -809,6 +809,19 @@ input[type='range']::-webkit-slider-thumb {
   background: var(--line);
 }
 
+/* "Beta" next to a section label: shipped, not settled. */
+.beta-tag {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--warn);
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 0 6px;
+  line-height: 14px;
+  opacity: 0.9;
+}
+
 .empty-note {
   padding: 14px 10px;
   text-align: center;
