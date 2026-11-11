@@ -173,6 +173,12 @@ export function useShortcuts(): void {
         }
       }
 
+      // The blueprint picker keeps focus after a pick, so Esc must work from a field too.
+      if (e.key === 'Escape' && s().blueprintSpawn) {
+        s().armBlueprint(null);
+        return;
+      }
+
       if (typing) return;
 
       if (e.key === 'F1') {
@@ -182,10 +188,6 @@ export function useShortcuts(): void {
       }
 
       if (e.key === 'Escape') {
-        if (s().blueprintSpawn) {
-          s().armBlueprint(null);
-          return;
-        }
         s().clearSelection();
         if (s().tool !== 'select') s().setTool('select');
         return;
