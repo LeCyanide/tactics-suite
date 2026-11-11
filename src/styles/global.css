@@ -2118,6 +2118,184 @@ select.armed {
   white-space: pre-wrap;
 }
 
+/* Battle panel: score strip and cap states, then the kill and capture timeline. */
+.replay-score {
+  flex: none;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+}
+.replay-score-nums {
+  display: flex;
+  align-items: baseline;
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 600;
+}
+.replay-score-mid {
+  flex: 1;
+  text-align: center;
+  font-size: 10.5px;
+  font-weight: 400;
+  color: var(--fg-faint);
+}
+.replay-score .ally,
+.replay-events .ally {
+  color: var(--success);
+}
+.replay-score .enemy,
+.replay-events .enemy {
+  color: var(--danger);
+}
+.replay-score-bars {
+  display: flex;
+  gap: 2px;
+  height: 4px;
+  margin-top: 4px;
+}
+.replay-score-bars > div {
+  flex: 1;
+  background: var(--line);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.replay-score-bars > div > div {
+  height: 100%;
+  background: currentColor;
+}
+.replay-score-bars .enemy {
+  margin-left: auto;
+}
+.replay-cap,
+.replay-cap-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  border-radius: 50%;
+  flex: none;
+}
+.replay-caps {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.replay-cap {
+  width: 26px;
+  height: 26px;
+  border: 2px solid;
+  font-size: 12px;
+}
+.replay-cap-tag {
+  width: 16px;
+  height: 16px;
+  font-size: 10px;
+  background: var(--line-strong);
+}
+.replay-lineup {
+  flex: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 6px 6px;
+  border-bottom: 1px solid var(--line);
+}
+.replay-lineup-team {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.replay-lineup-team + .replay-lineup-team {
+  border-left: 1px solid var(--line-strong);
+  padding-left: 4px;
+}
+.replay-lineup-ship {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 2px 4px;
+  border: none;
+  border-left: 3px solid transparent;
+  border-radius: 2px;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  font-size: 11px;
+  text-align: left;
+  cursor: pointer;
+}
+.replay-lineup-ship > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.replay-lineup-ship:hover:not(:disabled) {
+  background: var(--line);
+}
+.replay-lineup-ship.on {
+  background: var(--line);
+}
+.replay-lineup-ship.sunk > span {
+  color: var(--fg-faint);
+  text-decoration: line-through;
+}
+.replay-lineup-ship:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.replay-events {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+.replay-events-empty {
+  padding: 8px 10px;
+  color: var(--fg-faint);
+  font-size: 11.5px;
+}
+.replay-event {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  padding: 4px 10px;
+  border: none;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  font-size: 11.5px;
+  text-align: left;
+  cursor: pointer;
+}
+.replay-event:hover {
+  background: var(--line);
+}
+.replay-event.future {
+  opacity: 0.4;
+}
+.replay-event-time {
+  flex: none;
+  width: 34px;
+  font-family: var(--mono);
+  color: var(--fg-faint);
+}
+.replay-event-body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+.replay-event-ship {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.replay-event-verb {
+  color: var(--fg-faint);
+}
+
 /* The library folder, under the list: where the files are, and a way to move them. */
 .replay-root {
   display: flex;

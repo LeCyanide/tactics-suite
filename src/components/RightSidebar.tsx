@@ -32,6 +32,8 @@ import { useAsset } from '@/state/assets';
 import { canvasApi } from '@/canvas/canvasBridge';
 import { ClassIcon } from './common/ClassIcon';
 import { ReplayOverlayPanel } from './ReplayOverlayPanel';
+import { ReplayEventsPanel } from './ReplayEventsPanel';
+import { useReplayStore } from '@/state/replay';
 import { gridRef } from '@/lib/util';
 import { CONSUMABLE_FILTERS, filterShips, limitUse, type ConsumableFilter } from '@/lib/shipFilters';
 
@@ -41,6 +43,7 @@ export function RightSidebar() {
   const patchSettings = useStore((s) => s.patchSettings);
   const selection = useStore((s) => s.selection);
   const page = useStore(getActivePage);
+  const mode = useReplayStore((s) => s.mode);
   const resizing = useRef(false);
 
   const startResize = (e: React.MouseEvent) => {
@@ -71,7 +74,7 @@ export function RightSidebar() {
         {selected.length === 1 && <SingleObjectPanels obj={selected[0]} />}
         {selected.length > 1 && <MultiSelectionPanel objects={selected} />}
         <ReplayOverlayPanel />
-        <ShipBrowserPanel />
+        {mode === 'replay' ? <ReplayEventsPanel /> : <ShipBrowserPanel />}
       </div>
     </div>
   );

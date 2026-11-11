@@ -105,6 +105,9 @@ export default function MapCanvas() {
   const replayTimelineRaw = useReplayStore((s) => s.timeline);
   const replayFrame = useReplayStore((s) => s.frame);
   const replayView = useReplayStore((s) => s.view);
+  const replayPaths = useReplayStore((s) => s.paths);
+  const replayTrailIds = useReplayStore((s) => s.trails);
+  const replayTrails = useMemo(() => new Set(replayTrailIds), [replayTrailIds]);
   const replayOpacity = useReplayStore((s) => s.opacity);
   const replayTimeline = replayMode === 'replay' ? replayTimelineRaw : null;
   const overlay = useOverlayStore();
@@ -929,6 +932,25 @@ export default function MapCanvas() {
               options={replayView}
               inv={inv}
               opacity={replayOpacity}
+            />
+          </Layer>
+        )}
+
+        {/* Trails of the ships picked in the replay's lineup, up to the playback clock. */}
+        {replayTimeline && replayPaths && replayTrails.size > 0 && (
+          <Layer listening={false}>
+            <OverlayLayer
+              data={replayPaths}
+              map={map}
+              until={replayTimeline.clockAt(replayFrame)}
+              allies
+              enemies
+              unique
+              only={null}
+              pick={replayTrails}
+              icons={false}
+              opacity={replayOpacity}
+              inv={inv}
             />
           </Layer>
         )}

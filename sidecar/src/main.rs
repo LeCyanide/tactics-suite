@@ -276,6 +276,13 @@ fn bake(args: &[String]) -> Result<(), String> {
     let mut parser = wows_replays::packet2::Parser::with_version(&specs, version);
     let mut remaining = replay.packet_data();
 
+    // Battle events for the viewer's score strip and timeline. Teams stay raw
+    // team ids during the pass and become ally/enemy once the bake knows which
+    // team the recording player is on.
+    let mut score_events: Vec<(f32, Vec<i64>)> = Vec::new();
+    let mut cap_events: Vec<(f32, String, i64)> = Vec::new();
+    let mut cap_owners: Vec<i64> = Vec::new();
+
     while !remaining.is_empty() {
         // A truncated or unparseable tail is normal: replays are cut off when
         // the client exits. Everything up to that point is still good, so stop
@@ -284,6 +291,27 @@ fn bake(args: &[String]) -> Result<(), String> {
         world.process(&packet);
         let clock = packet.clock.0;
         battle_secs = battle_secs.max(clock);
+
+        {
+            let view = world.view();
+            let scores: Vec<i64> = view.team_scores().iter().map(|s| s.score).collect();
+            if !scores.is_empty() && score_events.last().map(|(_, s)| s) != Some(&scores) {
+                score_events.push((clock, scores));
+            }
+            for cp in view.capture_points() {
+                if !cp.is_enabled {
+                    continue;
+                }
+                if cap_owners.len() <= cp.index {
+                    cap_owners.resize(cp.index + 1, -1);
+                }
+                if cap_owners[cp.index] != cp.team_id {
+                    cap_owners[cp.index] = cp.team_id;
+                    // Same lettering the renderer draws on the zone.
+                    cap_events.push((clock, ((b'A' + cp.index as u8) as char).to_string(), cp.team_id));
+                }
+            }
+        }
 
         while clock >= frame_clock(writer.frame_count()) {
             renderer.set_render_clock(GameClock(frame_clock(writer.frame_count())));
@@ -307,7 +335,10 @@ fn bake(args: &[String]) -> Result<(), String> {
     let skipped: serde_json::Map<String, serde_json::Value> =
         writer.skipped().iter().map(|(k, v)| ((*k).to_owned(), serde_json::json!(v))).collect();
 
+    let events = battle_events(&mut world, provider, &score_events, &cap_events);
+
     let header = serde_json::json!({
+        "events": events,
         "replay": replay_path.file_name().map(|n| n.to_string_lossy().into_owned()),
         "clientVersion": replay.meta.clientVersionFromExe,
         "dateTime": replay.meta.dateTime,
@@ -353,6 +384,81 @@ fn bake(args: &[String]) -> Result<(), String> {
         "out": out_path.as_ref().map(|p| p.display().to_string()),
     }));
     Ok(())
+}
+
+/// Kills, cap flips and score changes, from the recording player's side:
+/// `ally` / `enemy` instead of team ids, `null` for a neutral cap. Times are
+/// packet clock seconds, the same clock frames are sampled on.
+fn battle_events(
+    world: &mut wows_battle_world::BattleWorld<'_, '_, GameMetadataProvider>,
+    provider: &GameMetadataProvider,
+    scores: &[(f32, Vec<i64>)],
+    caps: &[(f32, String, i64)],
+) -> serde_json::Value {
+    use wowsunpack::data::ResourceLoader;
+    use wowsunpack::data::TranslationKey;
+
+    let view = world.view();
+    let players = view.player_entities();
+    let self_team =
+        players.values().find(|p| p.relation().is_self()).map(|p| p.initial_state().team_id()).unwrap_or(0);
+    let side = |team: i64| match team {
+        t if t == self_team => serde_json::json!("ally"),
+        0 | 1 => serde_json::json!("enemy"),
+        _ => serde_json::Value::Null,
+    };
+
+    let roster: Vec<_> = players
+        .iter()
+        .map(|(id, p)| {
+            let raw = p.initial_state().username();
+            let name = if p.is_bot() && raw.starts_with("IDS_") {
+                provider.localized_name_from_id(&TranslationKey::new(raw)).unwrap_or_else(|| raw.to_string())
+            } else {
+                raw.to_string()
+            };
+            serde_json::json!({
+                "id": id.raw(),
+                "player": name,
+                "ship": provider.localized_name_from_param(p.vehicle()),
+                "species": p.vehicle().species().and_then(|s| s.known()).map(|s| s.name().to_string()),
+                "side": if p.relation().is_enemy() { "enemy" } else { "ally" },
+            })
+        })
+        .collect();
+
+    let kills: Vec<_> = view
+        .kills()
+        .iter()
+        .map(|k| {
+            serde_json::json!({
+                "t": k.clock.0,
+                "killer": k.killer.raw(),
+                "victim": k.victim.raw(),
+                "cause": k.cause.known().map(|c| format!("{c:?}")),
+            })
+        })
+        .collect();
+
+    // Team scores come in team-index order; flip so ally is always first.
+    let (ally, enemy) = if self_team == 1 { (1, 0) } else { (0, 1) };
+    let scores: Vec<_> = scores
+        .iter()
+        .filter(|(_, s)| s.len() >= 2)
+        .map(|(t, s)| serde_json::json!({ "t": t, "ally": s[ally], "enemy": s[enemy] }))
+        .collect();
+    let caps: Vec<_> =
+        caps.iter().map(|(t, label, team)| serde_json::json!({ "t": t, "cap": label, "owner": side(*team) })).collect();
+
+    serde_json::json!({
+        "battleStart": view.battle_start_clock().map(|c| c.0),
+        "maxScore": view.scoring_rules().map(|r| r.team_win_score),
+        "winner": view.winning_team().map(|t| side(i64::from(t))),
+        "roster": roster,
+        "kills": kills,
+        "scores": scores,
+        "caps": caps,
+    })
 }
 
 /// The capture point layout a battle opens with.
