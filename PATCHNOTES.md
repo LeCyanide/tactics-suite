@@ -21,6 +21,7 @@ Collect notes under `## Unreleased` and rename it to the version when releasing.
 
 - The grid square and position under the cursor, in the map's bottom-left corner, can be hidden in Settings → Appearance
 - Moving the mouse over the map takes much less work: only the position readout updates, not the whole map
+- Edits are quicker and use less memory: the ship list is no longer redrawn after every change, and moving or resizing an object no longer stores a full copy of the project for undo
 
 ### Fixes
 

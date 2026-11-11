@@ -1219,7 +1219,10 @@ export const useStore = create<Store>((set, get) => {
     pushHistory() {
       const current = get().project;
       if (!current) return;
-      set((s) => ({ past: [...s.past, clone(current)].slice(-HISTORY_LIMIT), future: [] }));
+      // No copy: a project version is never changed in place (every edit goes
+      // through commit or commitPage, which build a new one), so the version
+      // itself is the undo step, sharing its pages like any other.
+      set((s) => ({ past: [...s.past, current].slice(-HISTORY_LIMIT), future: [] }));
     },
 
     undo() {
