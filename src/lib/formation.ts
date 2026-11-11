@@ -1,33 +1,37 @@
-import type { Vec2 } from '@/types/model';
+import type { ShipClass, Vec2 } from '@/types/model';
 
 /**
- * Where the ships of a blueprint land around the point clicked: rows abreast,
- * with every other row shifted half a gap so no ship sits straight behind
- * another. Up to four ships make one row, up to twelve two, more three.
- *
- * NOTE: this is a stand-in. The game's own spawn layout (how far apart ships
- * start, how rows are staggered, whether classes are sorted into lines) is
- * not known to the app. Replays carry every ship's starting position, so the
- * real pattern can be measured from a batch of them and put here; until then
- * this only keeps a lineup tidy and easy to drag into place.
+ * Metres between rows and between ships in a row. The game uses 1.5 km for
+ * both; these are wider so icons and names stay clear on the planner.
  */
-export function spawnFormation(count: number, centre: Vec2, spacing: number): Vec2[] {
-  if (count <= 0) return [];
-  const rows = count <= 4 ? 1 : count <= 12 ? 2 : 3;
-  const perRow = Math.ceil(count / rows);
-  const rowGap = spacing * 0.8;
-  const out: Vec2[] = [];
-  for (let i = 0; i < count; i++) {
-    const row = Math.floor(i / perRow);
-    const col = i % perRow;
-    const inRow = Math.min(perRow, count - row * perRow);
-    // A short row centres itself and is staggered already; a full one is
-    // pushed half a gap sideways on odd rows.
-    const stagger = row % 2 === 1 && inRow === perRow ? spacing / 2 : 0;
-    out.push({
-      x: centre.x + (col - (inRow - 1) / 2) * spacing + stagger,
-      y: centre.y + (row - (rows - 1) / 2) * rowGap,
-    });
-  }
-  return out;
+export const ROW_GAP = 2000;
+export const SHIP_GAP = 2500;
+
+/**
+ * Row of each class, counted forward from the cruisers. Measured in 45 clan
+ * battle replays (15.9): destroyers 1.5 km ahead of the cruisers, battleships
+ * 1.5 km behind.
+ * shortcut: no submarine or carrier was in those battles, so their rows are a guess; measure them once clan replays with one exist.
+ */
+const ROW: Record<ShipClass, number> = { DD: 1, SS: 1, CA: 0, BB: -1, CV: -2 };
+
+/**
+ * Where a blueprint's ships land around the point clicked, laid out like a
+ * team at an in-game spawn: one row per class, facing `facing` (a unit
+ * vector), each row centred on the line through the click. The cruiser row
+ * passes through the click. Ships keep the blueprint's order within a row.
+ */
+export function spawnFormation(classes: ShipClass[], centre: Vec2, facing: Vec2): Vec2[] {
+  const right = { x: -facing.y, y: facing.x };
+  const inRow = new Map<number, number>();
+  for (const c of classes) inRow.set(ROW[c], (inRow.get(ROW[c]) ?? 0) + 1);
+  const placed = new Map<number, number>();
+  return classes.map((c) => {
+    const row = ROW[c];
+    const i = placed.get(row) ?? 0;
+    placed.set(row, i + 1);
+    const lat = (i - ((inRow.get(row) ?? 1) - 1) / 2) * SHIP_GAP;
+    const fwd = row * ROW_GAP;
+    return { x: centre.x + facing.x * fwd + right.x * lat, y: centre.y + facing.y * fwd + right.y * lat };
+  });
 }

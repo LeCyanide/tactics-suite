@@ -174,17 +174,13 @@ async function testShipFilters(): Promise<void> {
   check('blueprint: narrows the list to its ships', names({ blueprint: lineup }) === 'Minotaur,Yamato', names({ blueprint: lineup }));
   check('blueprint: other filters still apply', names({ blueprint: lineup, consumable: 'radar' }) === 'Minotaur');
 
-  const spots = spawnFormation(7, { x: 5000, y: 5000 }, 1000);
-  const rowsOf = [...new Set(spots.map((p) => p.y))];
-  check('formation: seven ships make two rows', spots.length === 7 && rowsOf.length === 2, spots);
-  check(
-    'formation: centred on the click',
-    Math.abs(spots.reduce((a, p) => a + p.x, 0) / 7 - 5000) < 1000 && Math.abs(rowsOf[0] + rowsOf[1] - 10000) < 1e-6,
-  );
-  check(
-    'formation: no two ships share a spot',
-    spots.every((p, i) => spots.every((q, j) => i === j || Math.hypot(p.x - q.x, p.y - q.y) >= 500)),
-  );
+  // Facing north (-y): destroyers a row ahead, battleships a row behind the cruisers (2 km rows, 2.5 km apart in a row).
+  const spots = spawnFormation(['CA', 'BB', 'DD', 'CA', 'CA'], { x: 5000, y: 5000 }, { x: 0, y: -1 });
+  check('formation: destroyer row ahead of the cruisers', spots[2].y === 3000 && spots[2].x === 5000, spots);
+  check('formation: battleship row behind', spots[1].y === 7000, spots);
+  check('formation: cruiser row through the click, 2.5 km apart', spots[0].x === 2500 && spots[3].x === 5000 && spots[4].x === 7500 && spots[0].y === 5000, spots);
+  const east = spawnFormation(['DD'], { x: 0, y: 0 }, { x: 1, y: 0 });
+  check('formation: turns with the facing', Math.abs(east[0].x - 2000) < 1e-9 && Math.abs(east[0].y) < 1e-9, east);
 
   const open = { id: 'r', name: 'Open', tiers: [], classes: [], banned: [], limits: [], maxShips: 0 };
   check('ruleset: an empty one allows everything', ships.every((s) => allowedBy(open, s)));

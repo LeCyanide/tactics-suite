@@ -351,12 +351,10 @@ export default function MapCanvas() {
     if (e.evt.button !== 0) return;
 
     // An armed blueprint takes the click, whatever the tool: its ships land
-    // around it, about a kilometre apart, or farther when zoomed out so
-    // their icons and names do not pile up.
+    // around it as a team spawns in game.
     if (useStore.getState().blueprintSpawn) {
       if (inReplay) return;
-      const spacing = Math.max(1000, 110 / camera.scale);
-      useStore.getState().spawnBlueprint(world, spacing, { width: worldW, height: worldH });
+      useStore.getState().spawnBlueprint(world, { width: worldW, height: worldH });
       return;
     }
 

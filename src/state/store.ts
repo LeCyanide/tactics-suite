@@ -265,8 +265,8 @@ interface Actions {
    */
   blueprintSpawn: { blueprintId: ID; teamId: ID | null } | null;
   armBlueprint(spawn: { blueprintId: ID; teamId: ID | null } | null): void;
-  /** Spawns the armed blueprint around a point, `spacing` metres apart, and disarms it. */
-  spawnBlueprint(at: Vec2, spacing: number, bounds: { width: number; height: number }): void;
+  /** Spawns the armed blueprint around a point in the in-game spawn layout, facing the map's centre, and disarms it. */
+  spawnBlueprint(at: Vec2, bounds: { width: number; height: number }): void;
 
   /* history */
   pushHistory(): void;
@@ -1246,15 +1246,19 @@ export const useStore = create<Store>((set, get) => {
       set({ blueprintSpawn: spawn });
     },
 
-    spawnBlueprint(at, spacing, bounds) {
+    spawnBlueprint(at, bounds) {
       const armed = get().blueprintSpawn;
       const blueprint = get().project?.blueprints.find((b) => b.id === armed?.blueprintId);
       set({ blueprintSpawn: null });
       if (!armed || !blueprint) return;
-      const known = new Set(get().ships.map((s) => s.id));
-      const ids = blueprint.ships.filter((id) => known.has(id));
+      const byId = new Map(get().ships.map((s) => [s.id, s]));
+      const ids = blueprint.ships.filter((id) => byId.has(id));
       const inside = (v: number, max: number) => Math.min(max, Math.max(0, v));
-      const spots = spawnFormation(ids.length, at, spacing);
+      // Teams spawn facing the enemy; the map's centre stands in for where it is.
+      const to = { x: bounds.width / 2 - at.x, y: bounds.height / 2 - at.y };
+      const len = Math.hypot(to.x, to.y);
+      const facing = len > 1 ? { x: to.x / len, y: to.y / len } : { x: 0, y: -1 };
+      const spots = spawnFormation(ids.map((id) => byId.get(id)!.class), at, facing);
       get().placeShips(
         ids.map((shipId, i) => ({ shipId, at: { x: inside(spots[i].x, bounds.width), y: inside(spots[i].y, bounds.height) } })),
         armed.teamId,

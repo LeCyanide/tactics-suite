@@ -16,7 +16,7 @@ Collect notes under `## Unreleased` and rename it to the version when releasing.
 ### New
 
 - Patch notes: after an update, the app shows what changed the first time it starts. "Don't show again" turns this off; Settings → Updates turns it back on and has a View patch notes button for every version
-- Ship blueprints: save a lineup of ships in the ship database (**+ Blueprint**, then switch ships on in the table). Pick it in the ship list and click the map to spawn the whole lineup in formation; Esc cancels
+- Ship blueprints: save a lineup of ships in the ship database (**+ Blueprint**, then switch ships on in the table). Pick it in the ship list and click the map to spawn the whole lineup as a team spawns in game (destroyers in front, cruisers in the middle, battleships behind, rows 2 km apart and ships 2.5 km apart, facing the map's centre); Esc cancels
 - Map picker: type to search the map list
 - Ruler travel time: start a ruler on a ship and it shows how long the ship takes to get there at top speed, with and without Engine Boost (the boost only lasts its real duration)
 
