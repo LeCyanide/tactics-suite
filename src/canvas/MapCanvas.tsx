@@ -188,6 +188,7 @@ export default function MapCanvas() {
         ? { right: Math.max(bandRight, 4), bottom: (bandBelow - CREDIT_SIZE.height) / 2 }
         : null;
   const iconScale = useStore((s) => s.settings.shipIconScale);
+  const showCursorPosition = useStore((s) => s.settings.showCursorPosition);
   const iconSize = SHIP_ICON_PX * iconScale;
 
   /* ------------------------------------------------------------------ */
@@ -1094,14 +1095,16 @@ export default function MapCanvas() {
         />
       )}
 
-      <div className="canvas-readout">
-        <span className="mono">
-          {gridRef(cursorWorld.x, cursorWorld.y, worldW, worldH, gridCols, gridRows)}
-        </span>
-        <span className="mono dim">
-          {(cursorWorld.x / 1000).toFixed(2)} , {(cursorWorld.y / 1000).toFixed(2)} km
-        </span>
-      </div>
+      {showCursorPosition && (
+        <div className="canvas-readout">
+          <span className="mono">
+            {gridRef(cursorWorld.x, cursorWorld.y, worldW, worldH, gridCols, gridRows)}
+          </span>
+          <span className="mono dim">
+            {(cursorWorld.x / 1000).toFixed(2)} , {(cursorWorld.y / 1000).toFixed(2)} km
+          </span>
+        </div>
+      )}
       {creditStyle && (
         <div className="canvas-credit" style={creditStyle}>
           {DEVELOPER_CREDIT}

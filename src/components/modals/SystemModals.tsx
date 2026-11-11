@@ -236,6 +236,11 @@ export function SettingsModal() {
           <RotateCcw size={12} />
         </button>
       </Field>
+      <Check
+        label="Show the cursor position in the map's corner"
+        checked={settings.showCursorPosition}
+        onChange={(v) => s().patchSettings({ showCursorPosition: v })}
+      />
 
       <SectionLabel>Share to Discord</SectionLabel>
       <BotAddress />

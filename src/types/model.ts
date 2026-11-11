@@ -717,6 +717,8 @@ export interface AppSettings {
    * is not a setting: the main process keeps that, encrypted, on its own.
    */
   discordChannel: string;
+  /** The grid square and km position under the cursor, in the map's bottom-left corner. */
+  showCursorPosition: boolean;
   /** Open the patch notes on the first launch after an update. */
   showPatchNotes: boolean;
   /**
@@ -742,6 +744,7 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   wowsGameDir: '',
   replayDir: '',
   discordChannel: '',
+  showCursorPosition: true,
   showPatchNotes: true,
   patchNotesSeen: '',
 };
