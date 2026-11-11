@@ -21,6 +21,10 @@ Collect notes under `## Unreleased` and rename it to the version when releasing.
 
 - The grid square and position under the cursor, in the map's bottom-left corner, can be hidden in Settings → Appearance
 
+### Fixes
+
+- Replay library: when the same replay is in the folder twice, the copy that was already listed stays listed, and the new copy is the one reported as a duplicate
+
 ## 2.6.0
 
 ### New
