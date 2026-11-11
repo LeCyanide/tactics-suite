@@ -6,8 +6,8 @@
     "class": "BB",
     "tier": 11,
     "concealment_km": 14.4,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 21.3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -17,8 +17,10 @@
     "class": "BB",
     "tier": 11,
     "concealment_km": 14.11,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 20.8,
+    "smoke": true,
+    "smokeRadius_km": 0.51,
+    "smokeDuration_s": 45,
     "iconId": null
   },
   {
@@ -28,8 +30,8 @@
     "class": "BB",
     "tier": 11,
     "concealment_km": 13.11,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 24.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -39,9 +41,9 @@
     "class": "BB",
     "tier": 11,
     "concealment_km": 15.04,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 21.4,
     "hydro_km": 7,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -51,8 +53,8 @@
     "class": "BB",
     "tier": 11,
     "concealment_km": 14.26,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 24.2,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -62,8 +64,8 @@
     "class": "BB",
     "tier": 11,
     "concealment_km": 14,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 26.6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -73,8 +75,8 @@
     "class": "BB",
     "tier": 11,
     "concealment_km": 14.54,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 27,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -85,10 +87,10 @@
     "cruiserType": "CA",
     "tier": 11,
     "concealment_km": 11,
-    "concealmentAir_km": 7.78,
     "mainBatteryRange_km": 16.2,
     "radar_km": 10,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -99,10 +101,10 @@
     "cruiserType": "CA",
     "tier": 11,
     "concealment_km": 12.81,
-    "concealmentAir_km": 7.87,
     "mainBatteryRange_km": 18.5,
     "torpedoRange_km": 6,
     "hydro_km": 7,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -113,10 +115,10 @@
     "cruiserType": "CA",
     "tier": 11,
     "concealment_km": 13.04,
-    "concealmentAir_km": 8.01,
     "mainBatteryRange_km": 19.5,
     "torpedoRange_km": 9,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -127,11 +129,13 @@
     "cruiserType": "CA",
     "tier": 11,
     "concealment_km": 9.48,
-    "concealmentAir_km": 6.9,
     "mainBatteryRange_km": 16.5,
     "torpedoRange_km": 12,
     "radar_km": 10,
     "hydro_km": 5,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 20,
     "iconId": null
   },
   {
@@ -142,10 +146,24 @@
     "cruiserType": "CA",
     "tier": 11,
     "concealment_km": 9.94,
-    "concealmentAir_km": 6.9,
     "mainBatteryRange_km": 16.9,
     "radar_km": 9,
     "hydro_km": 5,
+    "smoke": false,
+    "iconId": null
+  },
+  {
+    "id": "ship-kurama",
+    "name": "Kurama",
+    "nation": "Japan",
+    "class": "CA",
+    "cruiserType": "CA",
+    "tier": 11,
+    "concealment_km": 9.9,
+    "mainBatteryRange_km": 16.8,
+    "torpedoRange_km": 12,
+    "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -156,10 +174,10 @@
     "cruiserType": "CA",
     "tier": 11,
     "concealment_km": 12.69,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19,
     "radar_km": 12,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -170,9 +188,11 @@
     "cruiserType": "CA",
     "tier": 11,
     "concealment_km": 12.49,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.7,
     "torpedoRange_km": 13.5,
+    "smoke": true,
+    "smokeRadius_km": 0.51,
+    "smokeDuration_s": 40,
     "iconId": null
   },
   {
@@ -182,7 +202,7 @@
     "class": "CV",
     "tier": 11,
     "concealment_km": 14.49,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -192,7 +212,7 @@
     "class": "CV",
     "tier": 11,
     "concealment_km": 15.54,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -202,7 +222,7 @@
     "class": "CV",
     "tier": 11,
     "concealment_km": 15.54,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -212,7 +232,6 @@
     "class": "DD",
     "tier": 11,
     "concealment_km": 6.08,
-    "concealmentAir_km": 3.16,
     "mainBatteryRange_km": 11.2,
     "torpedoRange_km": 15,
     "iconId": null,
@@ -225,7 +244,6 @@
     "class": "DD",
     "tier": 11,
     "concealment_km": 5.93,
-    "concealmentAir_km": 3.37,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 16.5,
     "iconId": null,
@@ -240,7 +258,6 @@
     "class": "DD",
     "tier": 11,
     "concealment_km": 6,
-    "concealmentAir_km": 2.83,
     "mainBatteryRange_km": 13.4,
     "torpedoRange_km": 13.5,
     "radar_km": 7.5,
@@ -256,7 +273,6 @@
     "class": "DD",
     "tier": 11,
     "concealment_km": 5.59,
-    "concealmentAir_km": 3.16,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 20,
     "iconId": null,
@@ -265,13 +281,27 @@
     "smokeDuration_s": 20
   },
   {
+    "id": "ship-z-57",
+    "name": "Z-57",
+    "nation": "Germany",
+    "class": "DD",
+    "tier": 11,
+    "concealment_km": 6.11,
+    "mainBatteryRange_km": 12.8,
+    "torpedoRange_km": 12,
+    "hydro_km": 6,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20,
+    "iconId": null
+  },
+  {
     "id": "ship-zorkiy",
     "name": "Zorkiy",
     "nation": "USSR",
     "class": "DD",
     "tier": 11,
     "concealment_km": 7.86,
-    "concealmentAir_km": 3.21,
     "mainBatteryRange_km": 12.3,
     "torpedoRange_km": 10,
     "iconId": null,
@@ -286,8 +316,8 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 14.26,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 26.1,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -297,8 +327,8 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 14.26,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 26.1,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -308,8 +338,8 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 14.14,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 26.6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -319,8 +349,8 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 14,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 23.7,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -330,8 +360,8 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 13.15,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 24.8,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -341,8 +371,8 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 12.14,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 25,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -352,8 +382,8 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 12.3,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 24.3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -363,8 +393,8 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 12.3,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 24.3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -374,8 +404,10 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 13.07,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.9,
+    "smoke": true,
+    "smokeRadius_km": 0.51,
+    "smokeDuration_s": 45,
     "iconId": null
   },
   {
@@ -385,8 +417,10 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 14.05,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.9,
+    "smoke": true,
+    "smokeRadius_km": 0.51,
+    "smokeDuration_s": 45,
     "iconId": null
   },
   {
@@ -417,8 +451,8 @@
       }
     ],
     "id": "ship-9078eb3e-0d27-431d-813c-7fe3b3b3d008",
-    "iconId": null,
-    "concealmentAir_km": 8.1
+    "smoke": false,
+    "iconId": null
   },
   {
     "id": "ship-incomparable",
@@ -427,10 +461,10 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 10.6,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 17.6,
     "torpedoRange_km": 10,
     "hydro_km": 3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -440,8 +474,10 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 12.07,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 20.4,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 102,
     "iconId": null
   },
   {
@@ -456,8 +492,6 @@
     "mainBattery": "4 x 3 457 mm/55",
     "secondaryRange_km": 7.5,
     "aaRange_km": 6.6,
-    "hydro_km": 5,
-    "hydroDuration_s": 180,
     "rudderShift_s": 18.8,
     "turningCircle_m": 950,
     "consumables": [
@@ -472,8 +506,8 @@
       }
     ],
     "id": "ship-6896187c-e87a-48b4-af69-5273bcf72ae9",
-    "iconId": null,
-    "concealmentAir_km": 8.1
+    "smoke": false,
+    "iconId": null
   },
   {
     "id": "ship-libertad",
@@ -482,8 +516,8 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 12.96,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 20.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -493,8 +527,8 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 13.61,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 22.8,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -504,9 +538,9 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 13.86,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 22,
     "torpedoRange_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -532,8 +566,8 @@
       }
     ],
     "id": "ship-8c9c1495-a920-4bf8-883a-4c0affcda980",
-    "iconId": null,
-    "concealmentAir_km": 8.1
+    "smoke": false,
+    "iconId": null
   },
   {
     "id": "ship-ohio",
@@ -542,8 +576,8 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 14,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 21.7,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -553,8 +587,8 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 13.29,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 23.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -564,9 +598,9 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 14.28,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 20.6,
     "hydro_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -576,8 +610,8 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 14.14,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 26.1,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -587,9 +621,9 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 12.31,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 21,
     "radar_km": 9,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -599,9 +633,9 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 12.31,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 21,
     "radar_km": 9,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -611,8 +645,8 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 12.3,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -622,10 +656,10 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 12.6,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.8,
     "torpedoRange_km": 13.5,
     "hydro_km": 5.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -635,8 +669,8 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 12.73,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 25.3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -646,8 +680,8 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 14.14,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 26.6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -657,8 +691,8 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 13.39,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -668,8 +702,10 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 14.05,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.9,
+    "smoke": true,
+    "smokeRadius_km": 0.9,
+    "smokeDuration_s": 60,
     "iconId": null
   },
   {
@@ -679,8 +715,8 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 13.15,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 24.7,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -690,9 +726,9 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 13.12,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 20.5,
     "torpedoRange_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -702,8 +738,8 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 12.3,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -712,11 +748,11 @@
     "nation": "Europe",
     "class": "BB",
     "tier": 10,
-    "concealment_km": 12.3,
-    "concealmentAir_km": 8.1,
+    "concealment_km": 12.67,
     "mainBatteryRange_km": 21.7,
     "torpedoRange_km": 15,
     "radar_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -726,8 +762,8 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 12.3,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 21.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -737,8 +773,8 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 12.59,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 24.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -748,10 +784,10 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 12.6,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.8,
     "torpedoRange_km": 13.5,
     "hydro_km": 5.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -761,10 +797,10 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 12.17,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 22.2,
     "airstrikeMinRange_km": 1.5,
     "airstrikeMaxRange_km": 15,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -774,8 +810,8 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 12.87,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 23.4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -785,8 +821,8 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 12.87,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 23.4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -812,8 +848,8 @@
       }
     ],
     "id": "ship-65f2ebe7-c71f-4360-a54a-0e5fefe4129d",
-    "iconId": null,
-    "concealmentAir_km": 8.1
+    "smoke": false,
+    "iconId": null
   },
   {
     "id": "ship-yamato-kai",
@@ -822,8 +858,8 @@
     "class": "BB",
     "tier": 10,
     "concealment_km": 14.14,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 26.6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -834,10 +870,10 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 12.59,
-    "concealmentAir_km": 6.86,
     "mainBatteryRange_km": 17.8,
     "torpedoRange_km": 6,
     "hydro_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -848,11 +884,11 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 12.82,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19,
     "torpedoRange_km": 8,
     "radar_km": 12,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -863,9 +899,11 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 9.56,
-    "concealmentAir_km": 6.9,
     "mainBatteryRange_km": 17.8,
     "hydro_km": 5,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20,
     "iconId": null
   },
   {
@@ -876,8 +914,8 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 13.02,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 21.2,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -888,10 +926,10 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 9.33,
-    "concealmentAir_km": 6,
     "mainBatteryRange_km": 15,
     "torpedoRange_km": 10.5,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -902,10 +940,10 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 13.09,
-    "concealmentAir_km": 8.05,
     "mainBatteryRange_km": 18.1,
     "torpedoRange_km": 12,
     "hydro_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -916,10 +954,10 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 13.09,
-    "concealmentAir_km": 8.05,
     "mainBatteryRange_km": 18.1,
     "torpedoRange_km": 12,
     "hydro_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -930,9 +968,9 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 12.97,
-    "concealmentAir_km": 6.71,
     "mainBatteryRange_km": 20.3,
     "torpedoRange_km": 9,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -943,11 +981,11 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 9.83,
-    "concealmentAir_km": 6.9,
     "mainBatteryRange_km": 15.8,
     "torpedoRange_km": 13.5,
     "radar_km": 12,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -958,11 +996,11 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 9.83,
-    "concealmentAir_km": 6.9,
     "mainBatteryRange_km": 15.8,
     "torpedoRange_km": 13.5,
     "radar_km": 12,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -973,10 +1011,10 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 11.75,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 17.1,
     "torpedoRange_km": 8,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -987,10 +1025,12 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 10,
-    "concealmentAir_km": 6.66,
     "mainBatteryRange_km": 18,
     "torpedoRange_km": 13.5,
     "hydro_km": 5,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 102,
     "iconId": null
   },
   {
@@ -1001,9 +1041,9 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 9.77,
-    "concealmentAir_km": 6,
     "mainBatteryRange_km": 15,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1014,10 +1054,12 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 10.14,
-    "concealmentAir_km": 7.48,
     "mainBatteryRange_km": 18.3,
     "torpedoRange_km": 10,
     "hydro_km": 5,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 15,
     "iconId": null
   },
   {
@@ -1050,9 +1092,9 @@
       }
     ],
     "id": "ship-d29efe76-c7d0-4aac-8921-d01697e9caf5",
+    "smoke": false,
     "iconId": null,
-    "cruiserType": "CA",
-    "concealmentAir_km": 6.4
+    "cruiserType": "CA"
   },
   {
     "id": "ship-gibraltar",
@@ -1062,9 +1104,11 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 11.45,
-    "concealmentAir_km": 7.5,
     "mainBatteryRange_km": 16.9,
     "hydro_km": 5,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 15,
     "iconId": null
   },
   {
@@ -1075,10 +1119,10 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 11.03,
-    "concealmentAir_km": 7.07,
     "mainBatteryRange_km": 16.8,
     "torpedoRange_km": 10,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1089,11 +1133,11 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 10.34,
-    "concealmentAir_km": 7.51,
     "mainBatteryRange_km": 16.5,
     "airstrikeMinRange_km": 1.5,
     "airstrikeMaxRange_km": 13,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1104,10 +1148,10 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 12.18,
-    "concealmentAir_km": 7.69,
     "mainBatteryRange_km": 18.3,
     "radar_km": 8.5,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1118,10 +1162,10 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 12.18,
-    "concealmentAir_km": 7.69,
     "mainBatteryRange_km": 18.3,
     "radar_km": 8.5,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1132,10 +1176,10 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 13.01,
-    "concealmentAir_km": 6.71,
     "mainBatteryRange_km": 19.1,
     "torpedoRange_km": 9,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1146,9 +1190,9 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 12.52,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.5,
     "hydro_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1182,9 +1226,9 @@
       }
     ],
     "id": "ship-9fb5876d-cb1d-49f0-9fa3-4702cb136899",
+    "smoke": false,
     "iconId": null,
-    "cruiserType": "CA",
-    "concealmentAir_km": 6.86
+    "cruiserType": "CA"
   },
   {
     "id": "ship-incheon",
@@ -1194,9 +1238,26 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 11.17,
-    "concealmentAir_km": 6.51,
     "mainBatteryRange_km": 16.1,
     "torpedoRange_km": 13.5,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30,
+    "iconId": null
+  },
+  {
+    "id": "ship-incheon-b",
+    "name": "Incheon B",
+    "nation": "Pan-Asia",
+    "class": "CA",
+    "cruiserType": "CA",
+    "tier": 10,
+    "concealment_km": 11.17,
+    "mainBatteryRange_km": 16.1,
+    "torpedoRange_km": 13.5,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30,
     "iconId": null
   },
   {
@@ -1207,9 +1268,11 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 9.83,
-    "concealmentAir_km": 6.01,
     "mainBatteryRange_km": 15.5,
     "torpedoRange_km": 13.5,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30,
     "iconId": null
   },
   {
@@ -1220,9 +1283,11 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 7.92,
-    "concealmentAir_km": 4.02,
     "mainBatteryRange_km": 11.2,
     "torpedoRange_km": 20,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30,
     "iconId": null
   },
   {
@@ -1233,10 +1298,10 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 11.48,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 17.2,
     "torpedoRange_km": 10,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1247,10 +1312,12 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 10.29,
-    "concealmentAir_km": 6.17,
     "mainBatteryRange_km": 17.2,
     "torpedoRange_km": 8,
     "hydro_km": 5,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30,
     "iconId": null
   },
   {
@@ -1261,9 +1328,9 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 11.6,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.6,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1282,8 +1349,8 @@
     "aaRange_km": 6.6,
     "radar_km": 10,
     "radarDuration_s": 40,
-    "smokeDuration_s": 20,
-    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 15,
+    "smokeRadius_km": 0.6,
     "rudderShift_s": 8.4,
     "turningCircle_m": 730,
     "consumables": [
@@ -1301,9 +1368,9 @@
       }
     ],
     "id": "ship-52548b81-bade-4d09-89cf-97716e716050",
+    "smoke": true,
     "iconId": null,
     "cruiserType": "CA",
-    "concealmentAir_km": 6.9,
     "hydro_km": 5
   },
   {
@@ -1314,10 +1381,10 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 11.45,
-    "concealmentAir_km": 7.5,
     "mainBatteryRange_km": 19.8,
     "torpedoRange_km": 10,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1328,10 +1395,10 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 14.14,
-    "concealmentAir_km": 7.6,
     "mainBatteryRange_km": 19.4,
     "radar_km": 12,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1342,9 +1409,11 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 10.34,
-    "concealmentAir_km": 7.86,
     "mainBatteryRange_km": 16.3,
     "torpedoRange_km": 13.5,
+    "smoke": true,
+    "smokeRadius_km": 0.51,
+    "smokeDuration_s": 40,
     "iconId": null
   },
   {
@@ -1355,9 +1424,11 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 10.34,
-    "concealmentAir_km": 7.86,
     "mainBatteryRange_km": 16.3,
     "torpedoRange_km": 13.5,
+    "smoke": true,
+    "smokeRadius_km": 0.51,
+    "smokeDuration_s": 40,
     "iconId": null
   },
   {
@@ -1387,9 +1458,9 @@
       }
     ],
     "id": "ship-e0487567-6c53-4230-ab5e-22b7b95aa726",
+    "smoke": false,
     "iconId": null,
     "cruiserType": "CA",
-    "concealmentAir_km": 7.86,
     "hydro_km": 5
   },
   {
@@ -1400,10 +1471,12 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 9.94,
-    "concealmentAir_km": 6.72,
     "mainBatteryRange_km": 14.5,
     "torpedoRange_km": 6,
     "radar_km": 12,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 102,
     "iconId": null
   },
   {
@@ -1414,11 +1487,13 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 9.19,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 15.3,
     "torpedoRange_km": 10,
     "radar_km": 9,
     "hydro_km": 5,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 15,
     "iconId": null
   },
   {
@@ -1429,11 +1504,11 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 10.81,
-    "concealmentAir_km": 7.87,
     "mainBatteryRange_km": 18.1,
     "airstrikeMinRange_km": 1.5,
     "airstrikeMaxRange_km": 15,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1444,11 +1519,11 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 10.81,
-    "concealmentAir_km": 7.87,
     "mainBatteryRange_km": 18.1,
     "airstrikeMinRange_km": 1.5,
     "airstrikeMaxRange_km": 15,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1459,10 +1534,10 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 11.91,
-    "concealmentAir_km": 7.76,
     "mainBatteryRange_km": 18.2,
     "torpedoRange_km": 9.5,
     "hydro_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1473,10 +1548,10 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 13.2,
-    "concealmentAir_km": 7.86,
     "mainBatteryRange_km": 18.5,
     "radar_km": 12,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1487,10 +1562,10 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 13.01,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.8,
     "radar_km": 10,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1501,10 +1576,10 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 13.01,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.8,
     "radar_km": 10,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1515,10 +1590,10 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 10.89,
-    "concealmentAir_km": 6.4,
     "mainBatteryRange_km": 15.8,
     "radar_km": 8.5,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1529,11 +1604,11 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 9.12,
-    "concealmentAir_km": 6.9,
     "mainBatteryRange_km": 15.5,
     "torpedoRange_km": 10.5,
     "radar_km": 9,
     "hydro_km": 3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1544,9 +1619,9 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 11.03,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.1,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1557,10 +1632,12 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 10.04,
-    "concealmentAir_km": 6,
     "mainBatteryRange_km": 13.8,
     "torpedoRange_km": 8,
     "hydro_km": 5,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20,
     "iconId": null
   },
   {
@@ -1571,10 +1648,12 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 10.04,
-    "concealmentAir_km": 6,
     "mainBatteryRange_km": 13.8,
     "torpedoRange_km": 8,
     "hydro_km": 5,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20,
     "iconId": null
   },
   {
@@ -1605,9 +1684,9 @@
       }
     ],
     "id": "ship-fca2f64e-9119-4b8c-8f2a-85a3edd4c9da",
+    "smoke": false,
     "iconId": null,
-    "cruiserType": "CA",
-    "concealmentAir_km": 8.1
+    "cruiserType": "CA"
   },
   {
     "id": "ship-svea",
@@ -1617,10 +1696,26 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 9.32,
-    "concealmentAir_km": 6.9,
     "mainBatteryRange_km": 15.2,
     "torpedoRange_km": 13.5,
     "radar_km": 9,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 10,
+    "iconId": null
+  },
+  {
+    "id": "ship-taejong",
+    "name": "Taejong",
+    "nation": "Pan-Asia",
+    "class": "CA",
+    "cruiserType": "CA",
+    "tier": 10,
+    "concealment_km": 8.49,
+    "mainBatteryRange_km": 14.7,
+    "torpedoRange_km": 16.5,
+    "radar_km": 8.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1631,10 +1726,23 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 9.75,
-    "concealmentAir_km": 6,
     "mainBatteryRange_km": 17,
     "airstrikeMinRange_km": 1,
     "airstrikeMaxRange_km": 14,
+    "smoke": false,
+    "iconId": null
+  },
+  {
+    "id": "ship-vanadis",
+    "name": "Vanadis",
+    "nation": "Europe",
+    "class": "CA",
+    "cruiserType": "CA",
+    "tier": 10,
+    "concealment_km": 9.51,
+    "mainBatteryRange_km": 14.7,
+    "torpedoRange_km": 15,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1645,10 +1753,10 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 10.97,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.4,
     "torpedoRange_km": 8,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1665,8 +1773,8 @@
     "torpedoSpeed_kn": 60,
     "torpedoArc_deg": 45,
     "aaRange_km": 5.8,
-    "smokeDuration_s": 30,
-    "smokeRadius_km": 0.35,
+    "smokeDuration_s": 40,
+    "smokeRadius_km": 0.51,
     "rudderShift_s": 11.7,
     "turningCircle_m": 840,
     "consumables": [
@@ -1681,9 +1789,9 @@
       }
     ],
     "id": "ship-656201f9-972e-4365-a384-c93cc6d2aa35",
+    "smoke": true,
     "iconId": null,
-    "cruiserType": "CA",
-    "concealmentAir_km": 8.04
+    "cruiserType": "CA"
   },
   {
     "name": "Worcester",
@@ -1714,9 +1822,9 @@
       }
     ],
     "id": "ship-942aa420-fdc9-490e-97b8-e10208e3dd5a",
+    "smoke": false,
     "iconId": null,
-    "cruiserType": "CA",
-    "concealmentAir_km": 6.9
+    "cruiserType": "CA"
   },
   {
     "id": "ship-yodo",
@@ -1726,10 +1834,10 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 10.04,
-    "concealmentAir_km": 6.9,
     "mainBatteryRange_km": 18,
     "torpedoRange_km": 15,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1740,10 +1848,10 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 11.88,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 21.3,
     "torpedoRange_km": 20,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1754,10 +1862,10 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 11.88,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 21.3,
     "torpedoRange_km": 20,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1791,9 +1899,9 @@
     ],
     "hydro_km": 5,
     "id": "ship-6285fc7d-d0e0-4586-a344-e6b351fbd7bd",
+    "smoke": false,
     "iconId": null,
-    "cruiserType": "CA",
-    "concealmentAir_km": 6.04
+    "cruiserType": "CA"
   },
   {
     "id": "ship-zao-clr",
@@ -1803,10 +1911,10 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 9.9,
-    "concealmentAir_km": 6.04,
     "mainBatteryRange_km": 16.2,
     "torpedoRange_km": 12,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1817,9 +1925,9 @@
     "cruiserType": "CA",
     "tier": 10,
     "concealment_km": 11.6,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.6,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1829,7 +1937,7 @@
     "class": "CV",
     "tier": 10,
     "concealment_km": 14.67,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1839,7 +1947,7 @@
     "class": "CV",
     "tier": 10,
     "concealment_km": 14.3,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1849,7 +1957,7 @@
     "class": "CV",
     "tier": 10,
     "concealment_km": 14.32,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1859,7 +1967,7 @@
     "class": "CV",
     "tier": 10,
     "concealment_km": 13.49,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1869,7 +1977,7 @@
     "class": "CV",
     "tier": 10,
     "concealment_km": 15.38,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1880,7 +1988,6 @@
     "hp": 63000,
     "speed_kn": 32,
     "concealment_km": 15.19,
-    "mainBatteryRange_km": 10.8,
     "aaRange_km": 5.8,
     "rudderShift_s": 17.7,
     "turningCircle_m": 1230,
@@ -1897,8 +2004,8 @@
     ],
     "fighter": true,
     "id": "ship-c36227aa-328d-403e-9d4e-2f1be1f0cc7c",
-    "iconId": null,
-    "concealmentAir_km": 10
+    "smoke": false,
+    "iconId": null
   },
   {
     "id": "ship-independencia",
@@ -1907,7 +2014,7 @@
     "class": "CV",
     "tier": 10,
     "concealment_km": 11.36,
-    "concealmentAir_km": 9.69,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1917,7 +2024,7 @@
     "class": "CV",
     "tier": 10,
     "concealment_km": 15.19,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1927,7 +2034,7 @@
     "class": "CV",
     "tier": 10,
     "concealment_km": 13.58,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1937,7 +2044,7 @@
     "class": "CV",
     "tier": 10,
     "concealment_km": 13.58,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1948,7 +2055,6 @@
     "hp": 33500,
     "speed_kn": 33,
     "concealment_km": 15.38,
-    "mainBatteryRange_km": 11.1,
     "aaRange_km": 5.8,
     "rudderShift_s": 18,
     "turningCircle_m": 1230,
@@ -1965,8 +2071,8 @@
     ],
     "fighter": true,
     "id": "ship-9d1dc4d1-807d-467f-873d-6064593edf69",
-    "iconId": null,
-    "concealmentAir_km": 10
+    "smoke": false,
+    "iconId": null
   },
   {
     "id": "ship-ocean",
@@ -1975,7 +2081,7 @@
     "class": "CV",
     "tier": 10,
     "concealment_km": 11.36,
-    "concealmentAir_km": 9.69,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1985,7 +2091,7 @@
     "class": "CV",
     "tier": 10,
     "concealment_km": 13.49,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -1995,7 +2101,7 @@
     "class": "CV",
     "tier": 10,
     "concealment_km": 14.3,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -2005,7 +2111,7 @@
     "class": "CV",
     "tier": 10,
     "concealment_km": 13.58,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -2015,7 +2121,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 6.22,
-    "concealmentAir_km": 2.36,
     "mainBatteryRange_km": 12.7,
     "torpedoRange_km": 10,
     "iconId": null,
@@ -2028,7 +2133,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 5.59,
-    "concealmentAir_km": 2.74,
     "mainBatteryRange_km": 11.4,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -2043,7 +2147,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 7.96,
-    "concealmentAir_km": 3.69,
     "mainBatteryRange_km": 11.4,
     "iconId": null,
     "smoke": true,
@@ -2057,7 +2160,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 6.22,
-    "concealmentAir_km": 3.46,
     "mainBatteryRange_km": 12.6,
     "torpedoRange_km": 13.5,
     "iconId": null,
@@ -2072,7 +2174,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 7.21,
-    "concealmentAir_km": 3.46,
     "mainBatteryRange_km": 9.6,
     "torpedoRange_km": 13.5,
     "iconId": null,
@@ -2087,7 +2188,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 6.52,
-    "concealmentAir_km": 3.47,
     "mainBatteryRange_km": 13.1,
     "torpedoRange_km": 10.5,
     "iconId": null,
@@ -2101,8 +2201,7 @@
     "nation": "France",
     "class": "DD",
     "tier": 10,
-    "concealment_km": 6.1,
-    "concealmentAir_km": 3.11,
+    "concealment_km": 6.24,
     "mainBatteryRange_km": 12.6,
     "torpedoRange_km": 13.5,
     "iconId": null,
@@ -2115,7 +2214,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 6.34,
-    "concealmentAir_km": 3.01,
     "mainBatteryRange_km": 12.4,
     "torpedoRange_km": 20,
     "iconId": null,
@@ -2156,7 +2254,6 @@
     ],
     "id": "ship-1c15c9e9-3b45-4b2e-b017-6a5b7d04dfa0",
     "iconId": null,
-    "concealmentAir_km": 2.8,
     "smoke": true
   },
   {
@@ -2166,7 +2263,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 7.39,
-    "concealmentAir_km": 3.6,
     "mainBatteryRange_km": 13.1,
     "torpedoRange_km": 10,
     "iconId": null,
@@ -2181,7 +2277,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 6.61,
-    "concealmentAir_km": 3.3,
     "mainBatteryRange_km": 12.1,
     "hydro_km": 3,
     "iconId": null,
@@ -2196,7 +2291,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 6.49,
-    "concealmentAir_km": 4.06,
     "mainBatteryRange_km": 13.3,
     "torpedoRange_km": 13.5,
     "iconId": null,
@@ -2211,7 +2305,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 6.5,
-    "concealmentAir_km": 3.11,
     "mainBatteryRange_km": 12.6,
     "torpedoRange_km": 16.5,
     "hydro_km": 5,
@@ -2227,7 +2320,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 6.2,
-    "concealmentAir_km": 2.9,
     "mainBatteryRange_km": 12.4,
     "torpedoRange_km": 12,
     "iconId": null,
@@ -2242,7 +2334,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 7.35,
-    "concealmentAir_km": 3.82,
     "mainBatteryRange_km": 12,
     "torpedoRange_km": 10,
     "radar_km": 9,
@@ -2266,7 +2357,6 @@
     "torpedoArc_deg": 40,
     "torpedoes": "2 x 5 533 mm",
     "aaRange_km": 5,
-    "hydro_km": 5,
     "smokeDuration_s": 30,
     "smokeRadius_km": 0.45,
     "rudderShift_s": 4,
@@ -2284,7 +2374,6 @@
     ],
     "id": "ship-bc8bad68-6cff-4adb-808e-5a7073f3fa7f",
     "iconId": null,
-    "concealmentAir_km": 2.76,
     "smoke": true
   },
   {
@@ -2294,7 +2383,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 6.37,
-    "concealmentAir_km": 3.38,
     "mainBatteryRange_km": 11.2,
     "torpedoRange_km": 12,
     "hydro_km": 6,
@@ -2310,7 +2398,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 6.37,
-    "concealmentAir_km": 3.38,
     "mainBatteryRange_km": 11.2,
     "torpedoRange_km": 12,
     "hydro_km": 6,
@@ -2350,7 +2437,6 @@
     ],
     "id": "ship-40deca51-f559-44c6-8eb2-afe90f2531e7",
     "iconId": null,
-    "concealmentAir_km": 3.09,
     "smoke": true
   },
   {
@@ -2360,7 +2446,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 5.99,
-    "concealmentAir_km": 2.74,
     "mainBatteryRange_km": 10.5,
     "torpedoRange_km": 15,
     "iconId": null,
@@ -2373,7 +2458,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 6.22,
-    "concealmentAir_km": 3.39,
     "mainBatteryRange_km": 12.6,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -2388,7 +2472,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 6.08,
-    "concealmentAir_km": 3.06,
     "mainBatteryRange_km": 11.6,
     "torpedoRange_km": 12,
     "iconId": null,
@@ -2403,7 +2486,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 6.5,
-    "concealmentAir_km": 3.11,
     "mainBatteryRange_km": 12.3,
     "torpedoRange_km": 16.5,
     "iconId": null,
@@ -2416,7 +2498,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 7.86,
-    "concealmentAir_km": 3.21,
     "mainBatteryRange_km": 11.2,
     "torpedoRange_km": 6,
     "iconId": null,
@@ -2431,7 +2512,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 7.76,
-    "concealmentAir_km": 4.36,
     "mainBatteryRange_km": 13.6,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -2444,7 +2524,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 7.76,
-    "concealmentAir_km": 4.36,
     "mainBatteryRange_km": 13.6,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -2457,7 +2536,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 5.78,
-    "concealmentAir_km": 2.85,
     "mainBatteryRange_km": 12.3,
     "torpedoRange_km": 10.5,
     "iconId": null,
@@ -2472,7 +2550,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 6,
-    "concealmentAir_km": 2.96,
     "mainBatteryRange_km": 12.4,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -2487,7 +2564,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 5.8,
-    "concealmentAir_km": 2.86,
     "mainBatteryRange_km": 12.8,
     "torpedoRange_km": 11,
     "hydro_km": 5.5,
@@ -2501,7 +2577,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 5.8,
-    "concealmentAir_km": 2.86,
     "mainBatteryRange_km": 12.8,
     "torpedoRange_km": 11,
     "hydro_km": 5.5,
@@ -2515,7 +2590,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 6.97,
-    "concealmentAir_km": 3.92,
     "mainBatteryRange_km": 11.5,
     "torpedoRange_km": 9,
     "iconId": null,
@@ -2528,7 +2602,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 6.15,
-    "concealmentAir_km": 2.81,
     "mainBatteryRange_km": 11.5,
     "torpedoRange_km": 12,
     "radar_km": 7.5,
@@ -2542,7 +2615,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 7.51,
-    "concealmentAir_km": 3.82,
     "mainBatteryRange_km": 13,
     "radar_km": 7.5,
     "iconId": null,
@@ -2555,7 +2627,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 6.08,
-    "concealmentAir_km": 3.01,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 10.5,
     "hydro_km": 6,
@@ -2574,7 +2645,7 @@
     "concealment_km": 5.59,
     "mainBatteryRange_km": 11.4,
     "mainBattery": "3 x 1 127 mm/50",
-    "torpedoRange_km": 8,
+    "torpedoRange_km": 12,
     "torpedoSpeed_kn": 67,
     "torpedoArc_deg": 45,
     "torpedoes": "3 x 5 610 mm",
@@ -2596,7 +2667,6 @@
     ],
     "id": "ship-eb805d76-af60-4ea1-853e-8b068e9c4582",
     "iconId": null,
-    "concealmentAir_km": 2.74,
     "smoke": true
   },
   {
@@ -2606,7 +2676,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 6.15,
-    "concealmentAir_km": 2.81,
     "mainBatteryRange_km": 11.5,
     "torpedoRange_km": 12,
     "radar_km": 7.5,
@@ -2620,7 +2689,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 5.8,
-    "concealmentAir_km": 2.53,
     "mainBatteryRange_km": 11.7,
     "torpedoRange_km": 16.5,
     "iconId": null,
@@ -2635,7 +2703,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 5.94,
-    "concealmentAir_km": 2.99,
     "mainBatteryRange_km": 13.3,
     "torpedoRange_km": 12,
     "airstrikeMinRange_km": 1.5,
@@ -2650,7 +2717,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 5.82,
-    "concealmentAir_km": 2.74,
     "mainBatteryRange_km": 12.8,
     "torpedoRange_km": 12,
     "hydro_km": 5,
@@ -2666,7 +2732,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 5.83,
-    "concealmentAir_km": 2.72,
     "mainBatteryRange_km": 11.9,
     "torpedoRange_km": 13.5,
     "radar_km": 7.5,
@@ -2682,7 +2747,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 6.16,
-    "concealmentAir_km": 2.82,
     "mainBatteryRange_km": 12.6,
     "torpedoRange_km": 10,
     "hydro_km": 6,
@@ -2698,7 +2762,6 @@
     "class": "DD",
     "tier": 10,
     "concealment_km": 6.08,
-    "concealmentAir_km": 3.01,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 10.5,
     "hydro_km": 6,
@@ -2714,9 +2777,9 @@
     "class": "SS",
     "tier": 10,
     "concealment_km": 5.86,
-    "concealmentAir_km": 2.17,
     "mainBatteryRange_km": 6.5,
     "torpedoRange_km": 10.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -2726,9 +2789,9 @@
     "class": "SS",
     "tier": 10,
     "concealment_km": 7.12,
-    "concealmentAir_km": 2.63,
     "mainBatteryRange_km": 10,
     "torpedoRange_km": 15,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -2738,8 +2801,8 @@
     "class": "SS",
     "tier": 10,
     "concealment_km": 5.86,
-    "concealmentAir_km": 2.17,
     "torpedoRange_km": 12,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -2749,8 +2812,8 @@
     "class": "SS",
     "tier": 10,
     "concealment_km": 5.76,
-    "concealmentAir_km": 2.08,
     "torpedoRange_km": 16.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -2760,9 +2823,9 @@
     "class": "SS",
     "tier": 10,
     "concealment_km": 7.12,
-    "concealmentAir_km": 2.63,
     "mainBatteryRange_km": 10,
     "torpedoRange_km": 15,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -2772,9 +2835,21 @@
     "class": "SS",
     "tier": 10,
     "concealment_km": 6.3,
-    "concealmentAir_km": 2.26,
     "mainBatteryRange_km": 6,
     "torpedoRange_km": 11.5,
+    "smoke": false,
+    "iconId": null
+  },
+  {
+    "id": "ship-orzel",
+    "name": "Orzeł",
+    "nation": "Europe",
+    "class": "SS",
+    "tier": 10,
+    "concealment_km": 5.81,
+    "mainBatteryRange_km": 6,
+    "torpedoRange_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -2784,9 +2859,11 @@
     "class": "SS",
     "tier": 10,
     "concealment_km": 5.94,
-    "concealmentAir_km": 2.13,
     "mainBatteryRange_km": 10.5,
     "torpedoRange_km": 13.5,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 40,
     "iconId": null
   },
   {
@@ -2796,9 +2873,9 @@
     "class": "SS",
     "tier": 10,
     "concealment_km": 6.12,
-    "concealmentAir_km": 2.2,
     "mainBatteryRange_km": 6,
     "torpedoRange_km": 13,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -2808,9 +2885,9 @@
     "class": "SS",
     "tier": 10,
     "concealment_km": 5.74,
-    "concealmentAir_km": 2.17,
     "mainBatteryRange_km": 13.5,
     "torpedoRange_km": 12,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -2820,9 +2897,9 @@
     "class": "SS",
     "tier": 10,
     "concealment_km": 6.1,
-    "concealmentAir_km": 2.31,
     "mainBatteryRange_km": 6,
     "torpedoRange_km": 12,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -2832,10 +2909,10 @@
     "class": "SS",
     "tier": 10,
     "concealment_km": 5.8,
-    "concealmentAir_km": 2.08,
     "torpedoRange_km": 13,
     "airstrikeMinRange_km": 1.5,
     "airstrikeMaxRange_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -2845,8 +2922,8 @@
     "class": "SS",
     "tier": 10,
     "concealment_km": 5.57,
-    "concealmentAir_km": 2.06,
     "torpedoRange_km": 14,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -2856,8 +2933,8 @@
     "class": "SS",
     "tier": 10,
     "concealment_km": 5.4,
-    "concealmentAir_km": 2.06,
     "torpedoRange_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -2867,8 +2944,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 12.16,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 23.9,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -2878,8 +2955,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 13.29,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -2889,8 +2966,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 13.2,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -2900,8 +2977,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 13.12,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -2911,8 +2988,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 13.15,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 20.3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -2922,8 +2999,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 12.12,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.9,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -2933,8 +3010,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 13.5,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 25.4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -2944,8 +3021,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 13.12,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 21.6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -2955,9 +3032,9 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 13.37,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 20.6,
     "torpedoRange_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -2967,8 +3044,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 13.12,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 21.6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -2978,9 +3055,21 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 12.05,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.7,
     "torpedoRange_km": 10,
+    "smoke": false,
+    "iconId": null
+  },
+  {
+    "id": "ship-friedrich-carl",
+    "name": "Friedrich Carl",
+    "nation": "Germany",
+    "class": "BB",
+    "tier": 9,
+    "concealment_km": 13.11,
+    "mainBatteryRange_km": 20.8,
+    "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -2990,9 +3079,9 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 13.58,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 20.3,
     "hydro_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3002,8 +3091,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 13.29,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 20,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3013,8 +3102,10 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 13.2,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.1,
+    "smoke": true,
+    "smokeRadius_km": 0.9,
+    "smokeDuration_s": 60,
     "iconId": null
   },
   {
@@ -3024,10 +3115,10 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 11.45,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 20.8,
     "torpedoRange_km": 15,
     "radar_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3037,8 +3128,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 13.66,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 20.3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3048,8 +3139,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 12.16,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 21.8,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3059,8 +3150,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 12.85,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3070,9 +3161,9 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 12.4,
-    "concealmentAir_km": 7.67,
     "mainBatteryRange_km": 18.8,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3082,8 +3173,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 12.73,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 23.3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3093,9 +3184,9 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 12.87,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 22.3,
     "torpedoRange_km": 20,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3105,9 +3196,9 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 12.87,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 22.3,
     "torpedoRange_km": 20,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3117,8 +3208,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 13.5,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 21.7,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3128,8 +3219,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 12.87,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 24.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3139,8 +3230,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 12.87,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 24.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3150,10 +3241,10 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 10.55,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.1,
     "torpedoRange_km": 13.5,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3163,10 +3254,10 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 10.55,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.1,
     "torpedoRange_km": 13.5,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3176,8 +3267,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 13.29,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3187,8 +3278,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 13.29,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3198,8 +3289,10 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 13.44,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19,
+    "smoke": true,
+    "smokeRadius_km": 0.51,
+    "smokeDuration_s": 45,
     "iconId": null
   },
   {
@@ -3209,8 +3302,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 12.02,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 21.1,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3220,8 +3313,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 12.77,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3231,8 +3324,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 12.02,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 21.1,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3242,8 +3335,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 12.09,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 20.8,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3253,8 +3346,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 13.2,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3264,8 +3357,19 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 12.07,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 20.9,
+    "smoke": false,
+    "iconId": null
+  },
+  {
+    "id": "ship-marlborough-b",
+    "name": "Marlborough B",
+    "nation": "UK",
+    "class": "BB",
+    "tier": 9,
+    "concealment_km": 12.07,
+    "mainBatteryRange_km": 20.9,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3275,8 +3379,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 12.88,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 23.3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3286,9 +3390,9 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 12.73,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 23.4,
     "radar_km": 9.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3298,8 +3402,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 14.14,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 26.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3309,8 +3413,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 12.09,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 20.8,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3320,9 +3424,9 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 12.24,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 21.4,
     "torpedoRange_km": 15,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3332,8 +3436,10 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 13.2,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.1,
+    "smoke": true,
+    "smokeRadius_km": 0.9,
+    "smokeDuration_s": 60,
     "iconId": null
   },
   {
@@ -3343,8 +3449,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 13.2,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3354,10 +3460,10 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 13.58,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 21.3,
     "torpedoRange_km": 6,
     "hydro_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3367,10 +3473,10 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 13.58,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 21.3,
     "torpedoRange_km": 6,
     "hydro_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3380,10 +3486,10 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 12.24,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.8,
     "torpedoRange_km": 12,
     "hydro_km": 5.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3393,8 +3499,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 13.15,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 23.4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3404,8 +3510,19 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 12.24,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 22.2,
+    "smoke": false,
+    "iconId": null
+  },
+  {
+    "id": "ship-sovetskaya-rossiya",
+    "name": "Sovetskaya Rossiya",
+    "nation": "USSR",
+    "class": "BB",
+    "tier": 9,
+    "concealment_km": 13.12,
+    "mainBatteryRange_km": 19.4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3415,8 +3532,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 13.12,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3426,8 +3543,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 13.53,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.2,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3437,9 +3554,9 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 13.66,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 23.1,
     "torpedoRange_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3449,8 +3566,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 13.58,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3460,9 +3577,9 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 11.45,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 23,
     "torpedoRange_km": 15,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3472,8 +3589,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 12.6,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.7,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3483,8 +3600,19 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 11.73,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 23.9,
+    "smoke": false,
+    "iconId": null
+  },
+  {
+    "id": "ship-victoria-b",
+    "name": "Victoria B",
+    "nation": "Spain",
+    "class": "BB",
+    "tier": 9,
+    "concealment_km": 11.73,
+    "mainBatteryRange_km": 23.9,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3494,8 +3622,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 13.15,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 20.3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3505,8 +3633,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 13.53,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.2,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3516,8 +3644,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 12.73,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 23.3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3527,8 +3655,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 13.56,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3538,8 +3666,8 @@
     "class": "BB",
     "tier": 9,
     "concealment_km": 12.12,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.9,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3550,10 +3678,12 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 9.42,
-    "concealmentAir_km": 6.9,
     "mainBatteryRange_km": 15.8,
     "torpedoRange_km": 10,
     "radar_km": 9,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 15,
     "iconId": null
   },
   {
@@ -3564,9 +3694,9 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 10.2,
-    "concealmentAir_km": 8.07,
     "mainBatteryRange_km": 18.4,
     "hydro_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3577,10 +3707,10 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 11.88,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.5,
     "torpedoRange_km": 6,
     "hydro_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3591,10 +3721,10 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 11.88,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.5,
     "torpedoRange_km": 6,
     "hydro_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3605,9 +3735,9 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 11.88,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.1,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3618,10 +3748,10 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 12.18,
-    "concealmentAir_km": 7.87,
     "mainBatteryRange_km": 19,
     "radar_km": 10,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3632,10 +3762,10 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 12.18,
-    "concealmentAir_km": 7.87,
     "mainBatteryRange_km": 19,
     "radar_km": 10,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3646,10 +3776,10 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 11.34,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 17.6,
     "torpedoRange_km": 8,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3660,10 +3790,23 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 11.75,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 16.7,
     "torpedoRange_km": 8,
     "hydro_km": 5,
+    "smoke": false,
+    "iconId": null
+  },
+  {
+    "id": "ship-aragon",
+    "name": "Aragón",
+    "nation": "Spain",
+    "class": "CA",
+    "cruiserType": "CA",
+    "tier": 9,
+    "concealment_km": 11.5,
+    "mainBatteryRange_km": 18.6,
+    "torpedoRange_km": 8,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3674,9 +3817,9 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 11.88,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.1,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3687,9 +3830,9 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 11.88,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.1,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3700,10 +3843,10 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 10.09,
-    "concealmentAir_km": 6.9,
     "mainBatteryRange_km": 16.5,
     "torpedoRange_km": 15,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3714,9 +3857,9 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 11.87,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.1,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3727,9 +3870,9 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 10.39,
-    "concealmentAir_km": 6.83,
     "mainBatteryRange_km": 17.6,
     "torpedoRange_km": 13.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3740,10 +3883,10 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 11.17,
-    "concealmentAir_km": 5.81,
     "mainBatteryRange_km": 18.5,
     "torpedoRange_km": 8,
     "hydro_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3754,9 +3897,9 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 11.87,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.2,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3767,9 +3910,11 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 11.78,
-    "concealmentAir_km": 7.18,
     "mainBatteryRange_km": 17.1,
     "torpedoRange_km": 13.5,
+    "smoke": true,
+    "smokeRadius_km": 0.51,
+    "smokeDuration_s": 40,
     "iconId": null
   },
   {
@@ -3780,10 +3925,10 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 10.7,
-    "concealmentAir_km": 6.5,
     "mainBatteryRange_km": 15.8,
     "radar_km": 10,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3794,9 +3939,9 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 9.91,
-    "concealmentAir_km": 6.19,
     "mainBatteryRange_km": 16.1,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3807,9 +3952,23 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 12.02,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.6,
     "hydro_km": 5,
+    "smoke": false,
+    "iconId": null
+  },
+  {
+    "id": "ship-chao-heng",
+    "name": "Chao Heng",
+    "nation": "Pan-Asia",
+    "class": "CA",
+    "cruiserType": "CA",
+    "tier": 9,
+    "concealment_km": 10.21,
+    "mainBatteryRange_km": 16.5,
+    "torpedoRange_km": 10,
+    "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3820,10 +3979,12 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 8.77,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 15.7,
     "torpedoRange_km": 15,
     "hydro_km": 4,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20,
     "iconId": null
   },
   {
@@ -3834,10 +3995,28 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 8.77,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 15.7,
     "torpedoRange_km": 15,
     "hydro_km": 4,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20,
+    "iconId": null
+  },
+  {
+    "id": "ship-chikuma-sho-go",
+    "name": "Chikuma Shō-Gō",
+    "nation": "Japan",
+    "class": "CA",
+    "cruiserType": "CA",
+    "tier": 9,
+    "concealment_km": 8.77,
+    "mainBatteryRange_km": 15.7,
+    "torpedoRange_km": 15,
+    "hydro_km": 4,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20,
     "iconId": null
   },
   {
@@ -3848,11 +4027,13 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 10.34,
-    "concealmentAir_km": 6.9,
     "mainBatteryRange_km": 16.5,
     "torpedoRange_km": 10,
     "radar_km": 10,
     "hydro_km": 5,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 15,
     "iconId": null
   },
   {
@@ -3863,9 +4044,11 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 8.91,
-    "concealmentAir_km": 6,
     "mainBatteryRange_km": 14.1,
     "torpedoRange_km": 10,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30,
     "iconId": null
   },
   {
@@ -3876,11 +4059,11 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 12.59,
-    "concealmentAir_km": 6.16,
     "mainBatteryRange_km": 17.8,
     "torpedoRange_km": 8,
     "radar_km": 12,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3891,10 +4074,10 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 10.37,
-    "concealmentAir_km": 7.08,
     "mainBatteryRange_km": 15.9,
     "torpedoRange_km": 10,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3905,10 +4088,12 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 10.5,
-    "concealmentAir_km": 5.86,
     "mainBatteryRange_km": 16.5,
     "torpedoRange_km": 13.5,
     "hydro_km": 5,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 102,
     "iconId": null
   },
   {
@@ -3919,9 +4104,11 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 8.93,
-    "concealmentAir_km": 5.18,
     "mainBatteryRange_km": 13.8,
     "torpedoRange_km": 10,
+    "smoke": true,
+    "smokeRadius_km": 0.51,
+    "smokeDuration_s": 40,
     "iconId": null
   },
   {
@@ -3932,11 +4119,11 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 12.67,
-    "concealmentAir_km": 7.24,
     "mainBatteryRange_km": 18.6,
     "torpedoRange_km": 9.2,
     "radar_km": 10,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3947,11 +4134,11 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 12.67,
-    "concealmentAir_km": 7.24,
     "mainBatteryRange_km": 18.6,
     "torpedoRange_km": 9.2,
     "radar_km": 10,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3962,10 +4149,12 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 9.38,
-    "concealmentAir_km": 6,
     "mainBatteryRange_km": 15.6,
     "torpedoRange_km": 12,
     "hydro_km": 3,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 102,
     "iconId": null
   },
   {
@@ -3976,10 +4165,10 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 9.9,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 16.5,
     "torpedoRange_km": 10,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -3990,11 +4179,11 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 10,
-    "concealmentAir_km": 7.05,
     "mainBatteryRange_km": 16,
     "airstrikeMinRange_km": 1.5,
     "airstrikeMaxRange_km": 12,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -4005,11 +4194,11 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 12.59,
-    "concealmentAir_km": 6.16,
     "mainBatteryRange_km": 18.5,
     "torpedoRange_km": 6,
     "radar_km": 12,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -4020,9 +4209,22 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 12.73,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.2,
     "radar_km": 12,
+    "smoke": false,
+    "iconId": null
+  },
+  {
+    "id": "ship-la-spezia",
+    "name": "La Spezia",
+    "nation": "Italy",
+    "class": "CA",
+    "cruiserType": "CA",
+    "tier": 9,
+    "concealment_km": 12.17,
+    "mainBatteryRange_km": 18.8,
+    "torpedoRange_km": 13.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -4033,9 +4235,9 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 11.87,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.1,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -4046,10 +4248,10 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 11.73,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 17.6,
     "torpedoRange_km": 9.5,
     "hydro_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -4060,10 +4262,10 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 11.88,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.5,
     "torpedoRange_km": 6,
     "hydro_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -4074,10 +4276,10 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 9.58,
-    "concealmentAir_km": 6.01,
     "mainBatteryRange_km": 16.5,
     "airstrikeMinRange_km": 1,
     "airstrikeMaxRange_km": 13.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -4088,10 +4290,12 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 11.35,
-    "concealmentAir_km": 7.02,
     "mainBatteryRange_km": 16.8,
     "torpedoRange_km": 8,
     "hydro_km": 6,
+    "smoke": true,
+    "smokeRadius_km": 0.51,
+    "smokeDuration_s": 40,
     "iconId": null
   },
   {
@@ -4102,10 +4306,12 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 10.97,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 17,
     "torpedoRange_km": 8,
     "hydro_km": 5,
+    "smoke": true,
+    "smokeRadius_km": 0.51,
+    "smokeDuration_s": 40,
     "iconId": null
   },
   {
@@ -4116,11 +4322,13 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 10.34,
-    "concealmentAir_km": 6.9,
     "mainBatteryRange_km": 16.5,
     "torpedoRange_km": 10,
     "radar_km": 10,
     "hydro_km": 5,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 15,
     "iconId": null
   },
   {
@@ -4131,10 +4339,10 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 12.05,
-    "concealmentAir_km": 6.98,
     "mainBatteryRange_km": 18,
     "radar_km": 12,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -4145,10 +4353,10 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 11.32,
-    "concealmentAir_km": 6.46,
     "mainBatteryRange_km": 17.8,
     "torpedoRange_km": 6,
     "hydro_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -4159,10 +4367,10 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 11.32,
-    "concealmentAir_km": 6.46,
     "mainBatteryRange_km": 17.8,
     "torpedoRange_km": 6,
     "hydro_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -4173,10 +4381,10 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 11.74,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 18.3,
     "torpedoRange_km": 9,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -4187,11 +4395,11 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 10.29,
-    "concealmentAir_km": 6.9,
     "mainBatteryRange_km": 15.2,
     "torpedoRange_km": 10.5,
     "radar_km": 9,
     "hydro_km": 3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -4202,10 +4410,10 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 9.61,
-    "concealmentAir_km": 6.9,
     "mainBatteryRange_km": 15.7,
     "radar_km": 9,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -4216,9 +4424,11 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 9.7,
-    "concealmentAir_km": 6,
     "mainBatteryRange_km": 15,
     "torpedoRange_km": 12,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30,
     "iconId": null
   },
   {
@@ -4229,10 +4439,10 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 11.88,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 20.6,
     "torpedoRange_km": 6,
     "hydro_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -4243,10 +4453,10 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 10.21,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 16.5,
     "torpedoRange_km": 10,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -4257,10 +4467,10 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 10.21,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 16.5,
     "torpedoRange_km": 10,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -4271,10 +4481,10 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 10.21,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 16.5,
     "torpedoRange_km": 10,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -4285,10 +4495,10 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 10.09,
-    "concealmentAir_km": 6.9,
     "mainBatteryRange_km": 16.5,
     "torpedoRange_km": 15,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -4299,9 +4509,22 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 12.05,
-    "concealmentAir_km": 6.98,
     "mainBatteryRange_km": 19.3,
     "hydro_km": 5,
+    "smoke": false,
+    "iconId": null
+  },
+  {
+    "id": "ship-tirfing",
+    "name": "Tirfing",
+    "nation": "Europe",
+    "class": "CA",
+    "cruiserType": "CA",
+    "tier": 9,
+    "concealment_km": 9.15,
+    "mainBatteryRange_km": 14.3,
+    "torpedoRange_km": 15,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -4312,10 +4535,10 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 9.48,
-    "concealmentAir_km": 5.88,
     "mainBatteryRange_km": 14.9,
     "radar_km": 9,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -4326,8 +4549,8 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 9.35,
-    "concealmentAir_km": 6.9,
     "mainBatteryRange_km": 15.7,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -4338,11 +4561,11 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 9.83,
-    "concealmentAir_km": 7.31,
     "mainBatteryRange_km": 15.6,
     "airstrikeMinRange_km": 1.5,
     "airstrikeMaxRange_km": 15,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -4353,9 +4576,9 @@
     "cruiserType": "CA",
     "tier": 9,
     "concealment_km": 13.72,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 21,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -4365,7 +4588,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 6.63,
-    "concealmentAir_km": 3.36,
     "mainBatteryRange_km": 9.5,
     "torpedoRange_km": 12,
     "iconId": null,
@@ -4380,7 +4602,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 7.23,
-    "concealmentAir_km": 3.48,
     "mainBatteryRange_km": 12.7,
     "torpedoRange_km": 10,
     "iconId": null,
@@ -4394,8 +4615,7 @@
     "nation": "UK",
     "class": "DD",
     "tier": 9,
-    "concealment_km": 5.62,
-    "concealmentAir_km": 2.71,
+    "concealment_km": 5.82,
     "mainBatteryRange_km": 11.6,
     "torpedoRange_km": 12,
     "iconId": null,
@@ -4410,7 +4630,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 5.94,
-    "concealmentAir_km": 2.32,
     "mainBatteryRange_km": 12.6,
     "torpedoRange_km": 10.5,
     "iconId": null,
@@ -4425,7 +4644,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 5.8,
-    "concealmentAir_km": 2.62,
     "mainBatteryRange_km": 12.9,
     "torpedoRange_km": 13.7,
     "radar_km": 7.5,
@@ -4441,7 +4659,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 5.8,
-    "concealmentAir_km": 2.62,
     "mainBatteryRange_km": 12.9,
     "torpedoRange_km": 13.7,
     "radar_km": 7.5,
@@ -4457,7 +4674,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 6.74,
-    "concealmentAir_km": 2.75,
     "mainBatteryRange_km": 12.7,
     "torpedoRange_km": 10.5,
     "radar_km": 9,
@@ -4471,7 +4687,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 5.98,
-    "concealmentAir_km": 2.88,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 10,
     "iconId": null,
@@ -4486,7 +4701,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 6.36,
-    "concealmentAir_km": 3.3,
     "mainBatteryRange_km": 12.8,
     "torpedoRange_km": 10,
     "iconId": null,
@@ -4501,7 +4715,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 5.65,
-    "concealmentAir_km": 2.62,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 10.5,
     "radar_km": 7.5,
@@ -4517,7 +4730,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 6.37,
-    "concealmentAir_km": 3.38,
     "mainBatteryRange_km": 12.6,
     "torpedoRange_km": 12,
     "iconId": null,
@@ -4532,7 +4744,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 5.8,
-    "concealmentAir_km": 2.62,
     "mainBatteryRange_km": 12.9,
     "torpedoRange_km": 10.5,
     "iconId": null,
@@ -4547,7 +4758,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 6.42,
-    "concealmentAir_km": 2.35,
     "mainBatteryRange_km": 12.4,
     "hydro_km": 5,
     "iconId": null,
@@ -4562,7 +4772,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 5.8,
-    "concealmentAir_km": 2.65,
     "mainBatteryRange_km": 12.5,
     "torpedoRange_km": 13.5,
     "iconId": null,
@@ -4577,7 +4786,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 6.42,
-    "concealmentAir_km": 2.35,
     "mainBatteryRange_km": 12.4,
     "hydro_km": 5,
     "iconId": null,
@@ -4592,7 +4800,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 6.11,
-    "concealmentAir_km": 2.76,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 13.5,
     "iconId": null,
@@ -4607,7 +4814,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 5.43,
-    "concealmentAir_km": 2.8,
     "mainBatteryRange_km": 9.5,
     "torpedoRange_km": 12,
     "iconId": null,
@@ -4620,7 +4826,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 5.8,
-    "concealmentAir_km": 2.65,
     "mainBatteryRange_km": 12.5,
     "torpedoRange_km": 13.5,
     "iconId": null,
@@ -4635,7 +4840,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 5.69,
-    "concealmentAir_km": 2.64,
     "mainBatteryRange_km": 12.5,
     "torpedoRange_km": 10,
     "hydro_km": 3,
@@ -4651,7 +4855,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 6.1,
-    "concealmentAir_km": 2.96,
     "mainBatteryRange_km": 12.5,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -4666,9 +4869,8 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 7.19,
-    "concealmentAir_km": 3.52,
     "mainBatteryRange_km": 11.5,
-    "torpedoRange_km": 9,
+    "torpedoRange_km": 10,
     "radar_km": 9,
     "iconId": null,
     "smoke": true,
@@ -4682,7 +4884,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 5.37,
-    "concealmentAir_km": 2.45,
     "mainBatteryRange_km": 11,
     "torpedoRange_km": 15,
     "iconId": null,
@@ -4697,7 +4898,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 7.5,
-    "concealmentAir_km": 3.72,
     "mainBatteryRange_km": 12.8,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -4710,7 +4910,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 6.18,
-    "concealmentAir_km": 3.11,
     "mainBatteryRange_km": 11.8,
     "torpedoRange_km": 12,
     "iconId": null,
@@ -4725,7 +4924,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 5.56,
-    "concealmentAir_km": 2.43,
     "mainBatteryRange_km": 12.8,
     "torpedoRange_km": 10,
     "iconId": null,
@@ -4740,7 +4938,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 5.56,
-    "concealmentAir_km": 2.43,
     "mainBatteryRange_km": 12.8,
     "torpedoRange_km": 10,
     "iconId": null,
@@ -4755,7 +4952,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 6.12,
-    "concealmentAir_km": 2.83,
     "mainBatteryRange_km": 12.4,
     "torpedoRange_km": 10,
     "iconId": null,
@@ -4768,7 +4964,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 6.01,
-    "concealmentAir_km": 3.05,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 12,
     "iconId": null,
@@ -4781,7 +4976,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 5.99,
-    "concealmentAir_km": 2.66,
     "mainBatteryRange_km": 10.2,
     "torpedoRange_km": 13.5,
     "iconId": null,
@@ -4794,7 +4988,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 7.14,
-    "concealmentAir_km": 2.98,
     "mainBatteryRange_km": 11.3,
     "torpedoRange_km": 6,
     "iconId": null,
@@ -4803,13 +4996,24 @@
     "smokeDuration_s": 35
   },
   {
+    "id": "ship-red-hare",
+    "name": "Red Hare",
+    "nation": "Pan-Asia",
+    "class": "DD",
+    "tier": 9,
+    "concealment_km": 7.5,
+    "mainBatteryRange_km": 12.8,
+    "torpedoRange_km": 8,
+    "smoke": false,
+    "iconId": null
+  },
+  {
     "id": "ship-somme",
     "name": "Somme",
     "nation": "UK",
     "class": "DD",
     "tier": 9,
     "concealment_km": 5.69,
-    "concealmentAir_km": 2.64,
     "mainBatteryRange_km": 12.5,
     "torpedoRange_km": 10,
     "hydro_km": 3,
@@ -4825,7 +5029,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 6.1,
-    "concealmentAir_km": 2.96,
     "mainBatteryRange_km": 12.5,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -4840,7 +5043,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 7.23,
-    "concealmentAir_km": 3.48,
     "mainBatteryRange_km": 12.7,
     "torpedoRange_km": 10,
     "iconId": null,
@@ -4855,7 +5057,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 7.23,
-    "concealmentAir_km": 2.62,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 10,
     "iconId": null,
@@ -4870,7 +5071,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 5.76,
-    "concealmentAir_km": 2.72,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 10.5,
     "iconId": null,
@@ -4885,7 +5085,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 5.52,
-    "concealmentAir_km": 2.53,
     "mainBatteryRange_km": 12,
     "torpedoRange_km": 12,
     "iconId": null,
@@ -4899,8 +5098,7 @@
     "nation": "Germany",
     "class": "DD",
     "tier": 9,
-    "concealment_km": 5.88,
-    "concealmentAir_km": 2.83,
+    "concealment_km": 5.7,
     "mainBatteryRange_km": 11.1,
     "torpedoRange_km": 12,
     "iconId": null,
@@ -4915,7 +5113,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 5.94,
-    "concealmentAir_km": 2.86,
     "mainBatteryRange_km": 11,
     "torpedoRange_km": 10,
     "hydro_km": 5,
@@ -4931,7 +5128,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 5.83,
-    "concealmentAir_km": 2.59,
     "mainBatteryRange_km": 11.9,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -4946,7 +5142,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 5.83,
-    "concealmentAir_km": 2.59,
     "mainBatteryRange_km": 11.9,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -4961,7 +5156,6 @@
     "class": "DD",
     "tier": 9,
     "concealment_km": 5.83,
-    "concealmentAir_km": 1.76,
     "mainBatteryRange_km": 11.9,
     "torpedoRange_km": 10,
     "airstrikeMinRange_km": 0.5,
@@ -4979,9 +5173,9 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 12.87,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 21.2,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -4991,8 +5185,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 11.74,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.1,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5002,8 +5196,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 13.01,
-    "concealmentAir_km": 7.89,
     "mainBatteryRange_km": 18.3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5013,8 +5207,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 13.15,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 25.3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5024,8 +5218,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 12.73,
-    "concealmentAir_km": 7.87,
     "mainBatteryRange_km": 21.1,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5035,8 +5229,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 12.73,
-    "concealmentAir_km": 7.87,
     "mainBatteryRange_km": 21.1,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5046,8 +5240,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 12.73,
-    "concealmentAir_km": 7.87,
     "mainBatteryRange_km": 21.1,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5057,8 +5251,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 12.73,
-    "concealmentAir_km": 7.87,
     "mainBatteryRange_km": 21.1,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5068,8 +5262,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 13.58,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.9,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5079,9 +5273,9 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 12.17,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 21.1,
     "torpedoRange_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5091,8 +5285,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 11.52,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5102,8 +5296,10 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 11.66,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.3,
+    "smoke": true,
+    "smokeRadius_km": 0.9,
+    "smokeDuration_s": 60,
     "iconId": null
   },
   {
@@ -5113,9 +5309,9 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 12.87,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 21.5,
     "torpedoRange_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5125,9 +5321,9 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 12.87,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 21.2,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5137,8 +5333,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 12.87,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 21.2,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5148,9 +5344,9 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 13.72,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.6,
     "radar_km": 12,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5160,9 +5356,9 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 12.73,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.5,
     "torpedoRange_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5172,9 +5368,9 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 12.73,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.5,
     "torpedoRange_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5184,8 +5380,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 12.87,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 25,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5195,10 +5391,10 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 12.22,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 17.4,
     "torpedoRange_km": 9.2,
     "radar_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5208,8 +5404,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 12.87,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 21.2,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5219,10 +5415,10 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 11.17,
-    "concealmentAir_km": 7.75,
     "mainBatteryRange_km": 19.9,
     "torpedoRange_km": 12,
     "radar_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5232,8 +5428,19 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 12.73,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 20,
+    "smoke": false,
+    "iconId": null
+  },
+  {
+    "id": "ship-flandre-b",
+    "name": "Flandre B",
+    "nation": "France",
+    "class": "BB",
+    "tier": 8,
+    "concealment_km": 12.73,
+    "mainBatteryRange_km": 20,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5243,8 +5450,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 13.15,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 23.8,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5254,9 +5461,9 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 11.75,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.8,
     "torpedoRange_km": 8,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5266,8 +5473,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 13.58,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.9,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5277,8 +5484,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 12.3,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.7,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5288,8 +5495,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 13.01,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 22.7,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5299,8 +5506,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 12.3,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 23.3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5310,9 +5517,9 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 14,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.4,
     "torpedoRange_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5322,8 +5529,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 13.07,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5333,8 +5540,10 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 11.66,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.3,
+    "smoke": true,
+    "smokeRadius_km": 0.9,
+    "smokeDuration_s": 60,
     "iconId": null
   },
   {
@@ -5344,8 +5553,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 13.01,
-    "concealmentAir_km": 7.89,
     "mainBatteryRange_km": 18.3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5355,8 +5564,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 13.01,
-    "concealmentAir_km": 7.89,
     "mainBatteryRange_km": 18.3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5366,8 +5575,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 11.45,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5377,8 +5586,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 12.31,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 21,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5388,8 +5597,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 12.3,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 23.3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5399,8 +5608,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 12.3,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 23.3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5410,10 +5619,10 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 12.02,
-    "concealmentAir_km": 7.99,
     "mainBatteryRange_km": 19.1,
     "torpedoRange_km": 6,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5423,8 +5632,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 11.28,
-    "concealmentAir_km": 7.47,
     "mainBatteryRange_km": 22.7,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5434,8 +5643,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 11.83,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 17.1,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5445,8 +5654,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 13.58,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19.9,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5456,8 +5665,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 13.15,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 25.3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5467,8 +5676,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 11.74,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.1,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5478,8 +5687,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 11.74,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.1,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5489,8 +5698,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 11.42,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 20.2,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5500,9 +5709,9 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 12.87,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 21.5,
     "torpedoRange_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5512,9 +5721,9 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 12.87,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 21.5,
     "torpedoRange_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5524,10 +5733,10 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 11.97,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18.5,
     "torpedoRange_km": 6,
     "radar_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5537,8 +5746,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 12.6,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 20,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5548,8 +5757,10 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 12.77,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 19,
+    "smoke": true,
+    "smokeRadius_km": 0.51,
+    "smokeDuration_s": 45,
     "iconId": null
   },
   {
@@ -5559,8 +5770,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 12.49,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5570,10 +5781,10 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 11.99,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18,
     "torpedoRange_km": 12,
     "hydro_km": 5.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5583,8 +5794,8 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 11.92,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 22.8,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5594,10 +5805,10 @@
     "class": "BB",
     "tier": 8,
     "concealment_km": 11.99,
-    "concealmentAir_km": 8.1,
     "mainBatteryRange_km": 18,
     "torpedoRange_km": 12,
     "hydro_km": 5.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5608,10 +5819,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 11.17,
-    "concealmentAir_km": 5.82,
     "mainBatteryRange_km": 17.7,
     "torpedoRange_km": 6,
     "hydro_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5622,10 +5833,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.51,
-    "concealmentAir_km": 6.08,
     "mainBatteryRange_km": 16.1,
     "torpedoRange_km": 8,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5636,9 +5847,11 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.46,
-    "concealmentAir_km": 6.01,
     "mainBatteryRange_km": 14.5,
     "torpedoRange_km": 11,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30,
     "iconId": null
   },
   {
@@ -5649,10 +5862,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.33,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 15.6,
     "radar_km": 9,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5663,10 +5876,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.77,
-    "concealmentAir_km": 6.24,
     "mainBatteryRange_km": 15.7,
     "torpedoRange_km": 10,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5677,9 +5890,9 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.64,
-    "concealmentAir_km": 6.9,
     "mainBatteryRange_km": 16.1,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5690,9 +5903,11 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 11.35,
-    "concealmentAir_km": 7.02,
     "mainBatteryRange_km": 16.1,
     "torpedoRange_km": 12,
+    "smoke": true,
+    "smokeRadius_km": 0.51,
+    "smokeDuration_s": 40,
     "iconId": null
   },
   {
@@ -5703,10 +5918,12 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 10.7,
-    "concealmentAir_km": 6.5,
     "mainBatteryRange_km": 15.6,
     "torpedoRange_km": 10.5,
     "hydro_km": 5,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30,
     "iconId": null
   },
   {
@@ -5717,10 +5934,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.33,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 15.8,
     "torpedoRange_km": 10,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5731,10 +5948,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.33,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 15.8,
     "torpedoRange_km": 10,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5745,10 +5962,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.33,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 15.8,
     "torpedoRange_km": 10,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5759,10 +5976,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.33,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 15.8,
     "torpedoRange_km": 10,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5773,10 +5990,12 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 10.76,
-    "concealmentAir_km": 6.21,
     "mainBatteryRange_km": 16,
     "torpedoRange_km": 12,
     "hydro_km": 5,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 102,
     "iconId": null
   },
   {
@@ -5787,10 +6006,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.9,
-    "concealmentAir_km": 5.88,
     "mainBatteryRange_km": 15.8,
     "radar_km": 10,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5801,10 +6020,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.61,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 16.4,
     "torpedoRange_km": 9,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5815,11 +6034,13 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 8.91,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 15.4,
     "torpedoRange_km": 8,
     "radar_km": 9,
     "hydro_km": 5,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 15,
     "iconId": null
   },
   {
@@ -5830,9 +6051,9 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.48,
-    "concealmentAir_km": 5.88,
     "mainBatteryRange_km": 16,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5843,10 +6064,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 11.5,
-    "concealmentAir_km": 7.32,
     "mainBatteryRange_km": 16.5,
     "torpedoRange_km": 8,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5857,11 +6078,11 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 10.4,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 17.3,
     "torpedoRange_km": 4,
     "radar_km": 12,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5872,10 +6093,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 10.75,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 17.6,
     "torpedoRange_km": 9,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5886,9 +6107,9 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 12.3,
-    "concealmentAir_km": 6.85,
     "mainBatteryRange_km": 17.7,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5899,10 +6120,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.51,
-    "concealmentAir_km": 6.08,
     "mainBatteryRange_km": 16.1,
     "torpedoRange_km": 8,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5913,10 +6134,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.33,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 15.6,
     "radar_km": 9,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5927,9 +6148,9 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 10.74,
-    "concealmentAir_km": 7.99,
     "mainBatteryRange_km": 15.1,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5940,10 +6161,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 12.18,
-    "concealmentAir_km": 7.87,
     "mainBatteryRange_km": 18,
     "radar_km": 10,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5954,10 +6175,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 12.02,
-    "concealmentAir_km": 6.08,
     "mainBatteryRange_km": 17.5,
     "torpedoRange_km": 6,
     "hydro_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5968,10 +6189,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.33,
-    "concealmentAir_km": 6.9,
     "mainBatteryRange_km": 16.1,
     "airstrikeMinRange_km": 1.5,
     "airstrikeMaxRange_km": 13,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -5982,10 +6203,12 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 11.35,
-    "concealmentAir_km": 6.91,
     "mainBatteryRange_km": 18.1,
     "torpedoRange_km": 4,
     "hydro_km": 5,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 15,
     "iconId": null
   },
   {
@@ -5996,11 +6219,13 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.2,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 15.4,
     "torpedoRange_km": 10,
     "radar_km": 10,
     "hydro_km": 5,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 15,
     "iconId": null
   },
   {
@@ -6011,9 +6236,11 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.2,
-    "concealmentAir_km": 6.9,
     "mainBatteryRange_km": 15.6,
     "radar_km": 9,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 15,
     "iconId": null
   },
   {
@@ -6024,11 +6251,11 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.83,
-    "concealmentAir_km": 7.31,
     "mainBatteryRange_km": 15.6,
     "airstrikeMinRange_km": 1.5,
     "airstrikeMaxRange_km": 12,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6039,10 +6266,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.3,
-    "concealmentAir_km": 5.9,
     "mainBatteryRange_km": 16.8,
     "torpedoRange_km": 10,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6053,9 +6280,11 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.46,
-    "concealmentAir_km": 6.01,
     "mainBatteryRange_km": 14.5,
     "torpedoRange_km": 11,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30,
     "iconId": null
   },
   {
@@ -6066,11 +6295,11 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 10.21,
-    "concealmentAir_km": 6.9,
     "mainBatteryRange_km": 15.1,
     "torpedoRange_km": 6,
     "radar_km": 9,
     "hydro_km": 3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6081,10 +6310,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 10.76,
-    "concealmentAir_km": 6.03,
     "mainBatteryRange_km": 17.5,
     "torpedoRange_km": 13.5,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6095,10 +6324,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.33,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 15.9,
     "airstrikeMinRange_km": 1,
     "airstrikeMaxRange_km": 11,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6109,10 +6338,12 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 11.35,
-    "concealmentAir_km": 6.91,
     "mainBatteryRange_km": 18.1,
     "torpedoRange_km": 4,
     "hydro_km": 5,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 15,
     "iconId": null
   },
   {
@@ -6123,10 +6354,23 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 11.02,
-    "concealmentAir_km": 6.29,
     "mainBatteryRange_km": 16.8,
     "torpedoRange_km": 9.5,
     "hydro_km": 6,
+    "smoke": false,
+    "iconId": null
+  },
+  {
+    "id": "ship-kriti",
+    "name": "Kriti",
+    "nation": "Europe",
+    "class": "CA",
+    "cruiserType": "CA",
+    "tier": 8,
+    "concealment_km": 8.83,
+    "mainBatteryRange_km": 14,
+    "torpedoRange_km": 13.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6137,10 +6381,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 12.02,
-    "concealmentAir_km": 6.08,
     "mainBatteryRange_km": 17.5,
     "torpedoRange_km": 6,
     "hydro_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6151,10 +6395,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 12.02,
-    "concealmentAir_km": 6.08,
     "mainBatteryRange_km": 17.5,
     "torpedoRange_km": 6,
     "hydro_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6165,9 +6409,9 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 11.13,
-    "concealmentAir_km": 7.81,
     "mainBatteryRange_km": 18.8,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6178,10 +6422,12 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 11.39,
-    "concealmentAir_km": 6.03,
     "mainBatteryRange_km": 19.1,
     "torpedoRange_km": 8,
     "hydro_km": 5,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20,
     "iconId": null
   },
   {
@@ -6192,10 +6438,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.48,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 15.7,
     "torpedoRange_km": 10,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6206,9 +6452,11 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.2,
-    "concealmentAir_km": 6.9,
     "mainBatteryRange_km": 16,
     "hydro_km": 5.5,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30,
     "iconId": null
   },
   {
@@ -6219,10 +6467,12 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.48,
-    "concealmentAir_km": 6.19,
     "mainBatteryRange_km": 15.7,
     "torpedoRange_km": 8,
     "hydro_km": 5,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 15,
     "iconId": null
   },
   {
@@ -6233,10 +6483,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 8.42,
-    "concealmentAir_km": 5.2,
     "mainBatteryRange_km": 15.2,
     "torpedoRange_km": 8,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6247,11 +6497,11 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.05,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 15.6,
     "torpedoRange_km": 8,
     "radar_km": 10,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6262,10 +6512,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 10.76,
-    "concealmentAir_km": 6.03,
     "mainBatteryRange_km": 17.5,
     "torpedoRange_km": 13.5,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6276,10 +6526,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 11.74,
-    "concealmentAir_km": 6.07,
     "mainBatteryRange_km": 17.5,
     "torpedoRange_km": 6,
     "hydro_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6290,9 +6540,9 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 12.18,
-    "concealmentAir_km": 7.87,
     "mainBatteryRange_km": 17.9,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6303,10 +6553,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 11,
-    "concealmentAir_km": 6.67,
     "mainBatteryRange_km": 18.5,
     "torpedoRange_km": 8,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6317,10 +6567,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 10.24,
-    "concealmentAir_km": 4.38,
     "mainBatteryRange_km": 16.2,
     "torpedoRange_km": 12,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6331,9 +6581,11 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.48,
-    "concealmentAir_km": 5.88,
     "mainBatteryRange_km": 15.9,
     "hydro_km": 5,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30,
     "iconId": null
   },
   {
@@ -6344,10 +6596,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.26,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 15.6,
     "torpedoRange_km": 4.5,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6358,10 +6610,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 11.74,
-    "concealmentAir_km": 6.62,
     "mainBatteryRange_km": 17.3,
     "torpedoRange_km": 8,
     "hydro_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6372,10 +6624,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 11.74,
-    "concealmentAir_km": 6.62,
     "mainBatteryRange_km": 17.3,
     "torpedoRange_km": 8,
     "hydro_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6386,10 +6638,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 10.13,
-    "concealmentAir_km": 6.9,
     "mainBatteryRange_km": 16.5,
     "torpedoRange_km": 15,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6400,11 +6652,13 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 8.91,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 15.4,
     "torpedoRange_km": 8,
     "radar_km": 9,
     "hydro_km": 5,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 15,
     "iconId": null
   },
   {
@@ -6415,11 +6669,13 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.2,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 15.4,
     "torpedoRange_km": 10,
     "radar_km": 10,
     "hydro_km": 5,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 15,
     "iconId": null
   },
   {
@@ -6430,11 +6686,11 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 11.42,
-    "concealmentAir_km": 7.22,
     "mainBatteryRange_km": 17.7,
     "torpedoRange_km": 4,
     "radar_km": 12,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6445,9 +6701,11 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.2,
-    "concealmentAir_km": 6.9,
     "mainBatteryRange_km": 15.6,
     "radar_km": 9,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 15,
     "iconId": null
   },
   {
@@ -6458,10 +6716,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 8.77,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 15.7,
     "torpedoRange_km": 10,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6472,10 +6730,12 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.17,
-    "concealmentAir_km": 6,
     "mainBatteryRange_km": 14.1,
     "airstrikeMinRange_km": 1,
     "airstrikeMaxRange_km": 9.5,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20,
     "iconId": null
   },
   {
@@ -6486,10 +6746,10 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 9.48,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 15.8,
     "radar_km": 9,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6500,10 +6760,12 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 8.51,
-    "concealmentAir_km": 6.01,
     "mainBatteryRange_km": 15,
     "torpedoRange_km": 9.5,
     "hydro_km": 5,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 15,
     "iconId": null
   },
   {
@@ -6514,9 +6776,9 @@
     "cruiserType": "CA",
     "tier": 8,
     "concealment_km": 10.75,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 17.6,
     "torpedoRange_km": 12,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6526,7 +6788,7 @@
     "class": "CV",
     "tier": 8,
     "concealment_km": 13.79,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6536,7 +6798,7 @@
     "class": "CV",
     "tier": 8,
     "concealment_km": 13.44,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6546,7 +6808,7 @@
     "class": "CV",
     "tier": 8,
     "concealment_km": 13.09,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6556,7 +6818,7 @@
     "class": "CV",
     "tier": 8,
     "concealment_km": 13.16,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6566,7 +6828,7 @@
     "class": "CV",
     "tier": 8,
     "concealment_km": 13.16,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6576,7 +6838,7 @@
     "class": "CV",
     "tier": 8,
     "concealment_km": 11.36,
-    "concealmentAir_km": 9.67,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6586,7 +6848,7 @@
     "class": "CV",
     "tier": 8,
     "concealment_km": 14.14,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6596,7 +6858,7 @@
     "class": "CV",
     "tier": 8,
     "concealment_km": 15.71,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6606,7 +6868,7 @@
     "class": "CV",
     "tier": 8,
     "concealment_km": 15.71,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6616,7 +6878,17 @@
     "class": "CV",
     "tier": 8,
     "concealment_km": 13.79,
-    "concealmentAir_km": 10,
+    "smoke": false,
+    "iconId": null
+  },
+  {
+    "id": "ship-hornet-b",
+    "name": "Hornet B",
+    "nation": "USA",
+    "class": "CV",
+    "tier": 8,
+    "concealment_km": 13.79,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6626,7 +6898,7 @@
     "class": "CV",
     "tier": 8,
     "concealment_km": 14.51,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6636,7 +6908,7 @@
     "class": "CV",
     "tier": 8,
     "concealment_km": 13.09,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6646,7 +6918,7 @@
     "class": "CV",
     "tier": 8,
     "concealment_km": 12.22,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6656,7 +6928,7 @@
     "class": "CV",
     "tier": 8,
     "concealment_km": 12.22,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6666,7 +6938,7 @@
     "class": "CV",
     "tier": 8,
     "concealment_km": 14.51,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6676,7 +6948,7 @@
     "class": "CV",
     "tier": 8,
     "concealment_km": 13.41,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6686,7 +6958,7 @@
     "class": "CV",
     "tier": 8,
     "concealment_km": 11.87,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6696,7 +6968,7 @@
     "class": "CV",
     "tier": 8,
     "concealment_km": 11.87,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6706,7 +6978,7 @@
     "class": "CV",
     "tier": 8,
     "concealment_km": 11.87,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6716,7 +6988,7 @@
     "class": "CV",
     "tier": 8,
     "concealment_km": 12.06,
-    "concealmentAir_km": 9.58,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6726,7 +6998,7 @@
     "class": "CV",
     "tier": 8,
     "concealment_km": 11.36,
-    "concealmentAir_km": 9.67,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6736,7 +7008,7 @@
     "class": "CV",
     "tier": 8,
     "concealment_km": 13.01,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -6746,7 +7018,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 6.1,
-    "concealmentAir_km": 2.88,
     "mainBatteryRange_km": 12.5,
     "torpedoRange_km": 10,
     "iconId": null,
@@ -6761,7 +7032,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 5.37,
-    "concealmentAir_km": 2.49,
     "mainBatteryRange_km": 9.4,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -6776,7 +7046,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 5.37,
-    "concealmentAir_km": 2.45,
     "mainBatteryRange_km": 11,
     "torpedoRange_km": 20,
     "iconId": null,
@@ -6791,7 +7060,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 5.37,
-    "concealmentAir_km": 2.45,
     "mainBatteryRange_km": 11,
     "torpedoRange_km": 20,
     "iconId": null,
@@ -6806,7 +7074,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 5.8,
-    "concealmentAir_km": 2.33,
     "mainBatteryRange_km": 11.6,
     "torpedoRange_km": 9.2,
     "iconId": null,
@@ -6821,7 +7088,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 5.99,
-    "concealmentAir_km": 2.43,
     "mainBatteryRange_km": 11.5,
     "torpedoRange_km": 12,
     "hydro_km": 5,
@@ -6835,7 +7101,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 5.48,
-    "concealmentAir_km": 2.53,
     "mainBatteryRange_km": 11.9,
     "torpedoRange_km": 10,
     "hydro_km": 3,
@@ -6851,7 +7116,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 5.48,
-    "concealmentAir_km": 2.53,
     "mainBatteryRange_km": 11.9,
     "torpedoRange_km": 10,
     "hydro_km": 3,
@@ -6867,11 +7131,24 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 6.08,
-    "concealmentAir_km": 2.36,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 8,
     "iconId": null,
     "smoke": false
+  },
+  {
+    "id": "ship-datong",
+    "name": "Datong",
+    "nation": "Pan-Asia",
+    "class": "DD",
+    "tier": 8,
+    "concealment_km": 5.79,
+    "mainBatteryRange_km": 12.8,
+    "torpedoRange_km": 8,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20,
+    "iconId": null
   },
   {
     "id": "ship-eskimo",
@@ -6880,7 +7157,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 5.83,
-    "concealmentAir_km": 2.75,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 12,
     "iconId": null,
@@ -6895,7 +7171,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 6.1,
-    "concealmentAir_km": 2.88,
     "mainBatteryRange_km": 12.5,
     "torpedoRange_km": 12,
     "iconId": null,
@@ -6910,7 +7185,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 6.29,
-    "concealmentAir_km": 3.53,
     "mainBatteryRange_km": 11.9,
     "torpedoRange_km": 12,
     "iconId": null,
@@ -6925,7 +7199,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 6.01,
-    "concealmentAir_km": 3.02,
     "mainBatteryRange_km": 13,
     "torpedoRange_km": 9,
     "iconId": null,
@@ -6938,7 +7211,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 5.37,
-    "concealmentAir_km": 2.49,
     "mainBatteryRange_km": 9.4,
     "torpedoRange_km": 10,
     "iconId": null,
@@ -6953,7 +7225,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 5.37,
-    "concealmentAir_km": 2.48,
     "mainBatteryRange_km": 11.4,
     "torpedoRange_km": 10,
     "hydro_km": 5,
@@ -6969,7 +7240,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 5.8,
-    "concealmentAir_km": 2.35,
     "mainBatteryRange_km": 12.5,
     "torpedoRange_km": 9.5,
     "radar_km": 7.5,
@@ -6985,7 +7255,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 5.37,
-    "concealmentAir_km": 2.49,
     "mainBatteryRange_km": 9.4,
     "torpedoRange_km": 10,
     "iconId": null,
@@ -7000,7 +7269,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 5.8,
-    "concealmentAir_km": 2.66,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 9.2,
     "iconId": null,
@@ -7015,7 +7283,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 6.92,
-    "concealmentAir_km": 3.14,
     "mainBatteryRange_km": 12.3,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -7030,7 +7297,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 5.97,
-    "concealmentAir_km": 2.64,
     "mainBatteryRange_km": 12,
     "torpedoRange_km": 11,
     "iconId": null,
@@ -7043,7 +7309,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 6.42,
-    "concealmentAir_km": 3.34,
     "mainBatteryRange_km": 13,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -7056,7 +7321,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 6.65,
-    "concealmentAir_km": 2.97,
     "mainBatteryRange_km": 12.3,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -7069,7 +7333,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 5.52,
-    "concealmentAir_km": 2.48,
     "mainBatteryRange_km": 12.2,
     "torpedoRange_km": 8,
     "hydro_km": 3,
@@ -7085,7 +7348,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 5.8,
-    "concealmentAir_km": 2.33,
     "mainBatteryRange_km": 11.6,
     "torpedoRange_km": 6.7,
     "hydro_km": 5.5,
@@ -7101,7 +7363,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 5.8,
-    "concealmentAir_km": 2.33,
     "mainBatteryRange_km": 11.6,
     "torpedoRange_km": 6.7,
     "hydro_km": 5.5,
@@ -7117,7 +7378,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 6.08,
-    "concealmentAir_km": 2.45,
     "mainBatteryRange_km": 12,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -7132,7 +7392,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 5.83,
-    "concealmentAir_km": 2.59,
     "mainBatteryRange_km": 10.1,
     "torpedoRange_km": 12,
     "iconId": null,
@@ -7145,7 +7404,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 5.9,
-    "concealmentAir_km": 2.64,
     "mainBatteryRange_km": 11.6,
     "torpedoRange_km": 12,
     "radar_km": 7.5,
@@ -7159,7 +7417,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 6.18,
-    "concealmentAir_km": 2.81,
     "mainBatteryRange_km": 12.5,
     "torpedoRange_km": 9,
     "iconId": null,
@@ -7168,13 +7425,29 @@
     "smokeDuration_s": 160
   },
   {
+    "id": "ship-philips-van-almonde",
+    "name": "Philips van Almonde",
+    "nation": "Netherlands",
+    "class": "DD",
+    "tier": 8,
+    "concealment_km": 5.98,
+    "mainBatteryRange_km": 11.7,
+    "torpedoRange_km": 6,
+    "airstrikeMinRange_km": 1,
+    "airstrikeMaxRange_km": 8,
+    "hydro_km": 5,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 20,
+    "iconId": null
+  },
+  {
     "id": "ship-provorny",
     "name": "Provorny",
     "nation": "USSR",
     "class": "DD",
     "tier": 8,
     "concealment_km": 6.4,
-    "concealmentAir_km": 3.22,
     "mainBatteryRange_km": 11.6,
     "torpedoRange_km": 10,
     "iconId": null,
@@ -7187,7 +7460,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 5.23,
-    "concealmentAir_km": 2.25,
     "mainBatteryRange_km": 11.3,
     "torpedoRange_km": 10,
     "iconId": null,
@@ -7202,7 +7474,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 6.1,
-    "concealmentAir_km": 2.88,
     "mainBatteryRange_km": 12.5,
     "torpedoRange_km": 12,
     "iconId": null,
@@ -7217,7 +7488,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 5.94,
-    "concealmentAir_km": 2.76,
     "mainBatteryRange_km": 12.5,
     "torpedoRange_km": 10,
     "hydro_km": 5.5,
@@ -7233,7 +7503,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 6.89,
-    "concealmentAir_km": 3.05,
     "mainBatteryRange_km": 11.3,
     "torpedoRange_km": 8.5,
     "radar_km": 9,
@@ -7249,7 +7518,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 6.62,
-    "concealmentAir_km": 2.58,
     "mainBatteryRange_km": 8.6,
     "torpedoRange_km": 12,
     "iconId": null,
@@ -7264,7 +7532,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 6.22,
-    "concealmentAir_km": 2.83,
     "mainBatteryRange_km": 10.8,
     "torpedoRange_km": 9.5,
     "hydro_km": 5,
@@ -7280,7 +7547,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 6.22,
-    "concealmentAir_km": 3,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 6,
     "hydro_km": 5.5,
@@ -7296,7 +7562,6 @@
     "class": "DD",
     "tier": 8,
     "concealment_km": 5.8,
-    "concealmentAir_km": 2.66,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 9.2,
     "iconId": null,
@@ -7311,8 +7576,8 @@
     "class": "SS",
     "tier": 8,
     "concealment_km": 5.67,
-    "concealmentAir_km": 2.19,
     "torpedoRange_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7322,9 +7587,9 @@
     "class": "SS",
     "tier": 8,
     "concealment_km": 7.12,
-    "concealmentAir_km": 2.63,
     "mainBatteryRange_km": 8.5,
     "torpedoRange_km": 12.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7334,9 +7599,9 @@
     "class": "SS",
     "tier": 8,
     "concealment_km": 6.2,
-    "concealmentAir_km": 2.23,
     "mainBatteryRange_km": 6,
     "torpedoRange_km": 11,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7346,9 +7611,11 @@
     "class": "SS",
     "tier": 8,
     "concealment_km": 6.07,
-    "concealmentAir_km": 2.18,
     "mainBatteryRange_km": 9.5,
     "torpedoRange_km": 12,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30,
     "iconId": null
   },
   {
@@ -7358,8 +7625,8 @@
     "class": "SS",
     "tier": 8,
     "concealment_km": 5.5,
-    "concealmentAir_km": 2.03,
     "torpedoRange_km": 12.3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7369,8 +7636,8 @@
     "class": "SS",
     "tier": 8,
     "concealment_km": 5.96,
-    "concealmentAir_km": 2.2,
     "torpedoRange_km": 11,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7380,8 +7647,8 @@
     "class": "SS",
     "tier": 8,
     "concealment_km": 6.1,
-    "concealmentAir_km": 2.19,
     "torpedoRange_km": 11,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7391,8 +7658,8 @@
     "class": "SS",
     "tier": 8,
     "concealment_km": 5.61,
-    "concealmentAir_km": 2.07,
     "torpedoRange_km": 12.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7402,10 +7669,10 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 13.13,
-    "concealmentAir_km": 8.69,
     "mainBatteryRange_km": 17.4,
     "torpedoRange_km": 10,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7415,8 +7682,8 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 13.36,
-    "concealmentAir_km": 7.8,
     "mainBatteryRange_km": 20.1,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7426,8 +7693,8 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 15.08,
-    "concealmentAir_km": 9,
     "mainBatteryRange_km": 19.9,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7437,8 +7704,8 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 11.78,
-    "concealmentAir_km": 8.72,
     "mainBatteryRange_km": 19.9,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7448,9 +7715,9 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 11.79,
-    "concealmentAir_km": 9,
     "mainBatteryRange_km": 19.1,
     "torpedoRange_km": 10.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7460,9 +7727,9 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 12.73,
-    "concealmentAir_km": 9,
     "mainBatteryRange_km": 19.1,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7472,8 +7739,8 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 14.62,
-    "concealmentAir_km": 8.25,
     "mainBatteryRange_km": 18.8,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7483,9 +7750,9 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 12.73,
-    "concealmentAir_km": 9,
     "mainBatteryRange_km": 18.2,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7495,9 +7762,9 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 12.73,
-    "concealmentAir_km": 9,
     "mainBatteryRange_km": 18.2,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7507,8 +7774,8 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 12.1,
-    "concealmentAir_km": 9,
     "mainBatteryRange_km": 18.6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7518,8 +7785,8 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 12.5,
-    "concealmentAir_km": 8.77,
     "mainBatteryRange_km": 17.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7529,9 +7796,9 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 13.67,
-    "concealmentAir_km": 9,
     "mainBatteryRange_km": 19.5,
     "torpedoRange_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7541,8 +7808,8 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 14.14,
-    "concealmentAir_km": 9,
     "mainBatteryRange_km": 18.6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7552,8 +7819,8 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 14.7,
-    "concealmentAir_km": 9,
     "mainBatteryRange_km": 20.3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7563,8 +7830,8 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 12.73,
-    "concealmentAir_km": 9,
     "mainBatteryRange_km": 18.2,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7574,8 +7841,8 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 12.74,
-    "concealmentAir_km": 7.64,
     "mainBatteryRange_km": 17.4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7585,8 +7852,8 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 13.82,
-    "concealmentAir_km": 8.3,
     "mainBatteryRange_km": 18.6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7596,8 +7863,8 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 14.93,
-    "concealmentAir_km": 9,
     "mainBatteryRange_km": 20.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7607,8 +7874,8 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 13.36,
-    "concealmentAir_km": 8.9,
     "mainBatteryRange_km": 18.2,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7618,8 +7885,8 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 12.17,
-    "concealmentAir_km": 9,
     "mainBatteryRange_km": 18.3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7629,10 +7896,10 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 13.13,
-    "concealmentAir_km": 8.69,
     "mainBatteryRange_km": 17.4,
     "torpedoRange_km": 10,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7642,10 +7909,10 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 11.54,
-    "concealmentAir_km": 9,
     "mainBatteryRange_km": 16.9,
     "torpedoRange_km": 10,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7655,9 +7922,9 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 13.36,
-    "concealmentAir_km": 8.9,
     "mainBatteryRange_km": 18,
     "torpedoRange_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7667,9 +7934,9 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 11.68,
-    "concealmentAir_km": 9,
     "mainBatteryRange_km": 18.2,
     "torpedoRange_km": 8,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7679,9 +7946,9 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 12.03,
-    "concealmentAir_km": 7.03,
     "mainBatteryRange_km": 18.6,
     "hydro_km": 3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7691,9 +7958,9 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 13.67,
-    "concealmentAir_km": 8.95,
     "mainBatteryRange_km": 19.9,
     "torpedoRange_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7703,9 +7970,9 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 13.67,
-    "concealmentAir_km": 8.95,
     "mainBatteryRange_km": 18.9,
     "torpedoRange_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7715,9 +7982,9 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 13.67,
-    "concealmentAir_km": 8.95,
     "mainBatteryRange_km": 19.9,
     "torpedoRange_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7727,8 +7994,8 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 13.11,
-    "concealmentAir_km": 9,
     "mainBatteryRange_km": 17.4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7738,8 +8005,8 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 14.77,
-    "concealmentAir_km": 8.62,
     "mainBatteryRange_km": 19.1,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7749,8 +8016,8 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 13.56,
-    "concealmentAir_km": 9,
     "mainBatteryRange_km": 18.8,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7760,8 +8027,8 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 12.6,
-    "concealmentAir_km": 9,
     "mainBatteryRange_km": 17.1,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7771,8 +8038,8 @@
     "class": "BB",
     "tier": 7,
     "concealment_km": 11.5,
-    "concealmentAir_km": 8.15,
     "mainBatteryRange_km": 15.7,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7783,10 +8050,10 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 11.48,
-    "concealmentAir_km": 6.05,
     "mainBatteryRange_km": 16.4,
     "torpedoRange_km": 8,
     "hydro_km": 5.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7797,9 +8064,11 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 12.19,
-    "concealmentAir_km": 6.31,
     "mainBatteryRange_km": 15.6,
     "hydro_km": 6,
+    "smoke": true,
+    "smokeRadius_km": 0.51,
+    "smokeDuration_s": 40,
     "iconId": null
   },
   {
@@ -7810,10 +8079,10 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 12.1,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 17.9,
     "torpedoRange_km": 9,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7824,10 +8093,10 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 11.48,
-    "concealmentAir_km": 5.9,
     "mainBatteryRange_km": 15.6,
     "torpedoRange_km": 10,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7838,10 +8107,10 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 11.48,
-    "concealmentAir_km": 5.9,
     "mainBatteryRange_km": 15.6,
     "torpedoRange_km": 10,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7852,10 +8121,10 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 11.48,
-    "concealmentAir_km": 5.9,
     "mainBatteryRange_km": 15.6,
     "torpedoRange_km": 10,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7866,10 +8135,10 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 11.48,
-    "concealmentAir_km": 5.9,
     "mainBatteryRange_km": 15.6,
     "torpedoRange_km": 10,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7880,10 +8149,10 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 12.42,
-    "concealmentAir_km": 8.01,
     "mainBatteryRange_km": 15.7,
     "torpedoRange_km": 8,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7894,11 +8163,11 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 9.59,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 13.3,
     "torpedoRange_km": 4.5,
     "radar_km": 8.5,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7909,11 +8178,11 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 9.59,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 13.3,
     "torpedoRange_km": 4.5,
     "radar_km": 8.5,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7924,10 +8193,12 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 9.9,
-    "concealmentAir_km": 6.44,
     "mainBatteryRange_km": 15.4,
     "radar_km": 8.5,
     "hydro_km": 4,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 15,
     "iconId": null
   },
   {
@@ -7938,10 +8209,12 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 9.9,
-    "concealmentAir_km": 6.44,
     "mainBatteryRange_km": 15.4,
     "radar_km": 8.5,
     "hydro_km": 4,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 15,
     "iconId": null
   },
   {
@@ -7952,9 +8225,9 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 10.37,
-    "concealmentAir_km": 5.45,
     "mainBatteryRange_km": 13.6,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7965,9 +8238,11 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 9.28,
-    "concealmentAir_km": 5.81,
     "mainBatteryRange_km": 14.2,
     "torpedoRange_km": 10.5,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30,
     "iconId": null
   },
   {
@@ -7978,10 +8253,10 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 10.11,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 15,
     "torpedoRange_km": 8,
     "hydro_km": 3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -7992,10 +8267,10 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 9.75,
-    "concealmentAir_km": 5.51,
     "mainBatteryRange_km": 15.1,
     "torpedoRange_km": 12,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8006,10 +8281,10 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 11.48,
-    "concealmentAir_km": 5.9,
     "mainBatteryRange_km": 15.6,
     "torpedoRange_km": 10,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8020,11 +8295,11 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 10.37,
-    "concealmentAir_km": 5.37,
     "mainBatteryRange_km": 14.8,
     "airstrikeMinRange_km": 1.5,
     "airstrikeMaxRange_km": 11,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8035,10 +8310,12 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 10.05,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 15.4,
     "torpedoRange_km": 8,
     "hydro_km": 4,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 15,
     "iconId": null
   },
   {
@@ -8049,8 +8326,10 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 12.83,
-    "concealmentAir_km": 6.71,
     "mainBatteryRange_km": 16.5,
+    "smoke": true,
+    "smokeRadius_km": 0.51,
+    "smokeDuration_s": 25,
     "iconId": null
   },
   {
@@ -8061,10 +8340,12 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 9.59,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 12.4,
     "torpedoRange_km": 9.2,
     "hydro_km": 4,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30,
     "iconId": null
   },
   {
@@ -8075,9 +8356,11 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 8.64,
-    "concealmentAir_km": 5.51,
     "mainBatteryRange_km": 17.5,
     "torpedoRange_km": 13.5,
+    "smoke": true,
+    "smokeRadius_km": 0.51,
+    "smokeDuration_s": 22,
     "iconId": null
   },
   {
@@ -8088,10 +8371,12 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 10.62,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 15.3,
     "torpedoRange_km": 7,
     "hydro_km": 4,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 10,
     "iconId": null
   },
   {
@@ -8102,9 +8387,24 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 12.19,
-    "concealmentAir_km": 6.31,
     "mainBatteryRange_km": 15.6,
     "hydro_km": 6,
+    "smoke": true,
+    "smokeRadius_km": 0.51,
+    "smokeDuration_s": 40,
+    "iconId": null
+  },
+  {
+    "id": "ship-hel",
+    "name": "Hel",
+    "nation": "Europe",
+    "class": "CA",
+    "cruiserType": "CA",
+    "tier": 7,
+    "concealment_km": 9.42,
+    "mainBatteryRange_km": 13.7,
+    "torpedoRange_km": 12,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8115,9 +8415,9 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 10.37,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 14.6,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8128,10 +8428,10 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 11.09,
-    "concealmentAir_km": 5.81,
     "mainBatteryRange_km": 16.9,
     "radar_km": 10,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8142,10 +8442,10 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 11.4,
-    "concealmentAir_km": 5.89,
     "mainBatteryRange_km": 17.6,
     "torpedoRange_km": 8,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8156,10 +8456,10 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 11.56,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 17.3,
     "torpedoRange_km": 4,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8170,10 +8470,10 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 11.56,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 17.3,
     "torpedoRange_km": 4,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8184,10 +8484,10 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 11.16,
-    "concealmentAir_km": 6.44,
     "mainBatteryRange_km": 15.3,
     "torpedoRange_km": 8,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8198,10 +8498,10 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 9.43,
-    "concealmentAir_km": 5.2,
     "mainBatteryRange_km": 16.6,
     "torpedoRange_km": 6,
     "hydro_km": 5.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8212,10 +8512,10 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 9.43,
-    "concealmentAir_km": 5.2,
     "mainBatteryRange_km": 16.6,
     "torpedoRange_km": 6,
     "hydro_km": 5.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8226,10 +8526,10 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 11.48,
-    "concealmentAir_km": 5.9,
     "mainBatteryRange_km": 15.6,
     "torpedoRange_km": 10,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8240,9 +8540,9 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 10.85,
-    "concealmentAir_km": 5.4,
     "mainBatteryRange_km": 16.2,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8253,9 +8553,9 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 10.37,
-    "concealmentAir_km": 5.45,
     "mainBatteryRange_km": 13.6,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8266,10 +8566,12 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 9.49,
-    "concealmentAir_km": 4.28,
     "mainBatteryRange_km": 14.5,
     "torpedoRange_km": 9.5,
     "hydro_km": 5.5,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 10,
     "iconId": null
   },
   {
@@ -8280,10 +8582,10 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 10.69,
-    "concealmentAir_km": 5.9,
     "mainBatteryRange_km": 16.1,
     "torpedoRange_km": 13,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8294,9 +8596,11 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 8.64,
-    "concealmentAir_km": 5.51,
     "mainBatteryRange_km": 17.5,
     "torpedoRange_km": 13.5,
+    "smoke": true,
+    "smokeRadius_km": 0.51,
+    "smokeDuration_s": 22,
     "iconId": null
   },
   {
@@ -8307,10 +8611,10 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 11.63,
-    "concealmentAir_km": 5.83,
     "mainBatteryRange_km": 17.3,
     "torpedoRange_km": 4,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8321,10 +8625,10 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 11.48,
-    "concealmentAir_km": 5.9,
     "mainBatteryRange_km": 15.6,
     "torpedoRange_km": 10,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8335,10 +8639,10 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 9.75,
-    "concealmentAir_km": 5.63,
     "mainBatteryRange_km": 14.8,
     "torpedoRange_km": 8,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8349,10 +8653,10 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 10.58,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 13.6,
     "torpedoRange_km": 12,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8363,9 +8667,9 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 10.05,
-    "concealmentAir_km": 7.11,
     "mainBatteryRange_km": 16.8,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8376,10 +8680,12 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 10.05,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 15.8,
     "torpedoRange_km": 12,
     "hydro_km": 4,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 102,
     "iconId": null
   },
   {
@@ -8390,10 +8696,10 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 11.49,
-    "concealmentAir_km": 5.08,
     "mainBatteryRange_km": 14,
     "torpedoRange_km": 6,
     "hydro_km": 5.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8404,10 +8710,10 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 12.1,
-    "concealmentAir_km": 5.34,
     "mainBatteryRange_km": 17.3,
     "torpedoRange_km": 6,
     "hydro_km": 5.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8418,9 +8724,11 @@
     "cruiserType": "CA",
     "tier": 7,
     "concealment_km": 12.19,
-    "concealmentAir_km": 6.28,
     "mainBatteryRange_km": 16.1,
     "torpedoRange_km": 12,
+    "smoke": true,
+    "smokeRadius_km": 0.51,
+    "smokeDuration_s": 40,
     "iconId": null
   },
   {
@@ -8430,7 +8738,6 @@
     "class": "DD",
     "tier": 7,
     "concealment_km": 6.44,
-    "concealmentAir_km": 2.72,
     "mainBatteryRange_km": 10.4,
     "torpedoRange_km": 10,
     "iconId": null,
@@ -8445,7 +8752,6 @@
     "class": "DD",
     "tier": 7,
     "concealment_km": 6.76,
-    "concealmentAir_km": 2.76,
     "mainBatteryRange_km": 12,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -8460,7 +8766,6 @@
     "class": "DD",
     "tier": 7,
     "concealment_km": 6.28,
-    "concealmentAir_km": 3.21,
     "mainBatteryRange_km": 12.7,
     "torpedoRange_km": 7,
     "iconId": null,
@@ -8475,7 +8780,6 @@
     "class": "DD",
     "tier": 7,
     "concealment_km": 6.13,
-    "concealmentAir_km": 2.61,
     "mainBatteryRange_km": 11.9,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -8490,7 +8794,6 @@
     "class": "DD",
     "tier": 7,
     "concealment_km": 6.49,
-    "concealmentAir_km": 2.92,
     "mainBatteryRange_km": 10.9,
     "torpedoRange_km": 7.5,
     "iconId": null,
@@ -8505,7 +8808,6 @@
     "class": "DD",
     "tier": 7,
     "concealment_km": 5.67,
-    "concealmentAir_km": 2.81,
     "mainBatteryRange_km": 12.3,
     "torpedoRange_km": 8,
     "hydro_km": 3.5,
@@ -8521,7 +8823,6 @@
     "class": "DD",
     "tier": 7,
     "concealment_km": 6.42,
-    "concealmentAir_km": 2.55,
     "mainBatteryRange_km": 12.3,
     "torpedoRange_km": 9.2,
     "iconId": null,
@@ -8536,7 +8837,6 @@
     "class": "DD",
     "tier": 7,
     "concealment_km": 6.2,
-    "concealmentAir_km": 2.69,
     "mainBatteryRange_km": 12.3,
     "torpedoRange_km": 8,
     "hydro_km": 4,
@@ -8550,7 +8850,6 @@
     "class": "DD",
     "tier": 7,
     "concealment_km": 6.37,
-    "concealmentAir_km": 2.68,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 7,
     "hydro_km": 3,
@@ -8566,7 +8865,6 @@
     "class": "DD",
     "tier": 7,
     "concealment_km": 5.67,
-    "concealmentAir_km": 2.39,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 7,
     "hydro_km": 3,
@@ -8582,7 +8880,6 @@
     "class": "DD",
     "tier": 7,
     "concealment_km": 6.28,
-    "concealmentAir_km": 2.97,
     "mainBatteryRange_km": 12,
     "torpedoRange_km": 10,
     "iconId": null,
@@ -8595,7 +8892,6 @@
     "class": "DD",
     "tier": 7,
     "concealment_km": 6.76,
-    "concealmentAir_km": 2.9,
     "mainBatteryRange_km": 10.8,
     "torpedoRange_km": 8.5,
     "hydro_km": 4,
@@ -8611,7 +8907,6 @@
     "class": "DD",
     "tier": 7,
     "concealment_km": 6.6,
-    "concealmentAir_km": 3.11,
     "mainBatteryRange_km": 11.6,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -8626,7 +8921,6 @@
     "class": "DD",
     "tier": 7,
     "concealment_km": 6.54,
-    "concealmentAir_km": 2.84,
     "mainBatteryRange_km": 7.5,
     "torpedoRange_km": 10,
     "iconId": null,
@@ -8641,7 +8935,6 @@
     "class": "DD",
     "tier": 7,
     "concealment_km": 6.67,
-    "concealmentAir_km": 2.57,
     "mainBatteryRange_km": 11.7,
     "torpedoRange_km": 9.2,
     "iconId": null,
@@ -8656,7 +8949,6 @@
     "class": "DD",
     "tier": 7,
     "concealment_km": 6.55,
-    "concealmentAir_km": 2.48,
     "mainBatteryRange_km": 12,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -8669,7 +8961,6 @@
     "class": "DD",
     "tier": 7,
     "concealment_km": 6.76,
-    "concealmentAir_km": 3.11,
     "mainBatteryRange_km": 12.2,
     "torpedoRange_km": 7,
     "iconId": null,
@@ -8684,7 +8975,6 @@
     "class": "DD",
     "tier": 7,
     "concealment_km": 6.49,
-    "concealmentAir_km": 2.92,
     "mainBatteryRange_km": 10.9,
     "torpedoRange_km": 7.5,
     "iconId": null,
@@ -8699,7 +8989,6 @@
     "class": "DD",
     "tier": 7,
     "concealment_km": 5.81,
-    "concealmentAir_km": 2.5,
     "mainBatteryRange_km": 11,
     "torpedoRange_km": 10,
     "iconId": null,
@@ -8714,7 +9003,6 @@
     "class": "DD",
     "tier": 7,
     "concealment_km": 6.6,
-    "concealmentAir_km": 2.64,
     "mainBatteryRange_km": 12.9,
     "torpedoRange_km": 10.5,
     "iconId": null,
@@ -8729,7 +9017,6 @@
     "class": "DD",
     "tier": 7,
     "concealment_km": 6.6,
-    "concealmentAir_km": 2.64,
     "mainBatteryRange_km": 12.9,
     "torpedoRange_km": 10.5,
     "iconId": null,
@@ -8744,7 +9031,6 @@
     "class": "DD",
     "tier": 7,
     "concealment_km": 6.17,
-    "concealmentAir_km": 2.92,
     "mainBatteryRange_km": 10.1,
     "torpedoRange_km": 12,
     "iconId": null,
@@ -8757,7 +9043,6 @@
     "class": "DD",
     "tier": 7,
     "concealment_km": 6.75,
-    "concealmentAir_km": 3.05,
     "mainBatteryRange_km": 11.8,
     "torpedoRange_km": 10,
     "iconId": null,
@@ -8772,7 +9057,6 @@
     "class": "DD",
     "tier": 7,
     "concealment_km": 7.58,
-    "concealmentAir_km": 3.65,
     "mainBatteryRange_km": 10.5,
     "torpedoRange_km": 10,
     "iconId": null,
@@ -8787,7 +9071,6 @@
     "class": "DD",
     "tier": 7,
     "concealment_km": 6.6,
-    "concealmentAir_km": 3.16,
     "mainBatteryRange_km": 13,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -8800,7 +9083,6 @@
     "class": "DD",
     "tier": 7,
     "concealment_km": 6.11,
-    "concealmentAir_km": 2.71,
     "mainBatteryRange_km": 11.8,
     "torpedoRange_km": 15,
     "iconId": null,
@@ -8815,7 +9097,6 @@
     "class": "DD",
     "tier": 7,
     "concealment_km": 6.28,
-    "concealmentAir_km": 3.16,
     "mainBatteryRange_km": 11.5,
     "torpedoRange_km": 10,
     "iconId": null,
@@ -8830,7 +9111,6 @@
     "class": "DD",
     "tier": 7,
     "concealment_km": 6.76,
-    "concealmentAir_km": 3.15,
     "mainBatteryRange_km": 11.8,
     "torpedoRange_km": 8.5,
     "hydro_km": 5,
@@ -8846,8 +9126,8 @@
     "class": "BB",
     "tier": 6,
     "concealment_km": 12.07,
-    "concealmentAir_km": 7.56,
     "mainBatteryRange_km": 17.2,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8857,8 +9137,8 @@
     "class": "BB",
     "tier": 6,
     "concealment_km": 12.57,
-    "concealmentAir_km": 8.01,
     "mainBatteryRange_km": 16,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8868,8 +9148,8 @@
     "class": "BB",
     "tier": 6,
     "concealment_km": 12.1,
-    "concealmentAir_km": 7.87,
     "mainBatteryRange_km": 17.7,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8879,8 +9159,8 @@
     "class": "BB",
     "tier": 6,
     "concealment_km": 14.77,
-    "concealmentAir_km": 8.62,
     "mainBatteryRange_km": 18.2,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8890,8 +9170,8 @@
     "class": "BB",
     "tier": 6,
     "concealment_km": 14.77,
-    "concealmentAir_km": 8.62,
     "mainBatteryRange_km": 18.2,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8901,8 +9181,8 @@
     "class": "BB",
     "tier": 6,
     "concealment_km": 16.5,
-    "concealmentAir_km": 8.77,
     "mainBatteryRange_km": 21.8,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8912,8 +9192,8 @@
     "class": "BB",
     "tier": 6,
     "concealment_km": 13.82,
-    "concealmentAir_km": 8.86,
     "mainBatteryRange_km": 21.4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8923,8 +9203,8 @@
     "class": "BB",
     "tier": 6,
     "concealment_km": 13.27,
-    "concealmentAir_km": 8.64,
     "mainBatteryRange_km": 17,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8934,9 +9214,9 @@
     "class": "BB",
     "tier": 6,
     "concealment_km": 11.4,
-    "concealmentAir_km": 8.05,
     "mainBatteryRange_km": 18.2,
     "torpedoRange_km": 8,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8946,9 +9226,9 @@
     "class": "BB",
     "tier": 6,
     "concealment_km": 11.54,
-    "concealmentAir_km": 9,
     "mainBatteryRange_km": 16.6,
     "hydro_km": 5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8958,9 +9238,9 @@
     "class": "BB",
     "tier": 6,
     "concealment_km": 14.77,
-    "concealmentAir_km": 9,
     "mainBatteryRange_km": 20.4,
     "torpedoRange_km": 7,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8970,8 +9250,8 @@
     "class": "BB",
     "tier": 6,
     "concealment_km": 12.41,
-    "concealmentAir_km": 8.16,
     "mainBatteryRange_km": 16.1,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8981,8 +9261,8 @@
     "class": "BB",
     "tier": 6,
     "concealment_km": 14.14,
-    "concealmentAir_km": 7.47,
     "mainBatteryRange_km": 19.8,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -8992,8 +9272,8 @@
     "class": "BB",
     "tier": 6,
     "concealment_km": 13.52,
-    "concealmentAir_km": 7.67,
     "mainBatteryRange_km": 17.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9003,8 +9283,8 @@
     "class": "BB",
     "tier": 6,
     "concealment_km": 13.17,
-    "concealmentAir_km": 8.92,
     "mainBatteryRange_km": 17.8,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9014,8 +9294,8 @@
     "class": "BB",
     "tier": 6,
     "concealment_km": 12.57,
-    "concealmentAir_km": 8.23,
     "mainBatteryRange_km": 17.1,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9025,9 +9305,9 @@
     "class": "BB",
     "tier": 6,
     "concealment_km": 11.54,
-    "concealmentAir_km": 9,
     "mainBatteryRange_km": 17.9,
     "torpedoRange_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9037,8 +9317,8 @@
     "class": "BB",
     "tier": 6,
     "concealment_km": 12.57,
-    "concealmentAir_km": 8.66,
     "mainBatteryRange_km": 19.8,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9048,8 +9328,8 @@
     "class": "BB",
     "tier": 6,
     "concealment_km": 12.57,
-    "concealmentAir_km": 8.66,
     "mainBatteryRange_km": 19.8,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9059,8 +9339,8 @@
     "class": "BB",
     "tier": 6,
     "concealment_km": 14.34,
-    "concealmentAir_km": 9,
     "mainBatteryRange_km": 16.1,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9070,8 +9350,8 @@
     "class": "BB",
     "tier": 6,
     "concealment_km": 12.41,
-    "concealmentAir_km": 8.21,
     "mainBatteryRange_km": 16.3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9082,10 +9362,10 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 11.48,
-    "concealmentAir_km": 6.11,
     "mainBatteryRange_km": 16,
     "torpedoRange_km": 8,
     "hydro_km": 5.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9096,10 +9376,10 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 10.85,
-    "concealmentAir_km": 4.97,
     "mainBatteryRange_km": 16.3,
     "torpedoRange_km": 6,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9110,10 +9390,10 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 8.87,
-    "concealmentAir_km": 5.46,
     "mainBatteryRange_km": 14.5,
     "torpedoRange_km": 8,
     "hydro_km": 3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9124,10 +9404,10 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 10.53,
-    "concealmentAir_km": 5.2,
     "mainBatteryRange_km": 14.9,
     "torpedoRange_km": 10,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9138,10 +9418,10 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 10.53,
-    "concealmentAir_km": 6.51,
     "mainBatteryRange_km": 15.6,
     "torpedoRange_km": 7,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9152,10 +9432,10 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 11.48,
-    "concealmentAir_km": 5.9,
     "mainBatteryRange_km": 16.6,
     "torpedoRange_km": 4,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9166,9 +9446,9 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 10.04,
-    "concealmentAir_km": 5.83,
     "mainBatteryRange_km": 16.2,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9179,9 +9459,9 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 10.37,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 14.3,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9192,10 +9472,10 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 11.63,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 16.2,
     "torpedoRange_km": 9,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9206,10 +9486,10 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 11.09,
-    "concealmentAir_km": 5.77,
     "mainBatteryRange_km": 15.8,
     "torpedoRange_km": 8,
     "hydro_km": 5.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9220,10 +9500,10 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 10.05,
-    "concealmentAir_km": 5.94,
     "mainBatteryRange_km": 14,
     "torpedoRange_km": 8,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9234,9 +9514,11 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 9.2,
-    "concealmentAir_km": 5.2,
     "mainBatteryRange_km": 14.1,
     "torpedoRange_km": 8,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 15,
     "iconId": null
   },
   {
@@ -9247,10 +9529,10 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 10.53,
-    "concealmentAir_km": 5.29,
     "mainBatteryRange_km": 14,
     "torpedoRange_km": 12,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9261,10 +9543,10 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 12.42,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 15,
     "torpedoRange_km": 9,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9275,10 +9557,10 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 10.53,
-    "concealmentAir_km": 6,
     "mainBatteryRange_km": 16.5,
     "torpedoRange_km": 6,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9289,10 +9571,10 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 9.81,
-    "concealmentAir_km": 5.49,
     "mainBatteryRange_km": 13.9,
     "torpedoRange_km": 12,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9303,10 +9585,12 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 9.7,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 14.4,
     "torpedoRange_km": 10,
     "hydro_km": 4,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 102,
     "iconId": null
   },
   {
@@ -9317,10 +9601,10 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 11.48,
-    "concealmentAir_km": 6.11,
     "mainBatteryRange_km": 16,
     "torpedoRange_km": 8,
     "hydro_km": 5.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9331,10 +9615,12 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 8.33,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 13.2,
     "torpedoRange_km": 8,
     "hydro_km": 4,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 102,
     "iconId": null
   },
   {
@@ -9345,11 +9631,11 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 10.37,
-    "concealmentAir_km": 5.37,
     "mainBatteryRange_km": 14.6,
     "airstrikeMinRange_km": 1.5,
     "airstrikeMaxRange_km": 10,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9360,10 +9646,10 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 11.63,
-    "concealmentAir_km": 5.17,
     "mainBatteryRange_km": 15.9,
     "torpedoRange_km": 9,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9374,10 +9660,12 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 8.96,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 13.2,
     "torpedoRange_km": 8,
     "hydro_km": 4,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 15,
     "iconId": null
   },
   {
@@ -9388,10 +9676,10 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 8.7,
-    "concealmentAir_km": 4.97,
     "mainBatteryRange_km": 13.5,
     "torpedoRange_km": 10,
     "hydro_km": 5.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9402,10 +9690,12 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 10.53,
-    "concealmentAir_km": 5.92,
     "mainBatteryRange_km": 14.5,
     "torpedoRange_km": 7,
     "hydro_km": 3,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 15,
     "iconId": null
   },
   {
@@ -9416,10 +9706,10 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 11.48,
-    "concealmentAir_km": 5.42,
     "mainBatteryRange_km": 15.5,
     "torpedoRange_km": 4,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9430,10 +9720,10 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 11.63,
-    "concealmentAir_km": 5.17,
     "mainBatteryRange_km": 18,
     "torpedoRange_km": 6,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9444,9 +9734,11 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 9.59,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 14,
     "hydro_km": 4,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 102,
     "iconId": null
   },
   {
@@ -9457,10 +9749,10 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 11,
-    "concealmentAir_km": 4.97,
     "mainBatteryRange_km": 16.5,
     "torpedoRange_km": 6,
     "hydro_km": 5.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9471,10 +9763,10 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 9.99,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 14.5,
     "torpedoRange_km": 10,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9485,9 +9777,9 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 12.37,
-    "concealmentAir_km": 5.62,
     "mainBatteryRange_km": 15.7,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9498,10 +9790,12 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 8.8,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 12.8,
     "torpedoRange_km": 8,
     "hydro_km": 4,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 102,
     "iconId": null
   },
   {
@@ -9512,9 +9806,24 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 8.96,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 13.5,
     "torpedoRange_km": 9.5,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30,
+    "iconId": null
+  },
+  {
+    "id": "ship-tre-kronor",
+    "name": "Tre Kronor",
+    "nation": "Europe",
+    "class": "CA",
+    "cruiserType": "CA",
+    "tier": 6,
+    "concealment_km": 9,
+    "mainBatteryRange_km": 13.5,
+    "torpedoRange_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9525,9 +9834,11 @@
     "cruiserType": "CA",
     "tier": 6,
     "concealment_km": 12.65,
-    "concealmentAir_km": 6.58,
     "mainBatteryRange_km": 16.1,
     "torpedoRange_km": 12,
+    "smoke": true,
+    "smokeRadius_km": 0.51,
+    "smokeDuration_s": 25,
     "iconId": null
   },
   {
@@ -9537,7 +9848,7 @@
     "class": "CV",
     "tier": 6,
     "concealment_km": 13.97,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9547,7 +9858,7 @@
     "class": "CV",
     "tier": 6,
     "concealment_km": 12.57,
-    "concealmentAir_km": 9.18,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9557,7 +9868,7 @@
     "class": "CV",
     "tier": 6,
     "concealment_km": 13.09,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9567,7 +9878,7 @@
     "class": "CV",
     "tier": 6,
     "concealment_km": 12.06,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9577,7 +9888,7 @@
     "class": "CV",
     "tier": 6,
     "concealment_km": 9.86,
-    "concealmentAir_km": 8.99,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9587,7 +9898,7 @@
     "class": "CV",
     "tier": 6,
     "concealment_km": 13.79,
-    "concealmentAir_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9597,7 +9908,7 @@
     "class": "CV",
     "tier": 6,
     "concealment_km": 9.6,
-    "concealmentAir_km": 6.82,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9607,7 +9918,7 @@
     "class": "CV",
     "tier": 6,
     "concealment_km": 11.96,
-    "concealmentAir_km": 8.21,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9617,7 +9928,7 @@
     "class": "CV",
     "tier": 6,
     "concealment_km": 11.7,
-    "concealmentAir_km": 9.48,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9627,7 +9938,6 @@
     "class": "DD",
     "tier": 6,
     "concealment_km": 6.76,
-    "concealmentAir_km": 3.13,
     "mainBatteryRange_km": 12.8,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -9642,7 +9952,6 @@
     "class": "DD",
     "tier": 6,
     "concealment_km": 6.28,
-    "concealmentAir_km": 2.59,
     "mainBatteryRange_km": 11.9,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -9657,7 +9966,6 @@
     "class": "DD",
     "tier": 6,
     "concealment_km": 6.41,
-    "concealmentAir_km": 2.64,
     "mainBatteryRange_km": 6.9,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -9672,7 +9980,6 @@
     "class": "DD",
     "tier": 6,
     "concealment_km": 6.13,
-    "concealmentAir_km": 2.59,
     "mainBatteryRange_km": 11.7,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -9685,7 +9992,6 @@
     "class": "DD",
     "tier": 6,
     "concealment_km": 6.13,
-    "concealmentAir_km": 2.51,
     "mainBatteryRange_km": 11.4,
     "torpedoRange_km": 9,
     "iconId": null,
@@ -9698,7 +10004,6 @@
     "class": "DD",
     "tier": 6,
     "concealment_km": 6.6,
-    "concealmentAir_km": 3.09,
     "mainBatteryRange_km": 10.9,
     "torpedoRange_km": 8,
     "hydro_km": 4,
@@ -9714,7 +10019,6 @@
     "class": "DD",
     "tier": 6,
     "concealment_km": 6.6,
-    "concealmentAir_km": 2.47,
     "mainBatteryRange_km": 12.6,
     "torpedoRange_km": 6.4,
     "iconId": null,
@@ -9729,7 +10033,6 @@
     "class": "DD",
     "tier": 6,
     "concealment_km": 6.04,
-    "concealmentAir_km": 2.69,
     "mainBatteryRange_km": 11.5,
     "torpedoRange_km": 10,
     "iconId": null,
@@ -9744,7 +10047,6 @@
     "class": "DD",
     "tier": 6,
     "concealment_km": 6.13,
-    "concealmentAir_km": 2.57,
     "mainBatteryRange_km": 11.9,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -9759,7 +10061,6 @@
     "class": "DD",
     "tier": 6,
     "concealment_km": 5.97,
-    "concealmentAir_km": 2.42,
     "mainBatteryRange_km": 10.2,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -9774,7 +10075,6 @@
     "class": "DD",
     "tier": 6,
     "concealment_km": 6.13,
-    "concealmentAir_km": 2.59,
     "mainBatteryRange_km": 11.9,
     "torpedoRange_km": 7,
     "iconId": null,
@@ -9789,7 +10089,6 @@
     "class": "DD",
     "tier": 6,
     "concealment_km": 6.76,
-    "concealmentAir_km": 3.21,
     "mainBatteryRange_km": 13,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -9802,7 +10101,6 @@
     "class": "DD",
     "tier": 6,
     "concealment_km": 5.81,
-    "concealmentAir_km": 2.53,
     "mainBatteryRange_km": 10.8,
     "torpedoRange_km": 10,
     "iconId": null,
@@ -9817,7 +10115,6 @@
     "class": "DD",
     "tier": 6,
     "concealment_km": 5.97,
-    "concealmentAir_km": 2.38,
     "mainBatteryRange_km": 11.6,
     "torpedoRange_km": 7,
     "hydro_km": 3,
@@ -9833,7 +10130,6 @@
     "class": "DD",
     "tier": 6,
     "concealment_km": 5.97,
-    "concealmentAir_km": 2.42,
     "mainBatteryRange_km": 10.2,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -9848,7 +10144,6 @@
     "class": "DD",
     "tier": 6,
     "concealment_km": 6.6,
-    "concealmentAir_km": 3.09,
     "mainBatteryRange_km": 11.9,
     "torpedoRange_km": 7.5,
     "iconId": null,
@@ -9861,7 +10156,6 @@
     "class": "DD",
     "tier": 6,
     "concealment_km": 6.28,
-    "concealmentAir_km": 2.7,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 12,
     "iconId": null,
@@ -9876,7 +10170,6 @@
     "class": "DD",
     "tier": 6,
     "concealment_km": 6.28,
-    "concealmentAir_km": 2.5,
     "mainBatteryRange_km": 12.5,
     "torpedoRange_km": 9.2,
     "iconId": null,
@@ -9891,7 +10184,6 @@
     "class": "DD",
     "tier": 6,
     "concealment_km": 6.13,
-    "concealmentAir_km": 2.72,
     "mainBatteryRange_km": 9,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -9906,7 +10198,6 @@
     "class": "DD",
     "tier": 6,
     "concealment_km": 6.13,
-    "concealmentAir_km": 2.72,
     "mainBatteryRange_km": 9,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -9921,7 +10212,6 @@
     "class": "DD",
     "tier": 6,
     "concealment_km": 6.3,
-    "concealmentAir_km": 2.84,
     "mainBatteryRange_km": 11,
     "torpedoRange_km": 7.5,
     "iconId": null,
@@ -9936,7 +10226,6 @@
     "class": "DD",
     "tier": 6,
     "concealment_km": 6.13,
-    "concealmentAir_km": 2.72,
     "mainBatteryRange_km": 11.6,
     "torpedoRange_km": 8,
     "hydro_km": 4,
@@ -9952,7 +10241,6 @@
     "class": "DD",
     "tier": 6,
     "concealment_km": 6.17,
-    "concealmentAir_km": 2.69,
     "mainBatteryRange_km": 9.9,
     "torpedoRange_km": 10,
     "iconId": null,
@@ -9965,8 +10253,8 @@
     "class": "SS",
     "tier": 6,
     "concealment_km": 6.36,
-    "concealmentAir_km": 2.35,
     "torpedoRange_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -9976,9 +10264,11 @@
     "class": "SS",
     "tier": 6,
     "concealment_km": 6.16,
-    "concealmentAir_km": 2.13,
     "mainBatteryRange_km": 8.5,
     "torpedoRange_km": 9,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 25,
     "iconId": null
   },
   {
@@ -9988,9 +10278,9 @@
     "class": "SS",
     "tier": 6,
     "concealment_km": 6.1,
-    "concealmentAir_km": 2.19,
     "mainBatteryRange_km": 6,
     "torpedoRange_km": 11,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10000,8 +10290,8 @@
     "class": "SS",
     "tier": 6,
     "concealment_km": 5.66,
-    "concealmentAir_km": 2.09,
     "torpedoRange_km": 11.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10011,8 +10301,8 @@
     "class": "SS",
     "tier": 6,
     "concealment_km": 5.53,
-    "concealmentAir_km": 1.98,
     "torpedoRange_km": 10,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10022,9 +10312,9 @@
     "class": "SS",
     "tier": 6,
     "concealment_km": 6.4,
-    "concealmentAir_km": 2.32,
     "mainBatteryRange_km": 6,
     "torpedoRange_km": 10.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10034,8 +10324,8 @@
     "class": "BB",
     "tier": 5,
     "concealment_km": 10.68,
-    "concealmentAir_km": 7.83,
     "mainBatteryRange_km": 15.3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10045,8 +10335,8 @@
     "class": "BB",
     "tier": 5,
     "concealment_km": 14.14,
-    "concealmentAir_km": 8.42,
     "mainBatteryRange_km": 21.2,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10056,8 +10346,8 @@
     "class": "BB",
     "tier": 5,
     "concealment_km": 14.14,
-    "concealmentAir_km": 8.42,
     "mainBatteryRange_km": 21.2,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10067,8 +10357,8 @@
     "class": "BB",
     "tier": 5,
     "concealment_km": 14.14,
-    "concealmentAir_km": 8.42,
     "mainBatteryRange_km": 21.2,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10078,8 +10368,8 @@
     "class": "BB",
     "tier": 5,
     "concealment_km": 14.14,
-    "concealmentAir_km": 8.42,
     "mainBatteryRange_km": 21.2,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10089,8 +10379,8 @@
     "class": "BB",
     "tier": 5,
     "concealment_km": 13.36,
-    "concealmentAir_km": 6.61,
     "mainBatteryRange_km": 18.2,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10100,8 +10390,8 @@
     "class": "BB",
     "tier": 5,
     "concealment_km": 11.48,
-    "concealmentAir_km": 7.48,
     "mainBatteryRange_km": 16.1,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10111,8 +10401,8 @@
     "class": "BB",
     "tier": 5,
     "concealment_km": 10.44,
-    "concealmentAir_km": 8.69,
     "mainBatteryRange_km": 15.9,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10122,8 +10412,8 @@
     "class": "BB",
     "tier": 5,
     "concealment_km": 11.94,
-    "concealmentAir_km": 6.79,
     "mainBatteryRange_km": 16.4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10133,8 +10423,8 @@
     "class": "BB",
     "tier": 5,
     "concealment_km": 14.14,
-    "concealmentAir_km": 8.42,
     "mainBatteryRange_km": 21.2,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10144,8 +10434,8 @@
     "class": "BB",
     "tier": 5,
     "concealment_km": 13.04,
-    "concealmentAir_km": 7.22,
     "mainBatteryRange_km": 16.8,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10155,8 +10445,8 @@
     "class": "BB",
     "tier": 5,
     "concealment_km": 14.14,
-    "concealmentAir_km": 8.42,
     "mainBatteryRange_km": 21.2,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10166,8 +10456,8 @@
     "class": "BB",
     "tier": 5,
     "concealment_km": 12.73,
-    "concealmentAir_km": 7.62,
     "mainBatteryRange_km": 16.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10177,8 +10467,8 @@
     "class": "BB",
     "tier": 5,
     "concealment_km": 13.99,
-    "concealmentAir_km": 7.52,
     "mainBatteryRange_km": 18,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10188,8 +10478,8 @@
     "class": "BB",
     "tier": 5,
     "concealment_km": 11.8,
-    "concealmentAir_km": 9,
     "mainBatteryRange_km": 17.1,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10199,8 +10489,8 @@
     "class": "BB",
     "tier": 5,
     "concealment_km": 11.94,
-    "concealmentAir_km": 7.04,
     "mainBatteryRange_km": 16.8,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10210,8 +10500,8 @@
     "class": "BB",
     "tier": 5,
     "concealment_km": 11.94,
-    "concealmentAir_km": 8.27,
     "mainBatteryRange_km": 16,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10221,8 +10511,8 @@
     "class": "BB",
     "tier": 5,
     "concealment_km": 12.87,
-    "concealmentAir_km": 9,
     "mainBatteryRange_km": 16.1,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10232,9 +10522,9 @@
     "class": "BB",
     "tier": 5,
     "concealment_km": 11.16,
-    "concealmentAir_km": 7.34,
     "mainBatteryRange_km": 16.6,
     "torpedoRange_km": 8,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10244,8 +10534,8 @@
     "class": "BB",
     "tier": 5,
     "concealment_km": 13.99,
-    "concealmentAir_km": 7.69,
     "mainBatteryRange_km": 16.4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10255,9 +10545,9 @@
     "class": "BB",
     "tier": 5,
     "concealment_km": 11.37,
-    "concealmentAir_km": 8.33,
     "mainBatteryRange_km": 16.3,
     "torpedoRange_km": 6,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10267,8 +10557,8 @@
     "class": "BB",
     "tier": 5,
     "concealment_km": 10.92,
-    "concealmentAir_km": 6.14,
     "mainBatteryRange_km": 16,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10279,10 +10569,10 @@
     "cruiserType": "CA",
     "tier": 5,
     "concealment_km": 9.47,
-    "concealmentAir_km": 4.59,
     "mainBatteryRange_km": 13.9,
     "torpedoRange_km": 12,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10293,9 +10583,9 @@
     "cruiserType": "CA",
     "tier": 5,
     "concealment_km": 10.68,
-    "concealmentAir_km": 4.64,
     "mainBatteryRange_km": 14,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10306,9 +10596,11 @@
     "cruiserType": "CA",
     "tier": 5,
     "concealment_km": 8.96,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 13,
     "torpedoRange_km": 9.5,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 30,
     "iconId": null
   },
   {
@@ -10319,10 +10611,12 @@
     "cruiserType": "CA",
     "tier": 5,
     "concealment_km": 9.43,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 13.7,
     "torpedoRange_km": 10,
     "hydro_km": 4,
+    "smoke": true,
+    "smokeRadius_km": 0.45,
+    "smokeDuration_s": 102,
     "iconId": null
   },
   {
@@ -10333,10 +10627,10 @@
     "cruiserType": "CA",
     "tier": 5,
     "concealment_km": 10.68,
-    "concealmentAir_km": 5.2,
     "mainBatteryRange_km": 13.9,
     "torpedoRange_km": 10,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10347,10 +10641,12 @@
     "cruiserType": "CA",
     "tier": 5,
     "concealment_km": 8.88,
-    "concealmentAir_km": 4.86,
     "mainBatteryRange_km": 13.6,
     "torpedoRange_km": 7,
     "hydro_km": 4,
+    "smoke": true,
+    "smokeRadius_km": 0.6,
+    "smokeDuration_s": 15,
     "iconId": null
   },
   {
@@ -10361,10 +10657,10 @@
     "cruiserType": "CA",
     "tier": 5,
     "concealment_km": 11,
-    "concealmentAir_km": 4.8,
     "mainBatteryRange_km": 14.9,
     "torpedoRange_km": 6,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10375,10 +10671,10 @@
     "cruiserType": "CA",
     "tier": 5,
     "concealment_km": 9.59,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 14.3,
     "torpedoRange_km": 8,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10389,10 +10685,10 @@
     "cruiserType": "CA",
     "tier": 5,
     "concealment_km": 10.68,
-    "concealmentAir_km": 5.2,
     "mainBatteryRange_km": 13.9,
     "torpedoRange_km": 10,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10403,10 +10699,10 @@
     "cruiserType": "CA",
     "tier": 5,
     "concealment_km": 8.88,
-    "concealmentAir_km": 5.14,
     "mainBatteryRange_km": 15,
     "torpedoRange_km": 6,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10417,9 +10713,9 @@
     "cruiserType": "CA",
     "tier": 5,
     "concealment_km": 10.32,
-    "concealmentAir_km": 7.45,
     "mainBatteryRange_km": 14.3,
     "torpedoRange_km": 8,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10430,10 +10726,10 @@
     "cruiserType": "CA",
     "tier": 5,
     "concealment_km": 10.35,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 13.9,
     "torpedoRange_km": 7,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10444,10 +10740,10 @@
     "cruiserType": "CA",
     "tier": 5,
     "concealment_km": 12.41,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 16.3,
     "torpedoRange_km": 4,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10458,10 +10754,10 @@
     "cruiserType": "CA",
     "tier": 5,
     "concealment_km": 10.85,
-    "concealmentAir_km": 4.64,
     "mainBatteryRange_km": 16.5,
     "torpedoRange_km": 6,
     "hydro_km": 5.5,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10472,10 +10768,23 @@
     "cruiserType": "CA",
     "tier": 5,
     "concealment_km": 9.9,
-    "concealmentAir_km": 5.44,
     "mainBatteryRange_km": 15.8,
     "torpedoRange_km": 4,
     "hydro_km": 4,
+    "smoke": false,
+    "iconId": null
+  },
+  {
+    "id": "ship-kralj-petar-i",
+    "name": "Kralj Petar I",
+    "nation": "Europe",
+    "class": "CA",
+    "cruiserType": "CA",
+    "tier": 5,
+    "concealment_km": 8.73,
+    "mainBatteryRange_km": 13,
+    "torpedoRange_km": 9,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10486,10 +10795,10 @@
     "cruiserType": "CA",
     "tier": 5,
     "concealment_km": 11.94,
-    "concealmentAir_km": 4.6,
     "mainBatteryRange_km": 14,
     "torpedoRange_km": 5,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10500,10 +10809,10 @@
     "cruiserType": "CA",
     "tier": 5,
     "concealment_km": 8.55,
-    "concealmentAir_km": 5.8,
     "mainBatteryRange_km": 14.2,
     "torpedoRange_km": 8,
     "hydro_km": 3,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10514,10 +10823,10 @@
     "cruiserType": "CA",
     "tier": 5,
     "concealment_km": 11.78,
-    "concealmentAir_km": 4.82,
     "mainBatteryRange_km": 13.9,
     "torpedoRange_km": 8.2,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10528,10 +10837,10 @@
     "cruiserType": "CA",
     "tier": 5,
     "concealment_km": 11.78,
-    "concealmentAir_km": 4.82,
     "mainBatteryRange_km": 13.9,
     "torpedoRange_km": 8.2,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10542,10 +10851,10 @@
     "cruiserType": "CA",
     "tier": 5,
     "concealment_km": 10.46,
-    "concealmentAir_km": 5.74,
     "mainBatteryRange_km": 16.2,
     "torpedoRange_km": 4,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10556,10 +10865,10 @@
     "cruiserType": "CA",
     "tier": 5,
     "concealment_km": 11.48,
-    "concealmentAir_km": 5.27,
     "mainBatteryRange_km": 14.8,
     "torpedoRange_km": 8,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10570,10 +10879,10 @@
     "cruiserType": "CA",
     "tier": 5,
     "concealment_km": 11.78,
-    "concealmentAir_km": 4.82,
     "mainBatteryRange_km": 15.2,
     "torpedoRange_km": 5.5,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10584,9 +10893,11 @@
     "cruiserType": "CA",
     "tier": 5,
     "concealment_km": 10.14,
-    "concealmentAir_km": 5.46,
     "mainBatteryRange_km": 14.9,
     "torpedoRange_km": 10,
+    "smoke": true,
+    "smokeRadius_km": 0.51,
+    "smokeDuration_s": 25,
     "iconId": null
   },
   {
@@ -10597,10 +10908,10 @@
     "cruiserType": "CA",
     "tier": 5,
     "concealment_km": 11.78,
-    "concealmentAir_km": 4.82,
     "mainBatteryRange_km": 13.9,
     "torpedoRange_km": 8.2,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10611,10 +10922,10 @@
     "cruiserType": "CA",
     "tier": 5,
     "concealment_km": 9.9,
-    "concealmentAir_km": 4.63,
     "mainBatteryRange_km": 14.9,
     "torpedoRange_km": 12,
     "hydro_km": 4,
+    "smoke": false,
     "iconId": null
   },
   {
@@ -10624,7 +10935,6 @@
     "class": "DD",
     "tier": 5,
     "concealment_km": 5.97,
-    "concealmentAir_km": 2.31,
     "mainBatteryRange_km": 11.1,
     "torpedoRange_km": 6,
     "iconId": null,
@@ -10639,7 +10949,6 @@
     "class": "DD",
     "tier": 5,
     "concealment_km": 5.81,
-    "concealmentAir_km": 2.27,
     "mainBatteryRange_km": 11.2,
     "torpedoRange_km": 6,
     "iconId": null,
@@ -10652,7 +10961,6 @@
     "class": "DD",
     "tier": 5,
     "concealment_km": 5.41,
-    "concealmentAir_km": 2.25,
     "mainBatteryRange_km": 8.7,
     "torpedoRange_km": 7,
     "iconId": null,
@@ -10667,7 +10975,6 @@
     "class": "DD",
     "tier": 5,
     "concealment_km": 6.11,
-    "concealmentAir_km": 2.59,
     "mainBatteryRange_km": 11.9,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -10682,7 +10989,6 @@
     "class": "DD",
     "tier": 5,
     "concealment_km": 6.44,
-    "concealmentAir_km": 2.57,
     "mainBatteryRange_km": 11.4,
     "torpedoRange_km": 5.5,
     "iconId": null,
@@ -10697,7 +11003,6 @@
     "class": "DD",
     "tier": 5,
     "concealment_km": 6.28,
-    "concealmentAir_km": 3.05,
     "mainBatteryRange_km": 12.1,
     "torpedoRange_km": 7.5,
     "iconId": null,
@@ -10710,7 +11015,6 @@
     "class": "DD",
     "tier": 5,
     "concealment_km": 5.97,
-    "concealmentAir_km": 2.33,
     "mainBatteryRange_km": 10.9,
     "torpedoRange_km": 6.4,
     "iconId": null,
@@ -10725,7 +11029,6 @@
     "class": "DD",
     "tier": 5,
     "concealment_km": 5.69,
-    "concealmentAir_km": 2.27,
     "mainBatteryRange_km": 9.7,
     "torpedoRange_km": 10,
     "iconId": null,
@@ -10738,7 +11041,6 @@
     "class": "DD",
     "tier": 5,
     "concealment_km": 5.41,
-    "concealmentAir_km": 2.25,
     "mainBatteryRange_km": 8.7,
     "torpedoRange_km": 7,
     "iconId": null,
@@ -10753,7 +11055,6 @@
     "class": "DD",
     "tier": 5,
     "concealment_km": 5.41,
-    "concealmentAir_km": 2.25,
     "mainBatteryRange_km": 8.7,
     "torpedoRange_km": 7,
     "iconId": null,
@@ -10768,7 +11069,6 @@
     "class": "DD",
     "tier": 5,
     "concealment_km": 5.97,
-    "concealmentAir_km": 2.43,
     "mainBatteryRange_km": 11.2,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -10781,7 +11081,6 @@
     "class": "DD",
     "tier": 5,
     "concealment_km": 6.3,
-    "concealmentAir_km": 2.58,
     "mainBatteryRange_km": 6.8,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -10796,7 +11095,6 @@
     "class": "DD",
     "tier": 5,
     "concealment_km": 5.41,
-    "concealmentAir_km": 2.25,
     "mainBatteryRange_km": 8.9,
     "torpedoRange_km": 7,
     "iconId": null,
@@ -10811,7 +11109,6 @@
     "class": "DD",
     "tier": 5,
     "concealment_km": 5.94,
-    "concealmentAir_km": 2.43,
     "mainBatteryRange_km": 10.5,
     "torpedoRange_km": 7,
     "iconId": null,
@@ -10826,7 +11123,6 @@
     "class": "DD",
     "tier": 5,
     "concealment_km": 5.41,
-    "concealmentAir_km": 2.25,
     "mainBatteryRange_km": 8.9,
     "torpedoRange_km": 8,
     "iconId": null,
@@ -10841,7 +11137,6 @@
     "class": "DD",
     "tier": 5,
     "concealment_km": 5.81,
-    "concealmentAir_km": 2.21,
     "mainBatteryRange_km": 10.9,
     "torpedoRange_km": 5.5,
     "iconId": null,
@@ -10856,7 +11151,6 @@
     "class": "DD",
     "tier": 5,
     "concealment_km": 5.66,
-    "concealmentAir_km": 3.13,
     "mainBatteryRange_km": 9.2,
     "torpedoRange_km": 4.5,
     "iconId": null,
@@ -10871,7 +11165,6 @@
     "class": "DD",
     "tier": 5,
     "concealment_km": 6.4,
-    "concealmentAir_km": 2.89,
     "mainBatteryRange_km": 10.5,
     "torpedoRange_km": 6,
     "iconId": null,
@@ -10886,7 +11179,6 @@
     "class": "DD",
     "tier": 5,
     "concealment_km": 5.97,
-    "concealmentAir_km": 2.43,
     "mainBatteryRange_km": 11.8,
     "torpedoRange_km": 7,
     "iconId": null,
@@ -10899,7 +11191,6 @@
     "class": "DD",
     "tier": 5,
     "concealment_km": 5.69,
-    "concealmentAir_km": 2.13,
     "mainBatteryRange_km": 10,
     "torpedoRange_km": 7.5,
     "hydro_km": 4,
@@ -10915,7 +11206,6 @@
     "class": "DD",
     "tier": 5,
     "concealment_km": 5.96,
-    "concealmentAir_km": 2.38,
     "mainBatteryRange_km": 9.5,
     "torpedoRange_km": 8,
     "iconId": null,
