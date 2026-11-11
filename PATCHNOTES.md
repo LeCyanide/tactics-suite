@@ -24,6 +24,7 @@ Collect notes under `## Unreleased` and rename it to the version when releasing.
 ### Fixes
 
 - Replay library: when the same replay is in the folder twice, the copy that was already listed stays listed, and the new copy is the one reported as a duplicate
+- Ship database: with a ruleset open beside the ship editor, the ship table no longer runs off the right edge or wraps ship names
 
 ## 2.6.0
 

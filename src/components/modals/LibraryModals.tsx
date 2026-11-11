@@ -154,6 +154,8 @@ export function ShipDatabaseModal() {
   }, [ships, query, nation, cls, tier, radar, smoke, ruleset, bannedOnly]);
 
   const selected = ships.find((x) => x.id === selectedId) ?? null;
+  // A ruleset column next to the open ship editor does not fit the usual table: tighten it.
+  const compact = !!ruleset && !!selected;
   const withoutIcon = ships.filter((x) => !x.iconId).length;
 
   return (
@@ -319,12 +321,12 @@ export function ShipDatabaseModal() {
             )}
 
             <div style={{ maxHeight: 440, overflow: 'auto', border: '1px solid var(--line)', borderRadius: 4 }}>
-              <table className="table">
+              <table className={`table${compact ? ' ship-table-compact' : ''}`}>
                 <thead>
                   <tr>
                     <th style={{ width: 34 }} />
-                    <th>Ship</th>
-                    <th>Nation</th>
+                    <th style={compact ? { width: '70%' } : undefined}>Ship</th>
+                    <th style={compact ? { width: '30%' } : undefined}>Nation</th>
                     <th style={{ width: 46 }}>Class</th>
                     <th style={{ width: 40 }}>Tier</th>
                     <th style={{ width: 62 }}>Conceal</th>
@@ -332,7 +334,7 @@ export function ShipDatabaseModal() {
                     <th style={{ width: 56 }}>Hydro</th>
                     <th style={{ width: 50 }}>Smoke</th>
                     <th style={{ width: 56 }}>Range</th>
-                    {ruleset && <th style={{ width: 96 }}>{pickingLimit ? 'In limit' : 'Ruleset'}</th>}
+                    {ruleset && <th style={{ width: compact ? 1 : 96 }}>{pickingLimit ? 'In limit' : 'Ruleset'}</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -346,8 +348,12 @@ export function ShipDatabaseModal() {
                       <td>
                         <IconCell iconId={ship.iconId ?? null} cls={ship.class} />
                       </td>
-                      <td style={{ color: 'var(--fg)' }}>{ship.name}</td>
-                      <td>{ship.nation}</td>
+                      <td className="clip" style={{ color: 'var(--fg)' }} title={ship.name}>
+                        {ship.name}
+                      </td>
+                      <td className="clip" title={ship.nation}>
+                        {ship.nation}
+                      </td>
                       <td>
                         <span className="class-chip" style={{ background: `${CLASS_COLORS[ship.class]}22`, color: CLASS_COLORS[ship.class] }}>
                           {shipClassCode(ship)}
@@ -363,6 +369,7 @@ export function ShipDatabaseModal() {
                         <td onClick={(e) => e.stopPropagation()}>
                           {pickingLimit ? (
                             <Switch
+                              compact={compact}
                               on={pickingLimit.ships.includes(ship.id)}
                               label={pickingLimit.ships.includes(ship.id) ? 'In limit' : 'Add'}
                               onChange={() =>
@@ -375,6 +382,7 @@ export function ShipDatabaseModal() {
                             />
                           ) : (
                             <Switch
+                              compact={compact}
                               on={!ruleset.banned.includes(ship.id)}
                               label={ruleset.banned.includes(ship.id) ? 'Banned' : 'Allowed'}
                               offIsDanger
@@ -408,11 +416,14 @@ function Switch({
   on,
   label,
   offIsDanger,
+  compact,
   onChange,
 }: {
   on: boolean;
   label: string;
   offIsDanger?: boolean;
+  /** Just the switch: the label moves to its tooltip. */
+  compact?: boolean;
   onChange: () => void;
 }) {
   return (
@@ -420,13 +431,15 @@ function Switch({
       type="button"
       role="switch"
       aria-checked={on}
+      aria-label={compact ? label : undefined}
+      title={compact ? label : undefined}
       className={`switch${on ? ' on' : offIsDanger ? ' danger' : ''}`}
       onClick={onChange}
     >
       <span className="switch-track">
         <span className="switch-knob" />
       </span>
-      <span>{label}</span>
+      {!compact && <span>{label}</span>}
     </button>
   );
 }

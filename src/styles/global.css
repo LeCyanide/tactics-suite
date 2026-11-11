@@ -1722,6 +1722,19 @@ input[type='range']::-webkit-slider-thumb {
   background: var(--bg-3);
   color: var(--fg);
 }
+/* The ship table with a ruleset column beside the ship editor: tighter cells,
+   and names cut short (full name on hover) rather than wrapped. */
+.ship-table-compact th,
+.ship-table-compact td {
+  padding-left: 6px;
+  padding-right: 6px;
+}
+.ship-table-compact td.clip {
+  max-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .table td.num {
   font-family: var(--mono);
   text-align: right;
