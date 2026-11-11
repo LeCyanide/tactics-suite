@@ -587,7 +587,7 @@ function BlueprintEditor({
             disabled={!blueprint.ships.length && !only}
             onClick={() => onOnly(!only)}
           >
-            Show only these
+            Show added
           </button>
         </div>
       </Field>
