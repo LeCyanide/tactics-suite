@@ -11,37 +11,32 @@ item under it one note. Use `### Changelog` for what is finished and
 
 Collect notes under `## Unreleased` and rename it to the version when releasing.
 
-## Unreleased
+## 2.7.0
 
 ### New
 
-- Patch notes: after an update, the app shows what changed the first time it starts. "Don't show again" turns this off; Settings → Updates turns it back on and has a View patch notes button for every version
-- Ship blueprints: save a lineup of ships in the ship database (**+ Blueprint**, then switch ships on in the table). Pick it in the ship list and click the map to spawn the whole lineup as a team spawns in game (destroyers in front, cruisers in the middle, battleships behind, rows 2 km apart and ships 2.5 km apart, facing the map's centre); Esc cancels
-- Map picker: type to search the map list
-- Ruler travel time: start a ruler on a ship and it shows how long the ship takes to get there at top speed, with and without Engine Boost (the boost only lasts its real duration)
+- **Patch notes:** after an update, the app shows what changed the first time it starts. "Don't show again" turns this off; Settings → Updates turns it back on and has a View patch notes button for every version
+- **Ship blueprints:** save a lineup of ships in the ship database (**+ Blueprint**, then switch ships on in the table). Pick it in the ship list and click the map to spawn the whole lineup; Esc cancels
+- **Map picker:** type to search the map list
+- **Ruler travel time:** start a ruler on a ship and it shows how long the ship takes to get there at top speed, with and without Engine Boost (the boost only lasts its real duration)
 
 ### Changes
 
-- Ship database updated for game update 15.10: 24 new ships, and corrected concealment, torpedo range, hydro and smoke values
-- Ship database: top speed for every ship and Engine Boost duration and speed for 272, with corrected rudder shift and turning radius where they were out of date
-- The grid square and position under the cursor, in the map's bottom-left corner, can be hidden in Settings → Appearance
-- Moving the mouse over the map takes much less work: only the position readout updates, not the whole map
-- Edits are quicker and use less memory: the ship list is no longer redrawn after every change, and moving or resizing an object no longer stores a full copy of the project for undo
-- Lower memory use: the Map Manager shows small previews instead of loading every map at full size, and maps are only kept in memory while a tab uses them
-- Undo keeps the last 50 steps instead of 100
-- Ship list and ship database: radar, hydro and smoke are now one Consumables filter
-- Ship list: the Nation filter is removed (search by nation still works); Consumables moves into the first row and Blueprint into the second
-- Text size is now S, M or L (600 m, 900 m, 1200 m); new text starts at M
-- Shapes and arrows: pick the kind from a small bar that opens beside the tool rail and stays open while you draw, instead of from the sidebar
-- The team picker is now the last option in the ship list's filters
-- The ship list's team picker names the default team, such as "Place on Alpha (default)"
-- Text tool: clicking the map while a note is open finishes it instead of starting a new one; the next click starts the new note
+- **Ship database:** updated for game update 15.10: 24 new ships, and corrected concealment, torpedo range, hydro and smoke values
+- **Ship database:** top speed for every ship and Engine Boost duration and speed for 272, with corrected rudder shift and turning radius where they were out of date
+- **Cursor position:** the grid square and position in the map's bottom-left corner can be hidden in Settings → Appearance
+- **Memory optimization:** the app uses less memory and less work: moving the mouse over the map, editing and moving objects, and the Map Manager are all lighter, and maps are only kept in memory while a tab uses them
+- **Undo:** keeps the last 50 steps instead of 100
+- **Ship list:** tidier filters: radar, hydro and smoke are one Consumables filter (also in the ship database), the Nation filter is gone (search still finds nations), and the team picker comes last and names the default team
+- **Text size:** pick S, M or L; new text starts at M
+- **Shapes and arrows:** pick the kind from a small bar that opens beside the tool rail and stays open while you draw, instead of from the sidebar
+- **Text tool:** clicking the map while a note is open finishes it instead of starting a new one; the next click starts the new note
 
 ### Fixes
 
-- Replay library: when the same replay is in the folder twice, the copy that was already listed stays listed, and the new copy is the one reported as a duplicate
-- Ship database: with a ruleset open beside the ship editor, the ship table no longer runs off the right edge or wraps ship names
-- Map Manager: replacing a map image with one of the same file type now shows the new image on the page straight away, instead of the old one until a restart
+- **Replay library:** when the same replay is in the folder twice, the copy that was already listed stays listed, and the new copy is the one reported as a duplicate
+- **Ship database:** with a ruleset open beside the ship editor, the ship table no longer runs off the right edge or wraps ship names
+- **Map Manager:** replacing a map image with one of the same file type now shows the new image on the page straight away, instead of the old one until a restart
 
 ## 2.6.0
 
