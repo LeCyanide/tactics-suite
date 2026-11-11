@@ -175,6 +175,9 @@ function PathNode({ obj, inv, selected, theme, ...rest }: NodeCommon & Themed & 
   let measurement: React.ReactNode = null;
   if (obj.showMeasurement) {
     if (obj.type === 'ruler') {
+      // TODO(travel time): a ruler starting on a ship should also show how long
+      // that ship takes to cover the distance, with and without Engine Boost.
+      // Blocked on data — see "Planned: travel time" in the README.
       const mid = { x: (first.x + last.x) / 2, y: (first.y + last.y) / 2 };
       measurement = (
         <MeasureLabel x={mid.x} y={mid.y} inv={inv} color={s.color} theme={theme} text={formatKm(pathLength(pts))} />
