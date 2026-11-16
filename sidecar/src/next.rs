@@ -129,6 +129,36 @@ fn command(d: Draw<'_>) -> DrawCommand {
             player_name: s(player_name),
             ship_name: s(ship_name),
         },
+        Draw::ShotTracer {
+            from,
+            to,
+            color,
+            secondary: false,
+        } => DrawCommand::ShotTracer {
+            from: pos(from),
+            to: pos(to),
+            color,
+        },
+        Draw::ShotTracer {
+            from,
+            to,
+            color,
+            secondary: true,
+        } => DrawCommand::SecondaryShotTracer {
+            from: pos(from),
+            to: pos(to),
+            color,
+        },
+        Draw::ShotTracerTip {
+            at,
+            color,
+            secondary: false,
+        } => DrawCommand::ShotTracerTip { at: pos(at), color },
+        Draw::ShotTracerTip {
+            at,
+            color,
+            secondary: true,
+        } => DrawCommand::SecondaryShotTracerTip { at: pos(at), color },
     }
 }
 
@@ -161,6 +191,16 @@ pub fn bake(game_dir: &Path, replay_path: &PathBuf, fps: f32) -> Result<Vec<u8>,
         .ok_or_else(|| format!("no bounds in space.settings for {:?}", replay.meta.map_name))?;
 
     emit(&serde_json::json!({ "t": "stage", "stage": "baking", "engine": "parser" }));
+    // A first pass learns shell flight times from their hits, as the
+    // toolkit bake pre-scans for them.
+    let mut decoder = EntityDecoder::new(&defs);
+    let mut world = World::new(&replay.meta).with_params(&gp);
+    for p in Packets::new(&replay.packets, version) {
+        let event = decoder.feed(&p).ok().flatten();
+        world.apply(&decoder, &p, event.as_ref());
+    }
+    let flights = draw::flights(&world.shell_hits);
+
     let mut decoder = EntityDecoder::new(&defs);
     let mut world = World::new(&replay.meta).with_params(&gp);
     let mut writer = format::TimelineWriter::new();
@@ -180,10 +220,11 @@ pub fn bake(game_dir: &Path, replay_path: &PathBuf, fps: f32) -> Result<Vec<u8>,
                 labels = draw::labels(&world.players, Some(&gp), &names);
             }
             let clock = frame_clock(writer.frame_count());
-            let commands: Vec<DrawCommand> = draw::frame(&world, &map, &labels, clock)
-                .into_iter()
-                .map(command)
-                .collect();
+            let commands: Vec<DrawCommand> =
+                draw::frame(&world, &map, &labels, Some(&gp), &flights, clock)
+                    .into_iter()
+                    .map(command)
+                    .collect();
             writer.push_frame(&commands);
         }
     }
