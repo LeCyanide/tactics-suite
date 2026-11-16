@@ -159,6 +159,19 @@ fn command(d: Draw<'_>) -> DrawCommand {
             color,
             secondary: true,
         } => DrawCommand::SecondaryShotTracerTip { at: pos(at), color },
+        Draw::ConsumableRadius {
+            entity_id,
+            pos: p,
+            radius,
+            color,
+            alpha,
+        } => DrawCommand::ConsumableRadius {
+            entity_id: entity_id.into(),
+            pos: pos(p),
+            radius_px: radius,
+            color,
+            alpha,
+        },
         Draw::PatrolRadius {
             plane_id,
             pos: p,
