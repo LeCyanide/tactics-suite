@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { getRulesets, useStore } from '@/state/store';
 import { rulesetBreaches } from '@/lib/shipFilters';
 import type { Page } from '@/types/model';
+import { t } from '@/i18n';
 
 /**
  * A red "!" after a page's name when its lineup breaks the ruleset applied to
@@ -20,7 +21,7 @@ export function RulesetFlag({ page }: { page: Page }) {
   if (!ruleset || !breaches.length) return null;
 
   return (
-    <span className="ruleset-flag" title={`Breaks ${ruleset.name}:\n${breaches.join('\n')}`}>
+    <span className="ruleset-flag" title={`${t('Breaks {ruleset}:', { ruleset: ruleset.name })}\n${breaches.join('\n')}`}>
       !
     </span>
   );

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Download, RefreshCw, X } from 'lucide-react';
 import { formatBytes } from '@/lib/util';
 import { restartToUpdate, useUpdateState } from '@/state/updates';
+import { t } from '@/i18n';
 
 /**
  * Asks before downloading a new version, then shows progress and offers the
@@ -21,17 +22,19 @@ export function UpdateNotice() {
       <div className="update-notice">
         <div className="update-notice-head">
           <Download size={14} />
-          <strong>Version {state.version} is available</strong>
-          <button className="icon-btn" title="Later" onClick={later}>
+          <strong>{t('Version {version} is available', { version: state.version })}</strong>
+          <button className="icon-btn" title={t('Later')} onClick={later}>
             <X size={13} />
           </button>
         </div>
         <div className="faint">
-          Download it now{state.size ? ` (${formatBytes(state.size)})` : ''}? You can keep working while it downloads.
+          {state.size
+            ? t('Download it now ({size})? You can keep working while it downloads.', { size: formatBytes(state.size) })
+            : t('Download it now? You can keep working while it downloads.')}
         </div>
         <div className="update-notice-actions">
           <button className="btn sm ghost" onClick={later}>
-            Later
+            {t('Later')}
           </button>
           <button
             className="btn sm primary"
@@ -40,7 +43,7 @@ export function UpdateNotice() {
               void window.api.updates.download();
             }}
           >
-            Download
+            {t('Download')}
           </button>
         </div>
       </div>
@@ -52,7 +55,7 @@ export function UpdateNotice() {
       <div className="update-notice">
         <div className="update-notice-head">
           <Download size={14} />
-          <strong>Downloading {state.version}…</strong>
+          <strong>{t('Downloading {version}…', { version: state.version })}</strong>
         </div>
         <div className="update-progress">
           <div style={{ width: `${Math.min(100, state.percent)}%` }} />
@@ -66,18 +69,18 @@ export function UpdateNotice() {
       <div className="update-notice">
         <div className="update-notice-head">
           <RefreshCw size={14} />
-          <strong>Version {state.version} is ready</strong>
-          <button className="icon-btn" title="Later" onClick={later}>
+          <strong>{t('Version {version} is ready', { version: state.version })}</strong>
+          <button className="icon-btn" title={t('Later')} onClick={later}>
             <X size={13} />
           </button>
         </div>
-        <div className="faint">Restart now to finish updating. Your project is saved first.</div>
+        <div className="faint">{t('Restart now to finish updating. Your project is saved first.')}</div>
         <div className="update-notice-actions">
           <button className="btn sm ghost" onClick={later}>
-            Later
+            {t('Later')}
           </button>
           <button className="btn sm primary" onClick={() => void restartToUpdate()}>
-            Restart
+            {t('Restart')}
           </button>
         </div>
       </div>
@@ -88,12 +91,12 @@ export function UpdateNotice() {
     return (
       <div className="update-notice error">
         <div className="update-notice-head">
-          <strong>Update failed</strong>
-          <button className="icon-btn" title="Dismiss" onClick={later}>
+          <strong>{t('Update failed')}</strong>
+          <button className="icon-btn" title={t('Dismiss')} onClick={later}>
             <X size={13} />
           </button>
         </div>
-        <div className="faint">{state.message}</div>
+        <div className="faint">{t(state.message)}</div>
       </div>
     );
   }

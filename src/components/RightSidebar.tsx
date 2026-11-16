@@ -7,6 +7,7 @@ import {
   DEFAULT_RANGE_STYLES,
   RANGE_KEYS,
   SHIP_CLASS_LABEL,
+  layerLabel,
   type CharacteristicKey,
   type MarkerObject,
   type PathObject,
@@ -34,6 +35,7 @@ import { ClassIcon } from './common/ClassIcon';
 import { ReplayOverlayPanel } from './ReplayOverlayPanel';
 import { gridRef } from '@/lib/util';
 import { CONSUMABLE_FILTERS, filterShips, limitUse, type ConsumableFilter } from '@/lib/shipFilters';
+import { N_, t, tn, useLanguage } from '@/i18n';
 
 export function RightSidebar() {
   const open = useStore((s) => s.rightOpen);
@@ -110,26 +112,26 @@ function ShipRangeStyleEditor({ obj, rangeKey }: { obj: ShipObject; rangeKey: Ch
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '2px 0' }}>
         <ColorInput value={style.color} onChange={(v) => patch({ color: v })} />
         <NumInput value={style.lineWidth} min={0.5} max={8} step={0.5} onChange={(v) => patch({ lineWidth: v })} width={54} />
-        <Tip label="Dashed" side="bottom">
+        <Tip label={t('Dashed')} side="bottom">
           <button className={`icon-btn${style.dashed ? ' active' : ''}`} onClick={() => patch({ dashed: !style.dashed })}>
             ⋯
           </button>
         </Tip>
-        <Tip label="Fill" side="bottom">
+        <Tip label={t('Fill')} side="bottom">
           <button className={`icon-btn${style.fill ? ' active' : ''}`} onClick={() => patch({ fill: !style.fill })}>
             <Palette size={12} />
           </button>
         </Tip>
       </div>
-      <Field label="Opacity">
+      <Field label={t('Opacity')}>
         <Slider value={style.opacity} onChange={(v) => patch({ opacity: v })} />
       </Field>
       {style.fill && (
-        <Field label="Fill">
+        <Field label={t('Fill')}>
           <Slider value={style.fillOpacity} max={0.6} onChange={(v) => patch({ fillOpacity: v })} />
         </Field>
       )}
-      <Check label="Show label" checked={style.showLabel} onChange={(v) => patch({ showLabel: v })} />
+      <Check label={t('Show label')} checked={style.showLabel} onChange={(v) => patch({ showLabel: v })} />
     </div>
   );
 }
@@ -140,22 +142,22 @@ function ToolDefaultsPanel() {
   const stroke = options.stroke;
 
   return (
-    <Panel title="Drawing defaults" storageKey="toolDefaults">
-      <Field label="Colour">
+    <Panel title={t('Drawing defaults')} storageKey="toolDefaults">
+      <Field label={t('Colour')}>
         <ColorInput value={stroke.color} onChange={(v) => s().patchToolOptions({ stroke: { ...stroke, color: v } })} />
         <select
           value={stroke.dash}
           onChange={(e) => s().patchToolOptions({ stroke: { ...stroke, dash: e.target.value as typeof stroke.dash } })}
         >
-          <option value="solid">Solid</option>
-          <option value="dashed">Dashed</option>
-          <option value="dotted">Dotted</option>
+          <option value="solid">{t('Solid')}</option>
+          <option value="dashed">{t('Dashed')}</option>
+          <option value="dotted">{t('Dotted')}</option>
         </select>
       </Field>
-      <Field label="Width">
+      <Field label={t('Width')}>
         <NumInput value={stroke.width} min={0.5} max={20} step={0.5} onChange={(v) => s().patchToolOptions({ stroke: { ...stroke, width: v } })} suffix="px" />
       </Field>
-      <Field label="Fill">
+      <Field label={t('Fill')}>
         <input
           type="checkbox"
           checked={!!stroke.fill}
@@ -167,13 +169,13 @@ function ToolDefaultsPanel() {
           <Slider value={stroke.fillOpacity} max={0.8} onChange={(v) => s().patchToolOptions({ stroke: { ...stroke, fillOpacity: v } })} />
         )}
       </Field>
-      <Field label="Text size">
+      <Field label={t('Text size')}>
         <TextSizePicker value={options.fontSize} onChange={(v) => s().patchToolOptions({ fontSize: v })} />
       </Field>
-      <Field label="Arrowhead">
+      <Field label={t('Arrowhead')}>
         <NumInput value={options.arrowSize} min={4} max={48} step={1} onChange={(v) => s().patchToolOptions({ arrowSize: v })} suffix="px" />
       </Field>
-      <Field label="Next number">
+      <Field label={t('Next number')}>
         <NumInput value={options.numberCounter} min={1} step={1} onChange={(v) => s().patchToolOptions({ numberCounter: Math.round(v) })} />
       </Field>
     </Panel>
@@ -185,9 +187,9 @@ function ToolDefaultsPanel() {
  * any zoom. New text starts at M.
  */
 const TEXT_SIZES: { label: string; value: number; hint: string }[] = [
-  { label: 'S', value: 600, hint: 'Small — 600 m tall on the map' },
-  { label: 'M', value: 900, hint: 'Medium — 900 m tall on the map' },
-  { label: 'L', value: 1200, hint: 'Large — 1200 m tall on the map' },
+  { label: 'S', value: 600, hint: N_('Small — 600 m tall on the map') },
+  { label: 'M', value: 900, hint: N_('Medium — 900 m tall on the map') },
+  { label: 'L', value: 1200, hint: N_('Large — 1200 m tall on the map') },
 ];
 
 /** Text that was resized by hand on the map matches none of the three, and none is lit. */
@@ -198,7 +200,7 @@ function TextSizePicker({ value, onChange }: { value: number; onChange: (v: numb
         <button
           key={size.label}
           className={`variant-chip${Math.round(value) === size.value ? ' active' : ''}`}
-          title={size.hint}
+          title={t(size.hint)}
           onClick={() => onChange(size.value)}
         >
           {size.label}
@@ -224,9 +226,9 @@ function SingleObjectPanels({ obj }: { obj: TacticalObject }) {
 }
 
 const TYPE_LABEL: Record<string, string> = {
-  freehand: 'Freehand', line: 'Line', arrow: 'Arrow', doubleArrow: 'Double arrow', curvedArrow: 'Curved arrow',
-  polygon: 'Polygon', ruler: 'Ruler', area: 'Area', rect: 'Rectangle', roundRect: 'Rounded rectangle',
-  circle: 'Circle', text: 'Text', number: 'Number', marker: 'Marker',
+  freehand: N_('Freehand'), line: N_('Line'), arrow: N_('Arrow'), doubleArrow: N_('Double arrow'), curvedArrow: N_('Curved arrow'),
+  polygon: N_('Polygon'), ruler: N_('Ruler'), area: N_('Area'), rect: N_('Rectangle'), roundRect: N_('Rounded rectangle'),
+  circle: N_('Circle'), text: N_('Text'), number: N_('Number'), marker: N_('Marker'),
 };
 
 function CommonObjectPanel({ obj }: { obj: TacticalObject }) {
@@ -236,32 +238,32 @@ function CommonObjectPanel({ obj }: { obj: TacticalObject }) {
   const update = (patch: Partial<TacticalObject>) => s().updateObject(obj.id, patch);
 
   return (
-    <Panel title={TYPE_LABEL[obj.type] ?? obj.type} storageKey="objCommon">
-      <Field label="Layer">
+    <Panel title={TYPE_LABEL[obj.type] ? t(TYPE_LABEL[obj.type]) : obj.type} storageKey="objCommon">
+      <Field label={t('Layer')}>
         <select value={obj.layerId} onChange={(e) => update({ layerId: e.target.value } as Partial<TacticalObject>)}>
           {page.layers.map((l) => (
             <option key={l.id} value={l.id}>
-              {l.name}
+              {layerLabel(l)}
             </option>
           ))}
         </select>
       </Field>
-      <Field label="Position">
+      <Field label={t('Position')}>
         <NumInput value={obj.x / 1000} step={0.1} onChange={(v) => update({ x: v * 1000 })} suffix="km" />
         <NumInput value={obj.y / 1000} step={0.1} onChange={(v) => update({ y: v * 1000 })} suffix="km" />
       </Field>
-      <Field label="Rotation">
+      <Field label={t('Rotation')}>
         <NumInput value={obj.rotation} step={1} onChange={(v) => update({ rotation: v })} suffix="°" />
       </Field>
-      <Field label="Opacity">
+      <Field label={t('Opacity')}>
         <Slider value={obj.opacity} onChange={(v) => update({ opacity: v })} />
       </Field>
       <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
         <button className="btn sm" style={{ flex: 1 }} onClick={() => update({ locked: !obj.locked })}>
-          {obj.locked ? 'Unlock' : 'Lock'}
+          {obj.locked ? t('Unlock') : t('Lock')}
         </button>
         <button className="btn sm" style={{ flex: 1 }} onClick={() => s().duplicateSelection()}>
-          Duplicate
+          {t('Duplicate')}
         </button>
         <button className="btn sm danger" onClick={() => s().deleteSelection()}>
           <Trash2 size={12} />
@@ -279,18 +281,18 @@ function StrokeEditor({ obj }: { obj: PathObject | ShapeObject }) {
 
   return (
     <>
-      <Field label="Colour">
+      <Field label={t('Colour')}>
         <ColorInput value={stroke.color} onChange={(v) => set({ color: v })} />
         <select value={stroke.dash} onChange={(e) => set({ dash: e.target.value as typeof stroke.dash })}>
-          <option value="solid">Solid</option>
-          <option value="dashed">Dashed</option>
-          <option value="dotted">Dotted</option>
+          <option value="solid">{t('Solid')}</option>
+          <option value="dashed">{t('Dashed')}</option>
+          <option value="dotted">{t('Dotted')}</option>
         </select>
       </Field>
-      <Field label="Width">
+      <Field label={t('Width')}>
         <NumInput value={stroke.width} min={0.5} max={20} step={0.5} onChange={(v) => set({ width: v })} suffix="px" />
       </Field>
-      <Field label="Fill">
+      <Field label={t('Fill')}>
         <input
           type="checkbox"
           checked={!!stroke.fill}
@@ -300,7 +302,7 @@ function StrokeEditor({ obj }: { obj: PathObject | ShapeObject }) {
         {stroke.fill && <ColorInput value={stroke.fill} onChange={(v) => set({ fill: v })} />}
       </Field>
       {stroke.fill && (
-        <Field label="Fill opacity">
+        <Field label={t('Fill opacity')}>
           <Slider value={stroke.fillOpacity} max={0.9} onChange={(v) => set({ fillOpacity: v })} />
         </Field>
       )}
@@ -314,26 +316,26 @@ function PathPropertiesPanel({ obj }: { obj: PathObject }) {
   const isArrow = ['arrow', 'doubleArrow', 'curvedArrow', 'ruler'].includes(obj.type);
 
   return (
-    <Panel title="Style" storageKey="pathStyle">
+    <Panel title={t('Style')} storageKey="pathStyle">
       <StrokeEditor obj={obj} />
       {isArrow && (
-        <Field label="Arrowhead">
+        <Field label={t('Arrowhead')}>
           <NumInput value={obj.arrowSize ?? 14} min={4} max={60} step={1} onChange={(v) => update({ arrowSize: v })} suffix="px" />
         </Field>
       )}
       {obj.type === 'curvedArrow' && (
-        <Field label="Curvature">
+        <Field label={t('Curvature')}>
           <Slider value={obj.curvature ?? 0.25} min={-0.8} max={0.8} step={0.02} onChange={(v) => update({ curvature: v })} format={(v) => v.toFixed(2)} />
         </Field>
       )}
       {['ruler', 'area'].includes(obj.type) && (
-        <Check label="Show measurement" checked={obj.showMeasurement !== false} onChange={(v) => update({ showMeasurement: v })} />
+        <Check label={t('Show measurement')} checked={obj.showMeasurement !== false} onChange={(v) => update({ showMeasurement: v })} />
       )}
       {['polygon', 'area', 'freehand'].includes(obj.type) && (
-        <Check label="Closed shape" checked={!!obj.closed} onChange={(v) => update({ closed: v })} />
+        <Check label={t('Closed shape')} checked={!!obj.closed} onChange={(v) => update({ closed: v })} />
       )}
       <div className="faint mono" style={{ fontSize: 10.5, marginTop: 6 }}>
-        {obj.points.length} points
+        {tn(obj.points.length, '{n} point', '{n} points')}
       </div>
     </Panel>
   );
@@ -344,18 +346,18 @@ function ShapePropertiesPanel({ obj }: { obj: ShapeObject }) {
   const update = (patch: Partial<ShapeObject>) => s().updateObject(obj.id, patch as Partial<TacticalObject>);
 
   return (
-    <Panel title="Style" storageKey="shapeStyle">
+    <Panel title={t('Style')} storageKey="shapeStyle">
       <StrokeEditor obj={obj} />
-      <Field label={obj.type === 'circle' ? 'Radius' : 'Width'}>
+      <Field label={obj.type === 'circle' ? t('Radius') : t('Width')}>
         <NumInput value={obj.rx / 1000} step={0.1} min={0.01} onChange={(v) => update({ rx: v * 1000 })} suffix="km" />
       </Field>
       {obj.type !== 'circle' && (
-        <Field label="Height">
+        <Field label={t('Height')}>
           <NumInput value={obj.ry / 1000} step={0.1} min={0.01} onChange={(v) => update({ ry: v * 1000 })} suffix="km" />
         </Field>
       )}
       {obj.type === 'roundRect' && (
-        <Field label="Corner">
+        <Field label={t('Corner')}>
           <NumInput value={(obj.cornerRadius ?? 0) / 1000} step={0.05} min={0} onChange={(v) => update({ cornerRadius: v * 1000 })} suffix="km" />
         </Field>
       )}
@@ -368,12 +370,12 @@ function TextPropertiesPanel({ obj }: { obj: TextObject }) {
   const update = (patch: Partial<TextObject>) => s().updateObject(obj.id, patch as Partial<TacticalObject>);
 
   return (
-    <Panel title="Text" storageKey="textStyle">
+    <Panel title={t('Text')} storageKey="textStyle">
       <textarea value={obj.text} rows={3} onChange={(e) => update({ text: e.target.value })} />
-      <Field label="Size">
+      <Field label={t('Size')}>
         <TextSizePicker value={obj.fontSize} onChange={(v) => update({ fontSize: v })} />
       </Field>
-      <Field label="Colour">
+      <Field label={t('Colour')}>
         <ColorInput value={obj.color} onChange={(v) => update({ color: v })} />
         <button className={`btn sm${obj.bold ? ' primary' : ''}`} onClick={() => update({ bold: !obj.bold })}>
           B
@@ -382,14 +384,14 @@ function TextPropertiesPanel({ obj }: { obj: TextObject }) {
           <em>I</em>
         </button>
       </Field>
-      <Field label="Align">
+      <Field label={t('Align')}>
         <select value={obj.align} onChange={(e) => update({ align: e.target.value as TextObject['align'] })}>
-          <option value="left">Left</option>
-          <option value="center">Centre</option>
-          <option value="right">Right</option>
+          <option value="left">{t('Left')}</option>
+          <option value="center">{t('Centre')}</option>
+          <option value="right">{t('Right')}</option>
         </select>
       </Field>
-      <Field label="Background">
+      <Field label={t('Background')}>
         <input
           type="checkbox"
           checked={!!obj.background}
@@ -407,23 +409,23 @@ function MarkerPropertiesPanel({ obj }: { obj: MarkerObject }) {
   const update = (patch: Partial<MarkerObject>) => s().updateObject(obj.id, patch as Partial<TacticalObject>);
 
   return (
-    <Panel title="Marker" storageKey="markerStyle">
-      <Field label="Shape">
+    <Panel title={t('Marker')} storageKey="markerStyle">
+      <Field label={t('Shape')}>
         <select value={obj.shape} onChange={(e) => update({ shape: e.target.value as MarkerObject['shape'] })}>
-          <option value="pin">Pin</option>
-          <option value="cross">Cross</option>
-          <option value="diamond">Diamond</option>
-          <option value="star">Star</option>
-          <option value="flag">Flag</option>
+          <option value="pin">{t('Pin')}</option>
+          <option value="cross">{t('Cross')}</option>
+          <option value="diamond">{t('Diamond')}</option>
+          <option value="star">{t('Star')}</option>
+          <option value="flag">{t('Flag')}</option>
         </select>
       </Field>
-      <Field label="Colour">
+      <Field label={t('Colour')}>
         <ColorInput value={obj.color} onChange={(v) => update({ color: v })} />
       </Field>
-      <Field label="Size">
+      <Field label={t('Size')}>
         <NumInput value={obj.size} min={8} max={80} onChange={(v) => update({ size: v })} suffix="px" />
       </Field>
-      <Field label="Label">
+      <Field label={t('Label')}>
         <input type="text" value={obj.label} onChange={(e) => update({ label: e.target.value })} />
       </Field>
     </Panel>
@@ -466,24 +468,24 @@ function ShipPropertiesPanels({ obj }: { obj: ShipObject }) {
           <>
             <button
               className={`icon-btn${obj.locked ? ' active' : ''}`}
-              title={obj.locked ? 'Unlock ship' : 'Lock ship'}
+              title={obj.locked ? t('Unlock ship') : t('Lock ship')}
               onClick={() => update({ locked: !obj.locked })}
             >
               {obj.locked ? <Lock size={12} /> : <LockOpen size={12} />}
             </button>
-            <button className="icon-btn danger" title="Delete ship" onClick={() => s().deleteSelection()}>
+            <button className="icon-btn danger" title={t('Delete ship')} onClick={() => s().deleteSelection()}>
               <Trash2 size={12} />
             </button>
           </>
         }
       >
         <div className="faint mono" style={{ fontSize: 10.5, marginBottom: 6 }}>
-          {SHIP_CLASS_LABEL[obj.shipClass]} · Tier {obj.tier} · {ship?.nation ?? 'Unknown'}
+          {t(SHIP_CLASS_LABEL[obj.shipClass])} · {t('Tier {n}', { n: obj.tier })} · {ship?.nation ?? t('Unknown')}
         </div>
 
-        <Field label="Team">
+        <Field label={t('Team')}>
           <select value={obj.teamId ?? ''} onChange={(e) => update({ teamId: e.target.value || null })}>
-            <option value="">No team</option>
+            <option value="">{t('No team')}</option>
             {project.teams.map((t) => (
               <option key={t.id} value={t.id}>
                 {t.name}
@@ -491,7 +493,7 @@ function ShipPropertiesPanels({ obj }: { obj: ShipObject }) {
             ))}
           </select>
         </Field>
-        <Field label="Label">
+        <Field label={t('Label')}>
           <input
             type="text"
             placeholder={obj.shipName}
@@ -499,25 +501,25 @@ function ShipPropertiesPanels({ obj }: { obj: ShipObject }) {
             onChange={(e) => update({ label: e.target.value || undefined })}
           />
         </Field>
-        <Field label="Note">
+        <Field label={t('Note')}>
           <input
             type="text"
-            placeholder="Shown under the name"
+            placeholder={t('Shown under the name')}
             value={obj.note ?? ''}
             onChange={(e) => update({ note: e.target.value || undefined })}
           />
         </Field>
-        <Field label="Position">
+        <Field label={t('Position')}>
           <NumInput value={obj.x / 1000} step={0.1} onChange={(v) => update({ x: v * 1000 })} suffix="km" />
           <NumInput value={obj.y / 1000} step={0.1} onChange={(v) => update({ y: v * 1000 })} suffix="km" />
         </Field>
-        <Field label="Grid">
+        <Field label={t('Grid')}>
           <span className="mono dim">{ref}</span>
         </Field>
-        <Field label="Icon size">
+        <Field label={t('Icon size')}>
           <Slider value={obj.iconScale} min={0.5} max={2.5} step={0.05} onChange={(v) => update({ iconScale: v })} format={(v) => `${v.toFixed(2)}x`} />
         </Field>
-        <Field label="Icon colour">
+        <Field label={t('Icon colour')}>
           <ColorInput
             value={obj.iconColor ?? team?.color ?? NEUTRAL_ICON_COLOR}
             onChange={(v) => update({ iconColor: v })}
@@ -525,25 +527,25 @@ function ShipPropertiesPanels({ obj }: { obj: ShipObject }) {
           {(obj.opacity !== 1 || obj.iconColor) && (
             <button
               className="icon-btn"
-              title="Reset to the team default: team colour, full opacity"
+              title={t('Reset to the team default: team colour, full opacity')}
               onClick={() => update(STANDARD_LOOK)}
             >
               <RotateCcw size={13} />
             </button>
           )}
         </Field>
-        <Field label="Opacity">
+        <Field label={t('Opacity')}>
           <Slider value={obj.opacity} onChange={(v) => update({ opacity: v })} />
         </Field>
       </Panel>
 
       {/* Range rings, per ship --------------------------------------- */}
       <Panel
-        title="Ranges"
+        title={t('Ranges')}
         storageKey="shipRanges"
         actions={
           Object.keys(obj.display).length > 0 ? (
-            <Tip label="Switch every range off" side="bottom">
+            <Tip label={t('Switch every range off')} side="bottom">
               <button className="icon-btn" onClick={() => update({ display: {} })}>
                 <RadarIcon size={12} />
               </button>
@@ -561,14 +563,14 @@ function ShipPropertiesPanels({ obj }: { obj: ShipObject }) {
                 flagKey={c.key}
                 label={
                   <span style={{ display: 'flex', gap: 6, alignItems: 'baseline' }}>
-                    {c.label}
+                    {t(c.label)}
                     <span className="mono faint" style={{ fontSize: 10 }}>
-                      {km ? `${km.toFixed(1)} km` : 'n/a'}
+                      {km ? `${km.toFixed(1)} km` : t('n/a')}
                     </span>
                   </span>
                 }
                 value={on}
-                disabledReason={km ? undefined : 'This ship has no value for that characteristic'}
+                disabledReason={km ? undefined : t('This ship has no value for that characteristic')}
               />
               {on && !!km && <ShipRangeStyleEditor obj={obj} rangeKey={c.key} />}
             </div>
@@ -619,18 +621,18 @@ function MultiSelectionPanel({ objects }: { objects: TacticalObject[] }) {
   if (!page) return null;
 
   return (
-    <Panel title={`${objects.length} objects selected`} storageKey="multi">
-      <Field label="Layer">
+    <Panel title={tn(objects.length, '{n} object selected', '{n} objects selected')} storageKey="multi">
+      <Field label={t('Layer')}>
         <select value="" onChange={(e) => e.target.value && s().assignLayer(ids, e.target.value)}>
-          <option value="">Move to layer…</option>
+          <option value="">{t('Move to layer…')}</option>
           {page.layers.map((l) => (
             <option key={l.id} value={l.id}>
-              {l.name}
+              {layerLabel(l)}
             </option>
           ))}
         </select>
       </Field>
-      <Field label="Opacity">
+      <Field label={t('Opacity')}>
         <Slider
           value={objects[0].opacity}
           onChange={(v) => s().updateObjects(ids, { opacity: v } as Partial<TacticalObject>)}
@@ -638,29 +640,29 @@ function MultiSelectionPanel({ objects }: { objects: TacticalObject[] }) {
       </Field>
       <div style={{ display: 'flex', gap: 4, marginTop: 6, flexWrap: 'wrap' }}>
         <button className="btn sm" onClick={() => s().duplicateSelection()}>
-          Duplicate
+          {t('Duplicate')}
         </button>
         <button className="btn sm" onClick={() => s().copySelection()}>
-          Copy
+          {t('Copy')}
         </button>
         <button
           className="btn sm"
           onClick={() => s().updateObjects(ids, { locked: !objects[0].locked } as Partial<TacticalObject>)}
         >
-          {objects[0].locked ? 'Unlock' : 'Lock'}
+          {objects[0].locked ? t('Unlock') : t('Lock')}
         </button>
         <button className="btn sm danger" onClick={() => s().deleteSelection()}>
-          Delete
+          {t('Delete')}
         </button>
       </div>
       {shipIds.length > 0 && (
-        <Tip label="Full opacity and the team colour for every selected ship" side="bottom">
+        <Tip label={t('Full opacity and the team colour for every selected ship')} side="bottom">
           <button
             className="btn sm"
             style={{ width: '100%', marginTop: 6 }}
             onClick={() => s().updateObjects(shipIds, STANDARD_LOOK as Partial<TacticalObject>)}
           >
-            Standard look for {shipIds.length} ship{shipIds.length === 1 ? '' : 's'}
+            {tn(shipIds.length, 'Standard look for {n} ship', 'Standard look for {n} ships')}
           </button>
         </Tip>
       )}
@@ -683,6 +685,7 @@ const NO_TEAMS: Team[] = [];
  * colour change) cost more than the rest of the window together.
  */
 const ShipBrowserPanel = memo(function ShipBrowserPanel() {
+  useLanguage();
   const ships = useStore((s) => s.ships);
   const icons = useStore((s) => s.icons);
   const teams = useStore((s) => s.project?.teams ?? NO_TEAMS);
@@ -710,7 +713,7 @@ const ShipBrowserPanel = memo(function ShipBrowserPanel() {
 
   const resolvedDefaultId = defaultTeamId || teams[0]?.id || null;
   const teamId = team || resolvedDefaultId;
-  const teamName = (id: ID | null) => teams.find((t) => t.id === id)?.name ?? 'team';
+  const teamName = (id: ID | null) => teams.find((tm) => tm.id === id)?.name ?? t('team');
 
   // An armed blueprint spawns for whichever team is picked when the map is clicked.
   useEffect(() => {
@@ -734,12 +737,12 @@ const ShipBrowserPanel = memo(function ShipBrowserPanel() {
 
   return (
     <Panel
-      title="Ships"
+      title={t('Ships')}
       count={`${filtered.length}/${ships.length}`}
       storageKey="ships"
       grow
       actions={
-        <Tip label="Open ship database — add, edit and assign icons" side="bottom">
+        <Tip label={t('Open ship database — add, edit and assign icons')} side="bottom">
           <button className="icon-btn" onClick={() => s().openModal('shipDb')}>
             <Database size={13} />
           </button>
@@ -748,13 +751,13 @@ const ShipBrowserPanel = memo(function ShipBrowserPanel() {
     >
       {ships.length === 0 ? (
         <div className="empty-note">
-          No ships yet.
+          {t('No ships yet.')}
           <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 5 }}>
             <button className="btn sm block" onClick={() => void s().importShipData()}>
-              Import ship data…
+              {t('Import ship data…')}
             </button>
             <button className="btn sm block ghost" onClick={() => void s().loadSampleShips()}>
-              Load sample ships
+              {t('Load sample ships')}
             </button>
           </div>
         </div>
@@ -764,7 +767,7 @@ const ShipBrowserPanel = memo(function ShipBrowserPanel() {
             <Search size={12} style={{ position: 'absolute', left: 7, top: 6, color: 'var(--fg-faint)' }} />
             <input
               type="search"
-              placeholder="Search ships…"
+              placeholder={t('Search ships…')}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               style={{ paddingLeft: 24 }}
@@ -773,7 +776,7 @@ const ShipBrowserPanel = memo(function ShipBrowserPanel() {
 
           <div className="ship-filters">
             <select value={cls} onChange={(e) => setCls(e.target.value as ShipClass | '')}>
-              <option value="">Class</option>
+              <option value="">{t('Class')}</option>
               {SHIP_CLASSES.map((c) => (
                 <option key={c} value={c}>
                   {c}
@@ -781,7 +784,7 @@ const ShipBrowserPanel = memo(function ShipBrowserPanel() {
               ))}
             </select>
             <select value={tier} onChange={(e) => setTier(e.target.value)}>
-              <option value="">Tier</option>
+              <option value="">{t('Tier')}</option>
               {tiers.map((t) => (
                 <option key={t} value={t}>
                   {t}
@@ -789,10 +792,10 @@ const ShipBrowserPanel = memo(function ShipBrowserPanel() {
               ))}
             </select>
             <select value={consumable} onChange={(e) => setConsumable(e.target.value as ConsumableFilter)}>
-              <option value="">Consumables</option>
+              <option value="">{t('Consumables')}</option>
               {CONSUMABLE_FILTERS.map((c) => (
                 <option key={c.value} value={c.value}>
-                  {c.label}
+                  {t(c.label)}
                 </option>
               ))}
             </select>
@@ -800,10 +803,10 @@ const ShipBrowserPanel = memo(function ShipBrowserPanel() {
           <div className="ship-filters two">
             <select
               value={ruleset?.id ?? ''}
-              title="The ship restrictions this page is held to — add and edit them in the ship database"
+              title={t('The ship restrictions this page is held to — add and edit them in the ship database')}
               onChange={(e) => s().setPageRuleset(e.target.value || null)}
             >
-              <option value="">Ruleset</option>
+              <option value="">{t('Ruleset')}</option>
               {rulesets.map((r) => (
                 <option key={r.id} value={r.id}>
                   {r.name}
@@ -815,14 +818,14 @@ const ShipBrowserPanel = memo(function ShipBrowserPanel() {
               value={armed?.blueprintId ?? ''}
               title={
                 armed
-                  ? 'Click the map to spawn this lineup — Esc to cancel'
+                  ? t('Click the map to spawn this lineup — Esc to cancel')
                   : blueprints.length
-                    ? 'Pick a blueprint, then click the map to spawn its ships'
-                    : 'No blueprints yet — add one in the ship database'
+                    ? t('Pick a blueprint, then click the map to spawn its ships')
+                    : t('No blueprints yet — add one in the ship database')
               }
               onChange={(e) => s().armBlueprint(e.target.value ? { blueprintId: e.target.value, teamId } : null)}
             >
-              <option value="">{blueprints.length ? 'Blueprint' : 'No blueprints'}</option>
+              <option value="">{blueprints.length ? t('Blueprint') : t('No blueprints')}</option>
               {blueprints.map((b) => (
                 <option key={b.id} value={b.id}>
                   {b.name} ({b.ships.length})
@@ -833,22 +836,22 @@ const ShipBrowserPanel = memo(function ShipBrowserPanel() {
 
           {hasProject && teams.length > 0 && (
             <select value={team} onChange={(e) => setTeam(e.target.value)} style={{ marginBottom: 5, flex: 'none' }}>
-              <option value="">Place on {teamName(resolvedDefaultId)} (default)</option>
-              {teams.map((t) => (
-                <option key={t.id} value={t.id}>
-                  Place on {t.name}
+              <option value="">{t('Place on {team} (default)', { team: teamName(resolvedDefaultId) })}</option>
+              {teams.map((tm) => (
+                <option key={tm.id} value={tm.id}>
+                  {t('Place on {team}', { team: tm.name })}
                 </option>
               ))}
             </select>
           )}
 
-          {armed && <div className="spawn-hint">Click the map to spawn the lineup · Esc cancels</div>}
+          {armed && <div className="spawn-hint">{t('Click the map to spawn the lineup · Esc cancels')}</div>}
 
           {ruleset && ruleset.maxShips > 0 && (
             <div className={`team-count${placed.length >= ruleset.maxShips ? ' full' : ''}`}>
-              <span>{teams.find((t) => t.id === teamId)?.name ?? 'Team'}</span>
+              <span>{teams.find((tm) => tm.id === teamId)?.name ?? t('Team')}</span>
               <span className="mono">
-                {placed.length}/{ruleset.maxShips} ships
+                {t('{used}/{max} ships', { used: placed.length, max: ruleset.maxShips })}
               </span>
             </div>
           )}
@@ -865,10 +868,10 @@ const ShipBrowserPanel = memo(function ShipBrowserPanel() {
                   draggable
                   title={
                     teamFull
-                      ? `${ruleset?.name}: this team already has its ${ruleset?.maxShips} ships`
+                      ? t('{ruleset}: this team already has its {max} ships', { ruleset: ruleset?.name ?? '', max: ruleset?.maxShips ?? 0 })
                       : use && full
-                        ? `${ruleset?.name}: this team already has ${use.used} of the ${use.max} allowed from this group`
-                        : 'Drag onto the map, or double-click to place at the centre'
+                        ? t('{ruleset}: this team already has {used} of the {max} allowed from this group', { ruleset: ruleset?.name ?? '', used: use.used, max: use.max })
+                        : t('Drag onto the map, or double-click to place at the centre')
                   }
                   onDragStart={(e) => {
                     e.dataTransfer.setData('application/x-wows-ship', ship.id);
@@ -903,7 +906,7 @@ const ShipBrowserPanel = memo(function ShipBrowserPanel() {
                 </div>
               );
             })}
-            {!filtered.length && <div className="empty-note">No ships match those filters.</div>}
+            {!filtered.length && <div className="empty-note">{t('No ships match those filters.')}</div>}
           </div>
         </>
       )}
@@ -933,7 +936,7 @@ export function RightRailToggle() {
   const toggle = useStore((s) => s.toggleRight);
   if (open) return null;
   return (
-    <button className="rail-toggle right" onClick={toggle} title="Show properties (Ctrl+J)">
+    <button className="rail-toggle right" onClick={toggle} title={t('Show properties (Ctrl+J)')}>
       <ChevronRight size={11} style={{ transform: 'rotate(180deg)' }} />
     </button>
   );

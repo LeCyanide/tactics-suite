@@ -22,6 +22,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 import path from 'node:path';
+import { N_ } from '../src/i18n/core';
 
 declare const __UPDATE_URL__: string;
 declare const __UPDATE_TOKEN__: string;
@@ -51,7 +52,9 @@ interface PortableManifest {
  */
 const CHECK_TIMEOUT_MS = 15_000;
 const STALL_TIMEOUT_MS = 30_000;
-const TIMEOUT_MESSAGE = 'The update server could not be reached.';
+// Marked for translation; the renderer shows these through t(), and any
+// other message (a raw error) passes through unchanged.
+const TIMEOUT_MESSAGE = N_('The update server could not be reached.');
 
 const feedUrl = __UPDATE_URL__.replace(/\/+$/, '');
 const authHeader = `Bearer ${__UPDATE_TOKEN__}`;
@@ -79,8 +82,8 @@ export function updateState(): UpdateState {
 
 export function initUpdater(windowGetter: () => BrowserWindow | null): void {
   getWindow = windowGetter;
-  if (!app.isPackaged) return setState({ status: 'disabled', reason: 'Updates are off in development builds.' });
-  if (!feedUrl || !__UPDATE_TOKEN__) return setState({ status: 'disabled', reason: 'This build has no update server.' });
+  if (!app.isPackaged) return setState({ status: 'disabled', reason: N_('Updates are off in development builds.') });
+  if (!feedUrl || !__UPDATE_TOKEN__) return setState({ status: 'disabled', reason: N_('This build has no update server.') });
 
   if (portableExe) {
     // Left behind by a download that never finished or a swap that timed out.
@@ -352,9 +355,9 @@ function stallWatchdog(onStall: () => void): { kick(): void; stop(): void } {
 function describe(err: unknown): string {
   const message = err instanceof Error ? err.message : String(err);
   if (/ENOTFOUND|ECONNREFUSED|ETIMEDOUT|ERR_INTERNET_DISCONNECTED|ERR_NAME_NOT_RESOLVED/.test(message)) {
-    return 'The update server could not be reached.';
+    return TIMEOUT_MESSAGE;
   }
-  if (/\b40[13]\b/.test(message)) return 'The update server refused this build’s token.';
-  if (/EPERM|EACCES/.test(message)) return 'No permission to replace the app in its folder. Move it somewhere writable, or update by hand.';
+  if (/\b40[13]\b/.test(message)) return N_('The update server refused this build’s token.');
+  if (/EPERM|EACCES/.test(message)) return N_('No permission to replace the app in its folder. Move it somewhere writable, or update by hand.');
   return message.split('\n')[0];
 }

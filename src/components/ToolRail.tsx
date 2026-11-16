@@ -29,6 +29,7 @@ import {
   type ToolId,
 } from '@/state/store';
 import { Tip } from './common/ui';
+import { N_, t as tr } from '@/i18n';
 
 interface ToolDef {
   id: ToolId;
@@ -39,18 +40,18 @@ interface ToolDef {
 
 const GROUPS: ToolDef[][] = [
   [
-    { id: 'select', icon: MousePointer2, label: 'Select — one object: move, rotate, resize', shortcut: 'V' },
-    { id: 'marquee', icon: SquareDashed, label: 'Multi-select — box or click a group, drag to move it', shortcut: 'Shift+V' },
+    { id: 'select', icon: MousePointer2, label: N_('Select — one object: move, rotate, resize'), shortcut: 'V' },
+    { id: 'marquee', icon: SquareDashed, label: N_('Multi-select — box or click a group, drag to move it'), shortcut: 'Shift+V' },
   ],
-  [{ id: 'freehand', icon: Pencil, label: 'Freehand', shortcut: 'F' }],
+  [{ id: 'freehand', icon: Pencil, label: N_('Freehand'), shortcut: 'F' }],
   [
-    { id: 'text', icon: Type, label: 'Text', shortcut: 'T' },
-    { id: 'number', icon: Hash, label: 'Number' },
-    { id: 'marker', icon: Pin, label: 'Marker' },
+    { id: 'text', icon: Type, label: N_('Text'), shortcut: 'T' },
+    { id: 'number', icon: Hash, label: N_('Number') },
+    { id: 'marker', icon: Pin, label: N_('Marker') },
   ],
   [
-    { id: 'ruler', icon: Ruler, label: 'Ruler', shortcut: 'M' },
-    { id: 'area', icon: Scan, label: 'Area — click points, double-click to close' },
+    { id: 'ruler', icon: Ruler, label: N_('Ruler'), shortcut: 'M' },
+    { id: 'area', icon: Scan, label: N_('Area — click points, double-click to close') },
   ],
 ];
 
@@ -85,7 +86,7 @@ export function ToolRail() {
   const button = (t: ToolDef) => {
     const Icon = t.icon;
     return (
-      <Tip key={t.id} label={t.label} shortcut={t.shortcut} side="left">
+      <Tip key={t.id} label={tr(t.label)} shortcut={t.shortcut} side="left">
         <button
           className={`tool-btn${tool === t.id ? ' active' : ''}`}
           disabled={!hasProject}
@@ -108,7 +109,7 @@ export function ToolRail() {
     return (
       <Tip
         key={id}
-        label={id === 'shape' ? 'Shape' : 'Line & arrow'}
+        label={id === 'shape' ? tr('Shape') : tr('Line & arrow')}
         shortcut={shortcut}
         side="left"
       >
@@ -151,7 +152,7 @@ export function ToolRail() {
           {openFamily.members.map((v) => {
             const Icon = VARIANT_ICONS[v];
             return (
-              <Tip key={v} label={openFamily.labels[v]} shortcut={VARIANT_KEYS[v]} side="left">
+              <Tip key={v} label={tr(openFamily.labels[v])} shortcut={VARIANT_KEYS[v]} side="left">
                 <button className={`tool-btn${tool === v ? ' active' : ''}`} onClick={() => setTool(v as ToolId)}>
                   <Icon size={15} />
                 </button>

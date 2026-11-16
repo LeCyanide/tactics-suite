@@ -15,15 +15,34 @@ import * as discord from './discord';
 import * as archive from './replay/archive';
 import * as replay from './replay/sidecar';
 import * as updater from './updater';
+import { isLanguage, N_, tIn, type Language } from '../src/i18n/core';
 
 type GetWindow = () => BrowserWindow | null;
 
-const IMAGE_FILTERS = [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'webp'] }];
-const ICON_FILTERS = [{ name: 'Icons', extensions: ['png', 'svg', 'webp'] }];
-const SHIP_DATA_FILTERS = [{ name: 'Ship data', extensions: ['json', 'csv', 'yaml', 'yml'] }];
-const PLAN_FILTERS = [{ name: 'WoWs Tactics project', extensions: ['wowsplan'] }];
+const IMAGE_FILTERS = [{ name: N_('Images'), extensions: ['png', 'jpg', 'jpeg', 'webp'] }];
+const ICON_FILTERS = [{ name: N_('Icons'), extensions: ['png', 'svg', 'webp'] }];
+const SHIP_DATA_FILTERS = [{ name: N_('Ship data'), extensions: ['json', 'csv', 'yaml', 'yml'] }];
+const PLAN_FILTERS = [{ name: N_('WoWs Tactics project'), extensions: ['wowsplan'] }];
 const NOTICES = 'THIRD-PARTY-NOTICES.txt';
-const REPLAY_FILTERS = [{ name: 'World of Warships replay', extensions: ['wowsreplay'] }];
+const REPLAY_FILTERS = [{ name: N_('World of Warships replay'), extensions: ['wowsreplay'] }];
+
+/**
+ * Native dialogs speak the interface language too. The renderer saves the
+ * choice with the other settings, so it is read from there when a dialog opens.
+ */
+async function language(): Promise<Language> {
+  const settings = await db.getSettings().catch(() => ({}) as Record<string, unknown>);
+  return isLanguage(settings.language) ? settings.language : 'en';
+}
+
+async function tr(key: string): Promise<string> {
+  return tIn(await language(), key);
+}
+
+async function trFilters(filters: { name: string; extensions: string[] }[]) {
+  const lang = await language();
+  return filters.map((f) => ({ ...f, name: tIn(lang, f.name) }));
+}
 
 function mimeFor(ext: string): string {
   const e = ext.toLowerCase().replace('.', '');
@@ -165,9 +184,9 @@ export function registerIpc(getWindow: GetWindow): void {
     const w = getWindow();
     const safeName = String(project?.name ?? 'project').replace(/[\\/:*?"<>|]/g, '_');
     const res = await dialog.showSaveDialog(w!, {
-      title: 'Export project',
+      title: await tr('Export project'),
       defaultPath: `${safeName}.wowsplan`,
-      filters: PLAN_FILTERS,
+      filters: await trFilters(PLAN_FILTERS),
     });
     if (res.canceled || !res.filePath) return null;
     const packed = await db.packProject(project);
@@ -178,8 +197,8 @@ export function registerIpc(getWindow: GetWindow): void {
   handle('project:import', async () => {
     const w = getWindow();
     const res = await dialog.showOpenDialog(w!, {
-      title: 'Import project',
-      filters: PLAN_FILTERS,
+      title: await tr('Import project'),
+      filters: await trFilters(PLAN_FILTERS),
       properties: ['openFile'],
     });
     if (res.canceled || !res.filePaths[0]) return null;
@@ -195,8 +214,8 @@ export function registerIpc(getWindow: GetWindow): void {
   handle('map:pickImages', async () => {
     const w = getWindow();
     const res = await dialog.showOpenDialog(w!, {
-      title: 'Import map image',
-      filters: IMAGE_FILTERS,
+      title: await tr('Import map image'),
+      filters: await trFilters(IMAGE_FILTERS),
       properties: ['openFile', 'multiSelections'],
     });
     if (res.canceled) return [];
@@ -253,8 +272,8 @@ export function registerIpc(getWindow: GetWindow): void {
   handle('ship:pickDataFile', async () => {
     const w = getWindow();
     const res = await dialog.showOpenDialog(w!, {
-      title: 'Import ship database',
-      filters: SHIP_DATA_FILTERS,
+      title: await tr('Import ship database'),
+      filters: await trFilters(SHIP_DATA_FILTERS),
       properties: ['openFile'],
     });
     if (res.canceled || !res.filePaths[0]) return null;
@@ -269,9 +288,9 @@ export function registerIpc(getWindow: GetWindow): void {
   handle('ship:exportData', async (text: string, ext: string) => {
     const w = getWindow();
     const res = await dialog.showSaveDialog(w!, {
-      title: 'Export ship database',
+      title: await tr('Export ship database'),
       defaultPath: `wows-ships${ext}`,
-      filters: SHIP_DATA_FILTERS,
+      filters: await trFilters(SHIP_DATA_FILTERS),
     });
     if (res.canceled || !res.filePath) return null;
     await fsp.writeFile(res.filePath, text, 'utf8');
@@ -285,8 +304,8 @@ export function registerIpc(getWindow: GetWindow): void {
   handle('icon:pickImages', async () => {
     const w = getWindow();
     const res = await dialog.showOpenDialog(w!, {
-      title: 'Import ship icons',
-      filters: ICON_FILTERS,
+      title: await tr('Import ship icons'),
+      filters: await trFilters(ICON_FILTERS),
       properties: ['openFile', 'multiSelections'],
     });
     if (res.canceled) return [];
@@ -314,7 +333,7 @@ export function registerIpc(getWindow: GetWindow): void {
   handle('export:image', async (dataUrl: string, suggestedName: string, ext: string) => {
     const w = getWindow();
     const res = await dialog.showSaveDialog(w!, {
-      title: 'Export image',
+      title: await tr('Export image'),
       defaultPath: `${suggestedName}${ext}`,
       filters: [{ name: ext.replace('.', '').toUpperCase(), extensions: [ext.replace('.', '')] }],
     });
@@ -326,7 +345,7 @@ export function registerIpc(getWindow: GetWindow): void {
   handle('export:text', async (text: string, suggestedName: string, ext: string) => {
     const w = getWindow();
     const res = await dialog.showSaveDialog(w!, {
-      title: 'Export file',
+      title: await tr('Export file'),
       defaultPath: `${suggestedName}${ext}`,
       filters: [{ name: ext.replace('.', '').toUpperCase(), extensions: [ext.replace('.', '')] }],
     });
@@ -348,7 +367,7 @@ export function registerIpc(getWindow: GetWindow): void {
   handle('replay:checkGameDir', (dir: string) => replay.checkGameDir(dir));
   handle('replay:pickGameDir', async () => {
     const res = await dialog.showOpenDialog(getWindow()!, {
-      title: 'Select your World of Warships folder',
+      title: await tr('Select your World of Warships folder'),
       properties: ['openDirectory'],
     });
     if (res.canceled || !res.filePaths[0]) return null;
@@ -360,7 +379,7 @@ export function registerIpc(getWindow: GetWindow): void {
   handle('replay:defaultRoot', () => path.join(app.getPath('documents'), 'WoWs Tactics Suite', 'Replays'));
   handle('replay:pickRoot', async () => {
     const res = await dialog.showOpenDialog(getWindow()!, {
-      title: 'Choose a folder for your replays',
+      title: await tr('Choose a folder for your replays'),
       properties: ['openDirectory', 'createDirectory'],
     });
     return res.canceled || !res.filePaths[0] ? null : res.filePaths[0];
@@ -372,8 +391,8 @@ export function registerIpc(getWindow: GetWindow): void {
   handle('replay:import', (paths: string[], collection?: string | null) => archive.importReplays(paths, collection ?? null));
   handle('replay:pickReplays', async (collection?: string | null) => {
     const res = await dialog.showOpenDialog(getWindow()!, {
-      title: 'Add replays to the library',
-      filters: REPLAY_FILTERS,
+      title: await tr('Add replays to the library'),
+      filters: await trFilters(REPLAY_FILTERS),
       properties: ['openFile', 'multiSelections'],
     });
     if (res.canceled || !res.filePaths.length) return null;

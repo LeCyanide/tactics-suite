@@ -1,4 +1,5 @@
 import type { Vec2 } from '@/types/model';
+import { intlLocale, t } from '@/i18n/core';
 
 export function uid(prefix = ''): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return prefix + crypto.randomUUID();
@@ -148,19 +149,19 @@ export function formatBytes(bytes: number): string {
 export function formatDate(ts: number): string {
   if (!ts) return '—';
   const d = new Date(ts);
-  return d.toLocaleString(undefined, { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleString(intlLocale(), { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' });
 }
 
 export function formatRelative(ts: number): string {
   if (!ts) return '—';
   const diff = Date.now() - ts;
   const min = Math.round(diff / 60000);
-  if (min < 1) return 'just now';
-  if (min < 60) return `${min}m ago`;
+  if (min < 1) return t('just now');
+  if (min < 60) return t('{n}m ago', { n: min });
   const hrs = Math.round(min / 60);
-  if (hrs < 24) return `${hrs}h ago`;
+  if (hrs < 24) return t('{n}h ago', { n: hrs });
   const days = Math.round(hrs / 24);
-  if (days < 30) return `${days}d ago`;
+  if (days < 30) return t('{n}d ago', { n: days });
   return formatDate(ts);
 }
 

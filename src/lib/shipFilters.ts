@@ -5,14 +5,15 @@
 
 import type { ID, Ship, ShipBlueprint, ShipClass, ShipObject, ShipRuleset, TacticalObject, Team } from '@/types/model';
 import { foldForSearch } from './util';
+import { N_, t } from '@/i18n/core';
 
 /** One consumable a ship must carry: radar, hydro or smoke. Empty asks nothing. */
 export type ConsumableFilter = '' | 'radar' | 'hydro' | 'smoke';
 
 export const CONSUMABLE_FILTERS: { value: Exclude<ConsumableFilter, ''>; label: string }[] = [
-  { value: 'radar', label: 'Radar' },
-  { value: 'hydro', label: 'Hydro' },
-  { value: 'smoke', label: 'Smoke' },
+  { value: 'radar', label: N_('Radar') },
+  { value: 'hydro', label: N_('Hydro') },
+  { value: 'smoke', label: N_('Smoke') },
 ];
 
 export interface ShipFilter {
@@ -102,21 +103,21 @@ export function rulesetBreaches(
   }
   const out: string[] = [];
   for (const [teamId, placed] of sides) {
-    const team = teams.find((t) => t.id === teamId)?.name ?? 'No team';
+    const team = teams.find((tm) => tm.id === teamId)?.name ?? t('No team');
     if (ruleset.maxShips > 0 && placed.length > ruleset.maxShips) {
-      out.push(`${team}: ${placed.length} ships, ${ruleset.maxShips} allowed`);
+      out.push(t('{team}: {n} ships, {max} allowed', { team, n: placed.length, max: ruleset.maxShips }));
     }
     for (const limit of ruleset.limits) {
       const used = placed.filter((o) => o.shipId !== null && limit.ships.includes(o.shipId)).length;
       if (used > limit.max) {
         const names = limit.ships.map((id) => byId.get(id)?.name ?? id).join(', ');
-        out.push(`${team}: ${used} of ${names}, ${limit.max} allowed`);
+        out.push(t('{team}: {used} of {ships}, {max} allowed', { team, used, ships: names, max: limit.max }));
       }
     }
     for (const o of placed) {
       // A ship missing from the database is judged by its snapshot.
       const ship = (o.shipId && byId.get(o.shipId)) || ({ id: o.shipId ?? '', tier: o.tier, class: o.shipClass } as Ship);
-      if (!allowedBy(ruleset, ship)) out.push(`${team}: ${o.shipName} is not allowed`);
+      if (!allowedBy(ruleset, ship)) out.push(t('{team}: {ship} is not allowed', { team, ship: o.shipName }));
     }
   }
   return out;

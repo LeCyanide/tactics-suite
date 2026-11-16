@@ -13,6 +13,7 @@ import Papa from 'papaparse';
 import { dump as yamlDump, load as yamlLoad } from 'js-yaml';
 import type { Consumable, Ship, ShipClass } from '@/types/model';
 import { uid } from './util';
+import { t } from '@/i18n/core';
 
 type Raw = Record<string, unknown>;
 
@@ -354,7 +355,7 @@ export function parseShipData(text: string, ext: string): ParseResult {
     .map((r) => normalizeShip(r))
     .filter((s) => s.name && s.name !== 'Unnamed ship');
 
-  if (!ships.length) warnings.push('No ship rows were recognised in this file.');
+  if (!ships.length) warnings.push(t('No ship rows were recognised in this file.'));
   return { ships, format, warnings };
 }
 

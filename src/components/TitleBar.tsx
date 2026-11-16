@@ -3,6 +3,7 @@ import { Clapperboard, Map as MapIcon, Minus, Square, X, Copy as CopyIcon } from
 import { TEST_BUILD_LABEL } from '@/lib/testBuild';
 import { getActivePage, useStore } from '@/state/store';
 import { useReplayStore } from '@/state/replay';
+import { keyLabel, N_, t } from '@/i18n';
 
 interface MenuEntry {
   label?: string;
@@ -48,32 +49,32 @@ export function TitleBar() {
   const hasProject = !!project;
 
   const menus: Record<string, MenuEntry[]> = {
-    File: [
-      { label: 'New Project…', shortcut: 'Ctrl+N', action: () => s().openModal('newProject') },
-      { label: 'Open Project…', shortcut: 'Ctrl+O', action: () => s().openModal('projects') },
+    [N_('File')]: [
+      { label: t('New Project…'), shortcut: 'Ctrl+N', action: () => s().openModal('newProject') },
+      { label: t('Open Project…'), shortcut: 'Ctrl+O', action: () => s().openModal('projects') },
       { separator: true },
-      { label: 'Save', shortcut: 'Ctrl+S', action: () => void s().saveProject(), enabled: hasProject },
-      { label: 'Save As…', action: () => s().openModal('newProject', { saveAs: true }), enabled: hasProject },
+      { label: t('Save'), shortcut: 'Ctrl+S', action: () => void s().saveProject(), enabled: hasProject },
+      { label: t('Save As…'), action: () => s().openModal('newProject', { saveAs: true }), enabled: hasProject },
       { separator: true },
-      { label: 'Import Project…', action: () => void s().importProject() },
-      { label: 'Export Project (.wowsplan)…', action: () => void s().exportProject(), enabled: hasProject },
-      { label: 'Export Image…', shortcut: 'Ctrl+E', action: () => s().openModal('export'), enabled: hasProject },
+      { label: t('Import Project…'), action: () => void s().importProject() },
+      { label: t('Export Project (.wowsplan)…'), action: () => void s().exportProject(), enabled: hasProject },
+      { label: t('Export Image…'), shortcut: 'Ctrl+E', action: () => s().openModal('export'), enabled: hasProject },
       { separator: true },
-      { label: 'Backups…', action: () => s().openModal('backups'), enabled: hasProject },
+      { label: t('Backups…'), action: () => s().openModal('backups'), enabled: hasProject },
       { separator: true },
-      { label: 'Exit', action: () => window.api.window.close() },
+      { label: t('Exit'), action: () => window.api.window.close() },
     ],
-    Edit: [
-      { label: 'Undo', shortcut: 'Ctrl+Z', action: () => s().undo(), enabled: past > 0 },
-      { label: 'Redo', shortcut: 'Ctrl+Y', action: () => s().redo(), enabled: future > 0 },
+    [N_('Edit')]: [
+      { label: t('Undo'), shortcut: 'Ctrl+Z', action: () => s().undo(), enabled: past > 0 },
+      { label: t('Redo'), shortcut: 'Ctrl+Y', action: () => s().redo(), enabled: future > 0 },
       { separator: true },
-      { label: 'Copy', shortcut: 'Ctrl+C', action: () => s().copySelection(), enabled: selection.length > 0 },
-      { label: 'Paste', shortcut: 'Ctrl+V', action: () => s().paste(), enabled: clipboard.length > 0 },
-      { label: 'Duplicate', shortcut: 'Ctrl+D', action: () => s().duplicateSelection(), enabled: selection.length > 0 },
-      { label: 'Delete', shortcut: 'Del', action: () => s().deleteSelection(), enabled: selection.length > 0 },
+      { label: t('Copy'), shortcut: 'Ctrl+C', action: () => s().copySelection(), enabled: selection.length > 0 },
+      { label: t('Paste'), shortcut: 'Ctrl+V', action: () => s().paste(), enabled: clipboard.length > 0 },
+      { label: t('Duplicate'), shortcut: 'Ctrl+D', action: () => s().duplicateSelection(), enabled: selection.length > 0 },
+      { label: t('Delete'), shortcut: 'Del', action: () => s().deleteSelection(), enabled: selection.length > 0 },
       { separator: true },
       {
-        label: 'Select All',
+        label: t('Select All'),
         shortcut: 'Ctrl+A',
         action: () => {
           const p = getActivePage(s());
@@ -81,34 +82,34 @@ export function TitleBar() {
         },
         enabled: hasProject,
       },
-      { label: 'Deselect', shortcut: 'Esc', action: () => s().clearSelection(), enabled: selection.length > 0 },
+      { label: t('Deselect'), shortcut: 'Esc', action: () => s().clearSelection(), enabled: selection.length > 0 },
     ],
-    View: [
-      { label: 'Left Sidebar', checked: leftOpen, shortcut: 'Ctrl+B', action: () => s().toggleLeft() },
-      { label: 'Right Sidebar', checked: rightOpen, shortcut: 'Ctrl+J', action: () => s().toggleRight() },
-      { label: 'Notes Panel', checked: notesOpen, shortcut: 'Ctrl+K', action: () => s().toggleNotes() },
+    [N_('View')]: [
+      { label: t('Left Sidebar'), checked: leftOpen, shortcut: 'Ctrl+B', action: () => s().toggleLeft() },
+      { label: t('Right Sidebar'), checked: rightOpen, shortcut: 'Ctrl+J', action: () => s().toggleRight() },
+      { label: t('Notes Panel'), checked: notesOpen, shortcut: 'Ctrl+K', action: () => s().toggleNotes() },
       { separator: true },
       {
-        label: 'Grid',
+        label: t('Grid'),
         checked: page?.mapView.showGrid ?? false,
         action: () => page && s().patchMapView({ showGrid: !page.mapView.showGrid }),
         enabled: !!page,
       },
       {
-        label: 'Coordinate Labels',
+        label: t('Coordinate Labels'),
         checked: page?.mapView.showCoordinates ?? false,
         action: () => page && s().patchMapView({ showCoordinates: !page.mapView.showCoordinates }),
         enabled: !!page,
       },
     ],
     // Everything not about the open document.
-    Settings: [
-      { label: 'Settings…', action: () => s().openModal('settings') },
+    [N_('Settings')]: [
+      { label: t('Settings…'), action: () => s().openModal('settings') },
       { separator: true },
-      { label: 'Map Manager…', action: () => s().openModal('maps') },
-      { label: 'Ship Database…', action: () => s().openModal('shipDb') },
+      { label: t('Map Manager…'), action: () => s().openModal('maps') },
+      { label: t('Ship Database…'), action: () => s().openModal('shipDb') },
       { separator: true },
-      { label: 'Keyboard Shortcuts', shortcut: 'F1', action: () => s().openModal('shortcuts') },
+      { label: t('Keyboard Shortcuts'), shortcut: 'F1', action: () => s().openModal('shortcuts') },
     ],
   };
 
@@ -129,7 +130,7 @@ export function TitleBar() {
               }}
               onMouseEnter={() => openMenu && setOpenMenu(name)}
             >
-              {name}
+              {t(name)}
             </button>
             {openMenu === name && (
               <div className="menu-pop">
@@ -154,7 +155,7 @@ export function TitleBar() {
                         )}
                         {entry.label}
                       </span>
-                      {entry.shortcut && <kbd>{entry.shortcut}</kbd>}
+                      {entry.shortcut && <kbd>{keyLabel(entry.shortcut)}</kbd>}
                     </button>
                   ),
                 )}
@@ -171,13 +172,13 @@ export function TitleBar() {
       </div>
 
       <div className="win-controls">
-        <button onClick={() => window.api.window.minimize()} title="Minimize">
+        <button onClick={() => window.api.window.minimize()} title={t('Minimize')}>
           <Minus size={14} />
         </button>
-        <button onClick={() => window.api.window.maximize()} title={maximized ? 'Restore' : 'Maximize'}>
+        <button onClick={() => window.api.window.maximize()} title={maximized ? t('Restore') : t('Maximize')}>
           {maximized ? <CopyIcon size={12} /> : <Square size={11} />}
         </button>
-        <button className="close" onClick={() => window.api.window.close()} title="Close">
+        <button className="close" onClick={() => window.api.window.close()} title={t('Close')}>
           <X size={14} />
         </button>
       </div>
@@ -199,10 +200,10 @@ function TitleCaption() {
   const timeline = useReplayStore((s) => s.timeline);
   const inReplay = useReplayStore((s) => s.mode) === 'replay';
 
-  if (!project) return <span className="faint">No project open</span>;
+  if (!project) return <span className="faint">{t('No project open')}</span>;
 
   if (inReplay && timeline) {
-    const map = timeline.header.map?.displayName ?? timeline.header.map?.name ?? 'Replay';
+    const map = timeline.header.map?.displayName ?? timeline.header.map?.name ?? t('Replay');
     // Seconds are noise in a title; the date and time already identify the
     // battle among an evening's worth of them.
     const when = (timeline.header.dateTime ?? '').replace(/:\d{2}$/, '');
@@ -218,8 +219,8 @@ function TitleCaption() {
     <>
       <span className="project-name">{project.name}</span>
       {page && <span>— {page.name}</span>}
-      {inReplay && <span className="faint">— no replay open</span>}
-      {dirty && <span className="dirty-dot" title="Unsaved changes" />}
+      {inReplay && <span className="faint">— {t('no replay open')}</span>}
+      {dirty && <span className="dirty-dot" title={t('Unsaved changes')} />}
     </>
   );
 }
@@ -241,17 +242,17 @@ function ModeSwitch() {
       <button
         className={mode === 'tactics' ? 'active' : ''}
         onClick={() => setMode('tactics')}
-        title="Plan on the map"
+        title={t('Plan on the map')}
       >
-        <MapIcon size={14} /> Tactics
+        <MapIcon size={14} /> {t('Tactics')}
       </button>
       <button
         className={mode === 'replay' ? 'active' : ''}
         onClick={() => setMode('replay')}
         disabled={!hasProject}
-        title={hasProject ? 'Watch a replay on the map' : 'Open a project first'}
+        title={hasProject ? t('Watch a replay on the map') : t('Open a project first')}
       >
-        <Clapperboard size={14} /> Replay
+        <Clapperboard size={14} /> {t('Replay')}
       </button>
     </div>
   );

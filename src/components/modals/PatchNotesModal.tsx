@@ -3,6 +3,7 @@ import { Sparkles } from 'lucide-react';
 import { useStore, type ModalId } from '@/state/store';
 import type { PatchNotesArg } from '@/lib/patchNotes';
 import { Modal } from '../common/ui';
+import { t } from '@/i18n';
 
 /**
  * The patch notes, either by themselves on the first launch after an update or
@@ -23,7 +24,7 @@ export function PatchNotesModal() {
   const mute = () => {
     const s = useStore.getState();
     s.patchSettings({ showPatchNotes: false });
-    s.toast('Patch notes will no longer open after updates. Turn them back on in Settings → Updates.');
+    s.toast(t('Patch notes will no longer open after updates. Turn them back on in Settings → Updates.'));
     close();
   };
 
@@ -33,26 +34,26 @@ export function PatchNotesModal() {
 
   return (
     <Modal
-      title={afterUpdate && latest ? `What's new in ${latest}` : 'Patch notes'}
-      subtitle={afterUpdate && versions.length > 1 ? `${versions.length} updates since you last looked` : undefined}
+      title={afterUpdate && latest ? t("What's new in {version}", { version: latest }) : t('Patch notes')}
+      subtitle={afterUpdate && versions.length > 1 ? t('{n} updates since you last looked', { n: versions.length }) : undefined}
       icon={afterUpdate ? <Sparkles size={13} style={{ color: 'var(--accent)', flex: 'none' }} /> : undefined}
       onClose={close}
       footer={
         <>
           {afterUpdate && (
-            <button className="btn sm ghost patch-notes-mute" onClick={mute} title="Turn back on in Settings → Updates">
-              Don't show again
+            <button className="btn sm ghost patch-notes-mute" onClick={mute} title={t('Turn back on in Settings → Updates')}>
+              {t('Don\'t show again')}
             </button>
           )}
           <span className="spacer" />
           <button className="btn primary" onClick={close}>
-            Close
+            {t('Close')}
           </button>
         </>
       }
     >
       {versions.length === 0 ? (
-        <div className="faint">No patch notes in this build.</div>
+        <div className="faint">{t('No patch notes in this build.')}</div>
       ) : (
         <div className="patch-notes">
           {versions.map((v) => (
@@ -60,7 +61,7 @@ export function PatchNotesModal() {
               {headed && (
                 <h3>
                   {v.version}
-                  {v.version === latest && afterUpdate && <span className="patch-notes-current">installed</span>}
+                  {v.version === latest && afterUpdate && <span className="patch-notes-current">{t('installed')}</span>}
                 </h3>
               )}
               {v.sections.map((section) => (

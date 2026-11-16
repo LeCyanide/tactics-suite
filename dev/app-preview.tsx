@@ -46,12 +46,14 @@ async function dataUrl(path: string, mime: string): Promise<string> {
 /**
  * `?version=2.6.0&seen=2.5.0` plays the first launch after an update from
  * `seen` to `version`, so the patch notes pop-up opens. `&theme=light` picks
- * a theme. `&noreadout` starts with the cursor position readout hidden.
+ * a theme, `&lang=de` (or es, fr) a language. `&noreadout` starts with the cursor
+ * position readout hidden.
  */
 const query = new URLSearchParams(location.search);
 
 const settings: Record<string, unknown> = {
   theme: query.get('theme') ?? 'dark',
+  language: query.get('lang') ?? 'en',
   ...(query.has('noreadout') ? { showCursorPosition: false } : {}),
   ...(query.has('seen') ? { patchNotesSeen: query.get('seen') } : {}),
   // Preset so the sidebar does not open on the "choose your game folder" path;

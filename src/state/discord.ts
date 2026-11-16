@@ -1,6 +1,7 @@
 import { useEffect, useSyncExternalStore } from 'react';
 import type { DiscordBot, DiscordChannel, DiscordGuild, DiscordStatus } from '../../electron/preload';
 import { useStore } from './store';
+import { t } from '@/i18n/core';
 
 export type { DiscordBot, DiscordChannel, DiscordGuild, DiscordStatus };
 
@@ -55,7 +56,7 @@ export async function connectDiscord(): Promise<void> {
   try {
     const linked = await window.api.discord.link();
     publish(linked, false);
-    if (linked.status === 'linked') s.toast(`Connected to Discord as ${linked.user.name}`, 'success');
+    if (linked.status === 'linked') s.toast(t('Connected to Discord as {name}', { name: linked.user.name }), 'success');
   } catch (err) {
     publish(current, false);
     if (!cancelled) s.toast((err as Error).message, 'error');

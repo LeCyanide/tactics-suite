@@ -7,6 +7,7 @@ import { useStore } from '@/state/store';
 import { shipRangeKm } from '@/state/store';
 import { CANVAS_THEMES, type CanvasTheme } from '@/state/theme';
 import { withAlpha } from '@/lib/util';
+import { N_, t, useLanguage } from '@/i18n';
 
 // Ships keep the dark theme's ink on every theme: light outlines wash out icons and names over the map.
 const SHIP_INK = CANVAS_THEMES.dark;
@@ -20,13 +21,13 @@ const SHIP_INK = CANVAS_THEMES.dark;
 const bubbleDrag = () => {};
 
 const RANGE_LABEL: Record<string, string> = {
-  detection: 'Detection',
-  radar: 'Radar',
-  hydro: 'Hydro',
-  mainBattery: 'Main battery',
-  secondary: 'Secondary',
-  torpedo: 'Torpedo',
-  airstrike: 'Airstrike',
+  detection: N_('Detection'),
+  radar: N_('Radar'),
+  hydro: N_('Hydro'),
+  mainBattery: N_('Main battery'),
+  secondary: N_('Secondary'),
+  torpedo: N_('Torpedo'),
+  airstrike: N_('Airstrike'),
 };
 
 /**
@@ -235,6 +236,7 @@ interface ShipRangesProps {
  * characteristics cannot leak into an exported image.
  */
 export const ShipRanges = memo(function ShipRanges({ obj, ship, flags, inv, theme }: ShipRangesProps) {
+  useLanguage();
   if (!obj.visible) return null;
 
   const rings = RANGE_KEYS.filter((key) => flags[key]).map((key) => {
@@ -267,7 +269,7 @@ export const ShipRanges = memo(function ShipRanges({ obj, ship, flags, inv, them
             {style.showLabel && (
               <Group x={0} y={-radius} scaleX={inv} scaleY={inv}>
                 <Text
-                  text={`${RANGE_LABEL[key] ?? key} ${km.toFixed(1)} km`}
+                  text={`${RANGE_LABEL[key] ? t(RANGE_LABEL[key]) : key} ${km.toFixed(1)} km`}
                   x={-70}
                   y={-15}
                   width={140}

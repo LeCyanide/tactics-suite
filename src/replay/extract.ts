@@ -19,6 +19,7 @@ import {
 } from '@/types/model';
 import { extractPaths, lastIndexAt, type PathPoint } from './paths';
 import type { ReplayTimeline } from './timeline';
+import { t } from '@/i18n/core';
 
 export interface ExtractInput {
   timeline: ReplayTimeline;
@@ -51,7 +52,7 @@ export function extractPage(input: ExtractInput): ExtractResult {
 
   const player = timeline.header.player?.name;
   const self = data.paths.find((p) => p.playerName === player) ?? null;
-  const mapName = map?.name ?? timeline.header.map?.displayName ?? 'Replay';
+  const mapName = map?.name ?? timeline.header.map?.displayName ?? t('Replay');
   const page = createPage(self?.shipName ? `${mapName} – ${self.shipName}` : mapName, map?.id ?? null);
   const scenario = timeline.header.mode?.scenario;
   page.capLayoutId =
@@ -64,7 +65,7 @@ export function extractPage(input: ExtractInput): ExtractResult {
     const last = lastIndexAt(path.points, until);
     if (last < 0) continue; // not seen yet at this moment
     const end = path.points[last]!;
-    const name = path.shipName ?? 'Unknown ship';
+    const name = path.shipName ?? t('Unknown ship');
     const shipClass = classForSpecies(path.species);
     const team = path.ally ? allyTeam : enemyTeam;
     const sunk = path.diedAt !== null && path.diedAt <= until;
@@ -82,17 +83,17 @@ export function extractPage(input: ExtractInput): ExtractResult {
     obj.rotation = ((Math.round(yawToDegrees(end.yaw)) % 360) + 360) % 360;
     if (sunk) {
       obj.iconColor = SUNK_COLOR;
-      obj.note = `sunk ${clock(path.diedAt!)}`;
+      obj.note = t('sunk {time}', { time: clock(path.diedAt!) });
     } else if (unspotted) {
       obj.opacity = UNSPOTTED_OPACITY;
-      obj.note = `last seen ${clock(end.t)}`;
+      obj.note = t('last seen {time}', { time: clock(end.t) });
     }
 
     page.objects.push(obj);
   }
 
-  const lines = [`Extracted from ${input.replayName} at ${clock(until)}.`];
-  if (unmatched.size) lines.push('', `Not in the ship database: ${[...unmatched].sort().join(', ')}.`);
+  const lines = [t('Extracted from {replay} at {time}.', { replay: input.replayName, time: clock(until) })];
+  if (unmatched.size) lines.push('', t('Not in the ship database: {ships}.', { ships: [...unmatched].sort().join(', ') }));
   page.notes = lines.join('\n');
 
   return { page, unmatched: [...unmatched] };

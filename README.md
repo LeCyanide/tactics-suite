@@ -53,6 +53,16 @@ set WOWSPLAN_GAME_DIR=C:\Games\World_of_Warships
 set WOWSPLAN_REPLAY=%WOWSPLAN_GAME_DIR%\replays\<version>\<file>.wowsreplay
 ```
 
+The interface is translated into German, Spanish and French (Settings →
+Appearance → Language). English is the source: `t('Save')` shows the English
+text when no translation exists, and `src/i18n/{de,es,fr}.ts` map that text to
+each language. After adding or changing a string, check that every language
+still covers it:
+
+```bash
+npm run i18n-check
+```
+
 The replay viewer's own renderer can be driven in a plain browser, without
 Electron, against a stubbed `window.api`:
 

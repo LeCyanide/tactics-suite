@@ -37,6 +37,7 @@ import {
 import { clamp, clone, debounce, foldForSearch, uid } from '@/lib/util';
 import { dissolveFolder, openTab, placeFolder, placePage, settlePages, settleTabs, stepFolder, stepPage } from '@/lib/pageTree';
 import { applyTheme } from './theme';
+import { isLanguage, N_, setActiveLanguage, t, tn } from '@/i18n/core';
 import { forgetAsset } from './assets';
 import { BUNDLED_PATCH_NOTES, onLaunch, type PatchNotesArg } from '@/lib/patchNotes';
 import {
@@ -77,17 +78,17 @@ export type ShapeTool = (typeof SHAPE_TOOLS)[number];
 export type ArrowTool = (typeof ARROW_TOOLS)[number];
 
 export const SHAPE_TOOL_LABELS: Record<ShapeTool, string> = {
-  circle: 'Circle',
-  rect: 'Rectangle',
-  roundRect: 'Rounded',
-  polygon: 'Polygon',
+  circle: N_('Circle'),
+  rect: N_('Rectangle'),
+  roundRect: N_('Rounded'),
+  polygon: N_('Polygon'),
 };
 
 export const ARROW_TOOL_LABELS: Record<ArrowTool, string> = {
-  arrow: 'Arrow',
-  line: 'Line',
-  doubleArrow: 'Double',
-  curvedArrow: 'Curved',
+  arrow: N_('Arrow'),
+  line: N_('Line'),
+  doubleArrow: N_('Double'),
+  curvedArrow: N_('Curved'),
 };
 
 export interface Camera {
@@ -505,7 +506,9 @@ export const useStore = create<Store>((set, get) => {
       delete (settings as unknown as Record<string, unknown>).pings;
       delete (settings as unknown as Record<string, unknown>).discordUrl;
       delete (settings as unknown as Record<string, unknown>).discordToken;
+      if (!isLanguage(settings.language)) settings.language = 'en';
       applyTheme(settings.theme);
+      setActiveLanguage(settings.language);
 
       set({
         settings,
@@ -556,6 +559,7 @@ export const useStore = create<Store>((set, get) => {
 
     patchSettings(patch) {
       if (patch.theme) applyTheme(patch.theme);
+      if (patch.language) setActiveLanguage(patch.language);
       set((s) => ({ settings: { ...s.settings, ...patch } }));
       persistSettings();
     },
@@ -567,7 +571,7 @@ export const useStore = create<Store>((set, get) => {
     },
 
     async newProject(name) {
-      const project = createProject(name || 'Untitled project');
+      const project = createProject(name || t('Untitled project'));
       await window.api.projects.save(project);
       set({
         project,
@@ -582,19 +586,19 @@ export const useStore = create<Store>((set, get) => {
       get().patchSettings({ lastProjectId: project.id });
       get().requestFit();
       await get().refreshProjects();
-      get().toast(`Created "${project.name}"`, 'success');
+      get().toast(t('Created "{name}"', { name: project.name }), 'success');
     },
 
     async openProject(id) {
       const doc = (await window.api.projects.load(id)) as Project | null;
       if (!doc) {
-        get().toast('Project could not be loaded', 'error');
+        get().toast(t('Project could not be loaded'), 'error');
         return;
       }
       // Normalise the document: fill missing fields, drop unknown ones.
       doc.pages = (doc.pages ?? []).map((p) => {
         const page = {
-          ...createPage(p.name ?? 'Page'),
+          ...createPage(p.name ?? t('Page')),
           ...p,
           // Page defaults hold only non-range flags; ranges are per ship.
           display: { ...clone(DEFAULT_CHARACTERISTICS), ...pickPageFlags(p.display) },
@@ -625,7 +629,7 @@ export const useStore = create<Store>((set, get) => {
         });
         return page;
       });
-      if (!doc.pages.length) doc.pages = [createPage('Default')];
+      if (!doc.pages.length) doc.pages = [createPage(t('Default'))];
       if (!doc.activePageId || !doc.pages.some((p) => p.id === doc.activePageId)) {
         doc.activePageId = doc.pages[0].id;
       }
@@ -668,7 +672,7 @@ export const useStore = create<Store>((set, get) => {
       autosave.cancel();
       await persist({ backup: opts.backup ?? true });
       await get().refreshProjects();
-      if (!opts.silent) get().toast('Project saved', 'success');
+      if (!opts.silent) get().toast(t('Project saved'), 'success');
     },
 
     async saveProjectAs(name) {
@@ -679,7 +683,7 @@ export const useStore = create<Store>((set, get) => {
       set({ project: copy, blueprintSpawn: null, past: [], future: [], dirty: false, lastSavedAt: Date.now() });
       get().patchSettings({ lastProjectId: copy.id });
       await get().refreshProjects();
-      get().toast(`Saved as "${name}"`, 'success');
+      get().toast(t('Saved as "{name}"', { name }), 'success');
     },
 
     async duplicateProject(id) {
@@ -688,7 +692,7 @@ export const useStore = create<Store>((set, get) => {
       const copy: Project = { ...doc, id: uid('prj-'), name: `${doc.name} (copy)`, createdAt: Date.now(), updatedAt: Date.now() };
       await window.api.projects.save(copy);
       await get().refreshProjects();
-      get().toast(`Duplicated "${doc.name}"`, 'success');
+      get().toast(t('Duplicated "{name}"', { name: doc.name }), 'success');
     },
 
     async renameProject(id, name) {
@@ -710,10 +714,10 @@ export const useStore = create<Store>((set, get) => {
 
     async deleteProject(id) {
       const ok = await confirmDialog({
-        title: 'Delete project',
-        message: 'Delete this project permanently?',
-        detail: 'The project and its backups are removed from local storage. This cannot be undone.',
-        confirmLabel: 'Delete',
+        title: t('Delete project'),
+        message: t('Delete this project permanently?'),
+        detail: t('The project and its backups are removed from local storage. This cannot be undone.'),
+        confirmLabel: t('Delete'),
         danger: true,
       });
       if (!ok) return;
@@ -723,7 +727,7 @@ export const useStore = create<Store>((set, get) => {
         get().patchSettings({ lastProjectId: null });
       }
       await get().refreshProjects();
-      get().toast('Project deleted');
+      get().toast(t('Project deleted'));
     },
 
     async importProject() {
@@ -738,9 +742,9 @@ export const useStore = create<Store>((set, get) => {
         set({ ships: ships as Ship[], icons: icons as ShipIconAsset[], maps: maps as GameMap[] });
         await get().refreshProjects();
         await get().openProject(doc.id);
-        get().toast(`Imported "${doc.name}"`, 'success');
+        get().toast(t('Imported "{name}"', { name: doc.name }), 'success');
       } catch (err) {
-        get().toast(`Import failed: ${(err as Error).message}`, 'error');
+        get().toast(t('Import failed: {error}', { error: (err as Error).message }), 'error');
       }
     },
 
@@ -749,9 +753,9 @@ export const useStore = create<Store>((set, get) => {
       if (!project) return;
       try {
         const file = await window.api.projects.exportFile(project);
-        if (file) get().toast(`Exported to ${file}`, 'success');
+        if (file) get().toast(t('Exported to {file}', { file }), 'success');
       } catch (err) {
-        get().toast(`Export failed: ${(err as Error).message}`, 'error');
+        get().toast(t('Export failed: {error}', { error: (err as Error).message }), 'error');
       }
     },
 
@@ -818,7 +822,7 @@ export const useStore = create<Store>((set, get) => {
     addPage(name, folderId) {
       const { project } = get();
       if (!project) return;
-      const page = createPage(name ?? 'New page');
+      const page = createPage(name ?? t('New page'));
       // A new page inherits the map of the current one: pages are usually
       // successive phases of the same battle. For the same reason it joins
       // that page's folder unless told where to go.
@@ -885,15 +889,15 @@ export const useStore = create<Store>((set, get) => {
     async deletePage(id) {
       const { project } = get();
       if (!project || project.pages.length <= 1) {
-        get().toast('A project needs at least one page', 'error');
+        get().toast(t('A project needs at least one page'), 'error');
         return;
       }
       const page = project.pages.find((p) => p.id === id);
       if (!page) return;
       const ok = await confirmDialog({
-        title: 'Delete page',
-        message: `Delete "${page.name}"?`,
-        confirmLabel: 'Delete',
+        title: t('Delete page'),
+        message: t('Delete "{name}"?', { name: page.name }),
+        confirmLabel: t('Delete'),
         danger: true,
       });
       if (!ok) return;
@@ -926,7 +930,7 @@ export const useStore = create<Store>((set, get) => {
       if (!get().project) return null;
       const id = uid('folder-');
       commit((draft) => {
-        draft.pageFolders.push({ id, name: 'New folder' });
+        draft.pageFolders.push({ id, name: t('New folder') });
         draft.pageLayout.push(id);
       });
       return id;
@@ -1055,7 +1059,7 @@ export const useStore = create<Store>((set, get) => {
       const { selection } = get();
       const items = page.objects.filter((o) => selection.includes(o.id)).map(clone);
       set({ clipboard: items });
-      if (items.length) get().toast(`${items.length} object${items.length > 1 ? 's' : ''} copied`);
+      if (items.length) get().toast(tn(items.length, '{n} object copied', '{n} objects copied'));
     },
 
     paste(at) {
@@ -1165,7 +1169,7 @@ export const useStore = create<Store>((set, get) => {
     addLayer(name) {
       const id = uid('layer-');
       commitPage((page) => {
-        page.layers.push({ id, name: name ?? `Layer ${page.layers.length + 1}`, visible: true, locked: false, opacity: 1 });
+        page.layers.push({ id, name: name ?? t('Layer {n}', { n: page.layers.length + 1 }), visible: true, locked: false, opacity: 1 });
       });
       set({ activeLayerId: id });
     },
@@ -1212,7 +1216,7 @@ export const useStore = create<Store>((set, get) => {
       commit((draft) => {
         draft.teams.push({
           id: uid('team-'),
-          name: `Team ${draft.teams.length + 1}`,
+          name: t('Team {n}', { n: draft.teams.length + 1 }),
           color: palette[draft.teams.length % palette.length],
           visible: true,
           locked: false,
@@ -1349,7 +1353,7 @@ export const useStore = create<Store>((set, get) => {
         created.push(stored);
       }
       set({ maps: (await window.api.maps.list()) as GameMap[] });
-      get().toast(`Imported ${created.length} map${created.length > 1 ? 's' : ''}`, 'success');
+      get().toast(tn(created.length, 'Imported {n} map', 'Imported {n} maps'), 'success');
       // First map in an empty project is applied straight away.
       const page = getActivePage(get());
       if (page && !page.mapId && created[0]) get().setPageMap(created[0].id);
@@ -1362,15 +1366,15 @@ export const useStore = create<Store>((set, get) => {
 
     async deleteMap(id) {
       const ok = await confirmDialog({
-        title: 'Delete map',
-        message: 'Delete this map and its image?',
-        detail: 'Pages using it will keep their objects but lose the background image.',
-        confirmLabel: 'Delete',
+        title: t('Delete map'),
+        message: t('Delete this map and its image?'),
+        detail: t('Pages using it will keep their objects but lose the background image.'),
+        confirmLabel: t('Delete'),
         danger: true,
       });
       if (!ok) return;
       set({ maps: (await window.api.maps.remove(id)) as GameMap[] });
-      get().toast('Map deleted');
+      get().toast(t('Map deleted'));
     },
 
     async duplicateMap(id) {
@@ -1378,7 +1382,7 @@ export const useStore = create<Store>((set, get) => {
       if (!src) return;
       const read = await window.api.maps.dataUrl(src.file, src.mime);
       if (!('dataUrl' in read)) {
-        get().toast(`Could not read the map image — ${read.error}`);
+        get().toast(t('Could not read the map image — {error}', { error: read.error }));
         return;
       }
       const dataUrl = read.dataUrl;
@@ -1404,7 +1408,7 @@ export const useStore = create<Store>((set, get) => {
         await window.api.maps.update({ ...updated, pixelWidth: size.width, pixelHeight: size.height, updatedAt: Date.now() });
       }
       set({ maps: (await window.api.maps.list()) as GameMap[] });
-      get().toast('Map image replaced', 'success');
+      get().toast(t('Map image replaced'), 'success');
     },
 
     /* -------------------------- library: ships ------------------------- */
@@ -1415,7 +1419,7 @@ export const useStore = create<Store>((set, get) => {
       try {
         const { ships: parsed, warnings } = parseShipData(picked.text, picked.ext);
         if (!parsed.length) {
-          get().toast('No ships found in that file', 'error');
+          get().toast(t('No ships found in that file'), 'error');
           return;
         }
         // Merge on name+tier so re-importing an updated sheet updates in place.
@@ -1440,16 +1444,20 @@ export const useStore = create<Store>((set, get) => {
         const merged = [...byKey.values()].sort((a, b) => a.name.localeCompare(b.name));
         await window.api.ships.saveAll(merged);
         set({ ships: merged });
-        get().toast(`${added} added, ${updated} updated${warnings.length ? ` (${warnings.length} warnings)` : ''}`, 'success');
+        get().toast(
+          t('{added} added, {updated} updated', { added, updated }) +
+            (warnings.length ? ` (${tn(warnings.length, '{n} warning', '{n} warnings')})` : ''),
+          'success',
+        );
       } catch (err) {
-        get().toast(`Could not parse file: ${(err as Error).message}`, 'error');
+        get().toast(t('Could not parse file: {error}', { error: (err as Error).message }), 'error');
       }
     },
 
     async exportShipData(format) {
       const text = serializeShips(get().ships, format);
       const file = await window.api.ships.exportData(text, `.${format}`);
-      if (file) get().toast(`Ship database exported`, 'success');
+      if (file) get().toast(t('Ship database exported'), 'success');
     },
 
     async upsertShip(ship) {
@@ -1493,7 +1501,7 @@ export const useStore = create<Store>((set, get) => {
       const merged = [...existing, ...additions].sort((a, b) => a.name.localeCompare(b.name));
       await window.api.ships.saveAll(merged);
       set({ ships: merged });
-      get().toast(`Loaded ${additions.length} sample ships`, 'success');
+      get().toast(t('Loaded {n} sample ships', { n: additions.length }), 'success');
     },
 
     async importIcons() {
@@ -1523,7 +1531,11 @@ export const useStore = create<Store>((set, get) => {
         await window.api.ships.saveAll(ships);
         set({ ships });
       }
-      get().toast(`Imported ${picked.length} icon${picked.length > 1 ? 's' : ''}${matched ? `, ${matched} auto-matched` : ''}`, 'success');
+      get().toast(
+        tn(picked.length, 'Imported {n} icon', 'Imported {n} icons') +
+          (matched ? `, ${t('{n} auto-matched', { n: matched })}` : ''),
+        'success',
+      );
     },
 
     async deleteIcon(id) {

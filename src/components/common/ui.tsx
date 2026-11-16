@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { keyLabel, t } from '@/i18n';
 
 /* ------------------------------------------------------------------ */
 /* Tooltip                                                             */
@@ -56,7 +57,7 @@ export function Tip({ label, shortcut, side = 'left', children }: TipProps) {
       {pos && (
         <div className="tip" style={{ left: pos.x, top: pos.y, transform }}>
           <span>{label}</span>
-          {shortcut && <kbd>{shortcut}</kbd>}
+          {shortcut && <kbd>{keyLabel(shortcut)}</kbd>}
         </div>
       )}
     </>
@@ -155,14 +156,14 @@ export function Check({
       {overridden && (
         <span
           className="badge-override"
-          title="Overrides the page default — click to clear"
+          title={t('Overrides the page default — click to clear')}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             onClearOverride?.();
           }}
         >
-          OVR
+          {t('OVR')}
         </span>
       )}
     </label>
@@ -292,7 +293,7 @@ export function InlineEdit({
 
   if (!editing) {
     return (
-      <span className={className} onDoubleClick={() => setEditing(true)} title="Double-click to rename">
+      <span className={className} onDoubleClick={() => setEditing(true)} title={t('Double-click to rename')}>
         {value}
       </span>
     );
@@ -368,7 +369,7 @@ export function Modal({
           {subtitle && <span className="sub">{subtitle}</span>}
           <span className="spacer" />
           {headerExtra}
-          <button className="icon-btn" onClick={onClose} title="Close">
+          <button className="icon-btn" onClick={onClose} title={t('Close')}>
             ✕
           </button>
         </div>

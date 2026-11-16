@@ -21,6 +21,7 @@ import {
 } from '@/state/discord';
 import type { ThemeName } from '@/types/model';
 import { BUNDLED_PATCH_NOTES, type PatchNotesArg } from '@/lib/patchNotes';
+import { keyLabel, LANGUAGES, t, type Language } from '@/i18n';
 
 /* ================================================================== */
 /* Image export                                                        */
@@ -42,31 +43,31 @@ export function ExportModal() {
   const patch = (p: Partial<ExportOptions>) => setOpts((o) => ({ ...o, ...p }));
   const channel = findChannel(discord, channelId);
   const shareTip = channel
-    ? `Post this page in #${channel.name}`
+    ? t('Post this page in #{channel}', { channel: channel.name })
     : discord?.status === 'linked'
-      ? (discord.error ?? 'Pick a channel in Settings first')
+      ? (discord.error ?? t('Pick a channel in Settings first'))
       : discord?.status === 'unavailable'
-        ? 'This build has no clan bot to post through'
-        : 'Connect Discord in Settings first';
+        ? t('This build has no clan bot to post through')
+        : t('Connect Discord in Settings first');
 
   const run = async (toClipboard: boolean) => {
     setBusy(true);
     try {
       const url = await canvasApi()?.exportImage(opts);
       if (!url) {
-        s().toast('Export failed', 'error');
+        s().toast(t('Export failed'), 'error');
         return;
       }
       if (toClipboard) {
         await window.api.exporter.toClipboard(url);
-        s().toast('Image copied to clipboard', 'success');
+        s().toast(t('Image copied to clipboard'), 'success');
       } else {
         const name = path.join(' - ').replace(/[\\/:*?"<>|]/g, '_');
         const file = await window.api.exporter.image(url, name, opts.format === 'jpg' ? '.jpg' : '.png');
-        if (file) s().toast('Image exported', 'success');
+        if (file) s().toast(t('Image exported'), 'success');
       }
     } catch (err) {
-      s().toast(`Export failed: ${(err as Error).message}`, 'error');
+      s().toast(t('Export failed: {error}', { error: (err as Error).message }), 'error');
     } finally {
       setBusy(false);
     }
@@ -83,7 +84,7 @@ export function ExportModal() {
       // file nobody can load on a phone.
       const image = await canvasApi()?.exportImage({ ...opts, format: 'png', width: Math.min(opts.width, 2560) });
       if (!image) {
-        s().toast('Export failed', 'error');
+        s().toast(t('Export failed'), 'error');
         return;
       }
 
@@ -94,9 +95,9 @@ export function ExportModal() {
         image,
       });
 
-      s().toast(url ? 'Posted to Discord' : 'Posted', 'success');
+      s().toast(url ? t('Posted to Discord') : t('Posted'), 'success');
     } catch (err) {
-      s().toast(`Share failed: ${(err as Error).message}`, 'error');
+      s().toast(t('Share failed: {error}', { error: (err as Error).message }), 'error');
       // A refusal may mean the account was unlinked or lost the channel.
       void refreshDiscord();
     } finally {
@@ -110,52 +111,52 @@ export function ExportModal() {
 
   return (
     <Modal
-      title="Export Image"
+      title={t('Export Image')}
       subtitle={path.join(' — ')}
       onClose={() => s().closeModal()}
       footer={
         <>
           <button className="btn primary" disabled={busy} onClick={() => void run(false)}>
-            <ImageDown size={13} /> {busy ? 'Rendering…' : 'Export…'}
+            <ImageDown size={13} /> {busy ? t('Rendering…') : t('Export…')}
           </button>
           <button className="btn" disabled={busy} onClick={() => void run(true)}>
-            <Clipboard size={13} /> Copy to clipboard
+            <Clipboard size={13} /> {t('Copy to clipboard')}
           </button>
           <Tip label={shareTip} side="top">
             <button className="btn" disabled={busy || !channel} onClick={() => void share()}>
-              <Send size={13} /> Share to Discord <span className="beta-tag">Beta</span>
+              <Send size={13} /> {t('Share to Discord')} <span className="beta-tag">{t('Beta')}</span>
             </button>
           </Tip>
           <span className="spacer" />
           <button className="btn ghost" onClick={() => s().closeModal()}>
-            Cancel
+            {t('Cancel')}
           </button>
         </>
       }
     >
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
         <div>
-          <SectionLabel>Include</SectionLabel>
-          {cat('background', 'Background map')}
-          {cat('grid', 'Grid & coordinates')}
-          {cat('caps', 'Capture zones')}
-          {cat('ships', 'Ships')}
-          {cat('ranges', 'Ship ranges')}
-          {cat('annotations', 'Annotations')}
+          <SectionLabel>{t('Include')}</SectionLabel>
+          {cat('background', t('Background map'))}
+          {cat('grid', t('Grid & coordinates'))}
+          {cat('caps', t('Capture zones'))}
+          {cat('ships', t('Ships'))}
+          {cat('ranges', t('Ship ranges'))}
+          {cat('annotations', t('Annotations'))}
           <div className="faint" style={{ fontSize: 11, marginTop: 8, lineHeight: 1.5 }}>
-            Hidden layers, hidden teams and switched-off ranges are left out, as on the map.
+            {t('Hidden layers, hidden teams and switched-off ranges are left out, as on the map.')}
           </div>
         </div>
 
         <div>
-          <SectionLabel>Output</SectionLabel>
-          <Field label="Format">
+          <SectionLabel>{t('Output')}</SectionLabel>
+          <Field label={t('Format')}>
             <select value={opts.format} onChange={(e) => patch({ format: e.target.value as 'png' | 'jpg' })}>
-              <option value="png">PNG (lossless, transparent)</option>
-              <option value="jpg">JPG (smaller)</option>
+              <option value="png">{t('PNG (lossless, transparent)')}</option>
+              <option value="jpg">{t('JPG (smaller)')}</option>
             </select>
           </Field>
-          <Field label="Width">
+          <Field label={t('Width')}>
             <select value={opts.width} onChange={(e) => patch({ width: parseInt(e.target.value, 10) })}>
               {RESOLUTIONS.map((r) => (
                 <option key={r} value={r}>
@@ -165,12 +166,12 @@ export function ExportModal() {
             </select>
           </Field>
           {opts.format === 'jpg' && (
-            <Field label="Quality">
+            <Field label={t('Quality')}>
               <Slider value={opts.quality} min={0.4} max={1} step={0.02} onChange={(v) => patch({ quality: v })} />
             </Field>
           )}
           <div className="faint mono" style={{ fontSize: 11, marginTop: 10 }}>
-            Approx. {opts.width} × {Math.round((opts.width * (canvasApi()?.worldSize().height ?? 1)) / (canvasApi()?.worldSize().width ?? 1))} px
+            {t('Approx.')} {opts.width} × {Math.round((opts.width * (canvasApi()?.worldSize().height ?? 1)) / (canvasApi()?.worldSize().width ?? 1))} px
           </div>
         </div>
       </div>
@@ -194,30 +195,42 @@ export function SettingsModal() {
   }, []);
 
   return (
-    <Modal title="Settings" onClose={() => s().closeModal()} footer={
+    <Modal title={t('Settings')} onClose={() => s().closeModal()} footer={
       <>
         <span className="spacer" />
         <button className="btn ghost" onClick={() => s().closeModal()}>
-          Close
+          {t('Close')}
         </button>
       </>
     }>
-      <SectionLabel>Appearance</SectionLabel>
-      <Field label="Theme">
+      <SectionLabel>{t('Appearance')}</SectionLabel>
+      <Field label={t('Language')}>
+        <select
+          value={settings.language}
+          onChange={(e) => s().patchSettings({ language: e.target.value as Language })}
+        >
+          {LANGUAGES.map((l) => (
+            <option key={l.id} value={l.id}>
+              {l.name}
+            </option>
+          ))}
+        </select>
+      </Field>
+      <Field label={t('Theme')}>
         <select
           value={settings.theme}
           onChange={(e) => s().patchSettings({ theme: e.target.value as ThemeName })}
         >
-          <option value="dark">Standard (Dark)</option>
-          <option value="light">Standard (Light)</option>
-          <option value="dusk">Dusk</option>
-          <option value="aurora">Aurora</option>
-          <option value="midnight">Midnight</option>
-          <option value="nocturne">Nocturne</option>
-          <option value="dawn">Dawn</option>
+          <option value="dark">{t('Standard (Dark)')}</option>
+          <option value="light">{t('Standard (Light)')}</option>
+          <option value="dusk">{t('Dusk')}</option>
+          <option value="aurora">{t('Aurora')}</option>
+          <option value="midnight">{t('Midnight')}</option>
+          <option value="nocturne">{t('Nocturne')}</option>
+          <option value="dawn">{t('Dawn')}</option>
         </select>
       </Field>
-      <Field label="Ship icon scale">
+      <Field label={t('Ship icon scale')}>
         <Slider
           value={settings.shipIconScale}
           min={0.5}
@@ -228,8 +241,8 @@ export function SettingsModal() {
         />
         <button
           className="btn sm ghost"
-          title="Reset to 1×"
-          aria-label="Reset ship icon scale"
+          title={t('Reset to 1×')}
+          aria-label={t('Reset ship icon scale')}
           disabled={settings.shipIconScale === 1}
           onClick={() => s().patchSettings({ shipIconScale: 1 })}
         >
@@ -237,46 +250,46 @@ export function SettingsModal() {
         </button>
       </Field>
       <Check
-        label="Show the cursor position in the map's corner"
+        label={t("Show the cursor position in the map's corner")}
         checked={settings.showCursorPosition}
         onChange={(v) => s().patchSettings({ showCursorPosition: v })}
       />
 
       <SectionLabel>
-        Share to Discord <span className="beta-tag" title="Still being tested: it may change, and may not always work">Beta</span>
+        {t('Share to Discord')} <span className="beta-tag" title={t('Still being tested: it may change, and may not always work')}>{t('Beta')}</span>
       </SectionLabel>
       <BotAddress />
       <DiscordSection />
 
-      <SectionLabel>Saving</SectionLabel>
-      <Check label="Autosave while editing" checked={settings.autosave} onChange={(v) => s().patchSettings({ autosave: v })} />
+      <SectionLabel>{t('Saving')}</SectionLabel>
+      <Check label={t('Autosave while editing')} checked={settings.autosave} onChange={(v) => s().patchSettings({ autosave: v })} />
       <Check
-        label="Write a backup on every manual save"
+        label={t('Write a backup on every manual save')}
         checked={settings.backupOnSave}
         onChange={(v) => s().patchSettings({ backupOnSave: v })}
       />
-      <Field label="Keep">
+      <Field label={t('Keep')}>
         <NumInput
           value={settings.maxBackupsPerProject}
           min={1}
           max={100}
           step={1}
-          suffix="backups"
+          suffix={t('backups')}
           width={130}
           onChange={(v) => s().patchSettings({ maxBackupsPerProject: Math.round(v) })}
         />
       </Field>
 
-      <SectionLabel>Local storage</SectionLabel>
+      <SectionLabel>{t('Local storage')}</SectionLabel>
       <div className="mono faint" style={{ fontSize: 11, wordBreak: 'break-all', marginBottom: 8 }}>
         {info?.storageRoot ?? '…'}
       </div>
       <table className="table">
         <thead>
           <tr>
-            <th>Location</th>
-            <th style={{ width: 70 }}>Files</th>
-            <th style={{ width: 90 }}>Size</th>
+            <th>{t('Location')}</th>
+            <th style={{ width: 70 }}>{t('Files')}</th>
+            <th style={{ width: 90 }}>{t('Size')}</th>
           </tr>
         </thead>
         <tbody>
@@ -290,13 +303,13 @@ export function SettingsModal() {
         </tbody>
       </table>
       <button className="btn sm" style={{ marginTop: 8 }} onClick={() => void window.api.storage.reveal()}>
-        <HardDrive size={12} /> Open storage folder
+        <HardDrive size={12} /> {t('Open storage folder')}
       </button>
 
-      <SectionLabel>Updates</SectionLabel>
+      <SectionLabel>{t('Updates')}</SectionLabel>
       <UpdateSection />
 
-      <SectionLabel>About</SectionLabel>
+      <SectionLabel>{t('About')}</SectionLabel>
       <div className="faint" style={{ fontSize: 11.5, lineHeight: 1.7 }}>
         WoWs Tactics Suite {info?.version ?? ''}
         {TEST_BUILD_LABEL && <strong style={{ color: 'var(--warn)' }}> ({TEST_BUILD_LABEL})</strong>}
@@ -306,11 +319,11 @@ export function SettingsModal() {
         <div style={{ marginTop: 6 }}>{DEVELOPER_CREDIT}</div>
       </div>
 
-      <SectionLabel>Credits</SectionLabel>
+      <SectionLabel>{t('Credits')}</SectionLabel>
       <Credits />
 
       <button className="btn sm" style={{ marginTop: 8 }} onClick={() => void window.api.storage.revealLicenses()}>
-        <Scale size={12} /> Open licence notices
+        <Scale size={12} /> {t('Open licence notices')}
       </button>
     </Modal>
   );
@@ -354,7 +367,7 @@ function BotAddress() {
       const next = await setDiscordBot(value);
       setBot(next);
       setDraft(next.custom ? next.url : '');
-      useStore.getState().toast(next.custom ? `Sharing through ${next.url}` : 'Sharing through the built-in bot', 'success');
+      useStore.getState().toast(next.custom ? t('Sharing through {url}', { url: next.url }) : t('Sharing through the built-in bot'), 'success');
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -366,7 +379,7 @@ function BotAddress() {
 
   return (
     <>
-      <Field label="Bot">
+      <Field label={t('Bot')}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <input
             type="text"
@@ -385,7 +398,7 @@ function BotAddress() {
           />
           {changed && (
             <button className="btn sm" disabled={busy} onClick={() => void save(draft)}>
-              {busy ? 'Checking…' : 'Save'}
+              {busy ? t('Checking…') : t('Save')}
             </button>
           )}
         </div>
@@ -396,8 +409,8 @@ function BotAddress() {
       >
         {error ??
           (bot.builtIn
-            ? 'Leave empty for the built-in bot, or enter the address of one that your community runs. Changing it disconnects Discord.'
-            : 'The address of the bot your community runs. Changing it disconnects Discord.')}
+            ? t('Leave empty for the built-in bot, or enter the address of one that your community runs. Changing it disconnects Discord.')
+            : t('The address of the bot your community runs. Changing it disconnects Discord.'))}
       </div>
     </>
   );
@@ -417,7 +430,7 @@ function DiscordSection() {
   if (discord === null) {
     return (
       <div className="faint" style={note}>
-        Checking…
+        {t('Checking…')}
       </div>
     );
   }
@@ -425,7 +438,7 @@ function DiscordSection() {
   if (discord.status === 'unavailable') {
     return (
       <div className="faint" style={note}>
-        No bot to share to. Enter a bot address above.
+        {t('No bot to share to. Enter a bot address above.')}
       </div>
     );
   }
@@ -435,18 +448,18 @@ function DiscordSection() {
       <>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <button className="btn discord" disabled={linking} onClick={() => void connectDiscord()}>
-            <DiscordMark /> {linking ? 'Waiting for Discord…' : 'Connect Discord'}
+            <DiscordMark /> {linking ? t('Waiting for Discord…') : t('Connect Discord')}
           </button>
           {linking && (
             <button className="btn ghost" onClick={cancelConnectDiscord}>
-              Cancel
+              {t('Cancel')}
             </button>
           )}
         </div>
         <div className="faint" style={note}>
           {linking
-            ? 'Approve the request in the browser window that just opened, then come back here.'
-            : 'Sign in with Discord in your browser. The app learns only who you are, and can post pages wherever you can post yourself.'}
+            ? t('Approve the request in the browser window that just opened, then come back here.')
+            : t('Sign in with Discord in your browser. The app learns only who you are, and can post pages wherever you can post yourself.')}
         </div>
       </>
     );
@@ -457,24 +470,24 @@ function DiscordSection() {
 
   return (
     <>
-      <Field label="Account">
+      <Field label={t('Account')}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <span style={{ display: 'inline-flex', gap: 6, alignItems: 'center', flex: 1, minWidth: 0 }}>
             <DiscordMark /> {discord.user.name}
           </span>
           <button className="btn sm" onClick={() => void disconnectDiscord()}>
-            <Unplug size={12} /> Disconnect
+            <Unplug size={12} /> {t('Disconnect')}
           </button>
         </div>
       </Field>
-      <Field label="Post in">
+      <Field label={t('Post in')}>
         <select
           value={known ? channelId : ''}
           disabled={servers.length === 0}
           onChange={(e) => useStore.getState().patchSettings({ discordChannel: e.target.value })}
         >
           <option value="" disabled>
-            {servers.length === 0 ? 'No channels' : 'Choose a channel…'}
+            {servers.length === 0 ? t('No channels') : t('Choose a channel…')}
           </option>
           {servers.map((guild) => (
             <optgroup key={guild.id} label={guild.name}>
@@ -490,10 +503,10 @@ function DiscordSection() {
       </Field>
       <div className="faint" style={{ ...note, color: discord.error ? 'var(--danger)' : undefined }}>
         {discord.error
-          ? `${discord.error} The channel list returns once the bot can be reached.`
+          ? `${discord.error} ${t('The channel list returns once the bot can be reached.')}`
           : servers.length === 0
-            ? 'There is no channel where both you and the bot can send messages and attach files.'
-            : 'Where Share to Discord in the export dialog posts. Only channels where both you and the bot can send messages and attach files are listed.'}
+            ? t('There is no channel where both you and the bot can send messages and attach files.')
+            : t('Where Share to Discord in the export dialog posts. Only channels where both you and the bot can send messages and attach files are listed.')}
       </div>
     </>
   );
@@ -511,13 +524,11 @@ function DiscordSection() {
 function Credits() {
   return (
     <div className="faint" style={{ fontSize: 11.5, lineHeight: 1.7 }}>
-      The replay viewer is built on{' '}
+      {t('The replay viewer is built on')}{' '}
       <a className="link" href={TOOLKIT_URL} target="_blank" rel="noreferrer noopener">
         wows-toolkit
       </a>{' '}
-      by Lander Brandt (landaire), which does all of the real work of reading a replay: decrypting it, parsing the
-      packet stream, simulating the battle and resolving it into the draw commands this app renders on its own map.
-      Used under the MIT licence.
+      {t('by Lander Brandt (landaire), which does all of the real work of reading a replay: decrypting it, parsing the packet stream, simulating the battle and resolving it into the draw commands this app renders on its own map. Used under the MIT licence.')}
       <pre className="licence">{TOOLKIT_LICENCE}</pre>
     </div>
   );
@@ -537,21 +548,21 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 function describeUpdate(u: UpdateState): string {
   switch (u.status) {
     case 'disabled':
-      return u.reason;
+      return t(u.reason);
     case 'idle':
-      return 'Not checked yet.';
+      return t('Not checked yet.');
     case 'checking':
-      return 'Checking…';
+      return t('Checking…');
     case 'current':
-      return `You have the latest version (${u.version}).`;
+      return t('You have the latest version ({version}).', { version: u.version });
     case 'available':
-      return `Version ${u.version} is available.`;
+      return t('Version {version} is available.', { version: u.version });
     case 'downloading':
-      return `Downloading ${u.version}… ${Math.round(u.percent)}%`;
+      return t('Downloading {version}… {percent}%', { version: u.version, percent: Math.round(u.percent) });
     case 'ready':
-      return `Version ${u.version} is downloaded and ready.`;
+      return t('Version {version} is downloaded and ready.', { version: u.version });
     case 'error':
-      return u.message;
+      return t(u.message);
   }
 }
 
@@ -561,7 +572,7 @@ function UpdateSection() {
   return (
     <>
       <Check
-        label="Show patch notes after an update"
+        label={t('Show patch notes after an update')}
         checked={showPatchNotes}
         onChange={(v) => useStore.getState().patchSettings({ showPatchNotes: v })}
       />
@@ -570,11 +581,11 @@ function UpdateSection() {
       </div>
       {u.status === 'available' ? (
         <button className="btn sm primary" onClick={() => void window.api.updates.download()}>
-          Download {u.version}
+          {t('Download {version}', { version: u.version })}
         </button>
       ) : u.status === 'ready' ? (
         <button className="btn sm primary" onClick={() => void restartToUpdate()}>
-          Restart to update
+          {t('Restart to update')}
         </button>
       ) : (
         <button
@@ -582,7 +593,7 @@ function UpdateSection() {
           disabled={u.status === 'disabled' || u.status === 'checking' || u.status === 'downloading'}
           onClick={() => void window.api.updates.check()}
         >
-          <RefreshCw size={12} /> Check for updates
+          <RefreshCw size={12} /> {t('Check for updates')}
         </button>
       )}
       <button
@@ -597,7 +608,7 @@ function UpdateSection() {
           } satisfies PatchNotesArg)
         }
       >
-        <ScrollText size={12} /> View patch notes
+        <ScrollText size={12} /> {t('View patch notes')}
       </button>
     </>
   );
@@ -611,7 +622,7 @@ export function ShortcutsModal() {
   const s = () => useStore.getState();
   return (
     <Modal
-      title="Keyboard Shortcuts"
+      title={t('Keyboard Shortcuts')}
       size="wide"
       onClose={() => s().closeModal()}
       headerExtra={<Keyboard size={14} style={{ color: 'var(--fg-faint)' }} />}
@@ -619,7 +630,7 @@ export function ShortcutsModal() {
         <>
           <span className="spacer" />
           <button className="btn ghost" onClick={() => s().closeModal()}>
-            Close
+            {t('Close')}
           </button>
         </>
       }
@@ -627,11 +638,11 @@ export function ShortcutsModal() {
       <div style={{ columns: 2, columnGap: 26 }}>
         {SHORTCUT_REFERENCE.map((group) => (
           <div key={group.group} style={{ breakInside: 'avoid', marginBottom: 14 }}>
-            <SectionLabel>{group.group}</SectionLabel>
+            <SectionLabel>{t(group.group)}</SectionLabel>
             {group.rows.map((row) => (
               <div key={row.keys} className="shortcut-row">
-                <span>{row.action}</span>
-                <kbd>{row.keys}</kbd>
+                <span>{t(row.action)}</span>
+                <kbd>{keyLabel(row.keys)}</kbd>
               </div>
             ))}
           </div>

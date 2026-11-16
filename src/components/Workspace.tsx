@@ -7,6 +7,7 @@ import { InlineEdit, Tip } from './common/ui';
 import { RulesetFlag } from './common/RulesetFlag';
 import { renderMarkdown } from '@/lib/markdown';
 import { formatRelative } from '@/lib/util';
+import { N_, t, tn } from '@/i18n';
 
 /* ------------------------------------------------------------------ */
 /* Page tabs                                                           */
@@ -98,7 +99,7 @@ export function PageTabs() {
                   e.stopPropagation();
                   s().closeTab(page.id);
                 }}
-                title="Close tab (the page stays in the project)"
+                title={t('Close tab (the page stays in the project)')}
               >
                 <X size={10} />
               </span>
@@ -107,14 +108,14 @@ export function PageTabs() {
         );
       })}
       </div>
-      <Tip label="New page" side="bottom">
+      <Tip label={t('New page')} side="bottom">
         <button className="page-tab-add" onClick={() => s().addPage()}>
           <Plus size={14} />
         </button>
       </Tip>
       <span className="page-tabs-spacer" />
       {tabs.length > 1 && (
-        <Tip label="Multi-close all pages" side="bottom">
+        <Tip label={t('Multi-close all pages')} side="bottom">
           <button className="page-tab-add" onClick={() => s().closeOtherTabs()}>
             <ListX size={14} />
           </button>
@@ -129,10 +130,10 @@ export function PageTabs() {
 /* ------------------------------------------------------------------ */
 
 const TOOL_NAMES: Record<string, string> = {
-  select: 'Select', marquee: 'Multi-select', freehand: 'Freehand', line: 'Line', arrow: 'Arrow',
-  doubleArrow: 'Double arrow', curvedArrow: 'Curved arrow', rect: 'Rectangle', roundRect: 'Rounded rectangle',
-  circle: 'Circle', polygon: 'Polygon', text: 'Text', number: 'Number',
-  marker: 'Marker', ruler: 'Ruler', area: 'Area',
+  select: N_('Select'), marquee: N_('Multi-select'), freehand: N_('Freehand'), line: N_('Line'), arrow: N_('Arrow'),
+  doubleArrow: N_('Double arrow'), curvedArrow: N_('Curved arrow'), rect: N_('Rectangle'), roundRect: N_('Rounded rectangle'),
+  circle: N_('Circle'), polygon: N_('Polygon'), text: N_('Text'), number: N_('Number'),
+  marker: N_('Marker'), ruler: N_('Ruler'), area: N_('Area'),
 };
 
 export function StatusBar() {
@@ -146,31 +147,31 @@ export function StatusBar() {
 
   return (
     <div className="statusbar">
-      <span className="mono">{TOOL_NAMES[tool] ?? tool}</span>
+      <span className="mono">{TOOL_NAMES[tool] ? t(TOOL_NAMES[tool]) : tool}</span>
       <span className="sep" />
-      <span>{page ? `${page.objects.length} objects` : '—'}</span>
+      <span>{page ? tn(page.objects.length, '{n} object', '{n} objects') : '—'}</span>
       {selection.length > 0 && (
         <>
           <span className="sep" />
-          <span style={{ color: 'var(--accent)' }}>{selection.length} selected</span>
+          <span style={{ color: 'var(--accent)' }}>{t('{n} selected', { n: selection.length })}</span>
         </>
       )}
 
 
       <span className="spacer" />
 
-      <button onClick={() => s().openModal('settings')} title="Storage location">
+      <button onClick={() => s().openModal('settings')} title={t('Storage location')}>
         <HardDrive size={12} />
-        Local storage
+        {t('Local storage')}
       </button>
       <span className="sep" />
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
         <span className={`status-dot${dirty ? ' dirty' : ''}`} />
-        {dirty ? 'Unsaved changes' : `Saved ${formatRelative(lastSavedAt)}`}
+        {dirty ? t('Unsaved changes') : t('Saved {when}', { when: formatRelative(lastSavedAt) })}
       </span>
-      <button className="save-btn" onClick={() => void s().saveProject()} disabled={!project} title="Save (Ctrl+S)">
+      <button className="save-btn" onClick={() => void s().saveProject()} disabled={!project} title={t('Save (Ctrl+S)')}>
         <Save size={14} />
-        Save
+        {t('Save')}
       </button>
     </div>
   );
@@ -210,11 +211,11 @@ export function NotesPanel() {
       />
       <div className="notes-toolbar">
         <strong style={{ fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--fg-dim)' }}>
-          Notes — {page.name}
+          {t('Notes — {page}', { page: page.name })}
         </strong>
         <span style={{ flex: 1 }} />
         <button className={`btn sm${preview ? ' primary' : ''}`} onClick={() => setPreview((v) => !v)}>
-          <Eye size={11} /> Preview
+          <Eye size={11} /> {t('Preview')}
         </button>
         <button className="btn sm ghost" onClick={() => s().toggleNotes()}>
           <X size={12} />
@@ -223,9 +224,7 @@ export function NotesPanel() {
       <div className="notes-body" style={{ flex: 1 }}>
         <textarea
           value={page.notes}
-          placeholder={
-            'Notes for this page. Markdown is supported.'
-          }
+          placeholder={t('Notes for this page. Markdown is supported.')}
           onChange={(e) => s().setNotes(e.target.value)}
           onKeyDown={(e) => e.stopPropagation()}
         />

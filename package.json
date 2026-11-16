@@ -17,6 +17,7 @@
     "dev:replay": "node scripts/dev-replay.mjs",
     "selftest": "node scripts/run-selftest.mjs",
     "ipc-check": "node scripts/run-ipc-check.mjs",
+    "i18n-check": "node scripts/check-i18n.mjs",
     "refresh-seed": "node scripts/refresh-seed.mjs",
     "release": "node scripts/publish-release.mjs"
   },

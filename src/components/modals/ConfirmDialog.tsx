@@ -1,5 +1,6 @@
 import { Modal } from '../common/ui';
 import { answerConfirm, useConfirmStore } from '@/state/confirm';
+import { t } from '@/i18n';
 
 /** The app's yes/no question; see `confirmDialog`. */
 export function ConfirmDialog() {
@@ -15,10 +16,10 @@ export function ConfirmDialog() {
         <>
           <span className="spacer" />
           <button className="btn" onClick={() => answerConfirm(false)}>
-            Cancel
+            {t('Cancel')}
           </button>
           <button className={`btn ${q.danger ? 'danger' : 'primary'}`} autoFocus onClick={() => answerConfirm(true)}>
-            {q.confirmLabel ?? 'OK'}
+            {q.confirmLabel ?? t('OK')}
           </button>
         </>
       }

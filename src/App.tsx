@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { t } from '@/i18n';
 import { TitleBar } from './components/TitleBar';
 import { LeftRailToggle, LeftSidebar } from './components/LeftSidebar';
 import { RightRailToggle, RightSidebar } from './components/RightSidebar';
@@ -21,6 +22,12 @@ export default function App() {
   const modal = useStore((s) => s.modal);
   const toasts = useStore((s) => s.toasts);
   const icons = useStore((s) => s.icons);
+  // Subscribed so every component re-renders, and so re-translates, on a change.
+  const language = useStore((s) => s.settings.language);
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
 
   useShortcuts();
 
@@ -115,19 +122,19 @@ function WelcomeScreen({ booted }: { booted: boolean }) {
         </div>
         <div className="faint" style={{ fontSize: 12.5, lineHeight: 1.7, marginBottom: 18 }}>
           {booted
-            ? 'Plan tactics on the real maps. Create a project to start, or open one you already have.'
-            : 'Loading local storage…'}
+            ? t('Plan tactics on the real maps. Create a project to start, or open one you already have.')
+            : t('Loading local storage…')}
         </div>
         {booted && (
           <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
             <button className="btn primary" onClick={() => s().openModal('newProject')}>
-              New project
+              {t('New project')}
             </button>
             <button className="btn" onClick={() => s().openModal('projects')}>
-              Open project
+              {t('Open project')}
             </button>
             <button className="btn" onClick={() => void s().importProject()}>
-              Import project…
+              {t('Import project…')}
             </button>
           </div>
         )}

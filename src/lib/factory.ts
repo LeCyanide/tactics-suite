@@ -22,6 +22,7 @@ import {
 } from '@/types/model';
 import { clone, uid } from './util';
 import { canvasTheme } from '@/state/theme';
+import { t } from '@/i18n/core';
 
 /**
  * Every project starts with the two clan-war sides. The colours are the whole
@@ -58,10 +59,10 @@ export function createPage(name: string, mapId: ID | null = null): Page {
   };
 }
 
-export function createProject(name = 'Untitled project', pageNames?: string[]): Project {
+export function createProject(name = t('Untitled project'), pageNames?: string[]): Project {
   const now = Date.now();
   const teams = createTeams();
-  const pages = (pageNames?.length ? pageNames : ['Default']).map((n) => createPage(n));
+  const pages = (pageNames?.length ? pageNames : [t('Default')]).map((n) => createPage(n));
   return {
     id: uid('prj-'),
     name,

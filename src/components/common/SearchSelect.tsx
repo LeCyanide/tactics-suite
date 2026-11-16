@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Search } from 'lucide-react';
 import { foldForSearch } from '@/lib/util';
+import { t } from '@/i18n';
 
 export interface SearchOption {
   value: string;
@@ -19,7 +20,7 @@ export function SearchSelect({
   value,
   options,
   onChange,
-  placeholder = 'Search…',
+  placeholder = t('Search…'),
   title,
 }: {
   value: string;
@@ -178,7 +179,7 @@ export function SearchSelect({
                   </div>
                 );
               })}
-              {!matches.length && <div className="search-select-empty">No match</div>}
+              {!matches.length && <div className="search-select-empty">{t('No match')}</div>}
             </div>
           </div>,
           document.body,

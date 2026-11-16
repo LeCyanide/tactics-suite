@@ -5,6 +5,7 @@ import { getActivePage, useStore } from '@/state/store';
 import { formatClock, useReplayStore } from '@/state/replay';
 import { useOverlayStore } from '@/state/overlay';
 import { shipName } from './ReplaySidebar';
+import { t } from '@/i18n';
 
 /** Picks a replay played on the page's map and draws its paths behind the plan. */
 export function ReplayOverlayPanel() {
@@ -35,7 +36,7 @@ export function ReplayOverlayPanel() {
       (a, b) => Number(b.ally) - Number(a.ally) || (a.shipName ?? '').localeCompare(b.shipName ?? ''),
     );
     // Ship names only; the same ship twice on a team is told apart by a number.
-    const label = (p: (typeof sorted)[number]) => `${p.ally ? 'Ally' : 'Enemy'} · ${p.shipName ?? '?'}`;
+    const label = (p: (typeof sorted)[number]) => `${p.ally ? t('Ally') : t('Enemy')} · ${p.shipName ?? '?'}`;
     const total = new Map<string, number>();
     for (const p of sorted) total.set(label(p), (total.get(label(p)) ?? 0) + 1);
     const seen = new Map<string, number>();
@@ -52,8 +53,8 @@ export function ReplayOverlayPanel() {
   const onOtherMap = o.paths && o.paths.spaceName !== space;
 
   return (
-    <Panel title="Replay overlay" storageKey="replayOverlay" defaultOpen={false}>
-      <Field label="Replay">
+    <Panel title={t('Replay overlay')} storageKey="replayOverlay" defaultOpen={false}>
+      <Field label={t('Replay')}>
         <div style={{ display: 'flex', gap: 4, flex: 1, minWidth: 0 }}>
           <select
             style={{ flex: 1, minWidth: 0 }}
@@ -62,7 +63,7 @@ export function ReplayOverlayPanel() {
             onChange={(e) => (e.target.value ? void o.show(e.target.value) : o.clear())}
           >
             <option value="">
-              {choices.length ? 'None' : root ? 'No replays on this map' : 'Set up the library in Replay mode'}
+              {choices.length ? t('None') : root ? t('No replays on this map') : t('Set up the library in Replay mode')}
             </option>
             {choices.map((r) => (
               <option key={r.id} value={r.id}>
@@ -71,7 +72,7 @@ export function ReplayOverlayPanel() {
             ))}
           </select>
           {o.replayId && (
-            <button className="icon-btn" title="Clear overlay" onClick={() => o.clear()}>
+            <button className="icon-btn" title={t('Clear overlay')} onClick={() => o.clear()}>
               <X size={13} />
             </button>
           )}
@@ -80,7 +81,7 @@ export function ReplayOverlayPanel() {
 
       {o.load.phase === 'loading' && (
         <div className="faint mono" style={{ fontSize: 10.5 }}>
-          Loading… {o.load.total > 1 ? Math.round((o.load.frame / o.load.total) * 100) + '%' : ''}
+          {t('Loading…')} {o.load.total > 1 ? Math.round((o.load.frame / o.load.total) * 100) + '%' : ''}
         </div>
       )}
       {o.load.phase === 'error' && (
@@ -90,13 +91,13 @@ export function ReplayOverlayPanel() {
       )}
       {onOtherMap && (
         <div className="faint" style={{ fontSize: 11 }}>
-          This replay was played on another map, so it is hidden on this page.
+          {t('This replay was played on another map, so it is hidden on this page.')}
         </div>
       )}
 
       {o.paths && !onOtherMap && (
         <>
-          <Field label="Up to">
+          <Field label={t('Up to')}>
             <Slider
               value={o.until}
               min={0}
@@ -106,13 +107,13 @@ export function ReplayOverlayPanel() {
               onChange={(until) => o.set({ until })}
             />
           </Field>
-          <Field label="Ship">
+          <Field label={t('Ship')}>
             <select
               style={{ flex: 1, minWidth: 0 }}
               value={o.only ?? ''}
               onChange={(e) => o.set({ only: e.target.value ? Number(e.target.value) : null })}
             >
-              <option value="">All ships</option>
+              <option value="">{t('All ships')}</option>
               {ships.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.text}
@@ -120,15 +121,15 @@ export function ReplayOverlayPanel() {
               ))}
             </select>
           </Field>
-          <Field label="Opacity">
+          <Field label={t('Opacity')}>
             <Slider value={o.opacity} min={0.1} max={1} onChange={(opacity) => o.set({ opacity })} />
           </Field>
           <div style={{ display: 'flex', gap: 10 }}>
-            <Check label="Allies" checked={o.allies} onChange={(allies) => o.set({ allies })} />
-            <Check label="Enemies" checked={o.enemies} onChange={(enemies) => o.set({ enemies })} />
+            <Check label={t('Allies')} checked={o.allies} onChange={(allies) => o.set({ allies })} />
+            <Check label={t('Enemies')} checked={o.enemies} onChange={(enemies) => o.set({ enemies })} />
             <Check
-              label="Unique colours"
-              title="Give every ship its own colour, to tell the trails apart"
+              label={t('Unique colours')}
+              title={t('Give every ship its own colour, to tell the trails apart')}
               checked={o.unique}
               onChange={(unique) => o.set({ unique })}
             />

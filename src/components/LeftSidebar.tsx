@@ -34,6 +34,8 @@ import { beforeIdFor, pageTree } from '@/lib/pageTree';
 import { formatRelative } from '@/lib/util';
 import { RulesetFlag } from './common/RulesetFlag';
 import { renderMarkdown } from '@/lib/markdown';
+import { t, tn } from '@/i18n';
+import { layerLabel } from '@/types/model';
 
 export function LeftSidebar() {
   const open = useStore((s) => s.leftOpen);
@@ -91,21 +93,21 @@ function ProjectPanel() {
 
   return (
     <Panel
-      title="Project"
+      title={t('Project')}
       storageKey="project"
       actions={
         <>
-          <Tip label="Open project" side="bottom">
+          <Tip label={t('Open project')} side="bottom">
             <button className="icon-btn" onClick={() => s().openModal('projects')}>
               <FolderOpen size={13} />
             </button>
           </Tip>
-          <Tip label="New project" side="bottom">
+          <Tip label={t('New project')} side="bottom">
             <button className="icon-btn" onClick={() => s().openModal('newProject')}>
               <Plus size={14} />
             </button>
           </Tip>
-          <Tip label="Save project" shortcut="Ctrl+S" side="bottom">
+          <Tip label={t('Save project')} shortcut="Ctrl+S" side="bottom">
             <button className="icon-btn" disabled={!project} onClick={() => void s().saveProject()}>
               <Save size={13} />
             </button>
@@ -122,17 +124,17 @@ function ProjectPanel() {
               className="row-label"
             />
             <div className="faint mono" style={{ fontSize: 10.5, marginTop: 2 }}>
-              {project.pages.length} {project.pages.length === 1 ? 'page' : 'pages'} · {dirty ? 'unsaved' : `saved ${formatRelative(lastSavedAt)}`}
+              {tn(project.pages.length, '{n} page', '{n} pages')} · {dirty ? t('unsaved') : t('saved {when}', { when: formatRelative(lastSavedAt) })}
             </div>
           </div>
           <div style={{ display: 'flex', gap: 4 }}>
             <button className="btn sm" style={{ flex: 1 }} onClick={() => void s().exportProject()}>
-              Export
+              {t('Export')}
             </button>
             <button className="btn sm" style={{ flex: 1 }} onClick={() => void s().importProject()}>
-              Import
+              {t('Import')}
             </button>
-            <Tip label="Settings" side="bottom">
+            <Tip label={t('Settings')} side="bottom">
               <button className="btn sm" onClick={() => s().openModal('settings')}>
                 <Settings size={12} />
               </button>
@@ -140,7 +142,7 @@ function ProjectPanel() {
           </div>
         </>
       ) : (
-        <div className="empty-note">No project open.</div>
+        <div className="empty-note">{t('No project open.')}</div>
       )}
     </Panel>
   );
@@ -286,18 +288,18 @@ function PagesPanel() {
       <InlineEdit value={page.name} onCommit={(v) => s().renamePage(page.id, v)} className="row-label" />
       <RulesetFlag page={page} />
       <div className="row-actions">
-        <button className="icon-btn" title="Move up" onClick={(e) => { e.stopPropagation(); s().reorderPage(page.id, -1); }}>
+        <button className="icon-btn" title={t('Move up')} onClick={(e) => { e.stopPropagation(); s().reorderPage(page.id, -1); }}>
           <ArrowUp size={11} />
         </button>
-        <button className="icon-btn" title="Move down" onClick={(e) => { e.stopPropagation(); s().reorderPage(page.id, 1); }}>
+        <button className="icon-btn" title={t('Move down')} onClick={(e) => { e.stopPropagation(); s().reorderPage(page.id, 1); }}>
           <ArrowDown size={11} />
         </button>
-        <button className="icon-btn" title="Duplicate" onClick={(e) => { e.stopPropagation(); s().duplicatePage(page.id); }}>
+        <button className="icon-btn" title={t('Duplicate')} onClick={(e) => { e.stopPropagation(); s().duplicatePage(page.id); }}>
           <Copy size={11} />
         </button>
         <button
           className="icon-btn danger"
-          title="Delete page"
+          title={t('Delete page')}
           onClick={(e) => { e.stopPropagation(); void s().deletePage(page.id); }}
         >
           <Trash2 size={11} />
@@ -342,15 +344,15 @@ function PagesPanel() {
             {pages.length}
           </span>
           <div className="row-actions">
-            <button className="icon-btn" title="Move up" onClick={(e) => { e.stopPropagation(); s().reorderPageFolder(folder.id, -1); }}>
+            <button className="icon-btn" title={t('Move up')} onClick={(e) => { e.stopPropagation(); s().reorderPageFolder(folder.id, -1); }}>
               <ArrowUp size={11} />
             </button>
-            <button className="icon-btn" title="Move down" onClick={(e) => { e.stopPropagation(); s().reorderPageFolder(folder.id, 1); }}>
+            <button className="icon-btn" title={t('Move down')} onClick={(e) => { e.stopPropagation(); s().reorderPageFolder(folder.id, 1); }}>
               <ArrowDown size={11} />
             </button>
             <button
               className="icon-btn"
-              title="Add page to this folder"
+              title={t('Add page to this folder')}
               onClick={(e) => {
                 e.stopPropagation();
                 s().addPage(undefined, folder.id);
@@ -361,7 +363,7 @@ function PagesPanel() {
             </button>
             <button
               className="icon-btn danger"
-              title="Delete folder (its pages stay)"
+              title={t('Delete folder (its pages stay)')}
               onClick={(e) => { e.stopPropagation(); s().deletePageFolder(folder.id); }}
             >
               <Trash2 size={11} />
@@ -374,7 +376,7 @@ function PagesPanel() {
               pages.map(pageRow)
             ) : (
               <div className="faint" style={{ fontSize: 10.5, padding: '4px 6px' }}>
-                Drag pages here
+                {t('Drag pages here')}
               </div>
             )}
           </div>
@@ -387,17 +389,17 @@ function PagesPanel() {
 
   return (
     <Panel
-      title="Tactical pages"
+      title={t('Tactical pages')}
       count={project.pages.length}
       storageKey="pages"
       actions={
         <>
-          <Tip label="New folder" side="bottom">
+          <Tip label={t('New folder')} side="bottom">
             <button className="icon-btn" onClick={newFolder}>
               <FolderPlus size={13} />
             </button>
           </Tip>
-          <Tip label="Add page" side="bottom">
+          <Tip label={t('Add page')} side="bottom">
             <button className="icon-btn" onClick={() => s().addPage()}>
               <Plus size={14} />
             </button>
@@ -484,13 +486,13 @@ function PageMenu({
       onContextMenu={(e) => e.preventDefault()}
     >
       <div className="faint" style={{ fontSize: 10.5, padding: '3px 8px' }}>
-        Move to
+        {t('Move to')}
       </div>
       {folders.map((f) => item(f.id, f.name, () => s().placePage(page.id, f.id), f.id !== page.folderId))}
-      {item(LIST_END, 'No folder', () => s().placePage(page.id, null), page.folderId !== null)}
+      {item(LIST_END, t('No folder'), () => s().placePage(page.id, null), page.folderId !== null)}
       <div className="ctx-sep" />
-      {item('duplicate', 'Duplicate page', () => s().duplicatePage(page.id))}
-      {item('delete', 'Delete page', () => void s().deletePage(page.id))}
+      {item('duplicate', t('Duplicate page'), () => s().duplicatePage(page.id))}
+      {item('delete', t('Delete page'), () => void s().deletePage(page.id))}
     </div>
   );
 }
@@ -527,16 +529,16 @@ function MapPanel() {
 
   return (
     <Panel
-      title="Map"
+      title={t('Map')}
       storageKey="map"
       actions={
         <>
-          <Tip label="Import map image…" side="bottom">
+          <Tip label={t('Import map image…')} side="bottom">
             <button className="icon-btn" onClick={() => void s().importMaps()}>
               <ImageIcon size={13} />
             </button>
           </Tip>
-          <Tip label="Map manager" side="bottom">
+          <Tip label={t('Map manager')} side="bottom">
             <button className="icon-btn" onClick={() => s().openModal('maps')}>
               <MapIcon size={13} />
             </button>
@@ -548,31 +550,31 @@ function MapPanel() {
           the obvious choice and the temporary set is easy to spot. */}
       <SearchSelect
         value={page.mapId ?? ''}
-        placeholder="Search maps…"
+        placeholder={t('Search maps…')}
         options={[
-          { value: '', label: '— No map —' },
+          { value: '', label: t('— No map —') },
           ...maps.filter((m) => !m.archived).map((m) => ({ value: m.id, label: m.name })),
           ...maps
             .filter((m) => m.archived)
-            .map((m) => ({ value: m.id, label: m.name, group: 'Archived — layout baked into image' })),
+            .map((m) => ({ value: m.id, label: m.name, group: t('Archived — layout baked into image') })),
         ]}
         onChange={(v) => s().setPageMap(v || null)}
       />
 
       {map && (
         <div className="faint mono" style={{ fontSize: 10.5, margin: '5px 2px' }}>
-          {(map.widthMeters / 1000).toFixed(0)} × {(map.heightMeters / 1000).toFixed(0)} km · grid{' '}
+          {(map.widthMeters / 1000).toFixed(0)} × {(map.heightMeters / 1000).toFixed(0)} km · {t('grid')}{' '}
           {page.mapView.gridCols ?? map.gridCols} × {page.mapView.gridRows ?? map.gridRows}
         </div>
       )}
 
       {map && layouts.length > 0 && (
-        <Field label="Cap layout">
+        <Field label={t('Cap layout')}>
           <select
             value={page.capLayoutId ?? ''}
             onChange={(e) => s().setPageCapLayout(e.target.value || null)}
           >
-            <option value="">— None —</option>
+            <option value="">{t('— None —')}</option>
             {layouts.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -583,24 +585,24 @@ function MapPanel() {
       )}
       {map && layouts.length === 0 && (
         <div className="faint" style={{ fontSize: 10.5, margin: '5px 2px' }}>
-          No cap layouts recorded for this map.
+          {t('No cap layouts recorded for this map.')}
         </div>
       )}
 
       <div style={{ marginTop: 4 }}>
-        <Check label="Grid" checked={page.mapView.showGrid} onChange={(v) => s().patchMapView({ showGrid: v })} />
+        <Check label={t('Grid')} checked={page.mapView.showGrid} onChange={(v) => s().patchMapView({ showGrid: v })} />
         <Check
-          label="Coordinate labels"
+          label={t('Coordinate labels')}
           checked={page.mapView.showCoordinates}
           onChange={(v) => s().patchMapView({ showCoordinates: v })}
         />
-        <Check label="Map border" checked={page.mapView.showBorder} onChange={(v) => s().patchMapView({ showBorder: v })} />
+        <Check label={t('Map border')} checked={page.mapView.showBorder} onChange={(v) => s().patchMapView({ showBorder: v })} />
       </div>
 
-      <Field label="Grid opacity">
+      <Field label={t('Grid opacity')}>
         <Slider value={page.mapView.gridOpacity} onChange={(v) => s().patchMapView({ gridOpacity: v })} />
       </Field>
-      <Field label="Map opacity">
+      <Field label={t('Map opacity')}>
         <Slider value={page.mapView.mapOpacity} onChange={(v) => s().patchMapView({ mapOpacity: v })} />
       </Field>
     </Panel>
@@ -622,11 +624,11 @@ function TeamsPanel() {
 
   return (
     <Panel
-      title="Teams"
+      title={t('Teams')}
       count={project.teams.length}
       storageKey="teams"
       actions={
-        <Tip label="Add team" side="bottom">
+        <Tip label={t('Add team')} side="bottom">
           <button className="icon-btn" onClick={() => s().addTeam()}>
             <Plus size={14} />
           </button>
@@ -642,26 +644,26 @@ function TeamsPanel() {
               value={team.color}
               style={{ width: 16, height: 16 }}
               onChange={(e) => s().updateTeam(team.id, { color: e.target.value })}
-              title="Team colour"
+              title={t('Team colour')}
             />
             <InlineEdit value={team.name} onCommit={(v) => s().updateTeam(team.id, { name: v })} className="row-label" />
             <span className="count mono">{countFor(team.id)}</span>
             <button
               className="icon-btn"
-              title={team.visible ? 'Hide team' : 'Show team'}
+              title={team.visible ? t('Hide team') : t('Show team')}
               onClick={() => s().updateTeam(team.id, { visible: !team.visible })}
             >
               {team.visible ? <Eye size={12} /> : <EyeOff size={12} />}
             </button>
             <button
               className="icon-btn"
-              title={team.locked ? 'Unlock team' : 'Lock team'}
+              title={team.locked ? t('Unlock team') : t('Lock team')}
               onClick={() => s().updateTeam(team.id, { locked: !team.locked })}
             >
               {team.locked ? <Lock size={12} /> : <LockOpen size={12} />}
             </button>
             <div className="row-actions">
-              <Tip label="Make default for new ships" side="bottom">
+              <Tip label={t('Make default for new ships')} side="bottom">
                 <button
                   className="icon-btn"
                   onClick={() =>
@@ -674,7 +676,7 @@ function TeamsPanel() {
                   <Users size={11} />
                 </button>
               </Tip>
-              <button className="icon-btn danger" title="Delete team" onClick={() => s().removeTeam(team.id)}>
+              <button className="icon-btn danger" title={t('Delete team')} onClick={() => s().removeTeam(team.id)}>
                 <Trash2 size={11} />
               </button>
             </div>
@@ -698,11 +700,11 @@ function LayersPanel() {
 
   return (
     <Panel
-      title="Layers"
+      title={t('Layers')}
       count={page.layers.length}
       storageKey="layers"
       actions={
-        <Tip label="Add layer" side="bottom">
+        <Tip label={t('Add layer')} side="bottom">
           <button className="icon-btn" onClick={() => s().addLayer()}>
             <Plus size={14} />
           </button>
@@ -720,16 +722,16 @@ function LayersPanel() {
               onClick={() => s().setActiveLayer(layer.id)}
               title={
                 layer.id === LAYER_IDS.grid
-                  ? 'Background grid and coordinates — cannot hold objects'
+                  ? t('Background grid and coordinates — cannot hold objects')
                   : layer.system
-                    ? 'System layer'
-                    : 'Custom layer'
+                    ? t('System layer')
+                    : t('Custom layer')
               }
               style={layer.id === LAYER_IDS.grid ? { opacity: 0.72 } : undefined}
             >
               <button
                 className="icon-btn"
-                title={layer.visible ? 'Hide layer' : 'Show layer'}
+                title={layer.visible ? t('Hide layer') : t('Show layer')}
                 onClick={(e) => {
                   e.stopPropagation();
                   s().updateLayer(layer.id, { visible: !layer.visible });
@@ -739,7 +741,7 @@ function LayersPanel() {
               </button>
               <button
                 className="icon-btn"
-                title={layer.locked ? 'Unlock layer' : 'Lock layer'}
+                title={layer.locked ? t('Unlock layer') : t('Lock layer')}
                 onClick={(e) => {
                   e.stopPropagation();
                   s().updateLayer(layer.id, { locked: !layer.locked });
@@ -747,17 +749,17 @@ function LayersPanel() {
               >
                 {layer.locked ? <Lock size={12} /> : <LockOpen size={12} />}
               </button>
-              <InlineEdit value={layer.name} onCommit={(v) => s().updateLayer(layer.id, { name: v })} className="row-label" />
+              <InlineEdit value={layerLabel(layer)} onCommit={(v) => s().updateLayer(layer.id, { name: v })} className="row-label" />
               {count > 0 && <span className="count mono">{count}</span>}
               <div className="row-actions">
-                <button className="icon-btn" title="Move up" onClick={(e) => { e.stopPropagation(); s().reorderLayer(layer.id, 1); }}>
+                <button className="icon-btn" title={t('Move up')} onClick={(e) => { e.stopPropagation(); s().reorderLayer(layer.id, 1); }}>
                   <ArrowUp size={11} />
                 </button>
-                <button className="icon-btn" title="Move down" onClick={(e) => { e.stopPropagation(); s().reorderLayer(layer.id, -1); }}>
+                <button className="icon-btn" title={t('Move down')} onClick={(e) => { e.stopPropagation(); s().reorderLayer(layer.id, -1); }}>
                   <ArrowDown size={11} />
                 </button>
                 {!layer.system && (
-                  <button className="icon-btn danger" title="Delete layer" onClick={(e) => { e.stopPropagation(); s().removeLayer(layer.id); }}>
+                  <button className="icon-btn danger" title={t('Delete layer')} onClick={(e) => { e.stopPropagation(); s().removeLayer(layer.id); }}>
                     <Trash2 size={11} />
                   </button>
                 )}
@@ -772,7 +774,7 @@ function LayersPanel() {
         if (!layer) return null;
         return (
           <div style={{ padding: '4px 8px 2px' }}>
-            <Field label="Opacity">
+            <Field label={t('Opacity')}>
               <Slider value={layer.opacity} onChange={(v) => s().updateLayer(layer.id, { opacity: v })} />
             </Field>
           </div>
@@ -792,10 +794,10 @@ function NotesPreviewPanel() {
 
   return (
     <Panel
-      title="Notes"
+      title={t('Notes')}
       storageKey="notes"
       actions={
-        <Tip label={notesOpen ? 'Close notes editor' : 'Open notes editor'} shortcut="Ctrl+K" side="bottom">
+        <Tip label={notesOpen ? t('Close notes editor') : t('Open notes editor')} shortcut="Ctrl+K" side="bottom">
           <button className={`icon-btn${notesOpen ? ' active' : ''}`} onClick={() => s().toggleNotes()}>
             <StickyNote size={13} />
           </button>
@@ -808,10 +810,10 @@ function NotesPreviewPanel() {
         </div>
       ) : (
         <div className="empty-note">
-          No notes on this page.
+          {t('No notes on this page.')}
           <div style={{ marginTop: 8 }}>
             <button className="btn sm block" onClick={() => s().toggleNotes()}>
-              Write notes
+              {t('Write notes')}
             </button>
           </div>
         </div>
@@ -825,7 +827,7 @@ export function LeftRailToggle() {
   const toggle = useStore((s) => s.toggleLeft);
   if (open) return null;
   return (
-    <button className="rail-toggle left" onClick={toggle} title="Show left sidebar (Ctrl+B)">
+    <button className="rail-toggle left" onClick={toggle} title={t('Show left sidebar (Ctrl+B)')}>
       <ChevronLeft size={11} style={{ transform: 'rotate(180deg)' }} />
     </button>
   );

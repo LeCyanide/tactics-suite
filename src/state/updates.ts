@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { UpdateState } from '../../electron/preload';
 import { useStore } from './store';
+import { t } from '@/i18n/core';
 
 export type { UpdateState };
 
@@ -21,6 +22,6 @@ export async function restartToUpdate(): Promise<void> {
   try {
     await window.api.updates.install();
   } catch (err) {
-    s.toast(`Update failed: ${(err as Error).message}`, 'error');
+    s.toast(t('Update failed: {error}', { error: (err as Error).message }), 'error');
   }
 }

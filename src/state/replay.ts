@@ -13,6 +13,7 @@ import { create } from 'zustand';
 import { DEFAULT_REPLAY_VIEW, type ReplayViewOptions } from '@/canvas/ReplayLayer';
 import { ReplayTimeline, TimelineFormatError } from '@/replay/timeline';
 import { useStore } from './store';
+import { t, tn } from '@/i18n/core';
 
 export type AppMode = 'tactics' | 'replay';
 
@@ -198,7 +199,7 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
     if (!res.ok) {
       // The folder is gone or unwritable — a removed drive, say. Offer to
       // choose again rather than failing every action after this one.
-      useStore.getState().toast(res.reason ?? 'The replay folder cannot be used.', 'error');
+      useStore.getState().toast(res.reason ?? t('The replay folder cannot be used.'), 'error');
       set({ suggestedRoot: replayDir, archiveLoaded: true });
       return;
     }
@@ -211,7 +212,7 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
     if (!picked) return;
     const res = await window.api.replay.configure({ root: picked, gameDir: useStore.getState().settings.wowsGameDir });
     if (!res.ok) {
-      useStore.getState().toast(res.reason ?? 'That folder cannot be used.', 'error');
+      useStore.getState().toast(res.reason ?? t('That folder cannot be used.'), 'error');
       return;
     }
     useStore.getState().patchSettings({ replayDir: picked });
@@ -219,7 +220,9 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
     if (res.migrated) {
       useStore
         .getState()
-        .toast(`Moved ${res.migrated} replay${res.migrated === 1 ? '' : 's'} from the old replay store into ${picked}.`);
+        .toast(
+          tn(res.migrated, 'Moved {n} replay from the old replay store into {folder}.', 'Moved {n} replays from the old replay store into {folder}.', { folder: picked }),
+        );
     }
     await get().refreshArchive();
   },
@@ -230,7 +233,7 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
       const listing = await window.api.replay.list();
       set({ archive: listing.replays, collections: listing.collections, archiveLoaded: true });
     } catch (err) {
-      useStore.getState().toast(`Could not read the replay folder: ${message(err)}`, 'error');
+      useStore.getState().toast(t('Could not read the replay folder: {error}', { error: message(err) }), 'error');
     }
   },
 
@@ -241,7 +244,7 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
       await get().refreshArchive();
       reportImport(outcome);
     } catch (err) {
-      useStore.getState().toast(`Import failed: ${message(err)}`, 'error');
+      useStore.getState().toast(t('Import failed: {error}', { error: message(err) }), 'error');
     }
   },
 
@@ -254,36 +257,39 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
       const fresh = found.filter((f) => !f.archived);
       if (!fresh.length) {
         s.toast(
-          found.length ? 'Every recent replay is already in your library.' : 'No replays found in the game folder.',
+          found.length ? t('Every recent replay is already in your library.') : t('No replays found in the game folder.'),
         );
         return;
       }
       const ok = await confirmDialog({
-        title: 'Import from the game folder',
-        message: `Add ${fresh.length} replay${fresh.length === 1 ? '' : 's'} to your library?`,
-        detail: `${(fresh.reduce((n, f) => n + f.size, 0) / 1048576).toFixed(0)} MB will be copied into ${get().root}. The originals are left alone.`,
-        confirmLabel: 'Import',
+        title: t('Import from the game folder'),
+        message: tn(fresh.length, 'Add {n} replay to your library?', 'Add {n} replays to your library?'),
+        detail: t('{size} MB will be copied into {folder}. The originals are left alone.', {
+          size: (fresh.reduce((n, f) => n + f.size, 0) / 1048576).toFixed(0),
+          folder: get().root ?? '',
+        }),
+        confirmLabel: t('Import'),
       });
       if (!ok) return;
       const outcome = await window.api.replay.importPaths(fresh.map((f) => f.path));
       await get().refreshArchive();
       reportImport(outcome);
     } catch (err) {
-      s.toast(`Import failed: ${message(err)}`, 'error');
+      s.toast(t('Import failed: {error}', { error: message(err) }), 'error');
     }
   },
 
   async removeReplay(id) {
     const replay = get().archive.find((r) => r.id === id);
     const ok = await confirmDialog({
-      title: 'Delete replay',
-      message: 'Delete this replay?',
+      title: t('Delete replay'),
+      message: t('Delete this replay?'),
       detail:
-        `${replay?.path ?? 'The file'} is deleted from your replay folder, together with its saved timeline.` +
+        t('{file} is deleted from your replay folder, together with its saved timeline.', { file: replay?.path ?? t('The file') }) +
         (replay?.state === 'baked' && replay.build !== null
-          ? ' If its patch is gone from the game, it cannot be baked again.'
+          ? ' ' + t('If its patch is gone from the game, it cannot be baked again.')
           : ''),
-      confirmLabel: 'Delete',
+      confirmLabel: t('Delete'),
       danger: true,
     });
     if (!ok) return;
@@ -291,7 +297,7 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
       const listing = await window.api.replay.remove(id);
       set({ archive: listing.replays, collections: listing.collections });
     } catch (err) {
-      useStore.getState().toast(`Could not delete the replay: ${message(err)}`, 'error');
+      useStore.getState().toast(t('Could not delete the replay: {error}', { error: message(err) }), 'error');
     }
     if (get().selectedId === id) get().close();
   },
@@ -302,7 +308,7 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
       await get().refreshArchive();
       return collection.name;
     } catch (err) {
-      useStore.getState().toast(`Could not create the collection: ${message(err)}`, 'error');
+      useStore.getState().toast(t('Could not create the collection: {error}', { error: message(err) }), 'error');
       return null;
     }
   },
@@ -313,7 +319,7 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
       await get().refreshArchive();
       return true;
     } catch (err) {
-      useStore.getState().toast(`Could not rename the collection: ${message(err)}`, 'error');
+      useStore.getState().toast(t('Could not rename the collection: {error}', { error: message(err) }), 'error');
       return false;
     }
   },
@@ -323,19 +329,19 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
     // An empty folder costs nothing to lose, so it goes without asking.
     if (held) {
       const ok = await confirmDialog({
-        title: 'Delete collection',
-        message: `Delete "${name}"?`,
-        detail: `Its ${held} replay${held === 1 ? '' : 's'} move back to the top of your replay folder, unsorted.`,
-        confirmLabel: 'Delete',
+        title: t('Delete collection'),
+        message: t('Delete "{name}"?', { name }),
+        detail: tn(held, 'Its {n} replay moves back to the top of your replay folder, unsorted.', 'Its {n} replays move back to the top of your replay folder, unsorted.'),
+        confirmLabel: t('Delete'),
         danger: true,
       });
       if (!ok) return;
     }
     try {
       const { kept } = await window.api.replay.deleteCollection(name);
-      if (kept) useStore.getState().toast(`The "${name}" folder holds other files, so it was left in place.`);
+      if (kept) useStore.getState().toast(t('The "{name}" folder holds other files, so it was left in place.', { name }));
     } catch (err) {
-      useStore.getState().toast(`Could not delete the collection: ${message(err)}`, 'error');
+      useStore.getState().toast(t('Could not delete the collection: {error}', { error: message(err) }), 'error');
     }
     await get().refreshArchive();
   },
@@ -345,7 +351,7 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
       const listing = await window.api.replay.move(ids, collection);
       set({ archive: listing.replays, collections: listing.collections });
     } catch (err) {
-      useStore.getState().toast(`Could not move the replay: ${message(err)}`, 'error');
+      useStore.getState().toast(t('Could not move the replay: {error}', { error: message(err) }), 'error');
     }
   },
 
@@ -353,7 +359,7 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
     const picked = await window.api.replay.pickGameDir();
     if (!picked) return;
     if (!picked.ok) {
-      useStore.getState().toast(picked.reason ?? 'That folder is not a World of Warships install.', 'error');
+      useStore.getState().toast(picked.reason ?? t('That folder is not a World of Warships install.'), 'error');
       return;
     }
     useStore.getState().patchSettings({ wowsGameDir: picked.dir });
@@ -511,10 +517,10 @@ function reportImport(outcome: {
 }): void {
   const s = useStore.getState();
   const parts: string[] = [];
-  if (outcome.added.length) parts.push(`${outcome.added.length} added`);
-  if (outcome.duplicates.length) parts.push(`${outcome.duplicates.length} already in your library`);
-  if (outcome.failed.length) parts.push(`${outcome.failed.length} skipped`);
-  s.toast(parts.join(', ') || 'Nothing to import', outcome.failed.length && !outcome.added.length ? 'error' : 'info');
+  if (outcome.added.length) parts.push(t('{n} added', { n: outcome.added.length }));
+  if (outcome.duplicates.length) parts.push(t('{n} already in your library', { n: outcome.duplicates.length }));
+  if (outcome.failed.length) parts.push(t('{n} skipped', { n: outcome.failed.length }));
+  s.toast(parts.join(', ') || t('Nothing to import'), outcome.failed.length && !outcome.added.length ? 'error' : 'info');
   // The reasons matter more than the count when something was skipped, and a
   // toast is too small to carry them.
   for (const f of outcome.failed.slice(0, 3)) console.warn(`[replay] ${f.name}: ${f.reason}`);

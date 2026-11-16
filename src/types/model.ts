@@ -1,3 +1,4 @@
+import { N_, t } from '@/i18n/core';
 /**
  * Core data model for the WoWs Tactics Suite.
  *
@@ -27,11 +28,11 @@ export type ShipClass = 'DD' | 'CA' | 'BB' | 'CV' | 'SS';
 export const SHIP_CLASSES: ShipClass[] = ['DD', 'CA', 'BB', 'CV', 'SS'];
 
 export const SHIP_CLASS_LABEL: Record<ShipClass, string> = {
-  DD: 'Destroyer',
-  CA: 'Cruiser',
-  BB: 'Battleship',
-  CV: 'Aircraft carrier',
-  SS: 'Submarine',
+  DD: N_('Destroyer'),
+  CA: N_('Cruiser'),
+  BB: N_('Battleship'),
+  CV: N_('Aircraft carrier'),
+  SS: N_('Submarine'),
 };
 
 /**
@@ -331,13 +332,13 @@ export type CharacteristicKey =
   | 'airstrike';
 
 export const CHARACTERISTICS: { key: CharacteristicKey; label: string; group: 'range' | 'other' }[] = [
-  { key: 'detection', label: 'Detection range', group: 'range' },
-  { key: 'radar', label: 'Radar', group: 'range' },
-  { key: 'hydro', label: 'Hydro', group: 'range' },
-  { key: 'mainBattery', label: 'Main battery range', group: 'range' },
-  { key: 'secondary', label: 'Secondary battery range', group: 'range' },
-  { key: 'torpedo', label: 'Torpedo range', group: 'range' },
-  { key: 'airstrike', label: 'Airstrike', group: 'range' },
+  { key: 'detection', label: N_('Detection range'), group: 'range' },
+  { key: 'radar', label: N_('Radar'), group: 'range' },
+  { key: 'hydro', label: N_('Hydro'), group: 'range' },
+  { key: 'mainBattery', label: N_('Main battery range'), group: 'range' },
+  { key: 'secondary', label: N_('Secondary battery range'), group: 'range' },
+  { key: 'torpedo', label: N_('Torpedo range'), group: 'range' },
+  { key: 'airstrike', label: N_('Airstrike'), group: 'range' },
 ];
 
 /** Characteristics that render as a circle on the map. */
@@ -443,17 +444,28 @@ export const LAYER_IDS = {
 export function createDefaultLayers(): Layer[] {
   // Rendered back-to-front in array order.
   return [
-    { id: LAYER_IDS.grid, name: 'Grid', visible: true, locked: true, opacity: 1, system: true },
-    { id: LAYER_IDS.caps, name: 'Cap zones', visible: true, locked: true, opacity: 1, system: true },
-    { id: LAYER_IDS.ranges, name: 'Ship ranges', visible: true, locked: false, opacity: 1, system: true },
-    { id: LAYER_IDS.annotations, name: 'Annotations', visible: true, locked: false, opacity: 1, system: true },
-    { id: LAYER_IDS.ships, name: 'Ships', visible: true, locked: false, opacity: 1, system: true },
+    { id: LAYER_IDS.grid, name: N_('Grid'), visible: true, locked: true, opacity: 1, system: true },
+    { id: LAYER_IDS.caps, name: N_('Cap zones'), visible: true, locked: true, opacity: 1, system: true },
+    { id: LAYER_IDS.ranges, name: N_('Ship ranges'), visible: true, locked: false, opacity: 1, system: true },
+    { id: LAYER_IDS.annotations, name: N_('Annotations'), visible: true, locked: false, opacity: 1, system: true },
+    { id: LAYER_IDS.ships, name: N_('Ships'), visible: true, locked: false, opacity: 1, system: true },
     // Replay notes are a plan for a battle that already happened, on ground the
     // page may not even be planning against, so they are kept apart from the
     // plan and drawn only in replay mode.
-    { id: LAYER_IDS.replay, name: 'Replay notes', visible: true, locked: false, opacity: 1, system: true },
+    { id: LAYER_IDS.replay, name: N_('Replay notes'), visible: true, locked: false, opacity: 1, system: true },
   ];
 }
+
+/**
+ * What a layer is called on screen. The built-in layers are stored under their
+ * English names; until the user renames one it is shown in the interface
+ * language.
+ */
+export function layerLabel(layer: Pick<Layer, 'name' | 'system'>): string {
+  return layer.system && SYSTEM_LAYER_NAMES.has(layer.name) ? t(layer.name) : layer.name;
+}
+
+const SYSTEM_LAYER_NAMES = new Set(createDefaultLayers().map((l) => l.name));
 
 /** Legacy layer ids, mapped to the layer that replaces them. */
 export const LEGACY_LAYER_REMAP: Record<string, string> = {
@@ -706,6 +718,8 @@ export type ThemeName = 'dark' | 'light' | 'dusk' | 'aurora' | 'midnight' | 'noc
 
 export interface AppSettings {
   theme: ThemeName;
+  /** Interface language; English unless the user picks another. */
+  language: 'en' | 'es' | 'fr' | 'de';
   lastProjectId: ID | null;
   recentProjectIds: ID[];
   accentColor: string;
@@ -747,6 +761,7 @@ export interface AppSettings {
 
 export const DEFAULT_APP_SETTINGS: AppSettings = {
   theme: 'dark',
+  language: 'en',
   lastProjectId: null,
   recentProjectIds: [],
   accentColor: '#4ea3ff',

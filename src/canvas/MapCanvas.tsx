@@ -31,6 +31,7 @@ import { clamp, dist, simplifyPath, uid, gridRef } from '@/lib/util';
 import { DEVELOPER_CREDIT } from '@/lib/credit';
 import { createMarker, createNumber, createPath, createShape, createText } from '@/lib/factory';
 import { canvasThemeFor, type CanvasTheme } from '@/state/theme';
+import { keyLabel, t } from '@/i18n';
 
 /** Ship icon size at 1× scale; Settings → Ship icon scale multiplies it. */
 const SHIP_ICON_PX = 30;
@@ -1038,7 +1039,7 @@ export default function MapCanvas() {
               ))}
               <Group x={draft.cursor.x} y={draft.cursor.y} scaleX={inv} scaleY={inv}>
                 <Text
-                  text={`${draft.points.length} pts · double-click to finish`}
+                  text={t('{n} pts · double-click to finish', { n: draft.points.length })}
                   x={10}
                   y={-6}
                   fontSize={11}
@@ -1342,7 +1343,7 @@ function TextEditor({
           onCommit();
         }
       }}
-      placeholder="Type…"
+      placeholder={t('Type…')}
       spellCheck={false}
     />
   );
@@ -1387,7 +1388,7 @@ function CanvasContextMenu({ state, onClose }: { state: ContextMenuState; onClos
       }}
     >
       <span>{label}</span>
-      {shortcut && <kbd>{shortcut}</kbd>}
+      {shortcut && <kbd>{keyLabel(shortcut)}</kbd>}
     </button>
   );
 
@@ -1395,19 +1396,19 @@ function CanvasContextMenu({ state, onClose }: { state: ContextMenuState; onClos
 
   return (
     <div className="ctx-menu" style={{ left: state.x, top: state.y }} onContextMenu={(e) => e.preventDefault()}>
-      {item('Copy', () => useStore.getState().copySelection(), has, 'Ctrl+C')}
-      {item('Paste here', () => useStore.getState().paste(state.world), clipboard.length > 0, 'Ctrl+V')}
-      {item('Duplicate', () => useStore.getState().duplicateSelection(), has, 'Ctrl+D')}
+      {item(t('Copy'), () => useStore.getState().copySelection(), has, 'Ctrl+C')}
+      {item(t('Paste here'), () => useStore.getState().paste(state.world), clipboard.length > 0, 'Ctrl+V')}
+      {item(t('Duplicate'), () => useStore.getState().duplicateSelection(), has, 'Ctrl+D')}
       <div className="ctx-sep" />
-      {item('Bring to front', () => selection.forEach((id) => useStore.getState().reorderObject(id, 'front')), has)}
-      {item('Send to back', () => selection.forEach((id) => useStore.getState().reorderObject(id, 'back')), has)}
+      {item(t('Bring to front'), () => selection.forEach((id) => useStore.getState().reorderObject(id, 'front')), has)}
+      {item(t('Send to back'), () => selection.forEach((id) => useStore.getState().reorderObject(id, 'back')), has)}
       <div className="ctx-sep" />
       {item(
-        locked ? 'Unlock' : 'Lock',
+        locked ? t('Unlock') : t('Lock'),
         () => useStore.getState().updateObjects(selection, { locked: !locked } as Partial<TacticalObject>),
         has,
       )}
-      {item('Delete', () => useStore.getState().deleteSelection(), has, 'Del')}
+      {item(t('Delete'), () => useStore.getState().deleteSelection(), has, 'Del')}
     </div>
   );
 }

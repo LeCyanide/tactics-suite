@@ -18,6 +18,7 @@ import { CLASS_COLORS } from '@/canvas/shipGlyphs';
 import { ClassIcon } from '../common/ClassIcon';
 import { uid } from '@/lib/util';
 import { CONSUMABLE_FILTERS, filterShips, hasRadar, hasSmoke, inScope, type ConsumableFilter } from '@/lib/shipFilters';
+import { N_, t, tn } from '@/i18n';
 
 /* ================================================================== */
 /* Map manager                                                         */
@@ -30,28 +31,28 @@ export function MapManagerModal() {
 
   return (
     <Modal
-      title="Map Manager"
-      subtitle={`${maps.length} maps stored locally`}
+      title={t('Map Manager')}
+      subtitle={tn(maps.length, '{n} map stored locally', '{n} maps stored locally')}
       size="wide"
       onClose={() => s().closeModal()}
       footer={
         <>
           <button className="btn primary" onClick={() => void s().importMaps()}>
-            <ImageIcon size={13} /> Import map image…
+            <ImageIcon size={13} /> {t('Import map image…')}
           </button>
           <span className="faint" style={{ fontSize: 11 }}>
-            PNG · JPG · WEBP
+            {t('PNG · JPG · WEBP')}
           </span>
           <span className="spacer" />
           <button className="btn ghost" onClick={() => s().closeModal()}>
-            Close
+            {t('Close')}
           </button>
         </>
       }
     >
       {maps.length === 0 ? (
         <div className="empty-note" style={{ padding: 40 }}>
-          No maps yet. Import a minimap image, then set its real size so ranges measure correctly.
+          {t('No maps yet. Import a minimap image, then set its real size so ranges measure correctly.')}
         </div>
       ) : (
         <div className="card-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(268px, 1fr))' }}>
@@ -102,17 +103,17 @@ function MapCard({ map, active }: { map: GameMap; active: boolean }) {
 
   return (
     <div className={`card${active ? ' selected' : ''}`}>
-      <div className="thumb">{thumb ? <img src={thumb} alt="" /> : <span className="faint">loading…</span>}</div>
+      <div className="thumb">{thumb ? <img src={thumb} alt="" /> : <span className="faint">{t('loading…')}</span>}</div>
       <InlineEdit value={map.name} onCommit={(v) => update({ name: v })} className="card-title" />
       <div className="card-sub">
         {map.pixelWidth} × {map.pixelHeight} px
       </div>
 
-      <Field label="Size">
+      <Field label={t('Size')}>
         <NumInput value={map.widthMeters / 1000} step={1} min={1} onChange={(v) => update({ widthMeters: v * 1000 })} suffix="km" />
         <NumInput value={map.heightMeters / 1000} step={1} min={1} onChange={(v) => update({ heightMeters: v * 1000 })} suffix="km" />
       </Field>
-      <Field label="Grid">
+      <Field label={t('Grid')}>
         <NumInput value={map.gridCols} step={1} min={1} max={40} onChange={(v) => update({ gridCols: Math.round(v) })} />
         <NumInput value={map.gridRows} step={1} min={1} max={40} onChange={(v) => update({ gridRows: Math.round(v) })} />
       </Field>
@@ -122,14 +123,14 @@ function MapCard({ map, active }: { map: GameMap; active: boolean }) {
 
       <div className="card-actions">
         <button className="btn sm primary" style={{ flex: 1 }} onClick={() => s().setPageMap(map.id)}>
-          Use on page
+          {t('Use on page')}
         </button>
-        <Tip label="Replace image" side="top">
+        <Tip label={t('Replace image')} side="top">
           <button className="btn sm" onClick={() => void s().replaceMapImage(map.id)}>
             <RefreshCw size={12} />
           </button>
         </Tip>
-        <Tip label="Duplicate" side="top">
+        <Tip label={t('Duplicate')} side="top">
           <button className="btn sm" onClick={() => void s().duplicateMap(map.id)}>
             <Copy size={12} />
           </button>
@@ -207,17 +208,17 @@ export function ShipDatabaseModal() {
 
   return (
     <Modal
-      title="Ship Database"
+      title={t('Ship Database')}
       subtitle={`${ships.length} ships · ${icons.length} icons`}
       size="wide"
       onClose={() => s().closeModal()}
       footer={
         <>
           <button className="btn primary" onClick={() => void s().importShipData()}>
-            <FileUp size={13} /> Import ship data…
+            <FileUp size={13} /> {t('Import ship data…')}
           </button>
           <button className="btn" onClick={() => void s().importIcons()}>
-            <ImageIcon size={13} /> Import icons…
+            <ImageIcon size={13} /> {t('Import icons…')}
           </button>
           <div style={{ display: 'flex', gap: 4 }}>
             <button className="btn sm" onClick={() => void s().exportShipData('json')}>
@@ -234,15 +235,15 @@ export function ShipDatabaseModal() {
           <button
             className="btn"
             onClick={() => {
-              const ship: Ship = { id: uid('ship-'), name: 'New ship', nation: 'Unknown', class: 'CA', tier: 10, iconId: null };
+              const ship: Ship = { id: uid('ship-'), name: t('New ship'), nation: t('Unknown'), class: 'CA', tier: 10, iconId: null };
               void s().upsertShip(ship);
               setSelectedId(ship.id);
             }}
           >
-            <Plus size={13} /> Add ship
+            <Plus size={13} /> {t('Add ship')}
           </button>
           <button className="btn ghost" onClick={() => s().closeModal()}>
-            Close
+            {t('Close')}
           </button>
         </>
       }
@@ -250,17 +251,17 @@ export function ShipDatabaseModal() {
       {ships.length === 0 ? (
         <div className="empty-note" style={{ padding: 34 }}>
           <Database size={26} style={{ opacity: 0.4, marginBottom: 10 }} />
-          <div>The ship database is empty.</div>
+          <div>{t('The ship database is empty.')}</div>
           <div style={{ marginTop: 6, maxWidth: 420, margin: '6px auto 0' }}>
-            Import ship data as JSON, CSV or YAML. Column names are matched loosely, so most spreadsheet exports work
+            {t('Import ship data as JSON, CSV or YAML. Column names are matched loosely, so most spreadsheet exports work')}
             as-is.
           </div>
           <div style={{ marginTop: 14, display: 'flex', gap: 8, justifyContent: 'center' }}>
             <button className="btn primary" onClick={() => void s().importShipData()}>
-              Import ship data…
+              {t('Import ship data…')}
             </button>
             <button className="btn" onClick={() => void s().loadSampleShips()}>
-              Load sample ships
+              {t('Load sample ships')}
             </button>
           </div>
         </div>
@@ -270,28 +271,28 @@ export function ShipDatabaseModal() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 130px 100px 90px 130px', gap: 6, marginBottom: 8 }}>
               <div style={{ position: 'relative' }}>
                 <Search size={12} style={{ position: 'absolute', left: 7, top: 6, color: 'var(--fg-faint)' }} />
-                <input type="search" placeholder="Search…" value={query} onChange={(e) => setQuery(e.target.value)} style={{ paddingLeft: 24 }} />
+                <input type="search" placeholder={t('Search…')} value={query} onChange={(e) => setQuery(e.target.value)} style={{ paddingLeft: 24 }} />
               </div>
               <select value={nation} onChange={(e) => setNation(e.target.value)}>
-                <option value="">All nations</option>
+                <option value="">{t('All nations')}</option>
                 {nations.map((n) => (
                   <option key={n}>{n}</option>
                 ))}
               </select>
               <select value={cls} onChange={(e) => setCls(e.target.value as ShipClass | '')}>
-                <option value="">All classes</option>
+                <option value="">{t('All classes')}</option>
                 {SHIP_CLASSES.map((c) => (
                   <option key={c}>{c}</option>
                 ))}
               </select>
               <select value={tier} onChange={(e) => setTier(e.target.value)}>
-                <option value="">All tiers</option>
+                <option value="">{t('All tiers')}</option>
                 {tiers.map((t) => (
                   <option key={t}>{t}</option>
                 ))}
               </select>
               <select value={consumable} onChange={(e) => setConsumable(e.target.value as ConsumableFilter)}>
-                <option value="">All consumables</option>
+                <option value="">{t('All consumables')}</option>
                 {CONSUMABLE_FILTERS.map((c) => (
                   <option key={c.value} value={c.value}>
                     {c.label}
@@ -303,10 +304,10 @@ export function ShipDatabaseModal() {
               <select
                 value={ruleset?.id ?? ''}
                 disabled={!rulesets.length}
-                title="Ship restrictions belonging to this project"
+                title={t('Ship restrictions belonging to this project')}
                 onChange={(e) => setRulesetId(e.target.value)}
               >
-                <option value="">No ruleset</option>
+                <option value="">{t('No ruleset')}</option>
                 {rulesets.map((r) => (
                   <option key={r.id} value={r.id}>
                     {r.name}
@@ -316,11 +317,11 @@ export function ShipDatabaseModal() {
               <button
                 className="btn sm"
                 disabled={!hasProject}
-                title={hasProject ? 'Add a ruleset to this project' : 'Open a project to add a ruleset'}
+                title={hasProject ? t('Add a ruleset to this project') : t('Open a project to add a ruleset')}
                 onClick={() => {
                   const created: ShipRuleset = {
                     id: uid('rules-'),
-                    name: 'New ruleset',
+                    name: t('New ruleset'),
                     tiers: [],
                     classes: [],
                     banned: [],
@@ -331,18 +332,18 @@ export function ShipDatabaseModal() {
                   setRulesetId(created.id);
                 }}
               >
-                <Plus size={12} /> Ruleset
+                <Plus size={12} /> {t('Ruleset')}
               </button>
               <select
                 value={blueprint?.id ?? ''}
                 disabled={!blueprints.length}
-                title="Ship lineups belonging to this project, placed in one go from the ship list"
+                title={t('Ship lineups belonging to this project, placed in one go from the ship list')}
                 onChange={(e) => {
                   setBlueprintId(e.target.value);
                   setBlueprintOnly(false);
                 }}
               >
-                <option value="">No blueprint</option>
+                <option value="">{t('No blueprint')}</option>
                 {blueprints.map((b) => (
                   <option key={b.id} value={b.id}>
                     {b.name}
@@ -352,15 +353,15 @@ export function ShipDatabaseModal() {
               <button
                 className="btn sm"
                 disabled={!hasProject}
-                title={hasProject ? 'Add a blueprint to this project' : 'Open a project to add a blueprint'}
+                title={hasProject ? t('Add a blueprint to this project') : t('Open a project to add a blueprint')}
                 onClick={() => {
-                  const created: ShipBlueprint = { id: uid('blueprint-'), name: 'New blueprint', ships: [] };
+                  const created: ShipBlueprint = { id: uid('blueprint-'), name: t('New blueprint'), ships: [] };
                   saveBlueprints([...blueprints, created]);
                   setBlueprintId(created.id);
                   setBlueprintOnly(false);
                 }}
               >
-                <Plus size={12} /> Blueprint
+                <Plus size={12} /> {t('Blueprint')}
               </button>
             </div>
 
@@ -410,8 +411,11 @@ export function ShipDatabaseModal() {
 
             {withoutIcon > 0 && (
               <div className="faint" style={{ fontSize: 11, marginBottom: 6 }}>
-                {withoutIcon} ship{withoutIcon === 1 ? '' : 's'} without an icon use a class glyph. Icon files are
-                matched to ships by file name.
+                {tn(
+                  withoutIcon,
+                  '{n} ship without an icon uses a class glyph. Icon files are matched to ships by file name.',
+                  '{n} ships without an icon use a class glyph. Icon files are matched to ships by file name.',
+                )}
               </div>
             )}
 
@@ -420,17 +424,17 @@ export function ShipDatabaseModal() {
                 <thead>
                   <tr>
                     <th style={{ width: 34 }} />
-                    <th style={compact ? { width: '70%' } : undefined}>Ship</th>
-                    <th style={compact ? { width: '30%' } : undefined}>Nation</th>
-                    <th style={{ width: 46 }}>Class</th>
-                    <th style={{ width: 40 }}>Tier</th>
-                    <th style={{ width: 62 }}>Conceal</th>
-                    <th style={{ width: 56 }}>Radar</th>
-                    <th style={{ width: 56 }}>Hydro</th>
-                    <th style={{ width: 50 }}>Smoke</th>
-                    <th style={{ width: 56 }}>Range</th>
-                    {ruleset && <th style={{ width: compact ? 1 : 96 }}>{pickingLimit ? 'In limit' : 'Ruleset'}</th>}
-                    {blueprint && <th style={{ width: compact ? 1 : 96 }}>Blueprint</th>}
+                    <th style={compact ? { width: '70%' } : undefined}>{t('Ship')}</th>
+                    <th style={compact ? { width: '30%' } : undefined}>{t('Nation')}</th>
+                    <th style={{ width: 46 }}>{t('Class')}</th>
+                    <th style={{ width: 40 }}>{t('Tier')}</th>
+                    <th style={{ width: 62 }}>{t('Conceal')}</th>
+                    <th style={{ width: 56 }}>{t('Radar')}</th>
+                    <th style={{ width: 56 }}>{t('Hydro')}</th>
+                    <th style={{ width: 50 }}>{t('Smoke')}</th>
+                    <th style={{ width: 56 }}>{t('Range')}</th>
+                    {ruleset && <th style={{ width: compact ? 1 : 96 }}>{pickingLimit ? t('In limit') : t('Ruleset')}</th>}
+                    {blueprint && <th style={{ width: compact ? 1 : 96 }}>{t('Blueprint')}</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -467,7 +471,7 @@ export function ShipDatabaseModal() {
                             <Switch
                               compact={compact}
                               on={pickingLimit.ships.includes(ship.id)}
-                              label={pickingLimit.ships.includes(ship.id) ? 'In limit' : 'Add'}
+                              label={pickingLimit.ships.includes(ship.id) ? t('In limit') : t('Add')}
                               onChange={() =>
                                 patchRuleset(ruleset.id, {
                                   limits: ruleset.limits.map((l) =>
@@ -480,7 +484,7 @@ export function ShipDatabaseModal() {
                             <Switch
                               compact={compact}
                               on={!ruleset.banned.includes(ship.id)}
-                              label={ruleset.banned.includes(ship.id) ? 'Banned' : 'Allowed'}
+                              label={ruleset.banned.includes(ship.id) ? t('Banned') : t('Allowed')}
                               offIsDanger
                               onChange={() => patchRuleset(ruleset.id, { banned: toggled(ruleset.banned, ship.id) })}
                             />
@@ -492,7 +496,7 @@ export function ShipDatabaseModal() {
                           <Switch
                             compact={compact}
                             on={blueprint.ships.includes(ship.id)}
-                            label={blueprint.ships.includes(ship.id) ? 'Added' : 'Add'}
+                            label={blueprint.ships.includes(ship.id) ? t('Added') : t('Add')}
                             onChange={() => patchBlueprint(blueprint.id, { ships: toggled(blueprint.ships, ship.id) })}
                           />
                         </td>
@@ -597,34 +601,34 @@ function BlueprintEditor({
   const nameOf = useMemo(() => new Map(ships.map((x) => [x.id, x.name])), [ships]);
   return (
     <div className="ruleset-editor">
-      <Field label="Blueprint">
+      <Field label={t('Blueprint')}>
         <NameInput value={blueprint.name} onCommit={(name) => onChange({ name })} />
-        <Tip label="Duplicate blueprint" side="top">
+        <Tip label={t('Duplicate blueprint')} side="top">
           <button className="btn sm" onClick={onDuplicate}>
             <Copy size={12} />
           </button>
         </Tip>
-        <Tip label="Delete blueprint" side="top">
+        <Tip label={t('Delete blueprint')} side="top">
           <button className="btn sm danger" onClick={onDelete}>
             <Trash2 size={12} />
           </button>
         </Tip>
       </Field>
-      <Field label="Ships">
+      <Field label={t('Ships')}>
         <div className="ruleset-chips">
           {blueprint.ships.length === 0 && (
             <span className="faint" style={{ fontSize: 11 }}>
-              None yet — switch ships on in the table to add them.
+              {t('None yet — switch ships on in the table to add them.')}
             </span>
           )}
           {blueprint.ships.map((id) => (
             <button
               key={id}
               className="variant-chip"
-              title="Remove from the blueprint"
+              title={t('Remove from the blueprint')}
               onClick={() => onChange({ ships: blueprint.ships.filter((x) => x !== id) })}
             >
-              {nameOf.get(id) ?? 'Missing ship'} <X size={10} style={{ verticalAlign: -1 }} />
+              {nameOf.get(id) ?? t('Missing ship')} <X size={10} style={{ verticalAlign: -1 }} />
             </button>
           ))}
           <button
@@ -632,7 +636,7 @@ function BlueprintEditor({
             disabled={!blueprint.ships.length && !only}
             onClick={() => onOnly(!only)}
           >
-            Show added
+            {t('Show added')}
           </button>
         </div>
       </Field>
@@ -676,7 +680,7 @@ function RulesetEditor({
   const chips = <T extends string | number>(all: T[], picked: T[], onPick: (next: T[]) => void) => (
     <div className="ruleset-chips">
       <button className={`variant-chip${picked.length ? '' : ' active'}`} onClick={() => onPick([])}>
-        Any
+        {t('Any')}
       </button>
       {all.map((value) => (
         <button
@@ -692,23 +696,23 @@ function RulesetEditor({
 
   return (
     <div className="ruleset-editor">
-      <Field label="Name">
+      <Field label={t('Name')}>
         <NameInput value={ruleset.name} onCommit={(name) => onChange({ name })} />
-        <Tip label="Duplicate ruleset" side="top">
+        <Tip label={t('Duplicate ruleset')} side="top">
           <button className="btn sm" onClick={onDuplicate}>
             <Copy size={12} />
           </button>
         </Tip>
-        <Tip label="Delete ruleset" side="top">
+        <Tip label={t('Delete ruleset')} side="top">
           <button className="btn sm danger" onClick={onDelete}>
             <Trash2 size={12} />
           </button>
         </Tip>
       </Field>
-      <Field label="Tiers">{chips([...tiers].sort((a, b) => a - b), ruleset.tiers, (next) => onChange({ tiers: next }))}</Field>
-      <Field label="Classes">{chips(SHIP_CLASSES, ruleset.classes, (next) => onChange({ classes: next }))}</Field>
+      <Field label={t('Tiers')}>{chips([...tiers].sort((a, b) => a - b), ruleset.tiers, (next) => onChange({ tiers: next }))}</Field>
+      <Field label={t('Classes')}>{chips(SHIP_CLASSES, ruleset.classes, (next) => onChange({ classes: next }))}</Field>
 
-      <Field label="Team size">
+      <Field label={t('Team size')}>
         <div style={{ width: 52, flex: 'none' }}>
           <NumInput
             value={ruleset.maxShips}
@@ -719,32 +723,32 @@ function RulesetEditor({
           />
         </div>
         <span className="faint" style={{ fontSize: 11 }}>
-          {ruleset.maxShips ? 'ships per team at most' : 'no limit — set a number to cap ships per team'}
+          {ruleset.maxShips ? t('ships per team at most') : t('no limit — set a number to cap ships per team')}
         </span>
       </Field>
 
-      <Field label="Bans">
+      <Field label={t('Bans')}>
         <div className="ruleset-chips">
           <span className="faint" style={{ fontSize: 11 }}>
-            {ruleset.banned.length} banned — switch a ship off in the table to ban it.
+            {t('{n} banned — switch a ship off in the table to ban it.', { n: ruleset.banned.length })}
           </span>
           <button
             className={`variant-chip${bannedOnly ? ' active' : ''}`}
             disabled={!ruleset.banned.length && !bannedOnly}
             onClick={() => onBannedOnly(!bannedOnly)}
           >
-            Show only banned
+            {t('Show only banned')}
           </button>
         </div>
       </Field>
 
-      <Field label="Limits">
+      <Field label={t('Limits')}>
         <div className="ruleset-limits">
           {ruleset.limits.map((limit) => {
             const picking = limit.id === limitId;
             return (
               <div key={limit.id} className={`ruleset-limit${picking ? ' active' : ''}`}>
-                <span>Max</span>
+                <span>{t('Max')}</span>
                 <div style={{ width: 52, flex: 'none' }}>
                   <NumInput
                     value={limit.max}
@@ -754,22 +758,22 @@ function RulesetEditor({
                     onChange={(v) => patchLimit(limit.id, { max: Math.max(0, Math.round(v)) })}
                   />
                 </div>
-                <span>of</span>
+                <span>{t('of')}</span>
                 <div className="ruleset-chips" style={{ flex: 1 }}>
                   {limit.ships.map((id) => (
                     <button
                       key={id}
                       className="variant-chip"
-                      title="Take out of this limit"
+                      title={t('Take out of this limit')}
                       onClick={() => patchLimit(limit.id, { ships: limit.ships.filter((x) => x !== id) })}
                     >
-                      {nameOf.get(id) ?? 'Unknown ship'} ×
+                      {nameOf.get(id) ?? t('Unknown ship')} ×
                     </button>
                   ))}
-                  {!limit.ships.length && <span className="faint">no ships yet</span>}
+                  {!limit.ships.length && <span className="faint">{t('no ships yet')}</span>}
                 </div>
                 <button className={`btn sm${picking ? ' primary' : ''}`} onClick={() => onLimitId(picking ? '' : limit.id)}>
-                  {picking ? 'Done' : 'Pick ships'}
+                  {picking ? t('Done') : t('Pick ships')}
                 </button>
                 <button
                   className="btn sm danger"
@@ -789,7 +793,7 @@ function RulesetEditor({
                 onLimitId(limit.id);
               }}
             >
-              <Plus size={12} /> Limit
+              <Plus size={12} /> {t('Limit')}
             </button>
           </div>
         </div>
@@ -815,7 +819,7 @@ function ShipEditor({ ship, onDeleted }: { ship: Ship; onDeleted: () => void }) 
   const set = (patch: Partial<Ship>) => void s().upsertShip({ ...ship, ...patch });
 
   const numField = (label: string, key: keyof Ship, suffix?: string, step = 0.1) => (
-    <Field label={label}>
+    <Field label={t(label)}>
       <NumInput
         value={(ship[key] as number) ?? 0}
         step={step}
@@ -827,14 +831,14 @@ function ShipEditor({ ship, onDeleted }: { ship: Ship; onDeleted: () => void }) 
 
   return (
     <div style={{ borderLeft: '1px solid var(--line)', paddingLeft: 12, overflowY: 'auto', maxHeight: 480 }}>
-      <SectionLabel>Identity</SectionLabel>
-      <Field label="Name">
+      <SectionLabel>{t('Identity')}</SectionLabel>
+      <Field label={t('Name')}>
         <input type="text" value={ship.name} onChange={(e) => set({ name: e.target.value })} />
       </Field>
-      <Field label="Nation">
+      <Field label={t('Nation')}>
         <input type="text" value={ship.nation} onChange={(e) => set({ nation: e.target.value })} />
       </Field>
-      <Field label="Class">
+      <Field label={t('Class')}>
         <select value={ship.class} onChange={(e) => set({ class: e.target.value as ShipClass })}>
           {SHIP_CLASSES.map((c) => (
             <option key={c} value={c}>
@@ -844,24 +848,24 @@ function ShipEditor({ ship, onDeleted }: { ship: Ship; onDeleted: () => void }) 
         </select>
       </Field>
       {ship.class === 'CA' && (
-        <Field label="Cruiser type">
+        <Field label={t('Cruiser type')}>
           <select
             value={ship.cruiserType ?? 'CA'}
             onChange={(e) => set({ cruiserType: e.target.value as 'CA' | 'CL' })}
           >
-            <option value="CA">CA — Heavy cruiser</option>
-            <option value="CL">CL — Light cruiser</option>
+            <option value="CA">{t('CA — Heavy cruiser')}</option>
+            <option value="CL">{t('CL — Light cruiser')}</option>
           </select>
         </Field>
       )}
-      <Field label="Tier">
+      <Field label={t('Tier')}>
         <NumInput value={ship.tier} min={1} max={12} step={1} onChange={(v) => set({ tier: Math.round(v) })} />
       </Field>
 
-      <SectionLabel>Map icon</SectionLabel>
-      <Field label="Icon">
+      <SectionLabel>{t('Map icon')}</SectionLabel>
+      <Field label={t('Icon')}>
         <select value={ship.iconId ?? ''} onChange={(e) => void s().assignIcon(ship.id, e.target.value || null)}>
-          <option value="">Class glyph (no icon)</option>
+          <option value="">{t('Class glyph (no icon)')}</option>
           {icons.map((i) => (
             <option key={i.id} value={i.id}>
               {i.name}
@@ -871,43 +875,43 @@ function ShipEditor({ ship, onDeleted }: { ship: Ship; onDeleted: () => void }) 
         <IconCell iconId={ship.iconId ?? null} cls={ship.class} />
       </Field>
       <button className="btn sm block" onClick={() => void s().importIcons()}>
-        Import icon files…
+        {t('Import icon files…')}
       </button>
 
-      <SectionLabel>Survivability</SectionLabel>
+      <SectionLabel>{t('Survivability')}</SectionLabel>
       {numField('HP', 'hp', undefined, 100)}
-      {numField('Speed', 'speed_kn', 'kn')}
-      {numField('Rudder', 'rudderShift_s', 's')}
-      {numField('Turning', 'turningCircle_m', 'm', 10)}
+      {numField(N_('Speed'), 'speed_kn', 'kn')}
+      {numField(N_('Rudder'), 'rudderShift_s', 's')}
+      {numField(N_('Turning'), 'turningCircle_m', 'm', 10)}
 
-      <SectionLabel>Detection</SectionLabel>
-      {numField('Concealment', 'concealment_km', 'km')}
-      {numField('Air detection', 'concealmentAir_km', 'km')}
+      <SectionLabel>{t('Detection')}</SectionLabel>
+      {numField(N_('Concealment'), 'concealment_km', 'km')}
+      {numField(N_('Air detection'), 'concealmentAir_km', 'km')}
 
-      <SectionLabel>Armament</SectionLabel>
-      {numField('Main range', 'mainBatteryRange_km', 'km')}
-      <Field label="Main guns">
+      <SectionLabel>{t('Armament')}</SectionLabel>
+      {numField(N_('Main range'), 'mainBatteryRange_km', 'km')}
+      <Field label={t('Main guns')}>
         <input type="text" value={ship.mainBattery ?? ''} onChange={(e) => set({ mainBattery: e.target.value })} />
       </Field>
-      {numField('Secondary', 'secondaryRange_km', 'km')}
-      {numField('Torpedo range', 'torpedoRange_km', 'km')}
-      {numField('Torpedo arc', 'torpedoArc_deg', '°', 5)}
-      {numField('Airstrike min', 'airstrikeMinRange_km', 'km')}
-      {numField('Airstrike max', 'airstrikeMaxRange_km', 'km')}
-      {numField('AA range', 'aaRange_km', 'km')}
+      {numField(N_('Secondary'), 'secondaryRange_km', 'km')}
+      {numField(N_('Torpedo range'), 'torpedoRange_km', 'km')}
+      {numField(N_('Torpedo arc'), 'torpedoArc_deg', '°', 5)}
+      {numField(N_('Airstrike min'), 'airstrikeMinRange_km', 'km')}
+      {numField(N_('Airstrike max'), 'airstrikeMaxRange_km', 'km')}
+      {numField(N_('AA range'), 'aaRange_km', 'km')}
 
-      <SectionLabel>Consumables</SectionLabel>
-      {numField('Radar', 'radar_km', 'km')}
-      {numField('Radar time', 'radarDuration_s', 's', 5)}
-      {numField('Hydro', 'hydro_km', 'km')}
-      {numField('Hydro time', 'hydroDuration_s', 's', 5)}
-      <Check label="Smoke generator" checked={hasSmoke(ship)} onChange={(v) => set({ smoke: v })} />
-      {numField('Smoke radius', 'smokeRadius_km', 'km', 0.05)}
-      {numField('Smoke time', 'smokeDuration_s', 's', 5)}
-      <Check label="Fighter" checked={!!ship.fighter} onChange={(v) => set({ fighter: v })} />
-      <Check label="Spotting aircraft" checked={!!ship.spottingAircraft} onChange={(v) => set({ spottingAircraft: v })} />
+      <SectionLabel>{t('Consumables')}</SectionLabel>
+      {numField(N_('Radar'), 'radar_km', 'km')}
+      {numField(N_('Radar time'), 'radarDuration_s', 's', 5)}
+      {numField(N_('Hydro'), 'hydro_km', 'km')}
+      {numField(N_('Hydro time'), 'hydroDuration_s', 's', 5)}
+      <Check label={t('Smoke generator')} checked={hasSmoke(ship)} onChange={(v) => set({ smoke: v })} />
+      {numField(N_('Smoke radius'), 'smokeRadius_km', 'km', 0.05)}
+      {numField(N_('Smoke time'), 'smokeDuration_s', 's', 5)}
+      <Check label={t('Fighter')} checked={!!ship.fighter} onChange={(v) => set({ fighter: v })} />
+      <Check label={t('Spotting aircraft')} checked={!!ship.spottingAircraft} onChange={(v) => set({ spottingAircraft: v })} />
 
-      <SectionLabel>Notes</SectionLabel>
+      <SectionLabel>{t('Notes')}</SectionLabel>
       <textarea rows={3} value={ship.notes ?? ''} onChange={(e) => set({ notes: e.target.value })} />
 
       <button
@@ -915,9 +919,9 @@ function ShipEditor({ ship, onDeleted }: { ship: Ship; onDeleted: () => void }) 
         style={{ marginTop: 10 }}
         onClick={async () => {
           const ok = await confirmDialog({
-            title: 'Delete ship',
-            message: `Remove "${ship.name}" from the ship database?`,
-            confirmLabel: 'Delete',
+            title: t('Delete ship'),
+            message: t('Remove "{name}" from the ship database?', { name: ship.name }),
+            confirmLabel: t('Delete'),
             danger: true,
           });
           if (!ok) return;
@@ -925,7 +929,7 @@ function ShipEditor({ ship, onDeleted }: { ship: Ship; onDeleted: () => void }) 
           onDeleted();
         }}
       >
-        <Trash2 size={12} /> Delete ship
+        <Trash2 size={12} /> {t('Delete ship')}
       </button>
     </div>
   );
