@@ -55,6 +55,23 @@ fn command(d: Draw<'_>) -> DrawCommand {
             invader_color,
             flag_icon: None,
         },
+        Draw::WeatherZone { pos: p, radius } => DrawCommand::WeatherZone {
+            pos: pos(p),
+            radius,
+        },
+        Draw::BuffZone {
+            pos: p,
+            radius,
+            color,
+            alpha,
+            marker_name,
+        } => DrawCommand::BuffZone {
+            pos: pos(p),
+            radius,
+            color,
+            alpha,
+            marker_name: s(marker_name),
+        },
         Draw::Building {
             pos: p,
             color,
