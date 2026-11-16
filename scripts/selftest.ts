@@ -26,6 +26,7 @@ import { LEGACY_APP_FOLDERS, adoptLegacyStore } from '../electron/storage/migrat
 import { testReplayArchive } from './selftest-archive';
 import { testSidecar } from './selftest-sidecar';
 import { testReplayTimeline } from './selftest-timeline';
+import { testTimelineDiff } from './selftest-timeline-diff';
 import { testHistory } from './selftest-history';
 import { MAP_SPEED_FACTOR, formatDuration, travelTime } from '../src/lib/travel';
 import { compareVersions, notesSince, onLaunch, type VersionNotes } from '../src/lib/patchNotes';
@@ -703,6 +704,7 @@ async function main(): Promise<void> {
   await testTravelTime();
   await testHistory(check);
   await testReplayTimeline(check);
+  testTimelineDiff(check);
   await testSidecar(check);
   await testReplayArchive(check);
   console.log(failures === 0 ? '\nall checks passed\n' : `\n${failures} check(s) failed\n`);

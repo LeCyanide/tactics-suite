@@ -60,6 +60,15 @@ Electron, against a stubbed `window.api`:
 npm run dev:replay -- dev/fixtures/<file>.wtreply
 ```
 
+Two timelines baked from the same replay can be compared record by record —
+the acceptance test for changing how the sidecar parses replays. Records pair
+by entity or plane id (or by position where they have none), numbers compare
+within tolerances, and it exits 1 above `--max-rate` (a percentage, default 0):
+
+```bash
+npm run diff-timeline -- old.wtreply new.wtreply --max-rate 0.5
+```
+
 ## Updates
 
 A build made with `UPDATE_URL` and `UPDATE_TOKEN` set (see
