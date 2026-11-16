@@ -159,6 +159,34 @@ fn command(d: Draw<'_>) -> DrawCommand {
             color,
             secondary: true,
         } => DrawCommand::SecondaryShotTracerTip { at: pos(at), color },
+        Draw::PatrolRadius {
+            plane_id,
+            pos: p,
+            radius,
+            color,
+            alpha,
+        } => DrawCommand::PatrolRadius {
+            plane_id: plane_id.into(),
+            pos: pos(p),
+            radius_px: radius,
+            color,
+            alpha,
+        },
+        Draw::Plane {
+            plane_id,
+            owner_entity_id,
+            pos: p,
+            icon_key,
+            player_name,
+            ship_name,
+        } => DrawCommand::Plane {
+            plane_id: plane_id.into(),
+            owner_entity_id: owner_entity_id.into(),
+            pos: pos(p),
+            icon_key,
+            player_name: s(player_name),
+            ship_name: s(ship_name),
+        },
     }
 }
 
