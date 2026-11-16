@@ -96,6 +96,19 @@ fn command(d: Draw<'_>) -> DrawCommand {
             is_disconnected: false,
             name_color: None,
         },
+        Draw::CameraDirection {
+            entity_id,
+            pos: p,
+            yaw,
+            color,
+            length,
+        } => DrawCommand::CameraDirection {
+            entity_id: entity_id.into(),
+            pos: pos(p),
+            yaw,
+            color,
+            length,
+        },
         Draw::HealthBar {
             entity_id,
             pos: p,
