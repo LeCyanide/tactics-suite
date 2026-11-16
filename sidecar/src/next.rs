@@ -21,6 +21,8 @@ use replay_parser::res::InstallScripts;
 use replay_parser::res::Resources;
 use replay_parser::world::World;
 use wows_minimap_renderer::DrawCommand;
+use wows_minimap_renderer::draw_command::BuildingIconType;
+use wows_minimap_renderer::draw_command::BuildingRelation;
 use wows_minimap_renderer::ShipVisibility;
 use wows_minimap_renderer::map_data::MinimapPos;
 
@@ -52,6 +54,36 @@ fn command(d: Draw<'_>) -> DrawCommand {
             progress,
             invader_color,
             flag_icon: None,
+        },
+        Draw::Building {
+            pos: p,
+            color,
+            is_alive,
+            icon,
+            relation,
+        } => DrawCommand::Building {
+            pos: pos(p),
+            color,
+            is_alive,
+            icon_type: icon.map(|i| match i {
+                "airbase" => BuildingIconType::Airbase,
+                "air_defence" => BuildingIconType::AirDefence,
+                "artillery" => BuildingIconType::Artillery,
+                "generator" => BuildingIconType::Generator,
+                "radar" => BuildingIconType::Radar,
+                "station" => BuildingIconType::Station,
+                "supply" => BuildingIconType::Supply,
+                _ => BuildingIconType::Tower,
+            }),
+            relation: match relation {
+                "ally" => BuildingRelation::Ally,
+                "neutral" => BuildingRelation::Neutral,
+                "dead" => BuildingRelation::Dead,
+                "suppressed_ally" => BuildingRelation::SuppressedAlly,
+                "suppressed_enemy" => BuildingRelation::SuppressedEnemy,
+                "suppressed_neutral" => BuildingRelation::SuppressedNeutral,
+                _ => BuildingRelation::Enemy,
+            },
         },
         Draw::Torpedo { pos: p, color } => DrawCommand::Torpedo { pos: pos(p), color },
         Draw::Smoke {
