@@ -23,6 +23,10 @@ wows-replay-insights = { path = "vendor/wows-toolkit/crates/wows-replay-insights
 # Ship names live in the game's gettext catalog; without it the renderer emits
 # no ship_name at all.
 gettext = "0.4"
+# The suite's own replay parser, behind `bake --engine parser` until it
+# replaces the toolkit. shortcut: a path to a sibling checkout of
+# LeCyanide/replay-parser; switch to a git dependency before CI builds it.
+wows-replay-parser = { path = "../../replay-parser" }
 serde_json = "1"
 
 [profile.release]

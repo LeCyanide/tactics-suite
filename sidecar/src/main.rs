@@ -17,8 +17,10 @@
 //!       header and never touches the game install. This is what the replay
 //!       library list is built from.
 //!
-//!   bake --game <dir> --replay <file> [--fps 10] [--out <file>]
+//!   bake --game <dir> --replay <file> [--fps 10] [--out <file>] [--engine toolkit|parser]
 //!       The full timeline. Writes the blob to `--out`, or stdout if omitted.
+//!       `--engine parser` bakes with the suite's own replay parser (see
+//!       `next`), for comparison with `npm run diff-timeline`.
 //!
 //!   caps --game <dir> --replay <file>
 //!       The capture points the battle opens with, as JSON on stdout. This is
@@ -28,6 +30,7 @@
 //! stays a clean byte stream.
 
 mod format;
+mod next;
 
 use std::io::Write;
 use std::path::Path;
@@ -77,7 +80,7 @@ const USAGE: &str = "\
 wows-replay-sidecar
 
   probe --replay <file>
-  bake  --game <dir> --replay <file> [--fps <n>] [--out <file>]
+  bake  --game <dir> --replay <file> [--fps <n>] [--out <file>] [--engine toolkit|parser]
   caps  --game <dir> --replay <file>
 
 Progress and errors are newline-delimited JSON on stderr.";
@@ -95,11 +98,15 @@ fn parse_flags(args: &[String], allowed: &[&str]) -> Result<Vec<(String, String)
     let mut out = Vec::new();
     let mut i = 0;
     while i < args.len() {
-        let key = args[i].strip_prefix("--").ok_or_else(|| format!("expected a --flag, got {:?}", args[i]))?;
+        let key = args[i]
+            .strip_prefix("--")
+            .ok_or_else(|| format!("expected a --flag, got {:?}", args[i]))?;
         if !allowed.contains(&key) {
             return Err(format!("unknown flag --{key}"));
         }
-        let value = args.get(i + 1).ok_or_else(|| format!("--{key} needs a value"))?;
+        let value = args
+            .get(i + 1)
+            .ok_or_else(|| format!("--{key} needs a value"))?;
         out.push((key.to_owned(), value.clone()));
         i += 2;
     }
@@ -107,7 +114,10 @@ fn parse_flags(args: &[String], allowed: &[&str]) -> Result<Vec<(String, String)
 }
 
 fn flag<'a>(flags: &'a [(String, String)], name: &str) -> Option<&'a str> {
-    flags.iter().find(|(k, _)| k == name).map(|(_, v)| v.as_str())
+    flags
+        .iter()
+        .find(|(k, _)| k == name)
+        .map(|(_, v)| v.as_str())
 }
 
 fn require<'a>(flags: &'a [(String, String)], name: &str) -> Result<&'a str, String> {
@@ -118,7 +128,8 @@ fn require<'a>(flags: &'a [(String, String)], name: &str) -> Result<&'a str, Str
 fn probe(args: &[String]) -> Result<(), String> {
     let flags = parse_flags(args, &["replay"])?;
     let path = PathBuf::from(require(&flags, "replay")?);
-    let replay = ReplayFile::from_file(&path).map_err(|e| format!("could not read replay: {e:?}"))?;
+    let replay =
+        ReplayFile::from_file(&path).map_err(|e| format!("could not read replay: {e:?}"))?;
     let meta = &replay.meta;
 
     let json = serde_json::json!({
@@ -187,36 +198,58 @@ fn render_options() -> RenderOptions {
 }
 
 fn bake(args: &[String]) -> Result<(), String> {
-    let flags = parse_flags(args, &["game", "replay", "fps", "out"])?;
+    let flags = parse_flags(args, &["game", "replay", "fps", "out", "engine"])?;
     let game_dir = PathBuf::from(require(&flags, "game")?);
     let replay_path = PathBuf::from(require(&flags, "replay")?);
     let fps: f32 = match flag(&flags, "fps") {
-        Some(s) => s.parse().map_err(|_| format!("--fps {s:?} is not a number"))?,
+        Some(s) => s
+            .parse()
+            .map_err(|_| format!("--fps {s:?} is not a number"))?,
         None => DEFAULT_FPS,
     };
     if !(fps > 0.0 && fps <= 60.0) {
         return Err(format!("--fps must be between 0 and 60, got {fps}"));
     }
     let out_path = flag(&flags, "out").map(PathBuf::from);
+    match flag(&flags, "engine").unwrap_or("toolkit") {
+        "toolkit" => {}
+        "parser" => {
+            let blob = next::bake(&game_dir, &replay_path, fps)?;
+            return match &out_path {
+                Some(path) => write_file(path, &blob),
+                None => std::io::stdout()
+                    .lock()
+                    .write_all(&blob)
+                    .map_err(|e| format!("could not write to stdout: {e}")),
+            };
+        }
+        other => return Err(format!("--engine must be toolkit or parser, got {other:?}")),
+    }
 
     let started = Instant::now();
 
     // ---- game data. The expensive part (GameParams) is ~3.4 s.
     // TODO: cache it across bakes in a long-lived sidecar process.
     emit(&serde_json::json!({ "t": "stage", "stage": "loading-game-data" }));
-    let replay = ReplayFile::from_file(&replay_path).map_err(|e| format!("could not read replay: {e:?}"))?;
+    let replay =
+        ReplayFile::from_file(&replay_path).map_err(|e| format!("could not read replay: {e:?}"))?;
     let version = Version::from_client_exe(&replay.meta.clientVersionFromExe);
     let resources = game_data::load_game_resources(&game_dir, &version)
         .map_err(|e| format!("could not load game data for {version:?}: {e}"))?;
     let vfs = resources.vfs;
     let specs = resources.specs;
-    let game_params =
-        GameMetadataProvider::from_vfs(&vfs).map_err(|e| format!("could not load GameParams: {e:?}"))?;
+    let game_params = GameMetadataProvider::from_vfs(&vfs)
+        .map_err(|e| format!("could not load GameParams: {e:?}"))?;
     // Ship names come from the game's gettext catalog. Without it the renderer
     // emits no ship_name, so the timeline would carry only player names.
-    let build = version.build_number().ok_or("replay version carries no build number")?;
+    let build = version
+        .build_number()
+        .ok_or("replay version carries no build number")?;
     let mo_path = game_data::translations_path(&game_dir, build);
-    match std::fs::File::open(&mo_path).ok().and_then(|f| gettext::Catalog::parse(f).ok()) {
+    match std::fs::File::open(&mo_path)
+        .ok()
+        .and_then(|f| gettext::Catalog::parse(f).ok())
+    {
         Some(catalog) => game_params.set_translations(catalog),
         None => emit(&serde_json::json!({
             "t": "warning",
@@ -242,15 +275,26 @@ fn bake(args: &[String]) -> Result<(), String> {
 
     let mut world = wows_battle_world::BattleWorld::new(meta, provider, Some(constants));
     for (entity_id, fact) in &facts {
-        let inventory = wows_replay_insights::build::build_inventory_from_facts(fact, provider, version);
+        let inventory =
+            wows_replay_insights::build::build_inventory_from_facts(fact, provider, version);
         if !inventory.is_empty() {
             world.set_consumable_inventory(*entity_id, inventory);
         }
     }
 
-    let mut renderer = MinimapRenderer::new(Some(MapInfo { space_size }), provider, version, render_options());
-    let salvo_flight_times =
-        wows_battle_world::scan::scan_salvo_flight_times(&replay.meta, provider, constants, version, &replay);
+    let mut renderer = MinimapRenderer::new(
+        Some(MapInfo { space_size }),
+        provider,
+        version,
+        render_options(),
+    );
+    let salvo_flight_times = wows_battle_world::scan::scan_salvo_flight_times(
+        &replay.meta,
+        provider,
+        constants,
+        version,
+        &replay,
+    );
     renderer.set_salvo_flight_times(std::sync::Arc::new(salvo_flight_times));
 
     // ---- the bake itself
@@ -280,7 +324,9 @@ fn bake(args: &[String]) -> Result<(), String> {
         // A truncated or unparseable tail is normal: replays are cut off when
         // the client exits. Everything up to that point is still good, so stop
         // rather than fail.
-        let Ok(packet) = parser.parse_packet(&mut remaining) else { break };
+        let Ok(packet) = parser.parse_packet(&mut remaining) else {
+            break;
+        };
         world.process(&packet);
         let clock = packet.clock.0;
         battle_secs = battle_secs.max(clock);
@@ -298,14 +344,19 @@ fn bake(args: &[String]) -> Result<(), String> {
         let frames = writer.frame_count();
         if frames >= last_reported + 250 {
             last_reported = frames;
-            emit(&serde_json::json!({ "t": "progress", "frame": frames, "total": expected_frames }));
+            emit(
+                &serde_json::json!({ "t": "progress", "frame": frames, "total": expected_frames }),
+            );
         }
     }
 
     let frame_count = writer.frame_count();
     let record_count = writer.record_count();
-    let skipped: serde_json::Map<String, serde_json::Value> =
-        writer.skipped().iter().map(|(k, v)| ((*k).to_owned(), serde_json::json!(v))).collect();
+    let skipped: serde_json::Map<String, serde_json::Value> = writer
+        .skipped()
+        .iter()
+        .map(|(k, v)| ((*k).to_owned(), serde_json::json!(v)))
+        .collect();
 
     let header = serde_json::json!({
         "replay": replay_path.file_name().map(|n| n.to_string_lossy().into_owned()),
@@ -334,8 +385,10 @@ fn bake(args: &[String]) -> Result<(), String> {
         Some(path) => write_file(path, &blob)?,
         None => {
             let mut out = std::io::stdout().lock();
-            out.write_all(&blob).map_err(|e| format!("could not write to stdout: {e}"))?;
-            out.flush().map_err(|e| format!("could not flush stdout: {e}"))?;
+            out.write_all(&blob)
+                .map_err(|e| format!("could not write to stdout: {e}"))?;
+            out.flush()
+                .map_err(|e| format!("could not flush stdout: {e}"))?;
         }
     }
 
@@ -367,21 +420,24 @@ fn caps(args: &[String]) -> Result<(), String> {
     let game_dir = PathBuf::from(require(&flags, "game")?);
     let replay_path = PathBuf::from(require(&flags, "replay")?);
 
-    let replay = ReplayFile::from_file(&replay_path).map_err(|e| format!("could not read replay: {e:?}"))?;
+    let replay =
+        ReplayFile::from_file(&replay_path).map_err(|e| format!("could not read replay: {e:?}"))?;
     let version = Version::from_client_exe(&replay.meta.clientVersionFromExe);
     let resources = game_data::load_game_resources(&game_dir, &version)
         .map_err(|e| format!("could not load game data for {version:?}: {e}"))?;
     let vfs = resources.vfs;
     let specs = resources.specs;
-    let provider =
-        GameMetadataProvider::from_vfs(&vfs).map_err(|e| format!("could not load GameParams: {e:?}"))?;
+    let provider = GameMetadataProvider::from_vfs(&vfs)
+        .map_err(|e| format!("could not load GameParams: {e:?}"))?;
     let constants = GameConstants::from_vfs(&vfs);
 
     let mut world = wows_battle_world::BattleWorld::new(&replay.meta, &provider, Some(&constants));
     let mut parser = wows_replays::packet2::Parser::with_version(&specs, version);
     let mut remaining = replay.packet_data();
     while !remaining.is_empty() {
-        let Ok(packet) = parser.parse_packet(&mut remaining) else { break };
+        let Ok(packet) = parser.parse_packet(&mut remaining) else {
+            break;
+        };
         if packet.clock.0 > 0.0 {
             break;
         }
@@ -395,7 +451,11 @@ fn caps(args: &[String]) -> Result<(), String> {
             let pos = cp.position?;
             // The game numbers these from Control = 0 in declaration order, and
             // a type this build of the crates does not know is drawn as one.
-            let cp_type = cp.control_point_type.as_ref().and_then(|r| r.known().copied()).map_or(0, |t| t as i64);
+            let cp_type = cp
+                .control_point_type
+                .as_ref()
+                .and_then(|r| r.known().copied())
+                .map_or(0, |t| t as i64);
             Some(serde_json::json!({
                 "index": cp.index,
                 "x": pos.x,
@@ -424,7 +484,8 @@ fn caps(args: &[String]) -> Result<(), String> {
 
 fn write_file(path: &Path, bytes: &[u8]) -> Result<(), String> {
     if let Some(parent) = path.parent().filter(|p| !p.as_os_str().is_empty()) {
-        std::fs::create_dir_all(parent).map_err(|e| format!("could not create {}: {e}", parent.display()))?;
+        std::fs::create_dir_all(parent)
+            .map_err(|e| format!("could not create {}: {e}", parent.display()))?;
     }
     std::fs::write(path, bytes).map_err(|e| format!("could not write {}: {e}", path.display()))
 }

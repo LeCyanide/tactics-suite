@@ -212,7 +212,10 @@ impl Interner {
         if let Some(&id) = self.index.get(s) {
             return id;
         }
-        assert!(self.strings.len() < u16::MAX as usize, "string table overflow");
+        assert!(
+            self.strings.len() < u16::MAX as usize,
+            "string table overflow"
+        );
         self.strings.push(s.to_owned());
         let id = self.strings.len() as u16;
         self.index.insert(s.to_owned(), id);
@@ -343,7 +346,12 @@ impl TimelineWriter {
                 self.frames.pos(*pos);
                 self.frames.rgb(*color);
             }
-            DrawCommand::Smoke { pos, radius, color, alpha } => {
+            DrawCommand::Smoke {
+                pos,
+                radius,
+                color,
+                alpha,
+            } => {
                 self.frames.u8(tag::SMOKE);
                 self.frames.pos(*pos);
                 self.frames.i16(r16(*radius));
@@ -397,7 +405,14 @@ impl TimelineWriter {
                 self.frames.u16(ship_id);
                 self.frames.rgb(name_color.unwrap_or([0, 0, 0]));
             }
-            DrawCommand::HealthBar { entity_id, pos, fraction, fill_color, background_color, background_alpha } => {
+            DrawCommand::HealthBar {
+                entity_id,
+                pos,
+                fraction,
+                fill_color,
+                background_color,
+                background_alpha,
+            } => {
                 self.frames.u8(tag::HEALTH_BAR);
                 self.frames.u32(entity_id.raw());
                 self.frames.pos(*pos);
@@ -406,7 +421,16 @@ impl TimelineWriter {
                 self.frames.rgb(*background_color);
                 self.frames.u8(q8(*background_alpha));
             }
-            DrawCommand::DeadShip { entity_id, pos, yaw, species, color, is_self, player_name, ship_name } => {
+            DrawCommand::DeadShip {
+                entity_id,
+                pos,
+                yaw,
+                species,
+                color,
+                is_self,
+                player_name,
+                ship_name,
+            } => {
                 let species_id = self.interner.intern_opt(species.as_ref());
                 let player_id = self.interner.intern_opt(player_name.as_ref());
                 let ship_id = self.interner.intern_opt(ship_name.as_ref());
@@ -427,7 +451,13 @@ impl TimelineWriter {
                 self.frames.u16(player_id);
                 self.frames.u16(ship_id);
             }
-            DrawCommand::BuffZone { pos, radius, color, alpha, marker_name } => {
+            DrawCommand::BuffZone {
+                pos,
+                radius,
+                color,
+                alpha,
+                marker_name,
+            } => {
                 let marker_id = self.interner.intern_opt(marker_name.as_ref());
                 self.frames.u8(tag::BUFF_ZONE);
                 self.frames.pos(*pos);
@@ -436,7 +466,16 @@ impl TimelineWriter {
                 self.frames.u8(q8(*alpha));
                 self.frames.u16(marker_id);
             }
-            DrawCommand::CapturePoint { pos, radius, color, alpha, label, progress, invader_color, .. } => {
+            DrawCommand::CapturePoint {
+                pos,
+                radius,
+                color,
+                alpha,
+                label,
+                progress,
+                invader_color,
+                ..
+            } => {
                 let label_id = self.interner.intern(label);
                 self.frames.u8(tag::CAPTURE_POINT);
                 self.frames.pos(*pos);
@@ -448,7 +487,13 @@ impl TimelineWriter {
                 self.frames.rgb(invader_color.unwrap_or([0, 0, 0]));
                 self.frames.u8(u8::from(invader_color.is_some()));
             }
-            DrawCommand::CameraDirection { entity_id, pos, yaw, color, length } => {
+            DrawCommand::CameraDirection {
+                entity_id,
+                pos,
+                yaw,
+                color,
+                length,
+            } => {
                 self.frames.u8(tag::CAMERA_DIRECTION);
                 self.frames.u32(entity_id.raw());
                 self.frames.pos(*pos);
@@ -456,7 +501,13 @@ impl TimelineWriter {
                 self.frames.rgb(*color);
                 self.frames.i16(r16(*length));
             }
-            DrawCommand::Building { pos, color, is_alive, icon_type, relation } => {
+            DrawCommand::Building {
+                pos,
+                color,
+                is_alive,
+                icon_type,
+                relation,
+            } => {
                 self.frames.u8(tag::BUILDING);
                 self.frames.pos(*pos);
                 self.frames.rgb(*color);
@@ -469,7 +520,14 @@ impl TimelineWriter {
                 self.frames.pos(*pos);
                 self.frames.i16(r16(*radius));
             }
-            DrawCommand::Plane { plane_id, owner_entity_id, pos, icon_key, player_name, ship_name } => {
+            DrawCommand::Plane {
+                plane_id,
+                owner_entity_id,
+                pos,
+                icon_key,
+                player_name,
+                ship_name,
+            } => {
                 let icon_id = self.interner.intern(icon_key);
                 let player_id = self.interner.intern_opt(player_name.as_ref());
                 let ship_id = self.interner.intern_opt(ship_name.as_ref());
@@ -481,7 +539,13 @@ impl TimelineWriter {
                 self.frames.u16(player_id);
                 self.frames.u16(ship_id);
             }
-            DrawCommand::ConsumableRadius { entity_id, pos, radius_px, color, alpha } => {
+            DrawCommand::ConsumableRadius {
+                entity_id,
+                pos,
+                radius_px,
+                color,
+                alpha,
+            } => {
                 self.frames.u8(tag::CONSUMABLE_RADIUS);
                 self.frames.u32(entity_id.raw());
                 self.frames.pos(*pos);
@@ -489,7 +553,13 @@ impl TimelineWriter {
                 self.frames.rgb(*color);
                 self.frames.u8(q8(*alpha));
             }
-            DrawCommand::PatrolRadius { plane_id, pos, radius_px, color, alpha } => {
+            DrawCommand::PatrolRadius {
+                plane_id,
+                pos,
+                radius_px,
+                color,
+                alpha,
+            } => {
                 self.frames.u8(tag::PATROL_RADIUS);
                 self.frames.u64(plane_id.raw());
                 self.frames.pos(*pos);
@@ -529,7 +599,11 @@ impl TimelineWriter {
                 self.frames.u8(circle_kind_id(*kind));
                 self.frames.u16(player_id);
             }
-            DrawCommand::PositionTrail { entity_id, player_name, points } => {
+            DrawCommand::PositionTrail {
+                entity_id,
+                player_name,
+                points,
+            } => {
                 let player_id = self.interner.intern_opt(player_name.as_ref());
                 let n = u16::try_from(points.len()).unwrap_or(u16::MAX);
                 self.frames.u8(tag::POSITION_TRAIL);
@@ -564,8 +638,11 @@ impl TimelineWriter {
         mut header: serde_json::Value,
     ) -> Vec<u8> {
         let strings = std::mem::take(&mut self.interner.strings);
-        let skipped: serde_json::Map<String, serde_json::Value> =
-            self.skipped.iter().map(|(k, v)| ((*k).to_owned(), serde_json::json!(v))).collect();
+        let skipped: serde_json::Map<String, serde_json::Value> = self
+            .skipped
+            .iter()
+            .map(|(k, v)| ((*k).to_owned(), serde_json::json!(v)))
+            .collect();
 
         if let Some(obj) = header.as_object_mut() {
             obj.insert("strings".into(), serde_json::json!(strings));
