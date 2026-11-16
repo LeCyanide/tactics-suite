@@ -2101,22 +2101,6 @@ select.armed {
 .row.stacked.unplayable .stacked-sub {
   opacity: 0.55;
 }
-/* The MIT notice in the About panel: shown in full, but not at the cost of the
-   panel's height. */
-.licence {
-  max-height: 120px;
-  overflow: auto;
-  margin: 8px 0 0;
-  padding: 6px 8px;
-  border: 1px solid var(--line);
-  border-radius: 3px;
-  background: var(--bg-1);
-  color: var(--fg-faint);
-  font-family: var(--mono);
-  font-size: 9.5px;
-  line-height: 1.5;
-  white-space: pre-wrap;
-}
 
 /* The library folder, under the list: where the files are, and a way to move them. */
 .replay-root {

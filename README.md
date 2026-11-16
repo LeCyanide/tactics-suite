@@ -69,13 +69,12 @@ within tolerances, and it exits 1 above `--max-rate` (a percentage, default 0):
 npm run diff-timeline -- old.wtreply new.wtreply --max-rate 0.5
 ```
 
-The candidate is built into the same sidecar: `bake --engine parser` bakes
-with the suite's own replay parser (a sibling checkout of `replay-parser`,
-see `sidecar/Cargo.toml`) instead of the toolkit, so one binary gives both:
+Bake both with the sidecar (built on the suite's own replay parser, a sibling
+checkout of `replay-parser`; see `sidecar/Cargo.toml`) before and after the
+parser change:
 
 ```bash
-wows-replay-sidecar bake --game <dir> --replay <file> --out old.wtreply
-wows-replay-sidecar bake --game <dir> --replay <file> --out new.wtreply --engine parser
+wows-replay-sidecar bake --game <dir> --replay <file> --out new.wtreply
 ```
 
 ## Updates

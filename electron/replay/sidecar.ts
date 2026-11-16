@@ -2,7 +2,7 @@
  * Drives the replay viewer sidecar.
  *
  * The sidecar is a separate executable rather than a library because all of
- * the replay parsing lives in landaire's Rust crates. This module owns its
+ * the replay parsing lives in the suite's Rust replay parser. This module owns its
  * whole lifetime: finding it, deciding whether the replay viewer is available
  * at all, and running its two commands.
  *

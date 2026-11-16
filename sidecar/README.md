@@ -4,20 +4,15 @@ Turns a `.wowsreplay` into a draw-command timeline the planner plays back like a
 video: pause, seek, rewind, frame-step and speed changes are all index
 arithmetic on a baked array, so none of them need the replay re-simulated.
 
-Everything difficult here belongs to [landaire's wows-toolkit][toolkit] —
-decrypting the replay, parsing the packet stream, simulating the battle world,
-adjudicating who could see whom, and resolving all of it into draw commands.
-This crate swaps only the last step. Where `minimap_renderer` rasterizes each
-frame and encodes an mp4, the sidecar writes the commands out structured, so the
-renderer can draw them on the planner's own map, in the planner's own
-coordinates, with the drawing tools still live.
+The replay is read by the suite's own parser, [`wows-replay-parser`][parser]
+(a sibling checkout, `../replay-parser`), which tracks the battle world and
+resolves each frame into draw commands. This crate only writes those commands
+out structured, so the renderer can draw them on the planner's own map, in the
+planner's own coordinates, with the drawing tools still live. Its knowledge of
+the replay format owes a great deal to [landaire's wows-toolkit][toolkit],
+which the sidecar was first built on.
 
-The toolkit crates come from a checkout of the toolkit pinned to one commit,
-which `scripts/build-sidecar.mjs` fetches into `vendor/`: a game patch can break
-replay parsing, and the fix is upstream well before it is on crates.io. The encoder
-features (`vulkan`, `cpu`, `cpu-av1`) are off: nothing is ever rasterized, so
-none of wgpu, openh264 or rav1e is linked.
-
+[parser]: https://github.com/LeCyanide/replay-parser
 [toolkit]: https://github.com/landaire/wows-toolkit
 
 ## Why bake instead of stream
@@ -30,8 +25,7 @@ every frame the viewer will ever want during it.
 That is affordable because the expensive half of rendering is the half we
 dropped. Measured on a 15-minute Random Battle (build 13187581): the full mp4
 render takes **34.5 s**, while baking the same replay at 10 fps takes **1.8 s**
-after game data is loaded. Packet parsing and world simulation account for only
-0.12 s of that; `draw_frame` is the rest.
+after game data is loaded (both measured with the toolkit-era bake).
 
 ## Usage
 
@@ -91,7 +85,8 @@ At `--fps 10`, on the 15.8.0.0 replay corpus:
 | Smolensk — NE North Winter | 609 s | 6089 | 11.8 MB | 2.0 KB | 4.3 s |
 | St. Vincent — Bees to Honey | 399 s | 3989 | 7.0 MB | 1.9 KB | 3.7 s |
 
-Bake times include the one-time game data load.
+Bake times include the one-time game data load (toolkit-era bake; the
+format is unchanged since).
 
 Speed alone would not justify keeping them: at a few seconds each, baking on open
 is fine. What forces it is patches. A bake needs the game data of the exact build
@@ -128,7 +123,7 @@ producing a blob the client silently misreads.
 
 ### Positions
 
-Positions stay in minimap pixel space, `0..minimap_size`. The renderer produces
+Positions stay in minimap pixel space, `0..minimap_size`. The parser produces
 them that way and radii arrive in pixels too, so converting in Rust would mean
 transforming two quantities by two different rules. One linear transform on the
 client moves everything into planner coordinates at once:
@@ -144,41 +139,32 @@ a lookup table. `header.map.name` matches `GameMap.spaceName`.
 
 ### Strings
 
-`DrawCommand` carries player names, ship names and species as owned strings on
-every ship in every frame — about 15 ships, ten times a second, for fifteen
+Every ship in every frame carries its player name, ship name and species — about 15 ships, ten times a second, for fifteen
 minutes. They never change, so they live in `header.strings` and records refer
 to them by `u16` id, 1-based so that 0 can mean absent.
 
 This is most of the difference between ~14 KB and ~3 KB per frame. For the
 Okinawa battle above, the entire table is 58 entries and 270 bytes.
 
-Ship names need the game's gettext catalog
-(`bin/<build>/res/texts/en/LC_MESSAGES/global.mo`). Without it the renderer
-emits no `ship_name` at all and the bake warns on stderr rather than failing.
+Ship names come from the game's gettext catalog
+(`bin/<build>/res/texts/en/LC_MESSAGES/global.mo`).
 
 ### What is not carried
 
-HUD chrome is turned off at the renderer and never reaches the format: score
-bar, timer, kill feed, chat, battle result, stats panels and team rosters. The
-planner draws its own chrome from `header` and its ship database, so the
-renderer's pixel-positioned versions would be dead weight.
+HUD chrome never reaches the format: score bar, timer, kill feed, chat, battle
+result, stats panels and team rosters. The planner draws its own chrome from
+`header` and its ship database.
 
-Position trails and ship-config range circles are off by default too. Both
-multiply the per-frame record count, and the planner can already draw range
-rings from its own ship data. `format.rs` encodes both, so enabling them is a
-flag change rather than new format work.
-
-`header.skipped` counts every variant that was dropped, so nothing disappears
-silently. Currently that is `ConsumableIcons` (the icon strip above each ship —
-worth adding) and `BattleResultOverlay`.
+Position trails and ship-config range circles are not written either; their
+tags (18, 19) stay reserved so older bakes still decode. `header.skipped` is
+always `{}` now and kept only for readers of older bakes.
 
 ## Building
 
-`npm run build:sidecar` fetches the pinned toolkit checkout, builds and stages
-the binary. To move to a newer upstream commit, change `TOOLKIT_REV` in
-`scripts/build-sidecar.mjs` and run it again.
+`npm run build:sidecar` checks that `../replay-parser` exists, then builds and
+stages the binary.
 
-A bare cargo build works once that checkout exists. It needs a linker. Without
+A bare cargo build works too. It needs a linker. Without
 MSVC, use the GNU toolchain:
 
 ```sh
