@@ -126,6 +126,8 @@ fn command(d: Draw<'_>) -> DrawCommand {
             player_name,
             ship_name,
             is_detected_teammate,
+            is_disconnected,
+            name_color,
         } => DrawCommand::Ship {
             entity_id: entity_id.into(),
             pos: pos(p),
@@ -142,8 +144,8 @@ fn command(d: Draw<'_>) -> DrawCommand {
             player_name: s(player_name),
             ship_name: ship_name.map(|n| n.into_owned()),
             is_detected_teammate,
-            is_disconnected: false,
-            name_color: None,
+            is_disconnected,
+            name_color,
         },
         Draw::CameraDirection {
             entity_id,
