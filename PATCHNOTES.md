@@ -24,7 +24,7 @@ Collect notes under `## 3.0.0
 
 ### Changes
 
-- **Replay map:** sunk ships keep their name, in grey
+- **Replay map:** ships out of sight keep their team colour and name, faded; sunk ships turn grey and keep their name
 
 ## 2.7.0
 
