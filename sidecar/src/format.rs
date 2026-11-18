@@ -4,9 +4,8 @@
 //! for the battle, then one fixed-width record per draw command, grouped into
 //! frames, with an index so any frame is O(1) to reach.
 //!
-//! Strings are the whole reason this format exists. `DrawCommand` carries
-//! player names, ship names and species as owned `String`s on every ship in
-//! every frame — about 15 ships, ten times a second, for fifteen minutes. They
+//! Strings are the whole reason this format exists. Every ship in every
+//! frame carries its player name, ship name and species — about 15 ships, ten times a second, for fifteen minutes. They
 //! never change, so they live in the header string table and each record
 //! refers to them by a `u16` id. That alone is most of the difference between
 //! ~14 KB and ~3 KB per frame.
@@ -31,20 +30,15 @@
 //! A record is a `u8` tag followed by that tag's fixed payload, so a reader can
 //! skip anything it does not need by consulting `RECORD_SIZES`.
 //!
-//! Positions stay in minimap pixel space rather than world metres. The renderer
-//! produces them that way and radii come in pixels too, so converting here
+//! Positions stay in minimap pixel space rather than world metres.
+//! `replay_parser::draw` produces them that way and radii come in pixels too, so converting here
 //! would mean transforming two different quantities by two different rules.
 //! `space_size` and `minimap_size` are in the header; one linear transform on
 //! the client puts everything into the planner coordinate system at once.
 
 use std::collections::HashMap;
 
-use wows_minimap_renderer::DrawCommand;
-use wows_minimap_renderer::ShipVisibility;
-use wows_minimap_renderer::draw_command::BuildingIconType;
-use wows_minimap_renderer::draw_command::BuildingRelation;
-use wows_minimap_renderer::draw_command::ShipConfigCircleKind;
-use wows_minimap_renderer::map_data::MinimapPos;
+use replay_parser::draw::Draw;
 
 pub const MAGIC: &[u8; 8] = b"WTREPLY1";
 pub const FORMAT_VERSION: u16 = 1;
@@ -69,6 +63,8 @@ pub mod tag {
     pub const PLANE: u8 = 15;
     pub const CONSUMABLE_RADIUS: u8 = 16;
     pub const PATROL_RADIUS: u8 = 17;
+    /// Not written since the cut-over to `replay_parser` (range rings and
+    /// trails were off in the old renderer too); the tags stay reserved.
     pub const SHIP_CONFIG_CIRCLE: u8 = 18;
     /// Variable length: the fixed part ends with a `u16` point count, followed
     /// by that many (f32 x, f32 y, u8 r, u8 g, u8 b) points.
@@ -132,9 +128,9 @@ impl Buf {
     fn rgb(&mut self, v: [u8; 3]) {
         self.0.extend_from_slice(&v);
     }
-    fn pos(&mut self, p: MinimapPos) {
-        self.f32(p.x);
-        self.f32(p.y);
+    fn pos(&mut self, [x, y]: [f32; 2]) {
+        self.f32(x);
+        self.f32(y);
     }
     fn len(&self) -> usize {
         self.0.len()
@@ -154,48 +150,30 @@ fn r16(v: i32) -> i16 {
     v.clamp(i16::MIN as i32, i16::MAX as i32) as i16
 }
 
-fn visibility_id(v: ShipVisibility) -> u8 {
-    match v {
-        ShipVisibility::Visible => 0,
-        ShipVisibility::MinimapOnly => 1,
-        ShipVisibility::Undetected => 2,
-    }
-}
-
-fn building_icon_id(v: Option<BuildingIconType>) -> u8 {
+/// `replay_parser::draw`'s building icon names, by format id (0 is none).
+fn building_icon_id(v: Option<&str>) -> u8 {
     match v {
         None => 0,
-        Some(BuildingIconType::Airbase) => 1,
-        Some(BuildingIconType::AirDefence) => 2,
-        Some(BuildingIconType::Artillery) => 3,
-        Some(BuildingIconType::Generator) => 4,
-        Some(BuildingIconType::Radar) => 5,
-        Some(BuildingIconType::Station) => 6,
-        Some(BuildingIconType::Supply) => 7,
-        Some(BuildingIconType::Tower) => 8,
+        Some("airbase") => 1,
+        Some("air_defence") => 2,
+        Some("artillery") => 3,
+        Some("generator") => 4,
+        Some("radar") => 5,
+        Some("station") => 6,
+        Some("supply") => 7,
+        Some(_) => 8,
     }
 }
 
-fn building_relation_id(v: BuildingRelation) -> u8 {
+fn building_relation_id(v: &str) -> u8 {
     match v {
-        BuildingRelation::Ally => 0,
-        BuildingRelation::Enemy => 1,
-        BuildingRelation::Neutral => 2,
-        BuildingRelation::Dead => 3,
-        BuildingRelation::SuppressedAlly => 4,
-        BuildingRelation::SuppressedEnemy => 5,
-        BuildingRelation::SuppressedNeutral => 6,
-    }
-}
-
-fn circle_kind_id(v: ShipConfigCircleKind) -> u8 {
-    match v {
-        ShipConfigCircleKind::Detection => 0,
-        ShipConfigCircleKind::MainBattery => 1,
-        ShipConfigCircleKind::SecondaryBattery => 2,
-        ShipConfigCircleKind::TorpedoRange => 3,
-        ShipConfigCircleKind::Radar => 4,
-        ShipConfigCircleKind::Hydro => 5,
+        "ally" => 0,
+        "neutral" => 2,
+        "dead" => 3,
+        "suppressed_ally" => 4,
+        "suppressed_enemy" => 5,
+        "suppressed_neutral" => 6,
+        _ => 1,
     }
 }
 
@@ -219,7 +197,7 @@ impl Interner {
         id
     }
 
-    fn intern_opt(&mut self, s: Option<&String>) -> u16 {
+    fn intern_opt(&mut self, s: Option<&str>) -> u16 {
         match s {
             Some(s) => self.intern(s),
             None => 0,
@@ -241,8 +219,6 @@ pub struct TimelineWriter {
     /// (offset into `frames`, byte length) per frame.
     index: Vec<(u32, u32)>,
     interner: Interner,
-    /// Variants seen but not encoded, for the header diagnostics.
-    skipped: HashMap<&'static str, u64>,
     records: u64,
     /// Tags whose encoded width has already been checked against
     /// `RECORD_SIZES`, indexed by tag byte.
@@ -255,7 +231,6 @@ impl TimelineWriter {
             frames: Buf::default(),
             index: Vec::new(),
             interner: Interner::default(),
-            skipped: HashMap::new(),
             records: 0,
             verified: [false; 256],
         }
@@ -269,25 +244,16 @@ impl TimelineWriter {
         self.records
     }
 
-    pub fn skipped(&self) -> &HashMap<&'static str, u64> {
-        &self.skipped
-    }
-
-    /// Append one frame. Commands the format does not carry are counted and
-    /// dropped rather than silently lost.
-    pub fn push_frame(&mut self, cmds: &[DrawCommand]) {
+    /// Append one frame.
+    pub fn push_frame(&mut self, cmds: &[Draw<'_>]) {
         let start = self.frames.len();
-        // Patched once the real count is known: commands may be skipped.
-        self.frames.u16(0);
-        let mut written: u16 = 0;
+        let written = u16::try_from(cmds.len()).expect("under 65536 records a frame");
+        self.frames.u16(written);
         for cmd in cmds {
             let before = self.frames.len();
-            if self.encode(cmd) {
-                written += 1;
-                self.verify_record_size(before);
-            }
+            self.encode(cmd);
+            self.verify_record_size(before);
         }
-        self.frames.0[start..start + 2].copy_from_slice(&written.to_le_bytes());
         let len = self.frames.len() - start;
         self.index.push((start as u32, len as u32));
         self.records += u64::from(written);
@@ -313,50 +279,38 @@ impl TimelineWriter {
         }
     }
 
-    /// Returns whether the command was encoded.
-    fn encode(&mut self, cmd: &DrawCommand) -> bool {
+    fn encode(&mut self, cmd: &Draw<'_>) {
         match cmd {
-            DrawCommand::ShotTracer { from, to, color } => {
-                self.frames.u8(tag::SHOT_TRACER);
+            Draw::ShotTracer { from, to, color, secondary } => {
+                self.frames.u8(if *secondary { tag::SECONDARY_SHOT_TRACER } else { tag::SHOT_TRACER });
                 self.frames.pos(*from);
                 self.frames.pos(*to);
                 self.frames.rgb(*color);
             }
-            DrawCommand::SecondaryShotTracer { from, to, color } => {
-                self.frames.u8(tag::SECONDARY_SHOT_TRACER);
-                self.frames.pos(*from);
-                self.frames.pos(*to);
-                self.frames.rgb(*color);
-            }
-            DrawCommand::ShotTracerTip { at, color } => {
-                self.frames.u8(tag::SHOT_TRACER_TIP);
+            Draw::ShotTracerTip { at, color, secondary } => {
+                self.frames.u8(if *secondary { tag::SECONDARY_SHOT_TRACER_TIP } else { tag::SHOT_TRACER_TIP });
                 self.frames.pos(*at);
                 self.frames.rgb(*color);
             }
-            DrawCommand::SecondaryShotTracerTip { at, color } => {
-                self.frames.u8(tag::SECONDARY_SHOT_TRACER_TIP);
-                self.frames.pos(*at);
-                self.frames.rgb(*color);
-            }
-            DrawCommand::Torpedo { pos, color } => {
+            Draw::Torpedo { pos, color } => {
                 self.frames.u8(tag::TORPEDO);
                 self.frames.pos(*pos);
                 self.frames.rgb(*color);
             }
-            DrawCommand::Smoke { pos, radius, color, alpha } => {
+            Draw::Smoke { pos, radius, color, alpha } => {
                 self.frames.u8(tag::SMOKE);
                 self.frames.pos(*pos);
                 self.frames.i16(r16(*radius));
                 self.frames.rgb(*color);
                 self.frames.u8(q8(*alpha));
             }
-            DrawCommand::Ship {
+            Draw::Ship {
                 entity_id,
                 pos,
                 yaw,
                 species,
                 color,
-                visibility,
+                detected,
                 opacity,
                 is_self,
                 player_name,
@@ -365,9 +319,9 @@ impl TimelineWriter {
                 is_disconnected,
                 name_color,
             } => {
-                let species_id = self.interner.intern_opt(species.as_ref());
-                let player_id = self.interner.intern_opt(player_name.as_ref());
-                let ship_id = self.interner.intern_opt(ship_name.as_ref());
+                let species_id = self.interner.intern_opt(*species);
+                let player_id = self.interner.intern_opt(*player_name);
+                let ship_id = self.interner.intern_opt(ship_name.as_deref());
                 let mut flags = 0u8;
                 if *is_self {
                     flags |= ship_flags::IS_SELF;
@@ -385,50 +339,46 @@ impl TimelineWriter {
                     flags |= ship_flags::HAS_NAME_COLOR;
                 }
                 self.frames.u8(tag::SHIP);
-                self.frames.u32(entity_id.raw());
+                self.frames.u32(*entity_id);
                 self.frames.pos(*pos);
                 self.frames.f32(*yaw);
                 self.frames.u16(species_id);
                 self.frames.rgb(color.unwrap_or([0, 0, 0]));
-                self.frames.u8(visibility_id(*visibility));
+                // Visibility: 0 visible, 1 minimap only (never drawn), 2 undetected.
+                self.frames.u8(if *detected { 0 } else { 2 });
                 self.frames.u8(q8(*opacity));
                 self.frames.u8(flags);
                 self.frames.u16(player_id);
                 self.frames.u16(ship_id);
                 self.frames.rgb(name_color.unwrap_or([0, 0, 0]));
             }
-            DrawCommand::HealthBar { entity_id, pos, fraction, fill_color, background_color, background_alpha } => {
+            Draw::HealthBar { entity_id, pos, fraction, fill_color, background_color, background_alpha } => {
                 self.frames.u8(tag::HEALTH_BAR);
-                self.frames.u32(entity_id.raw());
+                self.frames.u32(*entity_id);
                 self.frames.pos(*pos);
                 self.frames.u8(q8(*fraction));
                 self.frames.rgb(*fill_color);
                 self.frames.rgb(*background_color);
                 self.frames.u8(q8(*background_alpha));
             }
-            DrawCommand::DeadShip { entity_id, pos, yaw, species, color, is_self, player_name, ship_name } => {
-                let species_id = self.interner.intern_opt(species.as_ref());
-                let player_id = self.interner.intern_opt(player_name.as_ref());
-                let ship_id = self.interner.intern_opt(ship_name.as_ref());
-                let mut flags = 0u8;
-                if *is_self {
-                    flags |= ship_flags::IS_SELF;
-                }
-                if color.is_some() {
-                    flags |= ship_flags::HAS_COLOR;
-                }
+            Draw::DeadShip { entity_id, pos, yaw, species, is_self, player_name, ship_name } => {
+                let species_id = self.interner.intern_opt(*species);
+                let player_id = self.interner.intern_opt(*player_name);
+                let ship_id = self.interner.intern_opt(*ship_name);
+                // Wrecks carry no colour (the flag stays clear).
+                let flags = if *is_self { ship_flags::IS_SELF } else { 0 };
                 self.frames.u8(tag::DEAD_SHIP);
-                self.frames.u32(entity_id.raw());
+                self.frames.u32(*entity_id);
                 self.frames.pos(*pos);
                 self.frames.f32(*yaw);
                 self.frames.u16(species_id);
-                self.frames.rgb(color.unwrap_or([0, 0, 0]));
+                self.frames.rgb([0, 0, 0]);
                 self.frames.u8(flags);
                 self.frames.u16(player_id);
                 self.frames.u16(ship_id);
             }
-            DrawCommand::BuffZone { pos, radius, color, alpha, marker_name } => {
-                let marker_id = self.interner.intern_opt(marker_name.as_ref());
+            Draw::BuffZone { pos, radius, color, alpha, marker_name } => {
+                let marker_id = self.interner.intern_opt(*marker_name);
                 self.frames.u8(tag::BUFF_ZONE);
                 self.frames.pos(*pos);
                 self.frames.i16(r16(*radius));
@@ -436,7 +386,7 @@ impl TimelineWriter {
                 self.frames.u8(q8(*alpha));
                 self.frames.u16(marker_id);
             }
-            DrawCommand::CapturePoint { pos, radius, color, alpha, label, progress, invader_color, .. } => {
+            Draw::CapturePoint { pos, radius, color, alpha, label, progress, invader_color } => {
                 let label_id = self.interner.intern(label);
                 self.frames.u8(tag::CAPTURE_POINT);
                 self.frames.pos(*pos);
@@ -448,109 +398,56 @@ impl TimelineWriter {
                 self.frames.rgb(invader_color.unwrap_or([0, 0, 0]));
                 self.frames.u8(u8::from(invader_color.is_some()));
             }
-            DrawCommand::CameraDirection { entity_id, pos, yaw, color, length } => {
+            Draw::CameraDirection { entity_id, pos, yaw, color, length } => {
                 self.frames.u8(tag::CAMERA_DIRECTION);
-                self.frames.u32(entity_id.raw());
+                self.frames.u32(*entity_id);
                 self.frames.pos(*pos);
                 self.frames.f32(*yaw);
                 self.frames.rgb(*color);
                 self.frames.i16(r16(*length));
             }
-            DrawCommand::Building { pos, color, is_alive, icon_type, relation } => {
+            Draw::Building { pos, color, is_alive, icon, relation } => {
                 self.frames.u8(tag::BUILDING);
                 self.frames.pos(*pos);
                 self.frames.rgb(*color);
                 self.frames.u8(u8::from(*is_alive));
-                self.frames.u8(building_icon_id(*icon_type));
-                self.frames.u8(building_relation_id(*relation));
+                self.frames.u8(building_icon_id(*icon));
+                self.frames.u8(building_relation_id(relation));
             }
-            DrawCommand::WeatherZone { pos, radius } => {
+            Draw::WeatherZone { pos, radius } => {
                 self.frames.u8(tag::WEATHER_ZONE);
                 self.frames.pos(*pos);
                 self.frames.i16(r16(*radius));
             }
-            DrawCommand::Plane { plane_id, owner_entity_id, pos, icon_key, player_name, ship_name } => {
+            Draw::Plane { plane_id, owner_entity_id, pos, icon_key, player_name, ship_name } => {
                 let icon_id = self.interner.intern(icon_key);
-                let player_id = self.interner.intern_opt(player_name.as_ref());
-                let ship_id = self.interner.intern_opt(ship_name.as_ref());
+                let player_id = self.interner.intern_opt(*player_name);
+                let ship_id = self.interner.intern_opt(*ship_name);
                 self.frames.u8(tag::PLANE);
-                self.frames.u64(plane_id.raw());
-                self.frames.u32(owner_entity_id.raw());
+                self.frames.u64(*plane_id);
+                self.frames.u32(*owner_entity_id);
                 self.frames.pos(*pos);
                 self.frames.u16(icon_id);
                 self.frames.u16(player_id);
                 self.frames.u16(ship_id);
             }
-            DrawCommand::ConsumableRadius { entity_id, pos, radius_px, color, alpha } => {
+            Draw::ConsumableRadius { entity_id, pos, radius, color, alpha } => {
                 self.frames.u8(tag::CONSUMABLE_RADIUS);
-                self.frames.u32(entity_id.raw());
+                self.frames.u32(*entity_id);
                 self.frames.pos(*pos);
-                self.frames.i16(r16(*radius_px));
+                self.frames.i16(r16(*radius));
                 self.frames.rgb(*color);
                 self.frames.u8(q8(*alpha));
             }
-            DrawCommand::PatrolRadius { plane_id, pos, radius_px, color, alpha } => {
+            Draw::PatrolRadius { plane_id, pos, radius, color, alpha } => {
                 self.frames.u8(tag::PATROL_RADIUS);
-                self.frames.u64(plane_id.raw());
+                self.frames.u64(*plane_id);
                 self.frames.pos(*pos);
-                self.frames.i16(r16(*radius_px));
+                self.frames.i16(r16(*radius));
                 self.frames.rgb(*color);
                 self.frames.u8(q8(*alpha));
-            }
-            DrawCommand::ShipConfigCircle {
-                entity_id,
-                pos,
-                radius_px,
-                color,
-                alpha,
-                dashed,
-                label,
-                kind,
-                player_name,
-                is_self,
-            } => {
-                let label_id = self.interner.intern_opt(label.as_ref());
-                let player_id = self.interner.intern(player_name);
-                let mut flags = 0u8;
-                if *dashed {
-                    flags |= 1 << 0;
-                }
-                if *is_self {
-                    flags |= 1 << 1;
-                }
-                self.frames.u8(tag::SHIP_CONFIG_CIRCLE);
-                self.frames.u32(entity_id.raw());
-                self.frames.pos(*pos);
-                self.frames.f32(*radius_px);
-                self.frames.rgb(*color);
-                self.frames.u8(q8(*alpha));
-                self.frames.u8(flags);
-                self.frames.u16(label_id);
-                self.frames.u8(circle_kind_id(*kind));
-                self.frames.u16(player_id);
-            }
-            DrawCommand::PositionTrail { entity_id, player_name, points } => {
-                let player_id = self.interner.intern_opt(player_name.as_ref());
-                let n = u16::try_from(points.len()).unwrap_or(u16::MAX);
-                self.frames.u8(tag::POSITION_TRAIL);
-                self.frames.u32(entity_id.raw());
-                self.frames.u16(player_id);
-                self.frames.u16(n);
-                for (pos, color) in points.iter().take(n as usize) {
-                    self.frames.pos(*pos);
-                    self.frames.rgb(*color);
-                }
-            }
-            // HUD chrome: score bar, timer, kill feed, chat, stats and roster
-            // panels. The planner draws its own chrome from the header and its
-            // ship database, so carrying the renderer pixel-positioned versions
-            // would be dead weight.
-            other => {
-                *self.skipped.entry(variant_name(other)).or_default() += 1;
-                return false;
             }
         }
-        true
     }
 
     /// Serialize the blob. The string table and diagnostics are merged into
@@ -564,12 +461,11 @@ impl TimelineWriter {
         mut header: serde_json::Value,
     ) -> Vec<u8> {
         let strings = std::mem::take(&mut self.interner.strings);
-        let skipped: serde_json::Map<String, serde_json::Value> =
-            self.skipped.iter().map(|(k, v)| ((*k).to_owned(), serde_json::json!(v))).collect();
 
         if let Some(obj) = header.as_object_mut() {
             obj.insert("strings".into(), serde_json::json!(strings));
-            obj.insert("skipped".into(), serde_json::Value::Object(skipped));
+            // Kept for readers of older bakes: nothing is dropped any more.
+            obj.insert("skipped".into(), serde_json::json!({}));
             obj.insert("records".into(), serde_json::json!(self.records));
         }
         let header_bytes = serde_json::to_vec(&header).expect("header serializes");
@@ -593,26 +489,5 @@ impl TimelineWriter {
         }
         out.0.extend_from_slice(&self.frames.0);
         out.0
-    }
-}
-
-fn variant_name(cmd: &DrawCommand) -> &'static str {
-    match cmd {
-        DrawCommand::ConsumableIcons { .. } => "ConsumableIcons",
-        DrawCommand::TeamBuffs { .. } => "TeamBuffs",
-        DrawCommand::ScoreBar { .. } => "ScoreBar",
-        DrawCommand::TeamAdvantage { .. } => "TeamAdvantage",
-        DrawCommand::Timer { .. } => "Timer",
-        DrawCommand::PreBattleCountdown { .. } => "PreBattleCountdown",
-        DrawCommand::KillFeed { .. } => "KillFeed",
-        DrawCommand::ChatOverlay { .. } => "ChatOverlay",
-        DrawCommand::BattleResultOverlay { .. } => "BattleResultOverlay",
-        DrawCommand::StatsPanel { .. } => "StatsPanel",
-        DrawCommand::StatsSilhouette { .. } => "StatsSilhouette",
-        DrawCommand::StatsDamage { .. } => "StatsDamage",
-        DrawCommand::StatsRibbons { .. } => "StatsRibbons",
-        DrawCommand::StatsActivityFeed { .. } => "StatsActivityFeed",
-        DrawCommand::TeamRoster { .. } => "TeamRoster",
-        _ => "other",
     }
 }

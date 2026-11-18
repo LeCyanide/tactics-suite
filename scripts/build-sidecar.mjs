@@ -36,75 +36,10 @@ export function clearStagedSidecar() {
   fs.rmSync(stageDir, { recursive: true, force: true });
 }
 
-/**
- * landaire's wows-toolkit, at the commit the sidecar is built against.
- *
- * Built from a pinned checkout rather than crates.io: replay-parsing fixes
- * for a game patch land upstream before a crates release.
- *
- * It is a sparse checkout made with git itself rather than a cargo git
- * dependency: the repository carries a Buck prelude whose paths run past
- * Windows' 260 characters, and cargo's own checkout fails on them.
- */
-const TOOLKIT_REPO = 'https://github.com/landaire/wows-toolkit';
-const TOOLKIT_REV = '1c1ef3ed37b39924322b7a9c6ce1812b48e536fc';
-const toolkitDir = path.join(crateDir, 'vendor', 'wows-toolkit');
-
-function git(args, cwd) {
-  const res = spawnSync('git', args, { cwd, encoding: 'utf8' });
-  if (res.error?.code === 'ENOENT') throw new Error('git is not on PATH; it is needed to fetch wows-toolkit.');
-  if (res.status !== 0) throw new Error(`git ${args.join(' ')} failed: ${(res.stderr ?? '').trim()}`);
-  return res.stdout.trim();
-}
-
-/** Puts the pinned toolkit checkout in place; a no-op once it is there. */
-export function ensureToolkit() {
-  if (!fs.existsSync(path.join(toolkitDir, '.git'))) {
-    console.log(`[sidecar] fetching wows-toolkit ${TOOLKIT_REV.slice(0, 8)}`);
-    fs.mkdirSync(path.dirname(toolkitDir), { recursive: true });
-    git(['clone', '--filter=blob:none', '--no-checkout', '--sparse', TOOLKIT_REPO, toolkitDir]);
-    git(['sparse-checkout', 'set', 'crates', 'build-support'], toolkitDir);
-  }
-  if (git(['rev-parse', 'HEAD'], toolkitDir) !== TOOLKIT_REV) {
-    console.log(`[sidecar] moving wows-toolkit to ${TOOLKIT_REV.slice(0, 8)}`);
-    // Patches from the previous pin would block the checkout.
-    git(['checkout', '--quiet', '--', '.'], toolkitDir);
-    try {
-      git(['checkout', '--quiet', TOOLKIT_REV], toolkitDir);
-    } catch {
-      // The pin moved to a commit this clone has not seen yet.
-      git(['fetch', '--filter=blob:none', 'origin'], toolkitDir);
-      git(['checkout', '--quiet', TOOLKIT_REV], toolkitDir);
-    }
-  }
-  applyToolkitPatches();
-}
-
-/**
- * Game-patch fixes not yet upstream, kept in sidecar/patches/ and applied on
- * top of the pin. Drop a patch once the pin moves past its upstream fix.
- */
-function applyToolkitPatches() {
-  const dir = path.join(crateDir, 'patches');
-  if (!fs.existsSync(dir)) return;
-  for (const name of fs.readdirSync(dir).filter((f) => f.endsWith('.patch')).sort()) {
-    const file = path.join(dir, name);
-    try {
-      git(['apply', '--reverse', '--check', file], toolkitDir);
-      continue; // already applied
-    } catch {
-      /* not applied yet */
-    }
-    console.log(`[sidecar] applying ${name}`);
-    git(['apply', file], toolkitDir);
-  }
-}
-
 export function buildSidecar() {
   if (!fs.existsSync(path.join(crateDir, 'Cargo.toml'))) {
     throw new Error('sidecar/Cargo.toml is missing; nothing to build.');
   }
-  ensureToolkit();
 
   const toolchain =
     process.env.SIDECAR_TOOLCHAIN ?? (process.platform === 'win32' ? 'stable-x86_64-pc-windows-gnu' : '');
@@ -122,8 +57,10 @@ export function buildSidecar() {
   }
   if (res.status !== 0) {
     throw new Error(
-      `sidecar build failed (exit ${res.status}). If this failed while linking, check that cargo is not ` +
-        `running under Git Bash: its coreutils link.exe shadows the real linker.`,
+      `sidecar build failed (exit ${res.status}). If fetching replay-parser failed, check that \`git\` can ` +
+        `clone https://github.com/LeCyanide/replay-parser on this machine (it is private). If this failed ` +
+        `while linking, check that cargo is not running under Git Bash: its coreutils link.exe shadows the ` +
+        `real linker.`,
     );
   }
 
