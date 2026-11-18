@@ -371,9 +371,12 @@ async function testRealTimeline(check: (l: string, c: boolean, d?: unknown) => v
   const bytes = await fs.readFile(file);
   const t = new ReplayTimeline(buffer(new Uint8Array(bytes)));
   check('real: frames present', t.frameCount > 0, t.frameCount);
-  check('real: frame count matches battle length', Math.round(t.battleSeconds * t.fps) === t.frameCount, {
+  // The bake writes frame n at n/fps for every n up to the last packet's
+  // clock, frame 0 included; the f32 clock can shift the edge by one.
+  const implied = Math.floor(t.battleSeconds * t.fps) + 1;
+  check('real: frame count matches battle length', Math.abs(t.frameCount - implied) <= 1, {
     frames: t.frameCount,
-    implied: Math.round(t.battleSeconds * t.fps),
+    implied,
   });
 
   // Walk every frame. Any offset error anywhere trips the reader's own
@@ -427,15 +430,17 @@ async function testRealTimeline(check: (l: string, c: boolean, d?: unknown) => v
     { id: 'bravo', name: 'Bravo', color: '#fe4d2a', visible: true, locked: false },
   ] as Team[];
   const map = { id: 'map-okinawa', name: 'Okinawa', widthMeters: 42000, heightMeters: 42000 } as GameMap;
-  const db = [{ id: 'dm', name: 'Des Moines', nation: 'USA', class: 'CA', tier: 10 }] as Ship[];
+  // The player's own ship, whichever replay was baked, stands in for a known database entry.
+  const own = op.paths.find((p) => p.playerName === t.header.player?.name)?.shipName ?? '';
+  const db = [{ id: 'own', name: own, nation: 'USA', class: 'CA', tier: 10 }] as Ship[];
   const { page, unmatched } = extractPage({
     timeline: t, frame: t.frameCount - 1, map, ships: db, teams, capLayouts: [], replayName: 'test',
   });
   const placed = page.objects.filter((o): o is ShipObject => o.type === 'ship');
   check('extract: every ship seen in the battle is placed, sunk ones too', placed.length === op.paths.length, placed.length);
-  check('extract: the page is named after the map and the player ship, no time', page.name === 'Okinawa – Des Moines', page.name);
-  const dm = placed.find((o) => o.shipName === 'Des Moines');
-  check('extract: a known ship is linked to the database', dm?.shipId === 'dm' && dm.teamId === 'alpha', dm?.shipId);
+  check('extract: the page is named after the map and the player ship, no time', own !== '' && page.name === `Okinawa – ${own}`, page.name);
+  const known = placed.find((o) => o.shipName === own);
+  check('extract: a known ship is linked to the database', known?.shipId === 'own' && known.teamId === 'alpha', known?.shipId);
   const sunk = placed.filter((o) => o.note?.startsWith('sunk'));
   check('extract: sunk ships are black and say when they sank', sunk.length > 0 && sunk.every((o) => o.iconColor === '#000000'), sunk.length);
   check('extract: unknown ships are listed, not dropped', unmatched.length === new Set(placed.map((o) => o.shipName)).size - 1 && page.notes.includes('Not in the ship database'));
