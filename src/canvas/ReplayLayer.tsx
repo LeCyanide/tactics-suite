@@ -93,6 +93,8 @@ const MONO = 'JetBrains Mono, Consolas, monospace';
  * than the ordinary contrast edge.
  */
 const SPOTTED_OUTLINE = '#b39a5e';
+/** Names on wrecks: grey, the replay videos' colour (replay-parser render/src/map.rs). */
+const WRECK_LABEL = '#9aa4b0';
 /** Edge width for a marked ship, against 0.9 for every other one. */
 const MARKED_OUTLINE_WIDTH = 1.15;
 
@@ -401,6 +403,20 @@ function paintFrame(ctx: Konva.Context, args: PaintArgs): void {
           inv,
           length: hullLength(scale),
         });
+        // Its name stays, in grey, as the replay videos draw wrecks.
+        const label = [
+          options.playerNames ? rec.playerName : null,
+          options.shipNames ? rec.shipName : null,
+        ].filter(Boolean) as string[];
+        if (label.length) {
+          ctx.setAttr('globalAlpha', 0.6);
+          ctx.setAttr('fillStyle', WRECK_LABEL);
+          let ty = y(rec.pos) + shipSize * 0.85 * 0.72;
+          for (const line of label) {
+            text(ctx, line, x(rec.pos), ty, nameSize, 'center', 'top');
+            ty += nameSize * 1.15;
+          }
+        }
         break;
       }
       case 'ship': {
