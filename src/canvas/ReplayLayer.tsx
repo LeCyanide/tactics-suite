@@ -390,14 +390,14 @@ function paintFrame(ctx: Konva.Context, args: PaintArgs): void {
         break;
       }
       case 'deadShip': {
-        // Wrecks stay on the map, faded, because where a ship died is most of
-        // what a post-battle read is about.
+        // Wrecks stay on the map, faded and grey (your own too), because where a
+        // ship died is most of what a post-battle read is about.
         drawShip(ctx, {
           px: x(rec.pos),
           py: y(rec.pos),
           yaw: rec.yaw,
           species: rec.species,
-          color: rec.isSelf ? selfColor : rec.color,
+          color: null,
           alpha: 0.32,
           size: shipSize * 0.85,
           inv,
@@ -520,9 +520,9 @@ export function drawShip(ctx: Konva.Context, a: ShipArgs): void {
     for (let i = 2; i < poly.length; i += 2) ctx.lineTo(poly[i]!, poly[i + 1]!);
     ctx.closePath();
   }
-  // A null colour means the renderer sent no tint, which is what a last-known
-  // ghost gets. Self is handled by the caller, which substitutes its team
-  // colour for the white the renderer sends.
+  // A null colour is a wreck's grey (bakes before 3.0 also sent none for
+  // ships out of sight). Self is handled by the caller, which substitutes its
+  // team colour for the white the renderer sends.
   ctx.setAttr('fillStyle', a.color !== null ? cssColor(a.color) : NEUTRAL_FILL);
   ctx.fill();
 
