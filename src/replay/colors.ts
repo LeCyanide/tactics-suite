@@ -78,6 +78,30 @@ export function distinctStyles(paths: ShipPath[], minimapSize: number): TrailSty
   return chosen.map((c) => ({ color: colorOf(c!), dashed: dashedOf(c!) }));
 }
 
+/**
+ * A style for one more trail next to those already `taken`: a free colour as
+ * far as possible from theirs, solid while any solid one is left. Taken styles
+ * never change, so trails already on screen keep their colour.
+ */
+export function nextStyle(taken: TrailStyle[]): TrailStyle {
+  const isFree = (c: number) => !taken.some((t) => t.color === colorOf(c) && t.dashed === dashedOf(c));
+  const n = DISTINCT_COLORS.length;
+  const solid = Array.from({ length: n }, (_, i) => i).filter(isFree);
+  const pool = solid.length ? solid : Array.from({ length: n }, (_, i) => i + n).filter(isFree);
+  // Every combination taken: start over with plain colours.
+  if (!pool.length) return { color: colorOf(taken.length), dashed: false };
+  let best = pool[0]!;
+  let bestScore = -1;
+  for (const c of pool) {
+    const score = Math.min(Infinity, ...taken.map((t) => colorDistance(colorOf(c), t.color)));
+    if (score > bestScore) {
+      best = c;
+      bestScore = score;
+    }
+  }
+  return { color: colorOf(best), dashed: dashedOf(best) };
+}
+
 const colorOf = (combo: number) => DISTINCT_COLORS[combo % DISTINCT_COLORS.length]!;
 const dashedOf = (combo: number) => combo >= DISTINCT_COLORS.length;
 

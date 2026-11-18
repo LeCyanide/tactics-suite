@@ -345,6 +345,7 @@ export function registerIpc(getWindow: GetWindow): void {
   /* ---------------- replay viewer ---------------- */
 
   handle('replay:status', () => replay.sidecarStatus());
+  handle('replay:killIcons', () => db.killIcons());
   handle('replay:checkGameDir', (dir: string) => replay.checkGameDir(dir));
   handle('replay:pickGameDir', async () => {
     const res = await dialog.showOpenDialog(getWindow()!, {

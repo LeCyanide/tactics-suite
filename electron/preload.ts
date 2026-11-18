@@ -144,6 +144,8 @@ const api = {
   replay: {
     /** Whether the replay viewer add-on is present, and why not if it is not. */
     status: () => call<SidecarStatus>('replay:status'),
+    /** The game's kill-type icons shipped in the seed, by file stem, as data URLs; empty without them. */
+    killIcons: () => call<Record<string, string>>('replay:killIcons'),
     checkGameDir: (dir: string) => call<GameDirCheck>('replay:checkGameDir', dir),
     pickGameDir: () => call<({ dir: string } & GameDirCheck) | null>('replay:pickGameDir'),
 

@@ -28,6 +28,7 @@
 //! stays a clean byte stream.
 
 mod bake;
+mod events;
 mod format;
 
 use std::io::Write;

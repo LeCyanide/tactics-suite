@@ -257,6 +257,7 @@ const api = {
 
   replay: {
     status: async () => ({ available: true }),
+    killIcons: async () => ({}),
     checkGameDir: async () => ({ ok: true, builds: [13187581] }),
     pickGameDir: async () => null,
     defaultRoot: async () => String.raw`C:\Users\preview\Documents\WoWs Tactics Suite\Replays`,
