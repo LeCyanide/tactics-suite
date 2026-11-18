@@ -23,4 +23,7 @@ World of Warships
 
 World of Warships is a trademark of Wargaming. This is an unofficial tool, not
 made by or endorsed by Wargaming. It reads the game's own files and replays on
-your machine and redistributes none of them.
+your machine. It ships a few of the game's images and data with it: the
+minimap images, ship icons and ship data (seed/maps, seed/ships) and the
+battle HUD's kill icons (seed/battle_hud). These belong to Wargaming and are
+not covered by the app's license.

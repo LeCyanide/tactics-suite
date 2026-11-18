@@ -187,12 +187,9 @@ always `{}` now and kept only for readers of older bakes.
 
 `npm run build:sidecar` builds and stages the binary.
 
-Cargo fetches `wows-replay-parser` from GitHub at the `rev` pinned in
-`Cargo.toml`. That repository is private, so `.cargo/config.toml` has cargo
-fetch with the git command line, which uses the machine's own GitHub login
-(Git Credential Manager on Windows). If `git clone
-https://github.com/LeCyanide/replay-parser` works, so does the build. To take
-a newer parser, change `rev` and build again; `Cargo.lock` follows.
+Cargo fetches `wows-replay-parser` from GitHub (a public repository) at the
+`rev` pinned in `Cargo.toml`. To take a newer parser, change `rev` and build
+again; `Cargo.lock` follows.
 
 To try a local, uncommitted parser change, override the dependency for one
 build without editing `Cargo.toml`:

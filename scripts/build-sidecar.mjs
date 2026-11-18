@@ -58,7 +58,7 @@ export function buildSidecar() {
   if (res.status !== 0) {
     throw new Error(
       `sidecar build failed (exit ${res.status}). If fetching replay-parser failed, check that \`git\` can ` +
-        `clone https://github.com/LeCyanide/replay-parser on this machine (it is private). If this failed ` +
+        `reach https://github.com/LeCyanide/replay-parser from this machine. If this failed ` +
         `while linking, check that cargo is not running under Git Bash: its coreutils link.exe shadows the ` +
         `real linker.`,
     );
