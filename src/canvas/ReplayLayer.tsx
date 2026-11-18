@@ -22,6 +22,8 @@ import {
   cssColor,
   type Px,
   type Record_,
+  type Rgb,
+  type TracerRecord,
   type ReplayTimeline,
   Visibility,
 } from '@/replay/timeline';
@@ -77,6 +79,20 @@ interface Props {
 const SHIP_PX = 26;
 const NAME_PX = 9.5;
 const TRACER_PX = 1.1;
+
+/** Shell streaks, as the video renderer's: yellow, the front share in the ammo's colour. */
+const TRACER = '#ffd04a';
+const TRACER_HEAD = 0.4;
+/** Names of players whose client has dropped; every other name stays white. */
+const DISCONNECTED = '#ff9f1c';
+
+/** The streak front for the parser's tip colour (AP blue, HE orange, SAP red). */
+// shortcut: keyed on the parser's tip colours; add the ammo type to the record if those change.
+function ammoTint(tip: Rgb): string {
+  if (tip === 0xffb450) return '#ff7a1a';
+  if (tip === 0xff6464) return '#ff4d5e';
+  return '#ffffff';
+}
 const TORPEDO_PX = 2.2;
 const PLANE_PX = 5;
 const HEALTH_W_PX = 22;
@@ -203,6 +219,8 @@ function paintFrame(ctx: Konva.Context, args: PaintArgs): void {
   ctx.setAttr('lineCap', 'round');
   ctx.setAttr('lineJoin', 'round');
 
+  // The streak a tip belongs to: the tip record follows it directly.
+  let tracer: TracerRecord | null = null;
   for (const rec of records) {
     switch (rec.kind) {
       case 'weatherZone': {
@@ -314,20 +332,27 @@ function paintFrame(ctx: Konva.Context, args: PaintArgs): void {
         // Secondaries are dimmed rather than hidden: a battleship in a
         // secondary brawl would otherwise look idle.
         ctx.setAttr('globalAlpha', rec.secondary ? 0.35 : 0.85);
-        ctx.setAttr('strokeStyle', cssColor(rec.color));
+        ctx.setAttr('strokeStyle', TRACER);
         ctx.setAttr('lineWidth', (rec.secondary ? TRACER_PX * 0.7 : TRACER_PX) * inv);
         ctx.beginPath();
         ctx.moveTo(x(rec.from), y(rec.from));
         ctx.lineTo(x(rec.to), y(rec.to));
         ctx.stroke();
+        tracer = rec;
         break;
       }
       case 'tracerTip': {
         if (!options.tracers) break;
-        ctx.setAttr('globalAlpha', rec.secondary ? 0.5 : 1);
-        ctx.setAttr('fillStyle', cssColor(rec.color));
-        circle(ctx, x(rec.at), y(rec.at), (rec.secondary ? 1 : 1.5) * inv);
-        ctx.fill();
+        const t = tracer;
+        tracer = null;
+        if (!t || t.to.x !== rec.at.x || t.to.y !== rec.at.y) break;
+        const mid = { x: t.to.x + (t.from.x - t.to.x) * TRACER_HEAD, y: t.to.y + (t.from.y - t.to.y) * TRACER_HEAD };
+        ctx.setAttr('strokeStyle', ammoTint(rec.color));
+        ctx.setAttr('lineWidth', (rec.secondary ? TRACER_PX * 0.7 : TRACER_PX) * 1.3 * inv);
+        ctx.beginPath();
+        ctx.moveTo(x(mid), y(mid));
+        ctx.lineTo(x(t.to), y(t.to));
+        ctx.stroke();
         break;
       }
       case 'torpedo': {
@@ -445,7 +470,7 @@ function paintFrame(ctx: Konva.Context, args: PaintArgs): void {
         ].filter(Boolean) as string[];
         if (label.length) {
           ctx.setAttr('globalAlpha', Math.min(1, alpha + 0.25));
-          ctx.setAttr('fillStyle', rec.nameColor !== null ? cssColor(rec.nameColor) : '#e8eef6');
+          ctx.setAttr('fillStyle', rec.isDisconnected ? DISCONNECTED : '#e8eef6');
           let ty = y(rec.pos) + shipSize * 0.72;
           for (const line of label) {
             text(ctx, line, x(rec.pos), ty, nameSize, 'center', 'top');
