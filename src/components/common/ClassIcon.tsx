@@ -13,21 +13,24 @@ export function ClassIcon({
   cls,
   size = 20,
   upright = false,
+  color,
 }: {
   cls: ShipClass;
   size?: number;
   /** true keeps the bow pointing up, as on the map. */
   upright?: boolean;
+  /** Overrides the class colour, e.g. a team colour (any CSS colour). */
+  color?: string;
 }) {
   const glyph = CLASS_GLYPHS[cls] ?? CLASS_GLYPHS.CA;
-  const color = CLASS_COLORS[cls] ?? '#8b98a5';
+  const fill = color ?? CLASS_COLORS[cls] ?? '#8b98a5';
 
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-label={cls} role="img">
       <path
         d={glyph.solid}
         transform={upright ? undefined : 'rotate(90 12 12)'}
-        fill={color}
+        fill={fill}
         stroke={GLYPH_CONTRAST}
         strokeWidth={GLYPH_CONTRAST_WIDTH}
         strokeLinejoin="round"

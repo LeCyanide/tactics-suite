@@ -146,9 +146,16 @@ export type Side = 'ally' | 'enemy';
 export interface BattleEvents {
   /** Clock the countdown ends at; null when the replay never got there. */
   battleStart: number | null;
+  /** Seconds the battle clock counts down from at `battleStart`. Absent on early bakes. */
+  timeLimit?: number | null;
   maxScore: number | null;
   winner: Side | null;
-  roster: { id: number; player: string; ship: string | null; species: string | null; side: Side }[];
+  roster: { id: number; player: string; ship: string | null; species: string | null; side: Side; isSelf?: boolean }[];
+  /**
+   * Ship health in whole percent, one `[t, id, percent]` per change, by roster
+   * id. Out of view a ship keeps its last value. Absent on early bakes.
+   */
+  health?: [number, number, number][];
   /** `cause` is the game's DEATH_REASON_NAME (`TORPEDO`, `BURNING`, …); null for a code the table lacks. */
   kills: { t: number; killer: number; victim: number; cause: string | null }[];
   /** One entry per change. */

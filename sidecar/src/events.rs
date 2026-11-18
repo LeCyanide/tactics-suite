@@ -28,6 +28,13 @@ pub struct EventLog {
     cap_owners: BTreeMap<u32, i64>,
     prev_left: Option<i64>,
     battle_start: Option<f32>,
+    /// Seconds on the battle clock when it starts counting down.
+    time_limit: Option<i64>,
+    /// Health in whole percent by ship entity id, one entry per change:
+    /// `(clock, id, percent)`. Ships out of view keep their last value, as
+    /// the video's lineup does.
+    health: Vec<(f32, u32, u8)>,
+    last_health: HashMap<u32, u8>,
 }
 
 impl EventLog {
@@ -54,8 +61,22 @@ impl EventLog {
         if let Some(left) = world.time_left {
             if self.battle_start.is_none() && self.prev_left.is_some_and(|p| left > p + 60) {
                 self.battle_start = Some(clock);
+                self.time_limit = Some(left);
             }
             self.prev_left = Some(left);
+        }
+        for (id, s) in &world.ships {
+            if s.player.is_none() || s.max_health <= 0.0 {
+                continue;
+            }
+            let pct = if s.alive {
+                (s.health / s.max_health * 100.0).round().clamp(0.0, 100.0) as u8
+            } else {
+                0
+            };
+            if self.last_health.insert(*id, pct) != Some(pct) {
+                self.health.push((clock, *id, pct));
+            }
         }
     }
 
@@ -98,6 +119,7 @@ impl EventLog {
                     "ship": label.and_then(|l| l.ship.clone()),
                     "species": label.and_then(|l| l.species.clone()),
                     "side": if p.relation == 2 { "enemy" } else { "ally" },
+                    "isSelf": p.relation == 0,
                 })
             })
             .collect();
@@ -131,6 +153,10 @@ impl EventLog {
 
         json!({
             "battleStart": self.battle_start,
+            "timeLimit": self.time_limit,
+            // [clock, ship id, percent]: arrays, not objects, as there are
+            // thousands of them.
+            "health": self.health.iter().map(|(t, id, pct)| json!([t, id, pct])).collect::<Vec<_>>(),
             "maxScore": world.win_score,
             "winner": world.winner.map_or(Value::Null, side),
             "roster": roster,
@@ -241,6 +267,37 @@ mod tests {
             );
 
             assert!(e["battleStart"].is_number(), "{name}: battle start found");
+            assert!(
+                e["timeLimit"].as_i64().is_some_and(|l| l >= 300),
+                "{name}: time limit {}",
+                e["timeLimit"]
+            );
+            assert_eq!(
+                roster.iter().filter(|r| r["isSelf"] == true).count(),
+                1,
+                "{name}: one recording player"
+            );
+            let health = e["health"].as_array().unwrap();
+            assert!(!health.is_empty(), "{name}: health track");
+            for h in health {
+                let id = h[1].as_i64().unwrap();
+                assert!(
+                    ids.contains(&id),
+                    "{name}: health for ship {id} in the roster"
+                );
+                assert!(h[2].as_u64().unwrap() <= 100, "{name}");
+            }
+            // Every ship sunk ends at 0 %.
+            for k in kills {
+                let victim = k["victim"].as_i64().unwrap();
+                if let Some(last) = health.iter().rev().find(|h| h[1].as_i64() == Some(victim)) {
+                    assert_eq!(
+                        last[2].as_u64(),
+                        Some(0),
+                        "{name}: sunk {victim} ends at 0 %"
+                    );
+                }
+            }
             assert!(e["winner"].is_string() || e["winner"].is_null(), "{name}");
             let scores = e["scores"].as_array().unwrap();
             assert!(!scores.is_empty(), "{name}: scores");
@@ -254,11 +311,12 @@ mod tests {
             let causes: std::collections::BTreeSet<&str> =
                 kills.iter().filter_map(|k| k["cause"].as_str()).collect();
             eprintln!(
-                "{name}: {} players, {} kills, {} score changes, {} cap flips, winner {}, causes {causes:?}",
+                "{name}: {} players, {} kills, {} score changes, {} cap flips, {} health changes, winner {}, causes {causes:?}",
                 roster.len(),
                 kills.len(),
                 scores.len(),
                 caps.len(),
+                health.len(),
                 e["winner"],
             );
         }

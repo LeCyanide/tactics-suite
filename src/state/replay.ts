@@ -11,7 +11,7 @@
 import { confirmDialog } from '@/state/confirm';
 import { create } from 'zustand';
 import { DEFAULT_REPLAY_VIEW, type ReplayViewOptions } from '@/canvas/ReplayLayer';
-import { ReplayTimeline, TimelineFormatError } from '@/replay/timeline';
+import { ReplayTimeline, TimelineFormatError, type BattleEvents } from '@/replay/timeline';
 import { extractPaths, type ReplayPaths } from '@/replay/paths';
 import { nextStyle, type TrailStyle } from '@/replay/colors';
 import { useStore } from './store';
@@ -591,4 +591,16 @@ export async function loadTimeline(id: string): Promise<ReplayTimeline> {
 export function formatClock(seconds: number): string {
   const s = Math.max(0, Math.floor(seconds));
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
+
+/**
+ * The game's battle clock at a timeline clock: the time left, counting down
+ * from the time limit once the pre-battle countdown is over, as the game and
+ * the replay videos show it. Null for a timeline without battle events or
+ * without a detected start (an abandoned training room); show elapsed time
+ * then.
+ */
+export function battleTimeLeft(events: BattleEvents | undefined, clock: number): number | null {
+  if (events?.battleStart == null || events.timeLimit == null) return null;
+  return Math.max(0, events.timeLimit - Math.max(0, clock - events.battleStart));
 }

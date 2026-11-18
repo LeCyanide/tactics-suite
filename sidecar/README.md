@@ -153,7 +153,10 @@ Ship names come from the game's gettext catalog
 
 `header.events` feeds the replay viewer's battle panel (`BattleEvents` in
 `src/replay/timeline.ts`): the roster, kills, score changes and cap flips from
-the recording player's side, plus `battleStart`, `maxScore` and `winner`.
+the recording player's side, plus `battleStart`, `timeLimit` (for the
+game's countdown clock), `maxScore`, `winner`, the recording player
+(`roster[].isSelf`) and each ship's health in whole percent per change
+(`health`, `[t, id, percent]`).
 Times are on the frames' clock. Ships are named by entity id, the ids kills
 use. A kill's `cause` is the game's `DEATH_REASON_NAME` constant (`TORPEDO`,
 `BURNING`, `FLOOD`, …), named with the build's own table from

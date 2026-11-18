@@ -2209,20 +2209,60 @@ select.armed {
   text-align: left;
   cursor: pointer;
 }
-.replay-lineup-ship > span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 .replay-lineup-ship:hover:not(:disabled) {
   background: var(--line);
 }
 .replay-lineup-ship.on {
   background: var(--line);
 }
-.replay-lineup-ship.sunk > span {
-  color: var(--fg-faint);
+/* After the replay videos' lineup: sunk rows fade whole, the recording
+   player's row is banded, each ship has its health under its name. */
+.replay-lineup-ship.sunk {
+  opacity: 0.4;
+}
+.replay-lineup-ship.sunk .replay-lineup-name > span:first-child {
   text-decoration: line-through;
+}
+.replay-lineup-ship.self {
+  background: var(--line);
+}
+.replay-lineup-name {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.replay-lineup-name > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.replay-health {
+  display: block;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--line-strong);
+  overflow: hidden;
+}
+.replay-health > span {
+  display: block;
+  height: 100%;
+}
+.replay-health > .ally {
+  background: var(--success);
+}
+.replay-health > .enemy {
+  background: var(--danger);
+}
+.replay-events-head {
+  flex: none;
+  padding: 8px 10px 2px;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
 }
 .replay-lineup-ship:disabled {
   opacity: 0.45;
@@ -2254,9 +2294,6 @@ select.armed {
 }
 .replay-event:hover {
   background: var(--line);
-}
-.replay-event.future {
-  opacity: 0.4;
 }
 .replay-event-time {
   flex: none;

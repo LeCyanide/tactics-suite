@@ -1,8 +1,8 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Panel } from './common/ui';
 import { ClassIcon } from './common/ClassIcon';
 import { classForSpecies } from '@/canvas/replayGlyphs';
-import { formatClock, useReplayStore } from '@/state/replay';
+import { battleTimeLeft, formatClock, useReplayStore } from '@/state/replay';
 import { cssColor, type BattleEvents, type Side } from '@/replay/timeline';
 
 /** Lineup order, as the game's own team lists sort. */
@@ -16,7 +16,20 @@ type Row =
   | { kind: 'cap'; t: number; cap: string; owner: Side | null };
 type Ship = BattleEvents['roster'][number];
 
-/** Score, caps and an event list for the loaded replay; takes the ship list's place in replay mode. */
+/** Team colours, as the theme sets them. */
+const SIDE_COLOR: Record<Side, string> = { ally: 'var(--success)', enemy: 'var(--danger)' };
+
+/**
+ * Score, caps, lineups and the event feed for the loaded replay; takes the
+ * ship list's place in replay mode.
+ *
+ * Laid out after the replay videos' sidebar (replay-parser
+ * `render/src/sidebar.rs`), which is the reference: change both together.
+ * Where the suite differs it is for being interactive and themed: team
+ * colours come from the theme, lineup rows toggle trails, events seek, kills
+ * read as words rather than the game's kill icons, and the map, mode and
+ * clock live in the Playback panel.
+ */
 export function ReplayEventsPanel() {
   const timeline = useReplayStore((s) => s.timeline);
   const frame = useReplayStore((s) => s.frame);
@@ -39,17 +52,37 @@ export function ReplayEventsPanel() {
     return [...kills, ...caps].sort((a, b) => a.t - b.t);
   }, [events]);
 
+  // Each ship's health changes, in time order, for a lookup at any clock.
+  const healthTracks = useMemo(() => {
+    const tracks = new Map<number, [number, number][]>();
+    for (const [t, id, pct] of events?.health ?? []) {
+      let track = tracks.get(id);
+      if (!track) tracks.set(id, (track = []));
+      track.push([t, pct]);
+    }
+    return tracks;
+  }, [events]);
+
   const lineup = useMemo(() => {
     const rank = (s: Ship) => {
       const i = SPECIES_ORDER.indexOf(s.species ?? '');
       return i < 0 ? SPECIES_ORDER.length : i;
     };
     const sorted = [...(events?.roster ?? [])].sort(
-      (a, b) => rank(a) - rank(b) || (a.ship ?? '').localeCompare(b.ship ?? ''),
+      (a, b) => rank(a) - rank(b) || (a.ship ?? a.player).localeCompare(b.ship ?? b.player),
     );
     return { ally: sorted.filter((s) => s.side === 'ally'), enemy: sorted.filter((s) => s.side === 'enemy') };
   }, [events]);
   const seen = useMemo(() => new Set(paths?.paths.filter((p) => p.points.length > 1).map((p) => p.entityId)), [paths]);
+
+  // The feed grows at the bottom, as the video's does; keep the newest in view.
+  const feed = useRef<HTMLDivElement>(null);
+  const now = timeline ? timeline.clockAt(frame) : 0;
+  const shown = rows.filter((r) => r.t <= now).length;
+  useEffect(() => {
+    const el = feed.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [shown]);
 
   if (!timeline) return null;
   if (!events) {
@@ -63,11 +96,13 @@ export function ReplayEventsPanel() {
     );
   }
 
-  const now = timeline.clockAt(frame);
   let score = { ally: 0, enemy: 0 };
   for (const s of events.scores) if (s.t <= now) score = s;
   const max = events.maxScore ?? 1000;
-  const caps = timeline.frame(frame).flatMap((r) => (r.kind === 'capturePoint' ? [r] : []));
+  const caps = timeline
+    .frame(frame)
+    .flatMap((r) => (r.kind === 'capturePoint' ? [r] : []))
+    .sort((a, b) => (a.label ?? '').localeCompare(b.label ?? ''));
   const sunk = new Set(events.kills.filter((k) => k.t <= now).map((k) => k.victim));
   const caption = events.winner && now >= timeline.battleSeconds - 1 ? (events.winner === 'ally' ? 'Victory' : 'Defeat') : null;
 
@@ -115,18 +150,29 @@ export function ReplayEventsPanel() {
               const on = trails.includes(s.id);
               const style = trailStyles.get(s.id);
               const canTrail = seen.has(s.id);
+              const isSunk = sunk.has(s.id);
+              // A ship with no health data is drawn full, as the video does; no bars
+              // at all on bakes from before health was recorded.
+              const health = isSunk ? 0 : (healthAt(healthTracks.get(s.id), now) ?? (events.health ? 100 : null));
               return (
                 <button
                   key={s.id}
-                  className={`replay-lineup-ship${on ? ' on' : ''}${sunk.has(s.id) ? ' sunk' : ''}`}
+                  className={`replay-lineup-ship${on ? ' on' : ''}${isSunk ? ' sunk' : ''}${s.isSelf ? ' self' : ''}`}
                   style={on && style ? { borderLeftColor: cssColor(style.color) } : undefined}
                   disabled={!canTrail}
                   aria-pressed={on}
                   onClick={() => useReplayStore.getState().toggleTrail(s.id)}
                   title={`${s.player}${canTrail ? (on ? ' · hide trail' : ' · show trail') : ' · never spotted'}`}
                 >
-                  <ClassIcon cls={classForSpecies(s.species ?? undefined)} size={12} />
-                  <span>{s.ship ?? s.player}</span>
+                  <ClassIcon cls={classForSpecies(s.species ?? undefined)} size={12} color={SIDE_COLOR[side]} />
+                  <span className="replay-lineup-name">
+                    <span>{s.ship ?? s.player}</span>
+                    {health !== null && !isSunk && (
+                      <span className="replay-health">
+                        <span className={side} style={{ width: `${health}%` }} />
+                      </span>
+                    )}
+                  </span>
                 </button>
               );
             })}
@@ -134,26 +180,35 @@ export function ReplayEventsPanel() {
         ))}
       </div>
 
-      <div className="replay-events">
-        {rows.length === 0 && <div className="replay-events-empty">No kills or captures in this battle.</div>}
-        {rows.map((r, i) => (
+      <div className="replay-events-head">Battle events</div>
+      <div className="replay-events" ref={feed}>
+        {shown === 0 && <div className="replay-events-empty">No kills or captures yet.</div>}
+        {rows.slice(0, shown).map((r, i) => (
           <button
             key={i}
-            className={`replay-event${r.t > now ? ' future' : ''}`}
+            className="replay-event"
+            // Newest is brightest, as in the video.
+            style={{ opacity: Math.max(0.55, 1 - (shown - 1 - i) * 0.06) }}
             onClick={() => useReplayStore.getState().seek(timeline.indexAt(r.t - LEAD_SECONDS))}
-            title={`Jump to ${formatClock(r.t - LEAD_SECONDS)}`}
+            title={`Jump to ${LEAD_SECONDS} s before this`}
           >
-            <span className="replay-event-time">{formatClock(r.t)}</span>
+            <span className="replay-event-time">{formatClock(battleTimeLeft(events, r.t) ?? r.t)}</span>
             {r.kind === 'kill' ? (
               <span className="replay-event-body">
-                <ShipLabel ship={r.killer} />
-                <span className="replay-event-verb">{causeLabel(r.cause)}</span>
+                {r.killer && r.killer !== r.victim ? (
+                  <>
+                    <ShipLabel ship={r.killer} />
+                    <span className="replay-event-verb">{causeLabel(r.cause)}</span>
+                  </>
+                ) : (
+                  <span className="replay-event-verb">Sunk:</span>
+                )}
                 <ShipLabel ship={r.victim} />
               </span>
             ) : (
               <span className="replay-event-body">
                 <span className="replay-cap-tag">{r.cap}</span>
-                <span className={r.owner ?? undefined}>
+                <span className={r.owner ?? 'replay-event-verb'}>
                   {r.owner === 'ally' ? 'captured by allies' : r.owner === 'enemy' ? 'captured by enemies' : 'neutralised'}
                 </span>
               </span>
@@ -169,7 +224,7 @@ function ShipLabel({ ship }: { ship?: Ship }) {
   if (!ship) return <span className="replay-event-ship">?</span>;
   return (
     <span className={`replay-event-ship ${ship.side}`} title={ship.player}>
-      <ClassIcon cls={classForSpecies(ship.species ?? undefined)} size={14} />
+      <ClassIcon cls={classForSpecies(ship.species ?? undefined)} size={13} color={SIDE_COLOR[ship.side]} />
       {ship.ship ?? ship.player}
     </span>
   );
@@ -210,4 +265,18 @@ function causeLabel(cause: string | null): string {
     default:
       return 'sank';
   }
+}
+
+/** A ship's health in percent at clock `t`; null with no data (bakes from before health was recorded). */
+function healthAt(track: [number, number][] | undefined, t: number): number | null {
+  if (!track || track.length === 0) return null;
+  let lo = 0;
+  let hi = track.length - 1;
+  if (track[0]![0] > t) return 100;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    if (track[mid]![0] <= t) lo = mid;
+    else hi = mid - 1;
+  }
+  return track[lo]![1];
 }
