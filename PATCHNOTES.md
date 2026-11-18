@@ -9,23 +9,22 @@ Under a version, each `###` heading becomes a header in the post and each list
 item under it one note. Use `### Changelog` for what is finished and
 `### In testing` for what is shipped but not settled.
 
-Collect notes under `## Unreleased` and rename it to the version when releasing.
-
-## Unreleased
-
-### New
-
-- **Replay battle panel:** beside the replay map: the score and every cap's progress, both lineups by class with health (sunk ships faded and struck through), and a feed of kills with the game's kill icons and cap changes, newest at the bottom. The battle clock counts down, as in the game
-- **Replay trails:** each ship's trail gets its own colour when you turn it on, and keeps it
-
-### Changes
-
-- **Replay viewer:** reads replays with the suite's own replay reader instead of a third-party one, the same one that makes the Discord bot's replay videos
-- **Replay map:** sunk ships keep their name, in grey
+Collect notes under `## 3.0.0
 
 ### Notes
 
-- Replays you opened before this update are rebaked the first time you open them again, so they get the battle panel. That needs the game version they were recorded on to still be installed; otherwise the panel says so
+- **Version 3.0:** the replay viewer now runs on the suite's own replay reader instead of a third-party one, a big change under the hood, hence the jump to 3.0
+- Older replays are rebaked when you open them, which needs their game version still installed
+
+### New
+
+- **Battle panel:** score, cap progress, both lineups with health, and a kill feed with the game's kill icons, on a countdown battle clock
+- **Replay videos in Discord:** `/render` with a replay attached turns it into a video of the battle, made by the same replay reader
+- **Replay trails:** each ship's trail keeps its own colour
+
+### Changes
+
+- **Replay map:** sunk ships keep their name, in grey
 
 ## 2.7.0
 
