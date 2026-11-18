@@ -5,7 +5,7 @@ video: pause, seek, rewind, frame-step and speed changes are all index
 arithmetic on a baked array, so none of them need the replay re-simulated.
 
 The replay is read by the suite's own parser, [`wows-replay-parser`][parser]
-(a sibling checkout, `../replay-parser`), which tracks the battle world and
+(a git dependency pinned to one commit, see `Cargo.toml`), which tracks the battle world and
 resolves each frame into draw commands. This crate only writes those commands
 out structured, so the renderer can draw them on the planner's own map, in the
 planner's own coordinates, with the drawing tools still live. Its knowledge of
@@ -161,8 +161,21 @@ always `{}` now and kept only for readers of older bakes.
 
 ## Building
 
-`npm run build:sidecar` checks that `../replay-parser` exists, then builds and
-stages the binary.
+`npm run build:sidecar` builds and stages the binary.
+
+Cargo fetches `wows-replay-parser` from GitHub at the `rev` pinned in
+`Cargo.toml`. That repository is private, so `.cargo/config.toml` has cargo
+fetch with the git command line, which uses the machine's own GitHub login
+(Git Credential Manager on Windows). If `git clone
+https://github.com/LeCyanide/replay-parser` works, so does the build. To take
+a newer parser, change `rev` and build again; `Cargo.lock` follows.
+
+To try a local, uncommitted parser change, override the dependency for one
+build without editing `Cargo.toml`:
+
+```sh
+cargo build --release --config 'patch."https://github.com/LeCyanide/replay-parser".wows-replay-parser.path="../../replay-parser"'
+```
 
 A bare cargo build works too. It needs a linker. Without
 MSVC, use the GNU toolchain:

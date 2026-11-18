@@ -10,10 +10,11 @@ name = "wows-replay-sidecar"
 path = "src/main.rs"
 
 [dependencies]
-# The suite's own replay parser. shortcut: a path to a sibling checkout of
-# LeCyanide/replay-parser (scripts/build-sidecar.mjs checks it is there);
-# switch to a git dependency before CI builds it.
-wows-replay-parser = { path = "../../replay-parser" }
+# The suite's own replay parser, pinned to a commit of LeCyanide/replay-parser
+# (main, 2026-11-17). The repository is private: cargo fetches it with the
+# git command line (see .cargo/config.toml), so the machine's own GitHub login
+# is used. Bump `rev` to take a newer parser.
+wows-replay-parser = { git = "https://github.com/LeCyanide/replay-parser", rev = "785511372d73647a74efe0a5336d8b40f7b90290" }
 serde_json = "1"
 
 [profile.release]

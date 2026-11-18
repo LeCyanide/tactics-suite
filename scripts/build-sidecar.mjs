@@ -36,25 +36,10 @@ export function clearStagedSidecar() {
   fs.rmSync(stageDir, { recursive: true, force: true });
 }
 
-/**
- * The sidecar's one heavy dependency, the suite's own replay parser, is a path
- * dependency on a sibling checkout (see sidecar/Cargo.toml).
- */
-const parserDir = path.join(root, '..', 'replay-parser');
-
-function ensureParser() {
-  if (!fs.existsSync(path.join(parserDir, 'Cargo.toml'))) {
-    throw new Error(
-      `the replay parser is missing: clone LeCyanide/replay-parser next to this checkout (${parserDir}).`,
-    );
-  }
-}
-
 export function buildSidecar() {
   if (!fs.existsSync(path.join(crateDir, 'Cargo.toml'))) {
     throw new Error('sidecar/Cargo.toml is missing; nothing to build.');
   }
-  ensureParser();
 
   const toolchain =
     process.env.SIDECAR_TOOLCHAIN ?? (process.platform === 'win32' ? 'stable-x86_64-pc-windows-gnu' : '');
@@ -72,8 +57,10 @@ export function buildSidecar() {
   }
   if (res.status !== 0) {
     throw new Error(
-      `sidecar build failed (exit ${res.status}). If this failed while linking, check that cargo is not ` +
-        `running under Git Bash: its coreutils link.exe shadows the real linker.`,
+      `sidecar build failed (exit ${res.status}). If fetching replay-parser failed, check that \`git\` can ` +
+        `clone https://github.com/LeCyanide/replay-parser on this machine (it is private). If this failed ` +
+        `while linking, check that cargo is not running under Git Bash: its coreutils link.exe shadows the ` +
+        `real linker.`,
     );
   }
 

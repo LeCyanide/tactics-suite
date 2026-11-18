@@ -69,8 +69,9 @@ within tolerances, and it exits 1 above `--max-rate` (a percentage, default 0):
 npm run diff-timeline -- old.wtreply new.wtreply --max-rate 0.5
 ```
 
-Bake both with the sidecar (built on the suite's own replay parser, a sibling
-checkout of `replay-parser`; see `sidecar/Cargo.toml`) before and after the
+Bake both with the sidecar (built on the suite's own replay parser, pinned in
+`sidecar/Cargo.toml`; a local parser checkout can be patched in, see
+`sidecar/README.md`) before and after the
 parser change:
 
 ```bash
