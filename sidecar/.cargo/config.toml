@@ -1,6 +1,0 @@
-# wows-replay-parser comes from a private GitHub repository. Fetching through
-# the git command line lets cargo use the machine's own GitHub login (Git
-# Credential Manager on Windows, an SSH agent or `gh auth setup-git`), which
-# cargo's built-in git client cannot.
-[net]
-git-fetch-with-cli = true

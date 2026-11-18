@@ -11,6 +11,22 @@ item under it one note. Use `### Changelog` for what is finished and
 
 Collect notes under `## Unreleased` and rename it to the version when releasing.
 
+## Unreleased
+
+### New
+
+- **Replay battle panel:** beside the replay map: the score and every cap's progress, both lineups by class with health (sunk ships faded and struck through), and a feed of kills with the game's kill icons and cap changes, newest at the bottom. The battle clock counts down, as in the game
+- **Replay trails:** each ship's trail gets its own colour when you turn it on, and keeps it
+
+### Changes
+
+- **Replay viewer:** reads replays with the suite's own replay reader instead of a third-party one, the same one that makes the Discord bot's replay videos
+- **Replay map:** sunk ships keep their name, in grey
+
+### Notes
+
+- Replays you opened before this update are rebaked the first time you open them again, so they get the battle panel. That needs the game version they were recorded on to still be installed; otherwise the panel says so
+
 ## 2.7.0
 
 ### New

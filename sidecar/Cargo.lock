@@ -236,7 +236,7 @@ checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 [[package]]
 name = "wows-replay-parser"
 version = "0.1.0"
-source = "git+https://github.com/LeCyanide/replay-parser?rev=785511372d73647a74efe0a5336d8b40f7b90290#785511372d73647a74efe0a5336d8b40f7b90290"
+source = "git+https://github.com/LeCyanide/replay-parser?rev=11ae4f32765ecf46371503a5c95dadabb8274bb2#11ae4f32765ecf46371503a5c95dadabb8274bb2"
 dependencies = [
  "blowfish",
  "flate2",

@@ -429,6 +429,6 @@ the Free Software Foundation. It is distributed in the hope that it will be
 useful, but WITHOUT ANY WARRANTY; see [LICENSE](LICENSE) for the full terms.
 
 Third-party components keep their own licenses
-([notices](resources/licenses/THIRD-PARTY-NOTICES.txt)). Map images, ship icons
-and other game assets and data from World of Warships belong to Wargaming and
-are not covered by this license.
+([notices](resources/licenses/THIRD-PARTY-NOTICES.txt)). Map images, ship and
+kill icons and other game assets and data from World of Warships belong to
+Wargaming and are not covered by this license.
