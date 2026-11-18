@@ -12,6 +12,8 @@ import { confirmDialog } from '@/state/confirm';
 import { create } from 'zustand';
 import { DEFAULT_REPLAY_VIEW, type ReplayViewOptions } from '@/canvas/ReplayLayer';
 import { ReplayTimeline, TimelineFormatError } from '@/replay/timeline';
+import { extractPaths, type ReplayPaths } from '@/replay/paths';
+import { nextStyle, type TrailStyle } from '@/replay/colors';
 import { useStore } from './store';
 
 export type AppMode = 'tactics' | 'replay';
@@ -103,6 +105,16 @@ interface ReplayState {
   view: ReplayViewOptions;
   /** Opacity of the replay layer, so a plan drawn over it stays readable. */
   opacity: number;
+  /** Ship paths of the open replay, for the lineup's trails. */
+  paths: ReplayPaths | null;
+  /**
+   * Trail style by entity id, handed out as trails are switched on so the ones
+   * on screen stay as far apart as possible. Kept after a trail goes off, so a
+   * ship switched back on gets its old colour if it is still free.
+   */
+  trailStyles: Map<number, TrailStyle>;
+  /** Entity ids whose trail is drawn. */
+  trails: number[];
 
   setMode(mode: AppMode): void;
   init(): Promise<void>;
@@ -127,6 +139,7 @@ interface ReplayState {
   setSpeed(speed: number): void;
   setView(patch: Partial<ReplayViewOptions>): void;
   setOpacity(value: number): void;
+  toggleTrail(entityId: number): void;
 }
 
 /** Set once the add-on is known to be there and the library events are wired. */
@@ -157,6 +170,9 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
   speed: 8,
   view: DEFAULT_REPLAY_VIEW,
   opacity: 1,
+  paths: null,
+  trailStyles: new Map(),
+  trails: [],
 
   setMode(mode) {
     if (get().mode === mode) return;
@@ -367,7 +383,14 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
 
   async open(id) {
     get().pause();
-    set({ selectedId: id, timeline: null, frame: 0, bake: { phase: 'baking', stage: 'starting', frame: 0, total: 1 } });
+    set({
+      selectedId: id,
+      timeline: null,
+      paths: null,
+      trails: [],
+      frame: 0,
+      bake: { phase: 'baking', stage: 'starting', frame: 0, total: 1 },
+    });
 
     const off = window.api.replay.onProgress((e) => {
       // A late event from a bake the user has already moved on from would
@@ -380,7 +403,13 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
     try {
       const timeline = await loadTimeline(id);
       if (get().selectedId !== id) return;
-      set({ timeline, frame: firstActiveFrame(timeline), bake: { phase: 'idle' } });
+      set({
+        timeline,
+        paths: extractPaths(timeline),
+        trailStyles: new Map(),
+        frame: firstActiveFrame(timeline),
+        bake: { phase: 'idle' },
+      });
     } catch (err) {
       if (get().selectedId !== id) return;
       set({ bake: { phase: 'error', message: message(err) }, timeline: null });
@@ -392,7 +421,7 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
   close() {
     get().pause();
     void window.api.replay.cancelBake().catch(() => undefined);
-    set({ selectedId: null, timeline: null, frame: 0, bake: { phase: 'idle' } });
+    set({ selectedId: null, timeline: null, paths: null, trails: [], frame: 0, bake: { phase: 'idle' } });
   },
 
   play() {
@@ -446,6 +475,21 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
 
   setView(patch) {
     set((s) => ({ view: { ...s.view, ...patch } }));
+  },
+
+  toggleTrail(entityId) {
+    const { trails, trailStyles } = get();
+    if (trails.includes(entityId)) {
+      set({ trails: trails.filter((id) => id !== entityId) });
+      return;
+    }
+    const taken = trails.map((id) => trailStyles.get(id)!);
+    const old = trailStyles.get(entityId);
+    const free = old && !taken.some((t) => t.color === old.color && t.dashed === old.dashed);
+    set({
+      trails: [...trails, entityId],
+      trailStyles: free ? trailStyles : new Map(trailStyles).set(entityId, nextStyle(taken)),
+    });
   },
 
   setOpacity(value) {
@@ -532,9 +576,9 @@ export async function loadTimeline(id: string): Promise<ReplayTimeline> {
     if (!(err instanceof TimelineFormatError)) throw err;
     timeline = new ReplayTimeline(await window.api.replay.load({ id, rebake: true }));
   }
-  if (timeline.lacksPlayers && !rebakedForPlayers.has(id)) {
+  if ((timeline.lacksPlayers || !timeline.header.events) && !rebakedForPlayers.has(id)) {
     rebakedForPlayers.add(id);
-    // No player data: rebake once. If that fails, keep the nameless timeline.
+    // No player data or battle events: rebake once. If that fails, keep what we have.
     try {
       timeline = new ReplayTimeline(await window.api.replay.load({ id, rebake: true }));
     } catch {

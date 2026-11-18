@@ -136,6 +136,25 @@ export interface TimelineHeader {
   skipped: Record<string, number>;
   records: number;
   nativeMinimapSize?: number;
+  /** Absent on timelines baked before battle events existed. */
+  events?: BattleEvents;
+}
+
+export type Side = 'ally' | 'enemy';
+
+/** Kills, cap flips and scores from the recording player's side. `t` is the battle clock frames use. */
+export interface BattleEvents {
+  /** Clock the countdown ends at; null when the replay never got there. */
+  battleStart: number | null;
+  maxScore: number | null;
+  winner: Side | null;
+  roster: { id: number; player: string; ship: string | null; species: string | null; side: Side }[];
+  /** `cause` is null for a death reason this build does not know. */
+  kills: { t: number; killer: number; victim: number; cause: string | null }[];
+  /** One entry per change. */
+  scores: { t: number; ally: number; enemy: number }[];
+  /** `owner` null is a neutralised cap. */
+  caps: { t: number; cap: string; owner: Side | null }[];
 }
 
 /* ------------------------------------------------------------------ */
