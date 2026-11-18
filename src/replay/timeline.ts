@@ -149,7 +149,7 @@ export interface BattleEvents {
   maxScore: number | null;
   winner: Side | null;
   roster: { id: number; player: string; ship: string | null; species: string | null; side: Side }[];
-  /** `cause` is null for a death reason this build does not know. */
+  /** `cause` is the game's DEATH_REASON_NAME (`TORPEDO`, `BURNING`, …); null for a code the table lacks. */
   kills: { t: number; killer: number; victim: number; cause: string | null }[];
   /** One entry per change. */
   scores: { t: number; ally: number; enemy: number }[];

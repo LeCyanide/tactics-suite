@@ -175,35 +175,38 @@ function ShipLabel({ ship }: { ship?: Ship }) {
   );
 }
 
-/** Death causes as the sidecar names them (the toolkit's `DeathCause` variants), in words. */
+/**
+ * Death causes as the sidecar names them: the game's `DEATH_REASON_NAME`
+ * constants, via replay-parser's `constants::death_reason`. The same words as
+ * the video renderer's `kill_verb` (replay-parser `render/src/sidebar.rs`);
+ * change both together. Shell hits (ARTILLERY, AP_SHELL, HE_SHELL, CS_SHELL)
+ * and anything unnamed read as "sank".
+ */
 function causeLabel(cause: string | null): string {
   switch (cause) {
-    case 'Artillery':
-    case 'ApShell':
-    case 'HeShell':
-    case 'CsShell':
-      return 'sank';
-    case 'Secondaries':
-      return 'sank (secondaries)';
-    case 'Torpedo':
-    case 'AerialTorpedo':
+    case 'TORPEDO':
+    case 'TBOMB':
       return 'torpedoed';
-    case 'Fire':
+    case 'BURNING':
       return 'burned';
-    case 'Flooding':
+    case 'FLOOD':
       return 'flooded';
-    case 'Ramming':
+    case 'RAM':
       return 'rammed';
-    case 'DiveBomber':
-    case 'SkipBombs':
+    case 'BOMB':
+    case 'SKIP_BOMB':
       return 'bombed';
-    case 'AerialRocket':
+    case 'ROCKET':
       return 'rocketed';
-    case 'DepthCharge':
-    case 'AerialDepthCharge':
+    case 'DBOMB':
+    case 'ADBOMB':
       return 'depth-charged';
-    case 'Detonation':
+    case 'DETONATE':
       return 'detonated';
+    case 'SEA_MINE':
+      return 'mined';
+    case 'ATBA':
+      return 'sank (secondaries)';
     default:
       return 'sank';
   }

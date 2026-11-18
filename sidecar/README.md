@@ -149,6 +149,27 @@ Okinawa battle above, the entire table is 58 entries and 270 bytes.
 Ship names come from the game's gettext catalog
 (`bin/<build>/res/texts/en/LC_MESSAGES/global.mo`).
 
+### Battle events
+
+`header.events` feeds the replay viewer's battle panel (`BattleEvents` in
+`src/replay/timeline.ts`): the roster, kills, score changes and cap flips from
+the recording player's side, plus `battleStart`, `maxScore` and `winner`.
+Times are on the frames' clock. Ships are named by entity id, the ids kills
+use. A kill's `cause` is the game's `DEATH_REASON_NAME` constant (`TORPEDO`,
+`BURNING`, `FLOOD`, …), named with the build's own table from
+`gui/data/constants/battle.xml`, or with replay-parser's default table when
+the install has none. `src/events.rs` builds it.
+
+Its test runs replay-parser's fixture replays (fetched by that repo's
+`scripts/fetch-fixtures.sh` and `scripts/fetch-entity-defs.sh`) and needs no
+game install:
+
+```sh
+SIDECAR_FIXTURES=../../replay-parser/tests/fixtures cargo test --release
+```
+
+Without `SIDECAR_FIXTURES` it is skipped.
+
 ### What is not carried
 
 HUD chrome never reaches the format: score bar, timer, kill feed, chat, battle

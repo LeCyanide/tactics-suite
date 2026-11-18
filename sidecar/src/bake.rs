@@ -17,6 +17,7 @@ use replay_parser::res::Resources;
 use replay_parser::world::World;
 
 use crate::emit;
+use crate::events::EventLog;
 use crate::format;
 
 /// The game's native minimap size in pixels, which the header has always
@@ -51,6 +52,15 @@ pub fn bake(game_dir: &Path, replay_path: &PathBuf, fps: f32) -> Result<Vec<u8>,
     let map = draw::MapGeometry::from_space_settings(&String::from_utf8_lossy(&space))
         .ok_or_else(|| format!("no bounds in space.settings for {:?}", replay.meta.map_name))?;
 
+    // The build's own death-reason names; without them the parser's
+    // default table names the causes.
+    let death_reasons = res
+        .read("gui/data/constants/battle.xml")
+        .ok()
+        .and_then(|b| {
+            replay_parser::constants::death_reasons_from_xml(&String::from_utf8_lossy(&b))
+        });
+
     emit(&serde_json::json!({ "t": "stage", "stage": "baking" }));
     // A first pass learns shell flight times from their hits: tracers are
     // paced by them.
@@ -73,10 +83,12 @@ pub fn bake(game_dir: &Path, replay_path: &PathBuf, fps: f32) -> Result<Vec<u8>,
     let mut labels = draw::Labels::default();
     let expected_frames = (f64::from(replay.meta.duration) * f64::from(fps)).max(1.0) as u64;
     let mut last_reported = 0u32;
+    let mut events = EventLog::default();
     for p in Packets::new(&replay.packets, version) {
         // An undecodable packet still moves the clock and positions.
         let event = decoder.feed(&p).ok().flatten();
         world.apply(&decoder, &p, event.as_ref());
+        events.observe(&world);
         battle_secs = battle_secs.max(p.clock);
         while p.clock >= frame_clock(writer.frame_count()) {
             // Operations add players mid-battle.
@@ -94,9 +106,15 @@ pub fn bake(game_dir: &Path, replay_path: &PathBuf, fps: f32) -> Result<Vec<u8>,
         }
     }
 
+    if labels.players.len() != world.players.len() {
+        labels = draw::labels(&world.players, Some(&gp), &names);
+    }
+    let events = events.finish(&world, &labels, death_reasons.as_deref());
+
     let meta = &replay.meta;
     let header = serde_json::json!({
         "engine": "parser",
+        "events": events,
         "replay": replay_path.file_name().map(|n| n.to_string_lossy().into_owned()),
         "clientVersion": meta.client_version_from_exe,
         "dateTime": meta.date_time,
