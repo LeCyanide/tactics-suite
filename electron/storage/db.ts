@@ -146,6 +146,36 @@ function seedRoot(): string | null {
   return null;
 }
 
+/**
+ * The game's kill-type icons for the replay battle panel, by file stem
+ * (`icon_frag_torpedo`), as data URLs. They ship in the seed as
+ * `battle_hud/icon_frag/*.png`, the layout replay-parser's
+ * `replay-dump datapack` writes, and are read from there rather than copied
+ * into the store: they are the release's, not the user's. Empty when the
+ * seed has none; the panel then names kills in words.
+ */
+export async function killIcons(): Promise<Record<string, string>> {
+  const seed = seedRoot();
+  if (!seed) return {};
+  const dir = path.join(seed, 'battle_hud', 'icon_frag');
+  let files: string[];
+  try {
+    files = (await fsp.readdir(dir)).filter((f) => f.toLowerCase().endsWith('.png'));
+  } catch {
+    return {};
+  }
+  const icons: Record<string, string> = {};
+  for (const file of files) {
+    try {
+      const data = await fsp.readFile(path.join(dir, file));
+      icons[file.slice(0, -4)] = `data:image/png;base64,${data.toString('base64')}`;
+    } catch {
+      /* an unreadable icon falls back to the word */
+    }
+  }
+  return icons;
+}
+
 /** Copies a file only where the destination is absent. Never overwrites. */
 function copyFileIfAbsent(from: string, to: string): void {
   if (fs.existsSync(to) || !fs.existsSync(from)) return;

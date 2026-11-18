@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Panel } from './common/ui';
 import { ClassIcon } from './common/ClassIcon';
 import { classForSpecies } from '@/canvas/replayGlyphs';
@@ -16,6 +16,21 @@ type Row =
   | { kind: 'cap'; t: number; cap: string; owner: Side | null };
 type Ship = BattleEvents['roster'][number];
 
+/** The seed's kill icons, loaded once per session. */
+let killIconsOnce: Promise<Record<string, string>> | null = null;
+function useKillIcons(): Record<string, string> {
+  const [icons, setIcons] = useState<Record<string, string>>({});
+  useEffect(() => {
+    killIconsOnce ??= window.api.replay.killIcons().catch(() => ({}));
+    let live = true;
+    void killIconsOnce.then((i) => live && setIcons(i));
+    return () => {
+      live = false;
+    };
+  }, []);
+  return icons;
+}
+
 /** Team colours, as the theme sets them. */
 const SIDE_COLOR: Record<Side, string> = { ally: 'var(--success)', enemy: 'var(--danger)' };
 
@@ -26,9 +41,9 @@ const SIDE_COLOR: Record<Side, string> = { ally: 'var(--success)', enemy: 'var(-
  * Laid out after the replay videos' sidebar (replay-parser
  * `render/src/sidebar.rs`), which is the reference: change both together.
  * Where the suite differs it is for being interactive and themed: team
- * colours come from the theme, lineup rows toggle trails, events seek, kills
- * read as words rather than the game's kill icons, and the map, mode and
- * clock live in the Playback panel.
+ * colours come from the theme, lineup rows toggle trails, events seek, and
+ * the map, mode and clock live in the Playback panel. Kills show the game's
+ * kill icons when the seed ships them, words otherwise.
  */
 export function ReplayEventsPanel() {
   const timeline = useReplayStore((s) => s.timeline);
@@ -37,6 +52,7 @@ export function ReplayEventsPanel() {
   const trails = useReplayStore((s) => s.trails);
   const trailStyles = useReplayStore((s) => s.trailStyles);
   const events = timeline?.header.events;
+  const killIcons = useKillIcons();
 
   const rows = useMemo<Row[]>(() => {
     if (!events) return [];
@@ -195,14 +211,8 @@ export function ReplayEventsPanel() {
             <span className="replay-event-time">{formatClock(battleTimeLeft(events, r.t) ?? r.t)}</span>
             {r.kind === 'kill' ? (
               <span className="replay-event-body">
-                {r.killer && r.killer !== r.victim ? (
-                  <>
-                    <ShipLabel ship={r.killer} />
-                    <span className="replay-event-verb">{causeLabel(r.cause)}</span>
-                  </>
-                ) : (
-                  <span className="replay-event-verb">Sunk:</span>
-                )}
+                {r.killer && r.killer !== r.victim && <ShipLabel ship={r.killer} />}
+                <KillMark cause={r.cause} icons={killIcons} sunk={!r.killer || r.killer === r.victim} />
                 <ShipLabel ship={r.victim} />
               </span>
             ) : (
@@ -218,6 +228,17 @@ export function ReplayEventsPanel() {
       </div>
     </Panel>
   );
+}
+
+/**
+ * Between the names: the game's kill icon, as its kill feed shows it, or the
+ * verb; with no killer and no icon, "Sunk:". The video's sidebar does the same.
+ */
+function KillMark({ cause, icons, sunk }: { cause: string | null; icons: Record<string, string>; sunk: boolean }) {
+  const icon = icons[fragIcon(cause)] ?? icons['frags'];
+  const verb = causeLabel(cause);
+  if (icon) return <img className="replay-event-icon" src={icon} alt={verb} title={verb} />;
+  return <span className="replay-event-verb">{sunk ? 'Sunk:' : verb}</span>;
 }
 
 function ShipLabel({ ship }: { ship?: Ship }) {
@@ -279,4 +300,57 @@ function healthAt(track: [number, number][] | undefined, t: number): number | nu
     else hi = mid - 1;
   }
   return track[lo]![1];
+}
+
+/**
+ * The kill icon for a death cause, by file stem in `battle_hud/icon_frag/`.
+ * Copied from the video renderer's `frag_icon` (replay-parser
+ * `render/src/sidebar.rs`); change both together.
+ */
+function fragIcon(cause: string | null): string {
+  switch (cause) {
+    case 'ARTILLERY':
+    case 'AP_SHELL':
+    case 'HE_SHELL':
+    case 'CS_SHELL':
+      return 'icon_frag_main_caliber';
+    case 'ATBA':
+      return 'icon_frag_atba';
+    case 'TORPEDO':
+    case 'TBOMB':
+      return 'icon_frag_torpedo';
+    case 'BOMB':
+      return 'icon_frag_bomb';
+    case 'SKIP_BOMB':
+      return 'icon_frag_skip';
+    case 'BURNING':
+      return 'icon_frag_burning';
+    case 'FLOOD':
+      return 'icon_frag_flood';
+    case 'RAM':
+      return 'icon_frag_ram';
+    case 'DETONATE':
+      return 'icon_frag_detonate';
+    case 'SEA_MINE':
+      return 'icon_frag_naval_mine';
+    case 'DBOMB':
+    case 'ADBOMB':
+      return 'icon_frag_depthbomb';
+    case 'ROCKET':
+      return 'icon_frag_rocket';
+    case 'MISSILE':
+      return 'icon_frag_missile';
+    case 'ACID':
+      return 'icon_frag_acid';
+    case 'LASER':
+      return 'icon_frag_laser';
+    case 'FEL':
+      return 'icon_frag_fel';
+    case 'PORTAL':
+      return 'icon_frag_portal';
+    case 'SECTOR_WAVE':
+      return 'icon_frag_wave';
+    default:
+      return 'frags';
+  }
 }

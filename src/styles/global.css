@@ -2316,6 +2316,12 @@ select.armed {
 .replay-event-verb {
   color: var(--fg-faint);
 }
+.replay-event-icon {
+  width: 15px;
+  height: 15px;
+  object-fit: contain;
+  flex: none;
+}
 
 /* The library folder, under the list: where the files are, and a way to move them. */
 .replay-root {
