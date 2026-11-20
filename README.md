@@ -94,7 +94,11 @@ ssh you@vps 'sudo bash setup-vps.sh updates.example.com'
 ```
 
 It installs Caddy (automatic HTTPS), creates `/srv/wows-updates`, generates the
-token and prints the values for `.env.release`. Copy `.env.release.example` to
+token and prints the values for `.env.release`. It also turns on an access log
+for usage stats: no IP address and no header, only the path asked for and the
+app's version, which every update request sends as `X-Suite-Version` and
+nothing else. fw-suite.de's `fw-stats` counts update checks per version and
+update downloads from it. Copy `.env.release.example` to
 `.env.release` (untracked) and fill them in.
 
 **Releasing:** bump the version, rename `## Unreleased` in `PATCHNOTES.md` to

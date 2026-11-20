@@ -5,6 +5,10 @@
  * .env.release) and presents the build's update token. Nothing is downloaded
  * without the user's say-so.
  *
+ * Every request also says which version is asking (X-Suite-Version), so the
+ * server can count running copies per version. That number is all it sends:
+ * no id, nothing about the user or the machine.
+ *
  * Two install kinds update differently:
  *  - the NSIS install goes through electron-updater, reading latest.yml and
  *    running the new installer silently on restart;
@@ -55,6 +59,8 @@ const TIMEOUT_MESSAGE = 'The update server could not be reached.';
 
 const feedUrl = __UPDATE_URL__.replace(/\/+$/, '');
 const authHeader = `Bearer ${__UPDATE_TOKEN__}`;
+/** Sent with every request to the update server; see the note at the top. */
+const VERSION_HEADER = 'X-Suite-Version';
 const portableExe = process.env.PORTABLE_EXECUTABLE_FILE;
 
 let getWindow: () => BrowserWindow | null = () => null;
@@ -92,7 +98,7 @@ export function initUpdater(windowGetter: () => BrowserWindow | null): void {
   autoUpdater.autoInstallOnAppQuit = true;
   autoUpdater.logger = null;
   autoUpdater.setFeedURL({ provider: 'generic', url: feedUrl });
-  autoUpdater.requestHeaders = { Authorization: authHeader };
+  autoUpdater.requestHeaders = { Authorization: authHeader, [VERSION_HEADER]: app.getVersion() };
   autoUpdater.on('download-progress', (p) => {
     stallWatch?.kick();
     if (state.status === 'downloading') setState({ ...state, percent: p.percent });
@@ -179,7 +185,7 @@ export async function installUpdate(): Promise<void> {
 
 async function authorizedFetch(file: string, signal: AbortSignal): Promise<Response> {
   const res = await net.fetch(`${feedUrl}/${encodeURIComponent(file)}`, {
-    headers: { Authorization: authHeader },
+    headers: { Authorization: authHeader, [VERSION_HEADER]: app.getVersion() },
     cache: 'no-store',
     signal,
   });

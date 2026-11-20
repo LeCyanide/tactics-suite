@@ -52,6 +52,11 @@ if [[ -f /etc/caddy/Caddyfile ]] && ! cmp -s "$HERE/Caddyfile" /etc/caddy/Caddyf
   cp /etc/caddy/Caddyfile "/etc/caddy/Caddyfile.bak-$(date +%s)"
 fi
 mkdir -p /etc/caddy/conf.d
+# The access log for usage stats (see the Caddyfile) goes here.
+[ -d /var/log/caddy ] || install -d -m 750 -o caddy -g caddy /var/log/caddy
+# A Caddyfile this Caddy cannot read would take every site on the box down at
+# the restart below, so it is checked before it replaces the running one.
+(set -a; . "$ENV_FILE"; caddy validate --config "$HERE/Caddyfile" --adapter caddyfile >/dev/null)
 install -m 644 "$HERE/Caddyfile" /etc/caddy/Caddyfile
 
 if command -v ufw >/dev/null && ufw status | grep -q "Status: active"; then

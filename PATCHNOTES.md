@@ -11,6 +11,12 @@ item under it one note. Use `### Changelog` for what is finished and
 
 Collect notes under `## Unreleased` and rename it to the version when releasing.
 
+## Unreleased
+
+### Changelog
+
+- The update check now tells the update server which version you are on, so we can see how many copies run each version. It sends only the version number: no id, nothing about you or your PC
+
 ## 3.0.0
 
 ### Notes
